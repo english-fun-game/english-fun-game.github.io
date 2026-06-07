@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>답답 암기 게임</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --slack-purple: #4a154b;       
+            --slack-aubergine: #611f69;    
+            --slack-blue: #1264a3;         
+            --slack-bg: #f4f5f6;           
+            --card-bg: #ffffff;             
+            --card-back-bg: #f8f9fa;        
+            --text-main: #1d1c1d;          
+            --text-muted: #616061;         
+            --border-color: #dddddd;
+        }
+
+        body {
+            font-family: 'Slack-Lato', 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--slack-bg);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100vh;
+            height: 100dvh; 
+            margin: 0;
+            padding: 16px 12px; 
+            box-sizing: border-box;
+            overflow: hidden; 
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1 {
+            margin: 0 0 15px 0;
+            color: var(--slack-purple);
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: -0.8px;
+            text-align: center;
+        }
+
+        /* 초기 진입 화면 */
+        #setup-area {
+            max-width: 480px;
+            margin: 30px auto auto auto; 
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px; 
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 16px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px; 
+            font-size: 16px;
+            outline: none;
+            box-sizing: border-box;
+            background: #ffffff;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--slack-blue);
+            box-shadow: 0 0 0 3px rgba(18, 100, 163, 0.15);
+        }
+
+        .base-btn {
+            width: 100%;
+            padding: 16px;
+            background-color: var(--slack-purple);
+            color: white;
+            border: none;
+            border-radius: 4px; 
+            font-size: 17px;
+            cursor: pointer;
+            font-weight: 700;
+            box-sizing: border-box;
+        }
+
+        .base-btn:hover {
+            background-color: var(--slack-aubergine);
+        }
+
+        .status-msg {
+            color: var(--slack-blue);
+            margin: -5px 0 5px 0;
+            font-weight: 700;
+            font-size: 14px;
+            text-align: center;
+            min-height: 20px;
+        }
+        .status-msg.error {
+            color: #d63031;
+        }
+
+        /* 게임 플레이 레이아웃 */
+        #game-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0; 
+            justify-content: flex-start; 
+        }
+
+        /* [2] 상단 툴바 레이아웃 정렬 개편 */
+        .game-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px; 
+            width: 100%;
+            flex-shrink: 0;
+        }
+
+        .top-btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .refresh-btn {
+            background-color: transparent;
+            color: var(--slack-blue);
+            border: 1px solid var(--border-color);
+            background-color: #ffffff;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: 700;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+        .refresh-btn:hover {
+            background-color: #edf0f2;
+        }
+
+        .progress {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 700;
+            background: #eef0f1;
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* 카드 배치 그리드 */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 20px;
+            width: 100%;
+            margin-bottom: 20px; 
+            flex-shrink: 0;
+        }
+
+        /* 카드 UI */
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        }
+
+        .card.empty {
+            visibility: hidden;
+        }
+
+        .card-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 28px 24px; 
+            overflow-y: auto;       
+            min-height: 0;          
+            box-sizing: border-box;
+        }
+
+        .section-ko {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-en {
+            background-color: var(--card-back-bg);
+        }
+
+        .card-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            flex-shrink: 0;
+        }
+
+        .card-word-wrapper {
+            margin: auto 0; 
+            width: 100%;
+            text-align: center;
+        }
+
+        /* 기본 단어/문장 서체 스펙 */
+        .card-word {
+            font-size: 24px; 
+            font-weight: 800;
+            color: var(--text-main);
+            width: 100%;
+            word-break: break-all;
+            overflow-wrap: break-word;
+            line-height: 1.5;
+        }
+
+        /* [1] 35자 이상 긴 텍스트 발견 시 모바일 대응 유연 스케일링 클래스 */
+        .card-word.long-text {
+            font-size: 19px; 
+            line-height: 1.4;
+            font-weight: 700;
+        }
+
+        .section-en .card-word {
+            display: none; 
+            color: var(--slack-blue); 
+        }
+
+        .show-answers .section-en .card-word {
+            display: block; 
+        }
+
+        .placeholder {
+            display: block;
+            color: #ccd5e0;
+            font-size: 26px;
+            font-weight: bold;
+        }
+
+        .show-answers .section-en .placeholder {
+            display: none;
+        }
+
+        .card-section::-webkit-scrollbar {
+            width: 4px;
+        }
+        .card-section::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+        }
+
+        /* 하단 고정 제어 영역 */
+        .controls {
+            width: 100%;
+            flex-shrink: 0;
+        }
+
+        .next-rect-btn {
+            width: 100%;
+            padding: 18px;
+            background-color: var(--slack-purple);
+            color: white;
+            border: none;
+            border-radius: 4px; 
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+        
+        .next-rect-btn:hover {
+            background-color: var(--slack-aubergine);
+        }
+
+        .instructions {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.7;
+            background: #ffffff;
+            width: 100%;
+            box-sizing: border-box;
+            padding: 18px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            text-align: left;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* 📱 모바일 UI 최적화 테마 스펙 기입 */
+        @media (max-width: 650px) {
+            body {
+                padding: 12px 10px;
+            }
+
+            h1 {
+                font-size: 24px;
+                margin-bottom: 8px;
+            }
+            
+            #setup-area {
+                margin-top: 15px;
+                gap: 16px;
+            }
+
+            /* 상단 툴바 모바일 컴팩트화 */
+            .game-top-bar {
+                margin-bottom: 12px;
+            }
+            .refresh-btn {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+            .progress {
+                padding: 5px 10px;
+                font-size: 12px;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr; 
+                margin-bottom: 20px !important; 
+            }
+
+            /* 모바일 카드 높이 380px 고정 스펙 유지 */
+            #game-area .card {
+                height: 380px !important; 
+            }
+
+            #game-area .card-section {
+                padding: 24px !important; 
+            }
+
+            #game-area .card-word, #game-area .placeholder {
+                font-size: 22px; 
+            }
+
+            /* [1] 모바일에서 35자 이상 긴 문장 진입 시 가독성 극대화를 위한 서체 리사이징 */
+            #game-area .card-word.long-text {
+                font-size: 16px !important;
+            }
+
+            .controls .next-rect-btn {
+                padding: 30px !important; 
+                font-size: 20px;          
+                border-radius: 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📝 답답 암기 게임</h1>
+    
+    <div id="setup-area">
+        <input type="text" id="excel-url" placeholder="공개된 엑셀 파일 또는 구글 시트 URL 입력" />
+        <button class="base-btn" onclick="loadExcelFromUrl()">불러오기</button>
+        
+        <div id="status" class="status-msg"></div>
+
+        <div class="instructions">
+            <strong>🎮 조작 방법 안내 (통일된 액션 흐름)</strong><br>
+            • <b>데스크탑</b>: 키보드 <b>오른쪽 화살표(→)</b> 연속 입력<br>
+            • <b>모바일</b>: 하단의 <b>액션 버튼</b> 연속 터치<br>
+            <span style="color: var(--slack-blue); font-weight: bold;">※ 1회 실행: 정답 공개 ➔ 2회 실행: 다음 이동</span>
+            
+            <hr style="border: 0; border-top: 1px solid #eef0f1; margin: 12px 0;">
+            
+            <strong>🌐 구글 스프레드시트 연동 방법 (공유 상태 만들기)</strong><br>
+            1. 연동할 구글 시트 우측 상단의 <b>[공유]</b> 버튼을 누릅니다.<br>
+            2. 일반 액세스의 제한됨을 <b>[링크가 있는 모든 사용자]</b>로 변경합니다.<br>
+            3. 권한이 <b>[뷰어]</b>인 상태에서 상단 주소창의 링크를 복사해 붙여넣으세요.
+        </div>
+    </div>
+
+    <div id="game-area" class="hidden">
+        
+        <div class="game-top-bar">
+            <div class="top-btn-group">
+                <button class="refresh-btn" onclick="loadExcelFromUrl()">🔄 시트 최신화</button>
+                <button class="refresh-btn" onclick="triggerShuffle()">🔀 랜덤 섞기</button>
+            </div>
+            <span class="progress" id="card-progress">0 - 0 / 0</span>
+        </div>
+
+        <div class="cards-grid" id="cards-wrapper">
+            </div>
+
+        <div class="controls">
+            <button id="action-btn" class="next-rect-btn" onclick="handlePrimaryAction()">정답 확인 👁️</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let wordList = [];
+    let currentStartIndex = 0; 
+    let showAnswers = false;   
+    let cardsPerPage = 2; 
+    
+    const wrapperEl = document.getElementById('cards-wrapper');
+    const actionBtn = document.getElementById('action-btn');
+    const statusEl = document.getElementById('status');
+
+    function updateCardsPerPage() {
+        if (window.innerWidth <= 650) {
+            cardsPerPage = 1; 
+        } else {
+            cardsPerPage = 2; 
+        }
+    }
+
+    function formatEnglishWord(word) {
+        if (!word) return '';
+        return word.replace(/([^])\[/g, '$1<br>[');
+    }
+
+    // 피셔-예이츠 알고리즘 기반 셔플 펑션 
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    // [2] 상단 바 '랜덤 섞기' 트리거 액션 핸들러
+    function triggerShuffle() {
+        if (wordList.length === 0) return;
+        wordList = shuffleArray(wordList);
+        currentStartIndex = 0;
+        showAnswers = false;
+        renderCards();
+    }
+
+    // 엑셀 비동기 동기화 런타임
+    async function loadExcelFromUrl() {
+        let url = document.getElementById('excel-url').value.trim();
+        
+        if (!url) {
+            statusEl.classList.add('error');
+            statusEl.innerText = "URL을 입력해주세요.";
+            return;
+        }
+
+        if (url.includes("docs.google.com/spreadsheets")) {
+            if (url.includes("/edit")) {
+                url = url.split('/edit')[0] + '/export?format=xlsx';
+            } else if (!url.includes("/export")) {
+                url = url + '/export?format=xlsx';
+            }
+        }
+
+        statusEl.classList.remove('error');
+        statusEl.innerText = "데이터 동기화 중...";
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error("파일 로드 실패. 링크 공유 권한을 확인하세요.");
+            
+            const arrayBuffer = await response.arrayBuffer();
+            const data = new Uint8Array(arrayBuffer);
+            const workbook = XLSX.read(data, { type: 'array' });
+            
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+            
+            const tempExtractList = jsonData
+                .filter(row => row && row[0] && row[1]) 
+                .map(row => ({
+                    ko: String(row[0]).trim(),
+                    en: formatEnglishWord(String(row[1]).trim())
+                }));
+
+            if (tempExtractList.length === 0) {
+                throw new Error("유효한 단어 데이터(1열 한국어, 2열 영어)가 없습니다.");
+            }
+
+            // 기본 로드는 엑셀 정렬 순서 유지
+            wordList = tempExtractList; 
+            currentStartIndex = 0;
+            showAnswers = false;
+            statusEl.innerText = "";
+            
+            document.getElementById('setup-area').classList.add('hidden');
+            document.getElementById('game-area').classList.remove('hidden');
+            
+            updateCardsPerPage();
+            renderCards();
+
+        } catch (error) {
+            console.error(error);
+            statusEl.classList.add('error');
+            statusEl.innerText = "에러: " + error.message;
+        }
+    }
+
+    // 카드 렌더링 코어 프로세스
+    function renderCards() {
+        if (wordList.length === 0) return;
+        
+        wrapperEl.innerHTML = '';
+        showAnswers = false;
+        wrapperEl.classList.remove('show-answers');
+        actionBtn.innerText = "정답 확인 👁️"; 
+
+        for (let i = 0; i < cardsPerPage; i++) {
+            const targetIndex = currentStartIndex + i;
+            
+            if (targetIndex < wordList.length) {
+                const item = wordList[targetIndex];
+                
+                // [1] 한글 글자수 공백 포함 35자 임계치 파악 후 컴팩트 폰트 스타일 분기
+                const isLongKorean = item.ko.length >= 35;
+                const koClass = isLongKorean ? 'card-word long-text' : 'card-word';
+
+                const cardHtml = `
+                    <div class="card">
+                        <div class="card-section section-ko">
+                            <div class="card-label">KOREAN</div>
+                            <div class="card-word-wrapper">
+                                <div class="${koClass}">${item.ko}</div>
+                            </div>
+                        </div>
+                        <div class="card-section section-en">
+                            <div class="card-label">ENGLISH</div>
+                            <div class="card-word-wrapper">
+                                <div class="placeholder">?</div>
+                                <div class="card-word">${item.en}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                wrapperEl.insertAdjacentHTML('beforeend', cardHtml);
+            } else {
+                wrapperEl.insertAdjacentHTML('beforeend', '<div class="card empty"></div>');
+            }
+        }
+
+        const endIndex = Math.min(currentStartIndex + cardsPerPage, wordList.length);
+        document.getElementById('card-progress').innerText = `${currentStartIndex + 1} - ${endIndex} / ${wordList.length}`;
+    }
+
+    function handlePrimaryAction() {
+        if (wordList.length === 0) return;
+
+        if (!showAnswers) {
+            showAnswers = true;
+            wrapperEl.classList.add('show-answers');
+            actionBtn.innerText = "다음 세트 ▶";
+        } else {
+            updateCardsPerPage();
+            if (currentStartIndex + cardsPerPage < wordList.length) {
+                currentStartIndex += cardsPerPage;
+                renderCards();
+            } else {
+                alert("마지막 단어입니다! 다시 처음부터 순서대로 학습합니다.");
+                currentStartIndex = 0;
+                renderCards();
+            }
+        }
+    }
+
+    window.addEventListener('resize', () => {
+        if (wordList.length > 0) {
+            updateCardsPerPage();
+            renderCards();
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (document.activeElement.tagName === 'INPUT') return;
+        if (event.key === 'ArrowRight') {
+            handlePrimaryAction();
+        }
+    });
+</script>
+</body>
+</html>
