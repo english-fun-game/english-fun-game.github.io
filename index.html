@@ -16,6 +16,7 @@
             --text-main: #1d1c1d;          
             --text-muted: #616061;         
             --border-color: #dddddd;
+            --amber-warn: #ecb22e;         
         }
 
         body {
@@ -31,15 +32,24 @@
             margin: 0;
             padding: 16px 12px; 
             box-sizing: border-box;
-            overflow: hidden; 
+            overflow-x: hidden;
+            overflow-y: auto; 
+        }
+
+        body.game-active {
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
         }
 
         .container {
             width: 100%;
             max-width: 800px;
-            height: 100%;
             display: flex;
             flex-direction: column;
+        }
+        body.game-active .container {
+            height: 100%;
         }
 
         h1 {
@@ -49,12 +59,13 @@
             font-weight: 900;
             letter-spacing: -0.8px;
             text-align: center;
+            flex-shrink: 0;
         }
 
         /* 초기 진입 화면 */
         #setup-area {
             max-width: 480px;
-            margin: 30px auto auto auto; 
+            margin: 20px auto; 
             width: 100%;
             display: flex;
             flex-direction: column;
@@ -94,16 +105,38 @@
             background-color: var(--slack-aubergine);
         }
 
+        /* 로딩 스테이터스 및 [2] 플렉스 스피닝 매칭 */
         .status-msg {
             color: var(--slack-blue);
-            margin: -5px 0 5px 0;
             font-weight: 700;
             font-size: 14px;
             text-align: center;
-            min-height: 20px;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .status-msg:not(:empty) {
+            margin: -5px 0 10px 0;
         }
         .status-msg.error {
             color: #d63031;
+        }
+
+        /* [2] 순수 CSS 기반 로딩 스피닝휠 크로스 브라우저 스펙 */
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(18, 100, 163, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--slack-blue);
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         /* 게임 플레이 레이아웃 */
@@ -115,7 +148,6 @@
             justify-content: flex-start; 
         }
 
-        /* [2] 상단 툴바 레이아웃 정렬 개편 */
         .game-top-bar {
             display: flex;
             justify-content: space-between;
@@ -140,7 +172,6 @@
             font-weight: 700;
             border-radius: 4px;
             cursor: pointer;
-            transition: background 0.1s;
         }
         .refresh-btn:hover {
             background-color: #edf0f2;
@@ -159,23 +190,31 @@
         /* 카드 배치 그리드 */
         .cards-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 20px;
+            grid-template-columns: 1fr; 
             width: 100%;
-            margin-bottom: 20px; 
+            max-width: 740px;
+            margin: 0 auto 20px auto; 
             flex-shrink: 0;
         }
 
-        /* 카드 UI */
+        /* 데스크탑 카드 가로 분할 */
         .card {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 12px;
             display: flex;
-            flex-direction: column;
+            flex-direction: row; 
             box-sizing: border-box;
             overflow: hidden;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+            height: 460px; 
+            width: 100%;
+
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent; 
         }
 
         .card.empty {
@@ -194,7 +233,8 @@
         }
 
         .section-ko {
-            border-bottom: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            border-bottom: none;
         }
 
         .section-en {
@@ -216,7 +256,6 @@
             text-align: center;
         }
 
-        /* 기본 단어/문장 서체 스펙 */
         .card-word {
             font-size: 24px; 
             font-weight: 800;
@@ -227,10 +266,9 @@
             line-height: 1.5;
         }
 
-        /* [1] 35자 이상 긴 텍스트 발견 시 모바일 대응 유연 스케일링 클래스 */
         .card-word.long-text {
-            font-size: 19px; 
-            line-height: 1.4;
+            font-size: 16px; 
+            line-height: 1.5;
             font-weight: 700;
         }
 
@@ -254,18 +292,42 @@
             display: none;
         }
 
-        .card-section::-webkit-scrollbar {
+        /* 헷갈림 버튼 스타일 */
+        .vague-btn {
+            display: inline-block;
+            margin-top: 16px;
+            padding: 10px 24px; 
+            background-color: #ffffff;
+            color: #d08700;
+            border: 1px solid var(--amber-warn);
+            border-radius: 4px;
+            font-size: 15px; 
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            box-shadow: 0 2px 4px rgba(236, 178, 46, 0.1);
+        }
+        .vague-btn:hover {
+            background-color: #fff9eb;
+        }
+        .show-answers .section-en .vague-btn {
+            display: none !important;
+        }
+
+        .card-section::-webkit-scrollbar, .table-wrapper::-webkit-scrollbar {
             width: 4px;
         }
-        .card-section::-webkit-scrollbar-thumb {
+        .card-section::-webkit-scrollbar-thumb, .table-wrapper::-webkit-scrollbar-thumb {
             background-color: rgba(0, 0, 0, 0.1);
             border-radius: 4px;
         }
 
-        /* 하단 고정 제어 영역 */
+        /* 하단 제어 영역 */
         .controls {
             width: 100%;
             flex-shrink: 0;
+            display: flex;
+            gap: 12px;
         }
 
         .next-rect-btn {
@@ -280,15 +342,60 @@
             cursor: pointer;
             box-sizing: border-box;
         }
-        
         .next-rect-btn:hover {
             background-color: var(--slack-aubergine);
         }
 
+        /* 결과 테이블 디자인 */
+        #summary-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            justify-content: space-between;
+        }
+
+        .table-wrapper {
+            flex: 1;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            background: #ffffff;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            position: sticky;
+            top: 0;
+            color: var(--text-muted);
+            font-weight: 700;
+            z-index: 1;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        tr:hover td {
+            background-color: #fcfcfc;
+        }
+
+        /* 가이드라인 박스 */
         .instructions {
             font-size: 14px;
             color: var(--text-muted);
-            line-height: 1.7;
+            line-height: 1.6;
             background: #ffffff;
             width: 100%;
             box-sizing: border-box;
@@ -298,11 +405,25 @@
             text-align: left;
         }
 
+        .instructions hr {
+            border: 0;
+            border-top: 1px solid #eef0f1;
+            margin: 14px 0;
+        }
+
+        .example-box {
+            background-color: #f8f9fa;
+            padding: 4px;
+            border: 1px dashed var(--border-color);
+            border-radius: 4px;
+            margin-top: 8px;
+        }
+
         .hidden {
             display: none !important;
         }
 
-        /* 📱 모바일 UI 최적화 테마 스펙 기입 */
+        /* 📱 모바일 UI 전용 미디어 쿼리 (가로 650px 이하) */
         @media (max-width: 650px) {
             body {
                 padding: 12px 10px;
@@ -318,46 +439,56 @@
                 gap: 16px;
             }
 
-            /* 상단 툴바 모바일 컴팩트화 */
-            .game-top-bar {
-                margin-bottom: 12px;
-            }
-            .refresh-btn {
-                padding: 6px 10px;
-                font-size: 12px;
-            }
-            .progress {
-                padding: 5px 10px;
-                font-size: 12px;
-            }
-
             .cards-grid {
-                grid-template-columns: 1fr; 
                 margin-bottom: 20px !important; 
             }
 
-            /* 모바일 카드 높이 380px 고정 스펙 유지 */
+            /* 모바일 카드: 상하 분할 전환 */
             #game-area .card {
-                height: 380px !important; 
+                flex-direction: column !important;
+                height: 420px !important; 
+            }
+
+            #game-area .section-ko {
+                border-right: none !important;
+                border-bottom: 1px solid var(--border-color) !important;
             }
 
             #game-area .card-section {
-                padding: 24px !important; 
+                padding: 15px !important; 
             }
 
             #game-area .card-word, #game-area .placeholder {
-                font-size: 22px; 
+                font-size: 24px; 
             }
 
-            /* [1] 모바일에서 35자 이상 긴 문장 진입 시 가독성 극대화를 위한 서체 리사이징 */
             #game-area .card-word.long-text {
-                font-size: 16px !important;
+                font-size: 14px !important;
+                line-height: 1.45 !important;
             }
 
-            .controls .next-rect-btn {
-                padding: 30px !important; 
-                font-size: 20px;          
+            .vague-btn {
+                padding: 12px 32px;
+                font-size: 16px;
+                margin-top: 12px;
+                width: 80%;
+            }
+
+            #summary-area .controls {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .controls .next-rect-btn, #summary-area .base-btn {
+                padding: 18px !important; 
+                font-size: 18px;          
                 border-radius: 6px;
+                width: 100%;
+            }
+
+            th, td {
+                padding: 10px 12px;
+                font-size: 13px;
             }
         }
     </style>
@@ -374,28 +505,34 @@
         <div id="status" class="status-msg"></div>
 
         <div class="instructions">
-            <strong>🎮 조작 방법 안내 (통일된 액션 흐름)</strong><br>
-            • <b>데스크탑</b>: 키보드 <b>오른쪽 화살표(→)</b> 연속 입력<br>
-            • <b>모바일</b>: 하단의 <b>액션 버튼</b> 연속 터치<br>
-            <span style="color: var(--slack-blue); font-weight: bold;">※ 1회 실행: 정답 공개 ➔ 2회 실행: 다음 이동</span>
+            <strong>조작 방법</strong><br>
+            • 데스크탑: 키보드 <b>오른쪽 화살표(→)</b> 정답/다음 | 키보드 <b>아래쪽 화살표(↓)</b> 헷갈림 기록<br>
+            • 모바일: 하단 액션 버튼 터치<br>
+            • 헷갈림 ❓: 암기가 명확하지 않은 표현은 체크 시 종료 후 요약 노트에 모아서 복습 가능<br>
             
-            <hr style="border: 0; border-top: 1px solid #eef0f1; margin: 12px 0;">
+            <hr>
             
-            <strong>🌐 구글 스프레드시트 연동 방법 (공유 상태 만들기)</strong><br>
-            1. 연동할 구글 시트 우측 상단의 <b>[공유]</b> 버튼을 누릅니다.<br>
-            2. 일반 액세스의 제한됨을 <b>[링크가 있는 모든 사용자]</b>로 변경합니다.<br>
-            3. 권한이 <b>[뷰어]</b>인 상태에서 상단 주소창의 링크를 복사해 붙여넣으세요.
+            <strong>구글 스프레드시트 공유 설정</strong><br>
+            1. 구글 시트 우측 상단 [공유] 클릭<br>
+            2. 일반 액세스를 [링크가 있는 모든 사용자]로 변경 (권한: 뷰어)<br>
+            3. 주소창 링크 복사 후 입력창에 붙여넣기<br>
+            
+            <hr>
+            
+            <strong>예시 데이터 원클릭 테스트</strong><br>
+            <div class="example-box">
+                <button class="refresh-btn" style="width: 100%; padding: 12px; font-size: 14px;" onclick="loadExampleLink()">⚡ 예시 링크로 바로 시작하기</button>
+            </div>
         </div>
     </div>
 
     <div id="game-area" class="hidden">
-        
         <div class="game-top-bar">
             <div class="top-btn-group">
                 <button class="refresh-btn" onclick="loadExcelFromUrl()">🔄 시트 최신화</button>
                 <button class="refresh-btn" onclick="triggerShuffle()">🔀 랜덤 섞기</button>
             </div>
-            <span class="progress" id="card-progress">0 - 0 / 0</span>
+            <span class="progress" id="card-progress">0 / 0</span>
         </div>
 
         <div class="cards-grid" id="cards-wrapper">
@@ -405,32 +542,50 @@
             <button id="action-btn" class="next-rect-btn" onclick="handlePrimaryAction()">정답 확인 👁️</button>
         </div>
     </div>
+
+    <div id="summary-area" class="hidden">
+        <div class="game-top-bar">
+            <span style="font-weight: 800; color: var(--slack-purple); font-size: 16px;">📋 헷갈림 표현 요약 노트</span>
+            <span class="progress" id="summary-count" style="background: rgba(236, 178, 46, 0.15); color: #d08700;">공부할 단어: 0개</span>
+        </div>
+        
+        <div class="table-wrapper">
+            <table id="summary-table">
+                <thead>
+                    <tr>
+                        <th style="width: 45%;">KOREAN</th>
+                        <th style="width: 55%;">ENGLISH</th>
+                    </tr>
+                </thead>
+                <tbody id="summary-tbody">
+                    </tbody>
+            </table>
+        </div>
+        
+        <div class="controls">
+            <button class="base-btn" style="margin: 0; background-color: var(--slack-blue);" onclick="reviewVagueWords()">헷갈림 표현만 다시 복습 🔁</button>
+            <button class="base-btn" style="margin: 0; background-color: var(--slack-purple);" onclick="restartFullGame()">전체 다시 복습 🔄</button>
+        </div>
+    </div>
 </div>
 
 <script>
+    let originalWordList = []; 
     let wordList = [];
+    let vagueWords = [];       
     let currentStartIndex = 0; 
     let showAnswers = false;   
-    let cardsPerPage = 2; 
+    const cardsPerPage = 1; 
     
     const wrapperEl = document.getElementById('cards-wrapper');
     const actionBtn = document.getElementById('action-btn');
     const statusEl = document.getElementById('status');
-
-    function updateCardsPerPage() {
-        if (window.innerWidth <= 650) {
-            cardsPerPage = 1; 
-        } else {
-            cardsPerPage = 2; 
-        }
-    }
 
     function formatEnglishWord(word) {
         if (!word) return '';
         return word.replace(/([^])\[/g, '$1<br>[');
     }
 
-    // 피셔-예이츠 알고리즘 기반 셔플 펑션 
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -439,7 +594,6 @@
         return array;
     }
 
-    // [2] 상단 바 '랜덤 섞기' 트리거 액션 핸들러
     function triggerShuffle() {
         if (wordList.length === 0) return;
         wordList = shuffleArray(wordList);
@@ -448,7 +602,11 @@
         renderCards();
     }
 
-    // 엑셀 비동기 동기화 런타임
+    function loadExampleLink() {
+        document.getElementById('excel-url').value = "https://docs.google.com/spreadsheets/d/1MDi2G3Z_4zmTt0si8Btw59Vkeo8qI6-JucYza3tqRsY/edit?usp=sharing";
+        loadExcelFromUrl();
+    }
+
     async function loadExcelFromUrl() {
         let url = document.getElementById('excel-url').value.trim();
         
@@ -456,6 +614,13 @@
             statusEl.classList.add('error');
             statusEl.innerText = "URL을 입력해주세요.";
             return;
+        }
+
+        // [2] 시트 내 데이터가 로드되어 활성화 상태일 때 최신화 클릭 시 확인 팝업 발생
+        if (wordList.length > 0) {
+            if (!confirm("시트를 최신화하면 기존의 헷갈림 체크 데이터가 모두 초기화됩니다. 진행하시겠습니까?")) {
+                return; 
+            }
         }
 
         if (url.includes("docs.google.com/spreadsheets")) {
@@ -467,7 +632,11 @@
         }
 
         statusEl.classList.remove('error');
-        statusEl.innerText = "데이터 동기화 중...";
+        // [2] 동적 스피닝 웹 휠 HTML 요소 강제 인젝션 구조 변경
+        statusEl.innerHTML = '<div class="spinner"></div> 데이터 동기화 중...';
+
+        vagueWords = []; 
+        document.getElementById('summary-tbody').innerHTML = '';
 
         try {
             const response = await fetch(url);
@@ -492,16 +661,19 @@
                 throw new Error("유효한 단어 데이터(1열 한국어, 2열 영어)가 없습니다.");
             }
 
-            // 기본 로드는 엑셀 정렬 순서 유지
-            wordList = tempExtractList; 
+            originalWordList = [...tempExtractList];
+            wordList = [...originalWordList]; 
+            
             currentStartIndex = 0;
             showAnswers = false;
             statusEl.innerText = "";
             
             document.getElementById('setup-area').classList.add('hidden');
+            document.getElementById('summary-area').classList.add('hidden');
             document.getElementById('game-area').classList.remove('hidden');
             
-            updateCardsPerPage();
+            document.body.classList.add('game-active');
+            
             renderCards();
 
         } catch (error) {
@@ -511,7 +683,6 @@
         }
     }
 
-    // 카드 렌더링 코어 프로세스
     function renderCards() {
         if (wordList.length === 0) return;
         
@@ -520,41 +691,55 @@
         wrapperEl.classList.remove('show-answers');
         actionBtn.innerText = "정답 확인 👁️"; 
 
-        for (let i = 0; i < cardsPerPage; i++) {
-            const targetIndex = currentStartIndex + i;
-            
-            if (targetIndex < wordList.length) {
-                const item = wordList[targetIndex];
-                
-                // [1] 한글 글자수 공백 포함 35자 임계치 파악 후 컴팩트 폰트 스타일 분기
-                const isLongKorean = item.ko.length >= 35;
-                const koClass = isLongKorean ? 'card-word long-text' : 'card-word';
+        const targetIndex = currentStartIndex;
+        
+        if (targetIndex < wordList.length) {
+            const item = wordList[targetIndex];
 
-                const cardHtml = `
-                    <div class="card">
-                        <div class="card-section section-ko">
-                            <div class="card-label">KOREAN</div>
-                            <div class="card-word-wrapper">
-                                <div class="${koClass}">${item.ko}</div>
-                            </div>
-                        </div>
-                        <div class="card-section section-en">
-                            <div class="card-label">ENGLISH</div>
-                            <div class="card-word-wrapper">
-                                <div class="placeholder">?</div>
-                                <div class="card-word">${item.en}</div>
-                            </div>
+            const isLongText = item.ko.length >= 40;
+            const wordClass = isLongText ? 'card-word long-text' : 'card-word';
+
+            // 워딩 톤앤매너 통일 완료
+            const isMobile = window.innerWidth <= 650;
+            const vagueBtnLabel = isMobile ? '헷갈림 체크 ❓' : '헷갈림 체크 ❓ (키보드 ↓ 방향키)';
+
+            const cardHtml = `
+                <div class="card">
+                    <div class="card-section section-ko">
+                        <div class="card-label">KOREAN</div>
+                        <div class="card-word-wrapper">
+                            <div class="${wordClass}">${item.ko}</div>
                         </div>
                     </div>
-                `;
-                wrapperEl.insertAdjacentHTML('beforeend', cardHtml);
-            } else {
-                wrapperEl.insertAdjacentHTML('beforeend', '<div class="card empty"></div>');
+                    <div class="card-section section-en">
+                        <div class="card-label">ENGLISH</div>
+                        <div class="card-word-wrapper">
+                            <div class="placeholder">?</div>
+                            <button class="vague-btn" onclick="handleVagueAction(${targetIndex}); event.stopPropagation();">${vagueBtnLabel}</button>
+                            <div class="${wordClass}">${item.en}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            wrapperEl.insertAdjacentHTML('beforeend', cardHtml);
+        }
+
+        document.getElementById('card-progress').innerText = `${currentStartIndex + 1} / ${wordList.length}`;
+    }
+
+    function handleVagueAction(targetIndex) {
+        if (wordList.length === 0 || showAnswers) return;
+
+        if (targetIndex < wordList.length) {
+            const targetItem = wordList[targetIndex];
+            if (!vagueWords.some(item => item.ko === targetItem.ko && item.en === targetItem.en)) {
+                vagueWords.push(targetItem);
             }
         }
 
-        const endIndex = Math.min(currentStartIndex + cardsPerPage, wordList.length);
-        document.getElementById('card-progress').innerText = `${currentStartIndex + 1} - ${endIndex} / ${wordList.length}`;
+        showAnswers = true;
+        wrapperEl.classList.add('show-answers');
+        actionBtn.innerText = "다음 세트 ▶";
     }
 
     function handlePrimaryAction() {
@@ -565,29 +750,77 @@
             wrapperEl.classList.add('show-answers');
             actionBtn.innerText = "다음 세트 ▶";
         } else {
-            updateCardsPerPage();
             if (currentStartIndex + cardsPerPage < wordList.length) {
                 currentStartIndex += cardsPerPage;
                 renderCards();
             } else {
-                alert("마지막 단어입니다! 다시 처음부터 순서대로 학습합니다.");
-                currentStartIndex = 0;
-                renderCards();
+                showSummaryNotes();
             }
         }
     }
 
+    function showSummaryNotes() {
+        document.getElementById('game-area').classList.add('hidden');
+        const summaryArea = document.getElementById('summary-area');
+        const tbody = document.getElementById('summary-tbody');
+        
+        tbody.innerHTML = '';
+        document.getElementById('summary-count').innerText = `공부할 단어: ${vagueWords.length}개`;
+
+        if (vagueWords.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="2" style="text-align:center; color:var(--slack-blue); font-weight:700; padding:40px 0;">🎉 완벽합니다! 체크한 단어가 없습니다.</td></tr>`;
+        } else {
+            vagueWords.forEach(item => {
+                const rowHtml = `
+                    <tr>
+                        <td style="font-weight: 700; color: var(--text-main);">${item.ko}</td>
+                        <td style="color: var(--slack-blue); font-weight: bold;">${item.en}</td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', rowHtml);
+            });
+        }
+
+        summaryArea.classList.remove('hidden');
+    }
+
+    /* [1] 팝업 알림 내 카피라이팅 헷갈림으로 수정 완료 */
+    function reviewVagueWords() {
+        if (vagueWords.length === 0) {
+            alert("복습할 헷갈림 표현이 존재하지 않습니다.");
+            return;
+        }
+        wordList = [...vagueWords]; 
+        vagueWords = []; 
+        currentStartIndex = 0;
+        document.getElementById('summary-area').classList.add('hidden');
+        document.getElementById('game-area').classList.remove('hidden');
+        renderCards();
+    }
+
+    function restartFullGame() {
+        wordList = [...originalWordList]; 
+        vagueWords = []; 
+        currentStartIndex = 0;
+        document.getElementById('summary-area').classList.add('hidden');
+        document.getElementById('game-area').classList.remove('hidden');
+        renderCards();
+    }
+
     window.addEventListener('resize', () => {
         if (wordList.length > 0) {
-            updateCardsPerPage();
             renderCards();
         }
     });
 
     document.addEventListener('keydown', (event) => {
         if (document.activeElement.tagName === 'INPUT') return;
+        
         if (event.key === 'ArrowRight') {
             handlePrimaryAction();
+        } else if (event.key === 'ArrowDown') {
+            event.preventDefault(); 
+            handleVagueAction(currentStartIndex);
         }
     });
 </script>
