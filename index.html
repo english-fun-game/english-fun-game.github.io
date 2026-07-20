@@ -11,7 +11,7 @@
             --slack-aubergine: #611f69;    
             --slack-blue: #1264a3;         
             --slack-bg: #f4f5f6;           
-            --card-bg: #ffffff;             
+            --card-bg: #ffffff;            
             --card-back-bg: #f8f9fa;        
             --text-main: #1d1c1d;          
             --text-muted: #616061;         
@@ -44,7 +44,7 @@
 
         .container {
             width: 100%;
-            max-width: 800px;
+            max-width: 1200px;
             display: flex;
             flex-direction: column;
         }
@@ -64,19 +64,19 @@
 
         /* 초기 진입 화면 */
         #setup-area {
-            max-width: 480px;
-            margin: 20px auto; 
+            max-width: 560px;
+            margin: 30px auto; 
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 20px; 
+            gap: 16px; 
         }
 
         input[type="text"] {
             width: 100%;
             padding: 16px 14px;
             border: 1px solid var(--border-color);
-            border-radius: 4px; 
+            border-radius: 6px; 
             font-size: 16px;
             outline: none;
             box-sizing: border-box;
@@ -94,18 +94,47 @@
             background-color: var(--slack-purple);
             color: white;
             border: none;
-            border-radius: 4px; 
+            border-radius: 6px; 
             font-size: 17px;
             cursor: pointer;
             font-weight: 700;
             box-sizing: border-box;
+            transition: background-color 0.15s ease;
         }
 
         .base-btn:hover {
             background-color: var(--slack-aubergine);
         }
 
-        /* 로딩 스테이터스 및 [2] 플렉스 스피닝 매칭 */
+        .quick-btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .quick-btn {
+            width: 100%;
+            padding: 14px 16px;
+            background-color: #ffffff;
+            color: var(--slack-purple);
+            border: 1.5px solid var(--slack-purple);
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .quick-btn:hover {
+            background-color: #f4ecf5;
+            transform: translateY(-1px);
+        }
+
+        /* 로딩 스테이터스 */
         .status-msg {
             color: var(--slack-blue);
             font-weight: 700;
@@ -119,13 +148,12 @@
             gap: 8px;
         }
         .status-msg:not(:empty) {
-            margin: -5px 0 10px 0;
+            margin: -5px 0 5px 0;
         }
         .status-msg.error {
             color: #d63031;
         }
 
-        /* [2] 순수 CSS 기반 로딩 스피닝휠 크로스 브라우저 스펙 */
         .spinner {
             display: inline-block;
             width: 18px;
@@ -148,33 +176,42 @@
             justify-content: flex-start; 
         }
 
-        .game-top-bar {
+        /* 🐱🌈 냥캣 타이머 Box */
+        .nyan-timer-box {
+            background-color: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-bottom: 16px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+            transition: all 0.3s ease;
+        }
+
+        .nyan-timer-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px; 
-            width: 100%;
-            flex-shrink: 0;
-        }
-
-        .top-btn-group {
-            display: flex;
-            gap: 8px;
-        }
-
-        .refresh-btn {
-            background-color: transparent;
-            color: var(--slack-blue);
-            border: 1px solid var(--border-color);
-            background-color: #ffffff;
-            padding: 8px 12px;
+            margin-bottom: 8px;
             font-size: 13px;
-            font-weight: 700;
-            border-radius: 4px;
-            cursor: pointer;
+            font-weight: 800;
         }
-        .refresh-btn:hover {
-            background-color: #edf0f2;
+
+        .nyan-title {
+            color: var(--slack-purple);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nyan-time {
+            color: var(--slack-blue);
+            font-family: monospace;
+            font-size: 15px;
+            background: #f0f4f8;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid #d0e1f9;
         }
 
         .progress {
@@ -182,22 +219,81 @@
             color: var(--text-muted);
             font-weight: 700;
             background: #eef0f1;
-            padding: 6px 12px;
+            padding: 4px 10px;
             border-radius: 4px;
             border: 1px solid var(--border-color);
         }
 
-        /* 카드 배치 그리드 */
+        .nyan-track {
+            position: relative;
+            height: 20px;
+            background-color: #eef0f1;
+            border-radius: 10px;
+            overflow: visible;
+            border: 1px solid #e0e0e0;
+        }
+
+        .nyan-trail {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ff4b4b, #ffb800, #20d070, #00b0ff, #9d4edd);
+            border-radius: 10px;
+            transition: width 0.4s ease-out;
+        }
+
+        .nyan-cat {
+            position: absolute;
+            right: -12px;
+            top: -6px;
+            font-size: 20px;
+            user-select: none;
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
+            animation: nyan-bounce 0.6s infinite alternate;
+        }
+
+        .nyan-star {
+            position: absolute;
+            right: 6px;
+            top: -1px;
+            font-size: 14px;
+            user-select: none;
+        }
+
+        @keyframes nyan-bounce {
+            from { transform: translateY(0px); }
+            to { transform: translateY(-2px); }
+        }
+
+        /* 1분 남았을 때 경고 스타일 */
+        .nyan-timer-box.warning {
+            border-color: #ff4b4b;
+            background-color: #fff5f5;
+            animation: pulse-warn 1s infinite alternate;
+        }
+
+        .nyan-timer-box.warning .nyan-time {
+            color: #d63031;
+            background-color: #ffe0e0;
+            border-color: #ffb3b3;
+        }
+
+        @keyframes pulse-warn {
+            from { box-shadow: 0 0 2px rgba(255, 75, 75, 0.2); }
+            to { box-shadow: 0 0 10px rgba(255, 75, 75, 0.6); }
+        }
+
         .cards-grid {
             display: grid;
             grid-template-columns: 1fr; 
             width: 100%;
-            max-width: 740px;
+            max-width: 1200px;
             margin: 0 auto 20px auto; 
             flex-shrink: 0;
         }
 
-        /* 데스크탑 카드 가로 분할 */
         .card {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -206,8 +302,8 @@
             flex-direction: row; 
             box-sizing: border-box;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
-            height: 460px; 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            height: 480px; 
             width: 100%;
 
             -webkit-user-select: none;
@@ -217,16 +313,12 @@
             -webkit-tap-highlight-color: transparent; 
         }
 
-        .card.empty {
-            visibility: hidden;
-        }
-
         .card-section {
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 28px 24px; 
+            padding: 32px 36px; 
             overflow-y: auto;       
             min-height: 0;          
             box-sizing: border-box;
@@ -242,11 +334,11 @@
         }
 
         .card-label {
-            font-size: 11px;
+            font-size: 12px;
             color: var(--text-muted);
             font-weight: 700;
             letter-spacing: 1px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             flex-shrink: 0;
         }
 
@@ -257,19 +349,25 @@
         }
 
         .card-word {
-            font-size: 24px; 
+            font-size: 26px; 
             font-weight: 800;
             color: var(--text-main);
             width: 100%;
             word-break: break-all;
             overflow-wrap: break-word;
-            line-height: 1.5;
+            line-height: 1.6;
         }
 
         .card-word.long-text {
-            font-size: 16px; 
-            line-height: 1.5;
+            font-size: 18px; 
+            line-height: 1.55;
             font-weight: 700;
+        }
+
+        /* 영어 카드 스크롤 발생 시 12px 축소 클래스 */
+        .card-word.font-small-12 {
+            font-size: 14px !important;
+            line-height: 1.45 !important;
         }
 
         .section-en .card-word {
@@ -281,10 +379,16 @@
             display: block; 
         }
 
+        /* # 구분선 스타일 (2px 두께, extra br 없음) */
+        .at-divider {
+            border-top: 1px solid transparent;
+            width: 100%;
+        }
+
         .placeholder {
             display: block;
             color: #ccd5e0;
-            font-size: 26px;
+            font-size: 28px;
             font-weight: bold;
         }
 
@@ -292,15 +396,14 @@
             display: none;
         }
 
-        /* 헷갈림 버튼 스타일 */
         .vague-btn {
             display: inline-block;
             margin-top: 16px;
-            padding: 10px 24px; 
+            padding: 12px 28px; 
             background-color: #ffffff;
             color: #d08700;
             border: 1px solid var(--amber-warn);
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 15px; 
             font-weight: 700;
             cursor: pointer;
@@ -315,10 +418,10 @@
         }
 
         .card-section::-webkit-scrollbar, .table-wrapper::-webkit-scrollbar {
-            width: 4px;
+            width: 6px;
         }
         .card-section::-webkit-scrollbar-thumb, .table-wrapper::-webkit-scrollbar-thumb {
-            background-color: rgba(0, 0, 0, 0.1);
+            background-color: rgba(0, 0, 0, 0.15);
             border-radius: 4px;
         }
 
@@ -336,7 +439,7 @@
             background-color: var(--slack-purple);
             color: white;
             border: none;
-            border-radius: 4px; 
+            border-radius: 6px; 
             font-size: 18px;
             font-weight: 700;
             cursor: pointer;
@@ -371,7 +474,7 @@
         }
 
         th, td {
-            padding: 14px 16px;
+            padding: 16px 20px;
             border-bottom: 1px solid var(--border-color);
             font-size: 15px;
             line-height: 1.5;
@@ -391,59 +494,25 @@
             background-color: #fcfcfc;
         }
 
-        /* 가이드라인 박스 */
-        .instructions {
-            font-size: 14px;
-            color: var(--text-muted);
-            line-height: 1.6;
-            background: #ffffff;
-            width: 100%;
-            box-sizing: border-box;
-            padding: 18px;
-            border-radius: 4px;
-            border: 1px solid var(--border-color);
-            text-align: left;
-        }
-
-        .instructions hr {
-            border: 0;
-            border-top: 1px solid #eef0f1;
-            margin: 14px 0;
-        }
-
-        .example-box {
-            background-color: #f8f9fa;
-            padding: 4px;
-            border: 1px dashed var(--border-color);
-            border-radius: 4px;
-            margin-top: 8px;
-        }
-
         .hidden {
             display: none !important;
         }
 
-        /* 📱 모바일 UI 전용 미디어 쿼리 (가로 650px 이하) */
+        /* 📱 모바일 UI 전용 미디어 쿼리 */
         @media (max-width: 650px) {
             body {
                 padding: 12px 10px;
             }
 
-            h1 {
-                font-size: 24px;
-                margin-bottom: 8px;
-            }
-            
             #setup-area {
                 margin-top: 15px;
-                gap: 16px;
+                gap: 12px;
             }
 
             .cards-grid {
                 margin-bottom: 20px !important; 
             }
 
-            /* 모바일 카드: 상하 분할 전환 */
             #game-area .card {
                 flex-direction: column !important;
                 height: 420px !important; 
@@ -455,11 +524,11 @@
             }
 
             #game-area .card-section {
-                padding: 15px !important; 
+                padding: 18px 15px !important; 
             }
 
             #game-area .card-word, #game-area .placeholder {
-                font-size: 24px; 
+                font-size: 22px; 
             }
 
             #game-area .card-word.long-text {
@@ -469,9 +538,9 @@
 
             .vague-btn {
                 padding: 12px 32px;
-                font-size: 16px;
+                font-size: 15px;
                 margin-top: 12px;
-                width: 80%;
+                width: 90%;
             }
 
             #summary-area .controls {
@@ -487,7 +556,7 @@
             }
 
             th, td {
-                padding: 10px 12px;
+                padding: 12px 14px;
                 font-size: 13px;
             }
         }
@@ -496,55 +565,47 @@
 <body>
 
 <div class="container">
-    <h1>📝 답답 암기 게임</h1>
-    
+    <!-- 초기 설정 화면 (테스트 진행 전 제목 노출) -->
     <div id="setup-area">
+        <h1>📝 답답 암기 게임</h1>
         <input type="text" id="excel-url" placeholder="공개된 엑셀 파일 또는 구글 시트 URL 입력" />
         <button class="base-btn" onclick="loadExcelFromUrl()">불러오기</button>
         
         <div id="status" class="status-msg"></div>
 
-        <div class="instructions">
-            <strong>조작 방법</strong><br>
-            • 데스크탑: 키보드 <b>오른쪽 화살표(→)</b> 정답/다음 | 키보드 <b>아래쪽 화살표(↓)</b> 헷갈림 기록<br>
-            • 모바일: 하단 액션 버튼 터치<br>
-            • 헷갈림 ❓: 암기가 명확하지 않은 표현은 체크 시 종료 후 요약 노트에 모아서 복습 가능<br>
-            
-            <hr>
-            
-            <strong>구글 스프레드시트 공유 설정</strong><br>
-            1. 구글 시트 우측 상단 [공유] 클릭<br>
-            2. 일반 액세스를 [링크가 있는 모든 사용자]로 변경 (권한: 뷰어)<br>
-            3. 주소창 링크 복사 후 입력창에 붙여넣기<br>
-            
-            <hr>
-            
-            <strong>예시 데이터 원클릭 테스트</strong><br>
-            <div class="example-box">
-                <button class="refresh-btn" style="width: 100%; padding: 12px; font-size: 14px;" onclick="loadExampleLink()">⚡ 예시 링크로 바로 시작하기</button>
-            </div>
+        <div class="quick-btn-group">
+            <button class="quick-btn" onclick="loadShortcutUrl('https://docs.google.com/spreadsheets/d/1m7KXifCB6txkKEOHqApMWOR4MQwqb6Ji1Dm-hRJYzLc/edit?usp=sharing')">🗣️ 스피킹 단어 시험 바로가기</button>
+            <button class="quick-btn" onclick="loadShortcutUrl('https://docs.google.com/spreadsheets/d/1UYTEv88wdKsSS2kkB-UylHAfQAlV6yrvjwVNecG6m64/edit?usp=sharing')">✍️ 라이팅 단어 시험 바로가기</button>
         </div>
     </div>
 
+    <!-- 게임 시작 화면 (제목 없이 깔끔하게 테스트 진행) -->
     <div id="game-area" class="hidden">
-        <div class="game-top-bar">
-            <div class="top-btn-group">
-                <button class="refresh-btn" onclick="loadExcelFromUrl()">🔄 시트 최신화</button>
-                <button class="refresh-btn" onclick="triggerShuffle()">🔀 랜덤 섞기</button>
+        <!-- 🐱🌈 냥캣 제한시간 타이머 & 단어 수 인디케이터 통합 상단 바 -->
+        <div id="nyan-timer-container" class="nyan-timer-box">
+            <div class="nyan-timer-header">
+                <span class="nyan-title">🐱🌈 제한시간 타이머 <span class="nyan-time" id="nyan-timer-text">⏱️ 07:00</span></span>
+                <span class="progress" id="card-progress">0 / 0</span>
             </div>
-            <span class="progress" id="card-progress">0 / 0</span>
+            <div class="nyan-track">
+                <div class="nyan-trail" id="nyan-trail">
+                    <span class="nyan-cat">🐱</span>
+                </div>
+                <span class="nyan-star">⭐</span>
+            </div>
         </div>
 
         <div class="cards-grid" id="cards-wrapper">
-            </div>
+        </div>
 
         <div class="controls">
             <button id="action-btn" class="next-rect-btn" onclick="handlePrimaryAction()">정답 확인 👁️</button>
         </div>
     </div>
 
+    <!-- 요약 노트 화면 -->
     <div id="summary-area" class="hidden">
-        <div class="game-top-bar">
+        <div class="nyan-timer-header" style="margin-bottom: 12px;">
             <span style="font-weight: 800; color: var(--slack-purple); font-size: 16px;">📋 헷갈림 표현 요약 노트</span>
             <span class="progress" id="summary-count" style="background: rgba(236, 178, 46, 0.15); color: #d08700;">공부할 단어: 0개</span>
         </div>
@@ -558,7 +619,7 @@
                     </tr>
                 </thead>
                 <tbody id="summary-tbody">
-                    </tbody>
+                </tbody>
             </table>
         </div>
         
@@ -577,33 +638,75 @@
     let showAnswers = false;   
     const cardsPerPage = 1; 
     
+    // 타이머 변수
+    const TOTAL_SECONDS = 420; // 7분 = 420초
+    let remainingSeconds = TOTAL_SECONDS;
+    let timerInterval = null;
+
     const wrapperEl = document.getElementById('cards-wrapper');
     const actionBtn = document.getElementById('action-btn');
     const statusEl = document.getElementById('status');
 
-    function formatEnglishWord(word) {
+    /* # 개수만큼 <br>로 치환하는 로직 */
+    function formatWordText(word) {
         if (!word) return '';
-        return word.replace(/([^])\[/g, '$1<br>[');
+        let text = String(word).trim();
+        
+        // 1. # 이 보이는 만큼 <br>로 치환 (divider 제거)
+        text = text.replace(/#/g, '<br>');
+
+        return text;
     }
 
-    function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
+    /* ⏱️ 냥캣 타이머 로직 */
+    function startTimer() {
+        stopTimer();
+        remainingSeconds = TOTAL_SECONDS;
+        updateTimerUI();
+
+        timerInterval = setInterval(() => {
+            remainingSeconds--;
+            updateTimerUI();
+
+            if (remainingSeconds <= 0) {
+                stopTimer();
+                alert("⏰ 7분 제한 시간이 종료되었습니다!");
+                showSummaryNotes();
+            }
+        }, 1000);
+    }
+
+    function stopTimer() {
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
         }
-        return array;
     }
 
-    function triggerShuffle() {
-        if (wordList.length === 0) return;
-        wordList = shuffleArray(wordList);
-        currentStartIndex = 0;
-        showAnswers = false;
-        renderCards();
+    function updateTimerUI() {
+        const mins = String(Math.floor(remainingSeconds / 60)).padStart(2, '0');
+        const secs = String(remainingSeconds % 60).padStart(2, '0');
+        
+        const timerTextEl = document.getElementById('nyan-timer-text');
+        const trailEl = document.getElementById('nyan-trail');
+        const containerEl = document.getElementById('nyan-timer-container');
+
+        if (timerTextEl) timerTextEl.innerText = `⏱️ ${mins}:${secs}`;
+
+        const elapsed = TOTAL_SECONDS - remainingSeconds;
+        const progressPercent = Math.min(100, Math.max(0, (elapsed / TOTAL_SECONDS) * 100));
+
+        if (trailEl) trailEl.style.width = `${progressPercent}%`;
+
+        if (remainingSeconds <= 60 && remainingSeconds > 0) {
+            containerEl.classList.add('warning');
+        } else {
+            containerEl.classList.remove('warning');
+        }
     }
 
-    function loadExampleLink() {
-        document.getElementById('excel-url').value = "https://docs.google.com/spreadsheets/d/1MDi2G3Z_4zmTt0si8Btw59Vkeo8qI6-JucYza3tqRsY/edit?usp=sharing";
+    function loadShortcutUrl(url) {
+        document.getElementById('excel-url').value = url;
         loadExcelFromUrl();
     }
 
@@ -616,7 +719,6 @@
             return;
         }
 
-        // [2] 시트 내 데이터가 로드되어 활성화 상태일 때 최신화 클릭 시 확인 팝업 발생
         if (wordList.length > 0) {
             if (!confirm("시트를 최신화하면 기존의 헷갈림 체크 데이터가 모두 초기화됩니다. 진행하시겠습니까?")) {
                 return; 
@@ -632,7 +734,6 @@
         }
 
         statusEl.classList.remove('error');
-        // [2] 동적 스피닝 웹 휠 HTML 요소 강제 인젝션 구조 변경
         statusEl.innerHTML = '<div class="spinner"></div> 데이터 동기화 중...';
 
         vagueWords = []; 
@@ -653,8 +754,8 @@
             const tempExtractList = jsonData
                 .filter(row => row && row[0] && row[1]) 
                 .map(row => ({
-                    ko: String(row[0]).trim(),
-                    en: formatEnglishWord(String(row[1]).trim())
+                    ko: formatWordText(row[0]),
+                    en: formatWordText(row[1])
                 }));
 
             if (tempExtractList.length === 0) {
@@ -675,11 +776,36 @@
             document.body.classList.add('game-active');
             
             renderCards();
+            startTimer();
 
         } catch (error) {
             console.error(error);
             statusEl.classList.add('error');
             statusEl.innerText = "에러: " + error.message;
+        }
+    }
+
+    /* 영어 스크롤 발생 시 폰트 12px 축소 감지 로직 */
+    function checkEnglishOverflow() {
+        const sectionEn = document.querySelector('.section-en');
+        const wordEn = sectionEn ? sectionEn.querySelector('.card-word') : null;
+        if (!sectionEn || !wordEn) return;
+
+        wordEn.classList.remove('font-small-12');
+
+        const isAnswerShown = wrapperEl.classList.contains('show-answers');
+        if (!isAnswerShown) {
+            wordEn.style.display = 'block';
+            wordEn.style.visibility = 'hidden';
+        }
+
+        if (sectionEn.scrollHeight > sectionEn.clientHeight) {
+            wordEn.classList.add('font-small-12');
+        }
+
+        if (!isAnswerShown) {
+            wordEn.style.display = '';
+            wordEn.style.visibility = '';
         }
     }
 
@@ -696,10 +822,10 @@
         if (targetIndex < wordList.length) {
             const item = wordList[targetIndex];
 
-            const isLongText = item.ko.length >= 40;
+            const plainKoLength = item.ko.replace(/<[^>]*>/g, '').length;
+            const isLongText = plainKoLength >= 45;
             const wordClass = isLongText ? 'card-word long-text' : 'card-word';
 
-            // 워딩 톤앤매너 통일 완료
             const isMobile = window.innerWidth <= 650;
             const vagueBtnLabel = isMobile ? '헷갈림 체크 ❓' : '헷갈림 체크 ❓ (키보드 ↓ 방향키)';
 
@@ -725,6 +851,7 @@
         }
 
         document.getElementById('card-progress').innerText = `${currentStartIndex + 1} / ${wordList.length}`;
+        checkEnglishOverflow();
     }
 
     function handleVagueAction(targetIndex) {
@@ -740,6 +867,7 @@
         showAnswers = true;
         wrapperEl.classList.add('show-answers');
         actionBtn.innerText = "다음 세트 ▶";
+        checkEnglishOverflow();
     }
 
     function handlePrimaryAction() {
@@ -749,6 +877,7 @@
             showAnswers = true;
             wrapperEl.classList.add('show-answers');
             actionBtn.innerText = "다음 세트 ▶";
+            checkEnglishOverflow();
         } else {
             if (currentStartIndex + cardsPerPage < wordList.length) {
                 currentStartIndex += cardsPerPage;
@@ -760,6 +889,7 @@
     }
 
     function showSummaryNotes() {
+        stopTimer(); 
         document.getElementById('game-area').classList.add('hidden');
         const summaryArea = document.getElementById('summary-area');
         const tbody = document.getElementById('summary-tbody');
@@ -784,7 +914,6 @@
         summaryArea.classList.remove('hidden');
     }
 
-    /* [1] 팝업 알림 내 카피라이팅 헷갈림으로 수정 완료 */
     function reviewVagueWords() {
         if (vagueWords.length === 0) {
             alert("복습할 헷갈림 표현이 존재하지 않습니다.");
@@ -796,6 +925,7 @@
         document.getElementById('summary-area').classList.add('hidden');
         document.getElementById('game-area').classList.remove('hidden');
         renderCards();
+        startTimer(); 
     }
 
     function restartFullGame() {
@@ -805,11 +935,12 @@
         document.getElementById('summary-area').classList.add('hidden');
         document.getElementById('game-area').classList.remove('hidden');
         renderCards();
+        startTimer(); 
     }
 
     window.addEventListener('resize', () => {
         if (wordList.length > 0) {
-            renderCards();
+            checkEnglishOverflow();
         }
     });
 
