@@ -199,6 +199,7 @@
             margin-bottom: 8px;
             font-size: 13px;
             font-weight: 800;
+            gap: 8px;
         }
 
         .nyan-title {
@@ -206,6 +207,7 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            flex-shrink: 0;
         }
 
         .nyan-time {
@@ -216,9 +218,10 @@
             padding: 2px 8px;
             border-radius: 4px;
             border: 1px solid #d0e1f9;
+            white-space: nowrap;
         }
 
-        /* 🎨 뮤트 버튼 눈에 잘 띄게 개선된 스타일 */
+        /* 🎨 뮤트 버튼 스타일 */
         .mute-btn {
             background: #f3e8ff;
             border: 1.5px solid var(--slack-purple);
@@ -233,6 +236,8 @@
             align-items: center;
             gap: 4px;
             box-shadow: 0 2px 4px rgba(74, 21, 75, 0.1);
+            flex-shrink: 0;
+            white-space: nowrap;
         }
 
         .mute-btn:hover {
@@ -261,6 +266,9 @@
             padding: 4px 10px;
             border-radius: 4px;
             border: 1px solid var(--border-color);
+            flex-shrink: 0;
+            white-space: nowrap;
+            text-align: center;
         }
 
         /* 프로그레스바 트랙 */
@@ -470,7 +478,7 @@
             border-bottom: none;
             background-repeat: no-repeat;
             background-position: center;
-            background-size: cover; /* 카드 전체 영역에 여백 없이 꽉 채움 */
+            background-size: cover; 
             transition: background-image 0.3s ease;
             position: relative;
             overflow: hidden;
@@ -485,7 +493,7 @@
             margin: auto 0; 
             width: 100%;
             text-align: center;
-            z-index: 1; /* 텍스트가 배경 이미지보다 위에 배치되도록 보장 */
+            z-index: 1; 
         }
 
         /* 🔄 한글/영어 텍스트 자동 줄바꿈 최적화 */
@@ -494,9 +502,9 @@
             font-weight: 800;
             color: var(--text-main);
             width: 100%;
-            word-break: keep-all;       /* 한글 단어 단위 가독성 줄바꿈 */
-            overflow-wrap: break-word; /* 긴 영단어나 문자열도 자동으로 다음 줄로 이어서 줄바꿈 */
-            white-space: normal;       /* 자연스러운 줄바꿈 적용 */
+            word-break: keep-all;       
+            overflow-wrap: break-word; 
+            white-space: normal;       
             line-height: 1.5;
         }
 
@@ -605,6 +613,45 @@
             display: none !important;
         }
 
+        /* 🍞 커스텀 토스트 알림 스타일 */
+        .toast-container {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            pointer-events: none;
+            width: 90%;
+            max-width: 420px;
+        }
+
+        .toast {
+            background-color: rgba(29, 28, 29, 0.92);
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 700;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            pointer-events: auto;
+            text-align: center;
+            word-break: keep-all;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
         /* 📱 모바일 UI 전용 미디어 쿼리 (650px 이하) */
         @media (max-width: 650px) {
             body {
@@ -618,6 +665,31 @@
 
             .shortcut-text {
                 display: none !important;
+            }
+
+            .nyan-timer-header {
+                font-size: 12px;
+                gap: 6px;
+            }
+
+            .nyan-title {
+                font-size: 12px;
+                gap: 4px;
+            }
+
+            .nyan-time {
+                font-size: 13px;
+                padding: 2px 5px;
+            }
+
+            .mute-btn {
+                padding: 4px 7px;
+                font-size: 12px;
+            }
+
+            .progress {
+                font-size: 12px;
+                padding: 3px 7px;
             }
 
             .cards-grid {
@@ -637,7 +709,7 @@
                 border-bottom: 1px solid var(--border-color) !important;
                 flex: 1 !important;
                 padding: 12px 10px !important;
-                background-size: cover !important; /* 모바일 단말기에서도 꽉 차게 조율 */
+                background-size: cover !important; 
             }
 
             #game-area .section-en {
@@ -658,21 +730,23 @@
                 gap: 8px;
             }
 
+            /* [1] 모바일 버튼 높이 및 터치 크기 확대 */
             .bottom-vague-btn, .bottom-primary-btn {
-                height: 50px;
-                font-size: 18px !important;
+                height: 62px !important;
+                font-size: 19px !important;
                 padding: 0 4px;
+                border-radius: 10px;
             }
 
             #summary-area .controls {
                 flex-direction: column;
-                gap: 8px;
+                gap: 10px;
             }
 
             #summary-area .base-btn {
-                padding: 15px !important; 
-                font-size: 16px;          
-                border-radius: 6px;
+                padding: 18px !important; 
+                font-size: 17px !important;          
+                border-radius: 8px;
                 width: 100%;
             }
 
@@ -681,7 +755,10 @@
                 font-size: 14px;
             }
         }
-    </style></head><body><div class="container">
+    </style></head><body>
+<div id="toast-container" class="toast-container"></div>
+
+<div class="container">
     <!-- 초기 설정 화면 -->
     <div id="setup-area">
         <h1>📝 답답 암기 게임</h1>
@@ -704,7 +781,7 @@
             <div class="nyan-timer-header">
                 <span class="nyan-title">🐱🌈 타이머 <span class="nyan-time" id="nyan-timer-text">⏱️ 07:00</span></span>
                 
-                <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
                     <button id="mute-btn" class="mute-btn" onclick="toggleMute()">
                         <span id="mute-icon">🔊</span> 소리 켬 <span class="shortcut-text">(M)</span>
                     </button>
@@ -759,7 +836,7 @@
         </div>
         
         <div class="controls">
-            <button class="base-btn" style="margin: 0; background-color: #2b8a3e;" onclick="copySummaryAsImage()">📷 이미지 공유 / 복사</button>
+            <button class="base-btn" style="margin: 0; background-color: #2b8a3e;" onclick="copySummaryAsImage()">📷 이미지 저장 및 공유</button>
             <button class="base-btn" style="margin: 0; background-color: var(--slack-blue);" onclick="reviewVagueWords()">복습 리스트만 다시 복습 🔁</button>
             <button class="base-btn" style="margin: 0; background-color: var(--slack-purple);" onclick="restartFullGame()">전체 다시 복습 🔄</button>
         </div>
@@ -775,7 +852,7 @@
     const TOTAL_SECONDS = 420; // 7분 = 420초
     let remainingSeconds = TOTAL_SECONDS;
     let timerInterval = null;
-    let currentImageType = 'type1'; // type1, type2, type3 중 무작위 선택
+    let currentImageType = 'type1'; 
     let currentImgNum = 1;
 
     // 🎵 사운드 제어 변수 및 뮤트 글로벌 상태
@@ -784,6 +861,31 @@
 
     // 🔊 Web Audio API 싱글톤 인스턴스 (빵빠레 전용)
     let synthAudioCtx = null;
+
+    /* 🍞 토스트 메시지 표출 함수 */
+    function showToast(message, duration = 2500) {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerText = message;
+
+        container.appendChild(toast);
+
+        requestAnimationFrame(() => {
+            toast.classList.add('show');
+        });
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 250);
+        }, duration);
+    }
 
     function getSynthAudioContext() {
         if (!synthAudioCtx) {
@@ -833,20 +935,19 @@
 
     /* 🎺 게임 종료 시 신나는 빵빠레(Fanfare) 이펙트 사운드 */
     function playFanfareSound() {
-        if (isMuted) return; // 음소거 상태이면 빵빠레 차단
+        if (isMuted) return;
 
         try {
             const ctx = getSynthAudioContext();
             const now = ctx.currentTime;
 
-            // 빵빠레 멜로디 파트: C5 -> C5 -> C5 -> E5 -> G5 -> C6(화음)
             const notes = [
                 { freq: 523.25, time: 0, duration: 0.12 },     // C5
                 { freq: 523.25, time: 0.13, duration: 0.12 },  // C5
                 { freq: 523.25, time: 0.26, duration: 0.12 },  // C5
                 { freq: 659.25, time: 0.39, duration: 0.25 },  // E5
                 { freq: 783.99, time: 0.65, duration: 0.25 },  // G5
-                { freq: 1046.50, time: 0.92, duration: 0.8 }   // C6 (메인 피날레)
+                { freq: 1046.50, time: 0.92, duration: 0.8 }   // C6
             ];
 
             notes.forEach(note => {
@@ -866,7 +967,6 @@
                 osc.stop(now + note.time + note.duration);
             });
 
-            // 피날레 C6 노트 타임에 풍성함을 더하는 화음 레이어 (C5 + E5 + G5)
             const chordFreqs = [523.25, 659.25, 783.99];
             chordFreqs.forEach(freq => {
                 const osc = ctx.createOscillator();
@@ -895,7 +995,7 @@
     const vagueBtn = document.getElementById('vague-btn');
     const statusEl = document.getElementById('status');
 
-    /* 🎲 배열을 무작위로 섞는 피셔-예이츠 셔플 함수 */
+    /* 🎲 피셔-예이츠 셔플 함수 */
     function shuffleArray(array) {
         const shuffled = [...array];
         for (let i = shuffled.length - 1; i > 0; i--) {
@@ -913,15 +1013,15 @@
         return text;
     }
 
-    /* 🎵 배경 음악 플레이어 (sounds/1.mp3 ~ 8.mp3 무작위 선곡 및 반복 재생) */
+    /* 🎵 배경 음악 플레이어 */
     function playRandomBgSound() {
-        stopBgSound(); // 기존 오디오 리소스 해제
+        stopBgSound();
 
-        const randomTrack = Math.floor(Math.random() * 8) + 1; // 1 ~ 8 사이의 숫자를 무작위 선택
+        const randomTrack = Math.floor(Math.random() * 8) + 1;
         bgAudio = new Audio(`sounds/${randomTrack}.mp3`);
-        bgAudio.loop = true; // 무한 반복 재생
-        bgAudio.volume = 0.5; // 배경음 볼륨 적절히 조절
-        bgAudio.muted = isMuted; // 현재 뮤트 상태 적용
+        bgAudio.loop = true;
+        bgAudio.volume = 0.5;
+        bgAudio.muted = isMuted;
         
         bgAudio.play().catch(err => {
             console.warn("오디오 자동 재생이 제한되었거나 파일 로드 실패:", err);
@@ -932,11 +1032,11 @@
         if (bgAudio) {
             bgAudio.pause();
             bgAudio.currentTime = 0;
-            bgAudio = null; // 메모리 할당 해제
+            bgAudio = null;
         }
     }
 
-    /* 🖼️ 한글 카드 배경을 투명 레이어 + 배경으로 설정하는 함수 */
+    /* 🖼️ 한글 카드 배경 업데이트 */
     function updateKoCardBackground() {
         const sectionKo = document.querySelector('.section-ko');
         if (sectionKo) {
@@ -964,7 +1064,7 @@
 
             if (remainingSeconds <= 0) {
                 stopTimer();
-                alert("⏰ 7분 제한 시간이 종료되었습니다!");
+                showToast("⏰ 7분 제한 시간이 종료되었습니다!", 3500);
                 showSummaryNotes();
             }
         }, 1000);
@@ -1097,7 +1197,7 @@
         }
     }
 
-    /* 하단 버튼 텍스트 및 시각적 색상 피드백 갱신 */
+    /* 하단 버튼 텍스트 및 UI 피드백 갱신 */
     function updateButtonsUI() {
         if (wordList.length === 0) return;
 
@@ -1231,7 +1331,7 @@
         summaryArea.classList.remove('hidden');
     }
 
-    /* 📷 데스크탑 클립보드 복사 후 다운로드 폴더 저장 개편 로직 */
+    /* 📷 이미지 저장 및 공유 로직 */
     async function copySummaryAsImage() {
         const tableWrapper = document.getElementById('summary-table-wrapper');
         const table = document.getElementById('summary-table');
@@ -1251,7 +1351,8 @@
         tableWrapper.style.height = table.scrollHeight + 'px';
 
         try {
-            const canvas = await html2canvas(tableWrapper, {
+            // 1. html2canvas로 본문 캡처
+            const capturedCanvas = await html2canvas(tableWrapper, {
                 scale: 2, 
                 backgroundColor: '#ffffff',
                 logging: false,
@@ -1260,31 +1361,96 @@
                 windowHeight: tableWrapper.scrollHeight + 200
             });
 
-            canvas.toBlob(async (blob) => {
+            // 2. 상단 날짜 영역 캔버스 생성
+            const finalCanvas = document.createElement('canvas');
+            const ctx = finalCanvas.getContext('2d');
+            const scale = 2;
+            const headerHeight = 85 * scale; // [2] 충분히 넓은 170px 높이 헤더 영역
+
+            finalCanvas.width = capturedCanvas.width;
+            finalCanvas.height = capturedCanvas.height + headerHeight;
+
+            // 3. 캔버스 배경 채우기 (흰색)
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+
+            // 4. [2] 상단 날짜만 크게 그리기 (다른 수식어 없이 연도.월.일)
+            ctx.fillStyle = '#1d1c1d';
+            ctx.font = `900 ${38 * scale}px 'Pretendard', -apple-system, sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const dateStr = `${year}. ${month}. ${day}`;
+
+            ctx.fillText(dateStr, finalCanvas.width / 2, headerHeight / 2);
+
+            // 5. 구분선 그리기
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1.5 * scale;
+            ctx.beginPath();
+            ctx.moveTo(0, headerHeight);
+            ctx.lineTo(finalCanvas.width, headerHeight);
+            ctx.stroke();
+
+            // 6. 원본 캡처 이미지 합성
+            ctx.drawImage(capturedCanvas, 0, headerHeight);
+
+            // 7. 최종 이미지 처리
+            finalCanvas.toBlob(async (blob) => {
                 if (!blob) {
-                    alert("이미지 생성에 실패했습니다.");
+                    showToast("이미지 생성에 실패했습니다.");
                     return;
                 }
 
-                const fileName = `복습_리스트_${new Date().toISOString().slice(0, 10)}.png`;
+                const fileName = `복습_리스트_${year}${month}${day}.png`;
                 const file = new File([blob], fileName, { type: 'image/png' });
+                const blobUrl = URL.createObjectURL(blob);
 
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    try {
-                        await navigator.share({
-                            files: [file],
-                            title: '복습 리스트',
-                            text: '답답 암기 게임 - 오늘의 복습 리스트입니다.'
-                        });
-                        return; 
-                    } catch (shareErr) {
-                        if (shareErr.name === 'AbortError') return; 
-                        console.warn("Web Share 시도 취소/실패:", shareErr);
+                // 모바일 환경 판별
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+                // [3] 모바일: 저장(다운로드) 먼저 실행 후, 공유하기 창 열기
+                if (isMobile) {
+                    // 1) 기기에 이미지 파일 다운로드/저장
+                    const link = document.createElement('a');
+                    link.href = blobUrl;
+                    link.download = fileName;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    showToast("💾 기기에 이미지 저장을 완료했습니다!");
+
+                    // 2) 저장 직후 공유 시트(Web Share API) 호출
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        try {
+                            await navigator.share({
+                                files: [file],
+                                title: '복습 리스트'
+                            });
+                        } catch (shareErr) {
+                            if (shareErr.name !== 'AbortError') {
+                                console.warn("Web Share 시도 취소/실패:", shareErr);
+                            }
+                        }
                     }
+                    URL.revokeObjectURL(blobUrl);
+                    return;
                 }
 
-                let copiedToClipboard = false;
+                // 데스크톱: 파일 다운로드 + 클립보드 복사 실행
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
 
+                let copiedToClipboard = false;
                 if (navigator.clipboard && navigator.clipboard.write) {
                     try {
                         await navigator.clipboard.write([
@@ -1296,22 +1462,19 @@
                     }
                 }
 
-                const link = document.createElement('a');
-                link.href = canvas.toDataURL('image/png');
-                link.download = fileName;
-                link.click();
-
                 if (copiedToClipboard) {
-                    alert("📋 클립보드에 이미지가 복사되었으며, 💾 다운로드 폴더에 저장을 완료했습니다!\n원하는 곳(슬랙, 노션 등)에 붙여넣기(Ctrl+V) 하실 수도 있습니다.");
+                    showToast("📋 클립보드 복사 및 💾 다운로드 폴더 저장이 완료되었습니다!");
                 } else {
-                    alert("💾 이미지 파일이 다운로드 폴더에 저장되었습니다.");
+                    showToast("💾 이미지 파일이 다운로드 폴더에 저장되었습니다.");
                 }
+
+                URL.revokeObjectURL(blobUrl);
 
             }, 'image/png');
 
         } catch (err) {
             console.error("캡처 에러:", err);
-            alert("이미지 캡처 도중 오류가 발생했습니다: " + err.message);
+            showToast("이미지 캡처 도중 오류가 발생했습니다: " + err.message);
         } finally {
             tableWrapper.style.overflow = origOverflow;
             tableWrapper.style.maxHeight = origMaxHeight;
@@ -1322,7 +1485,7 @@
 
     function reviewVagueWords() {
         if (vagueWords.length === 0) {
-            alert("복습할 단어가 존재하지 않습니다.");
+            showToast("복습할 단어가 존재하지 않습니다.");
             return;
         }
         wordList = shuffleArray(vagueWords); 
@@ -1344,7 +1507,7 @@
         startTimer(); 
     }
 
-    // ⌨️ 키보드 단축키 처리 (화살표 & 'M' 음소거 키 지원)
+    // ⌨️ 키보드 단축키 처리
     document.addEventListener('keydown', (event) => {
         if (document.activeElement.tagName === 'INPUT') return;
         
