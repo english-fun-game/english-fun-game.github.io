@@ -221,7 +221,7 @@
             white-space: nowrap;
         }
 
-        /* 🎨 뮤트 버튼 스타일 */
+        /* 🎨 BGM 토글 버튼 스타일 */
         .mute-btn {
             background: #f3e8ff;
             border: 1.5px solid var(--slack-purple);
@@ -726,11 +726,7 @@
                 line-height: 1.5 !important;
             }
 
-            .bottom-action-area {
-                gap: 8px;
-            }
-
-            /* [1] 모바일 버튼 높이 및 터치 크기 확대 */
+            /* 모바일 하단 액션 버튼 */
             .bottom-vague-btn, .bottom-primary-btn {
                 height: 62px !important;
                 font-size: 19px !important;
@@ -783,7 +779,7 @@
                 
                 <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
                     <button id="mute-btn" class="mute-btn" onclick="toggleMute()">
-                        <span id="mute-icon">🔊</span> 소리 켬 <span class="shortcut-text">(M)</span>
+                        <span id="mute-icon">🔊</span> BGM 켜기 <span class="shortcut-text">(M)</span>
                     </button>
                     <span class="progress" id="card-progress">0 / 0</span>
                 </div>
@@ -855,12 +851,39 @@
     let currentImageType = 'type1'; 
     let currentImgNum = 1;
 
-    // 🎵 사운드 제어 변수 및 뮤트 글로벌 상태
+    // 🎵 사운드 제어 변수 및 뮤트 글로벌 상태 (BGM 전용)
     let bgAudio = null;
     let isMuted = false;
 
     // 🔊 Web Audio API 싱글톤 인스턴스 (빵빠레 전용)
     let synthAudioCtx = null;
+
+    /* 🔊 Web Speech API 영어 발음 재생 함수 (BGM Mute와 독립 동작) */
+    function speakEnglish(text) {
+        if (!('speechSynthesis' in window)) return;
+
+        try {
+            window.speechSynthesis.cancel(); // 이전 음성 재생 중단
+
+            // HTML 태그 및 특수기호(# 등) 제거
+            const cleanText = text.replace(/<[^>]*>/g, '').replace(/#/g, ' ').trim();
+            if (!cleanText) return;
+
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = 'en-US'; // 미국 영어 발음
+            utterance.rate = 0.85;   // 암기 학습용 적절한 배속
+
+            window.speechSynthesis.speak(utterance);
+        } catch (e) {
+            console.warn("TTS 발음 재생 실패:", e);
+        }
+    }
+
+    function speakCurrentWord() {
+        if (wordList[currentStartIndex]) {
+            speakEnglish(wordList[currentStartIndex].en);
+        }
+    }
 
     /* 🍞 토스트 메시지 표출 함수 */
     function showToast(message, duration = 2500) {
@@ -887,6 +910,29 @@
         }, duration);
     }
 
+    /* 📱 공유 시트 미지원/차단 시 호출되는 이미지 미리보기 모달 */
+    function openImagePreviewModal(blobUrl) {
+        let modal = document.getElementById('image-preview-modal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'image-preview-modal';
+            modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;backdrop-filter:blur(5px);';
+            modal.innerHTML = `
+                <div style="background:#fff;border-radius:12px;padding:16px;max-width:100%;max-height:90%;display:flex;flex-direction:column;align-items:center;gap:12px;box-shadow:0 10px 25px rgba(0,0,0,0.3);overflow:hidden;width:100%;">
+                    <div style="font-size:15px;font-weight:800;color:#1d1c1d;text-align:center;line-height:1.4;">
+                        📷 이미지를 <span style="color:#2563eb;">길게 누르시면</span><br>갤러리 저장 및 공유가 가능합니다!
+                    </div>
+                    <div style="flex:1;overflow:auto;width:100%;display:flex;justify-content:center;align-items:flex-start;border:1px solid #ddd;border-radius:8px;background:#f8f9fa;padding:8px;box-sizing:border-box;">
+                        <img id="preview-img-element" style="max-width:100%;height:auto;display:block;border-radius:4px;" />
+                    </div>
+                    <button onclick="document.getElementById('image-preview-modal').remove()" style="width:100%;padding:14px;background:#4a154b;color:#fff;border:none;border-radius:8px;font-weight:700;font-size:16px;cursor:pointer;">닫기 ✖</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+        document.getElementById('preview-img-element').src = blobUrl;
+    }
+
     function getSynthAudioContext() {
         if (!synthAudioCtx) {
             synthAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -908,7 +954,7 @@
     window.addEventListener('touchstart', unlockAudioContext, { passive: true });
     window.addEventListener('keydown', unlockAudioContext, { passive: true });
 
-    // 🔇 뮤트 토글 로직
+    // 🔇 BGM 전용 음소거 토글 로직
     function toggleMute() {
         isMuted = !isMuted;
         const muteBtn = document.getElementById('mute-btn');
@@ -917,13 +963,13 @@
         if (isMuted) {
             if (muteIcon) muteIcon.innerText = '🔇';
             if (muteBtn) {
-                muteBtn.childNodes[1].nodeValue = ' 음소거 ';
+                muteBtn.childNodes[1].nodeValue = ' BGM 끄기 ';
                 muteBtn.classList.add('is-muted');
             }
         } else {
             if (muteIcon) muteIcon.innerText = '🔊';
             if (muteBtn) {
-                muteBtn.childNodes[1].nodeValue = ' 소리 켬 ';
+                muteBtn.childNodes[1].nodeValue = ' BGM 켜기 ';
                 muteBtn.classList.remove('is-muted');
             }
         }
@@ -935,8 +981,6 @@
 
     /* 🎺 게임 종료 시 신나는 빵빠레(Fanfare) 이펙트 사운드 */
     function playFanfareSound() {
-        if (isMuted) return;
-
         try {
             const ctx = getSynthAudioContext();
             const now = ctx.currentTime;
@@ -1279,6 +1323,7 @@
         if (!showAnswers) {
             showAnswers = true;
             wrapperEl.classList.add('show-answers');
+            speakCurrentWord(); // 🔊 정답 공개 시 자동으로 영어 발음 재생
         }
 
         updateButtonsUI();
@@ -1291,6 +1336,7 @@
             showAnswers = true;
             wrapperEl.classList.add('show-answers');
             updateButtonsUI();
+            speakCurrentWord(); // 🔊 정답 공개 시 자동으로 영어 발음 재생
         } else {
             if (currentStartIndex + cardsPerPage < wordList.length) {
                 currentStartIndex += cardsPerPage;
@@ -1365,7 +1411,7 @@
             const finalCanvas = document.createElement('canvas');
             const ctx = finalCanvas.getContext('2d');
             const scale = 2;
-            const headerHeight = 85 * scale; // [2] 충분히 넓은 170px 높이 헤더 영역
+            const headerHeight = 85 * scale; // 충분히 넓은 170px 높이 헤더 영역
 
             finalCanvas.width = capturedCanvas.width;
             finalCanvas.height = capturedCanvas.height + headerHeight;
@@ -1374,7 +1420,7 @@
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
 
-            // 4. [2] 상단 날짜만 크게 그리기 (다른 수식어 없이 연도.월.일)
+            // 4. 연도 월 일만 크게 렌더링
             ctx.fillStyle = '#1d1c1d';
             ctx.font = `900 ${38 * scale}px 'Pretendard', -apple-system, sans-serif`;
             ctx.textAlign = 'center';
@@ -1413,36 +1459,37 @@
                 // 모바일 환경 판별
                 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-                // [3] 모바일: 저장(다운로드) 먼저 실행 후, 공유하기 창 열기
+                // 모바일: 파일 저장 시도 후 공유 시트 호출 (실패 시 미리보기 모달 오픈)
                 if (isMobile) {
-                    // 1) 기기에 이미지 파일 다운로드/저장
-                    const link = document.createElement('a');
-                    link.href = blobUrl;
-                    link.download = fileName;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
+                    let shareSuccess = false;
 
-                    showToast("💾 기기에 이미지 저장을 완료했습니다!");
-
-                    // 2) 저장 직후 공유 시트(Web Share API) 호출
+                    // 1) 공유 시트 (Web Share API) 실행 시도
                     if (navigator.canShare && navigator.canShare({ files: [file] })) {
                         try {
                             await navigator.share({
                                 files: [file],
                                 title: '복습 리스트'
                             });
+                            shareSuccess = true;
                         } catch (shareErr) {
-                            if (shareErr.name !== 'AbortError') {
-                                console.warn("Web Share 시도 취소/실패:", shareErr);
+                            if (shareErr.name === 'AbortError') {
+                                URL.revokeObjectURL(blobUrl);
+                                return; // 취소한 경우
                             }
+                            console.warn("Web Share 시도 취소/실패:", shareErr);
                         }
                     }
-                    URL.revokeObjectURL(blobUrl);
+
+                    // 2) 공유 시트 차단/미지원 시 -> 길게 눌러 저장/공유 가능한 모달 오픈
+                    if (!shareSuccess) {
+                        openImagePreviewModal(blobUrl);
+                    } else {
+                        URL.revokeObjectURL(blobUrl);
+                    }
                     return;
                 }
 
-                // 데스크톱: 파일 다운로드 + 클립보드 복사 실행
+                // 데스크톱: 자동 파일 다운로드 + 클립보드 복사 실행
                 const link = document.createElement('a');
                 link.href = blobUrl;
                 link.download = fileName;
