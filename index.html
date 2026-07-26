@@ -488,30 +488,22 @@
             z-index: 1; /* 텍스트가 배경 이미지보다 위에 배치되도록 보장 */
         }
 
+        /* 🔄 한글/영어 텍스트 자동 줄바꿈 최적화 */
         .card-word {
-            font-size: 40px; /* 기존 26px -> 30px (+4px) */
+            font-size: 50px; 
             font-weight: 800;
             color: var(--text-main);
             width: 100%;
-            word-break: break-all;
-            overflow-wrap: break-word;
-            line-height: 1.6;
+            word-break: keep-all;       /* 한글 단어 단위 가독성 줄바꿈 */
+            overflow-wrap: break-word; /* 긴 영단어나 문자열도 자동으로 다음 줄로 이어서 줄바꿈 */
+            white-space: normal;       /* 자연스러운 줄바꿈 적용 */
+            line-height: 1.5;
         }
 
         .card-word.long-text {
-            font-size: 22px; /* 기존 18px -> 22px (+4px) */
-            line-height: 1.55;
+            font-size: 28px; 
+            line-height: 1.5;
             font-weight: 700;
-        }
-
-        /* 영어 카드 스크롤 발생 시 폰트 축소 */
-        .card-word.font-small-12 {
-            font-size: 14px !important;
-            line-height: 1.45 !important;
-        }
-        
-        .section-ko .card-word {
-            font-size: 50px; /* 기존 26px -> 30px (+4px) */
         }
 
         .section-en .card-word {
@@ -526,7 +518,7 @@
         .placeholder {
             display: block;
             color: #ccd5e0;
-            font-size: 32px; /* 기존 28px -> 32px (+4px) */
+            font-size: 32px; 
             font-weight: bold;
         }
 
@@ -654,11 +646,11 @@
             }
 
             #game-area .card-word, #game-area .placeholder {
-                font-size: 34px !important; /* 기존 24px -> 28px (+4px) */
+                font-size: 36px !important;
             }
 
             #game-area .card-word.long-text {
-                font-size: 22px !important; /* 기존 18px -> 22px (+4px) */
+                font-size: 22px !important;
                 line-height: 1.5 !important;
             }
 
@@ -1105,30 +1097,6 @@
         }
     }
 
-    /* 영어 스크롤 발생 시 폰트 축소 감지 로직 */
-    function checkEnglishOverflow() {
-        const sectionEn = document.querySelector('.section-en');
-        const wordEn = sectionEn ? sectionEn.querySelector('.card-word') : null;
-        if (!sectionEn || !wordEn) return;
-
-        wordEn.classList.remove('font-small-12');
-
-        const isAnswerShown = wrapperEl.classList.contains('show-answers');
-        if (!isAnswerShown) {
-            wordEn.style.display = 'block';
-            wordEn.style.visibility = 'hidden';
-        }
-
-        if (sectionEn.scrollHeight > sectionEn.clientHeight) {
-            wordEn.classList.add('font-small-12');
-        }
-
-        if (!isAnswerShown) {
-            wordEn.style.display = '';
-            wordEn.style.visibility = '';
-        }
-    }
-
     /* 하단 버튼 텍스트 및 시각적 색상 피드백 갱신 */
     function updateButtonsUI() {
         if (wordList.length === 0) return;
@@ -1196,7 +1164,6 @@
         document.getElementById('card-progress').innerText = `${currentStartIndex + 1} / ${wordList.length}`;
         updateButtonsUI();
         updateKoCardBackground();
-        checkEnglishOverflow();
     }
 
     function handleVagueAction(targetIndex) {
@@ -1212,7 +1179,6 @@
         if (!showAnswers) {
             showAnswers = true;
             wrapperEl.classList.add('show-answers');
-            checkEnglishOverflow();
         }
 
         updateButtonsUI();
@@ -1225,7 +1191,6 @@
             showAnswers = true;
             wrapperEl.classList.add('show-answers');
             updateButtonsUI();
-            checkEnglishOverflow();
         } else {
             if (currentStartIndex + cardsPerPage < wordList.length) {
                 currentStartIndex += cardsPerPage;
@@ -1378,12 +1343,6 @@
         renderCards();
         startTimer(); 
     }
-
-    window.addEventListener('resize', () => {
-        if (wordList.length > 0) {
-            checkEnglishOverflow();
-        }
-    });
 
     // ⌨️ 키보드 단축키 처리 (화살표 & 'M' 음소거 키 지원)
     document.addEventListener('keydown', (event) => {
