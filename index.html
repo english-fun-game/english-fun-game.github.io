@@ -220,6 +220,41 @@
             border: 1px solid #d0e1f9;
         }
 
+        /* 🎨 뮤트 버튼 눈에 잘 띄게 개선된 스타일 */
+        .mute-btn {
+            background: #f3e8ff;
+            border: 1.5px solid var(--slack-purple);
+            border-radius: 6px;
+            padding: 5px 10px;
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--slack-purple);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            box-shadow: 0 2px 4px rgba(74, 21, 75, 0.1);
+        }
+
+        .mute-btn:hover {
+            background: var(--slack-purple);
+            color: #ffffff;
+            transform: translateY(-1px);
+        }
+
+        .mute-btn.is-muted {
+            background: #fee2e2;
+            border-color: #dc2626;
+            color: #dc2626;
+            box-shadow: 0 2px 4px rgba(220, 38, 38, 0.15);
+        }
+
+        .mute-btn.is-muted:hover {
+            background: #dc2626;
+            color: #ffffff;
+        }
+
         .progress {
             font-size: 13px;
             color: var(--text-muted);
@@ -674,11 +709,17 @@
 
     <!-- 게임 시작 화면 -->
     <div id="game-area" class="hidden">
-        <!-- 🐱🌈 냥캣 제한시간 타이머 바 -->
+        <!-- 🐱🌈 냥캣 타이머 바 -->
         <div id="nyan-timer-container" class="nyan-timer-box">
             <div class="nyan-timer-header">
-                <span class="nyan-title">🐱🌈 제한시간 타이머 <span class="nyan-time" id="nyan-timer-text">⏱️ 07:00</span></span>
-                <span class="progress" id="card-progress">0 / 0</span>
+                <span class="nyan-title">🐱🌈 타이머 <span class="nyan-time" id="nyan-timer-text">⏱️ 07:00</span></span>
+                
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <button id="mute-btn" class="mute-btn" onclick="toggleMute()">
+                        <span id="mute-icon">🔊</span> 소리 켬 <span class="shortcut-text">(M)</span>
+                    </button>
+                    <span class="progress" id="card-progress">0 / 0</span>
+                </div>
             </div>
             <div class="nyan-controls-row">
                 <div class="nyan-track">
@@ -744,14 +785,123 @@
     const cardsPerPage = 1; 
     
     // 타이머 및 이미지 제어 변수
-    const TOTAL_SECONDS = 300; // 7분 = 420초
+    const TOTAL_SECONDS = 420; // 7분 = 420초
     let remainingSeconds = TOTAL_SECONDS;
     let timerInterval = null;
     let currentImageType = 'type1'; // type1, type2, type3 중 무작위 선택
     let currentImgNum = 1;
 
-    // 🎵 사운드 제어 변수 (sounds/1.mp3 ~ sounds/8.mp3)
+    // 🎵 사운드 제어 변수 및 뮤트 글로벌 상태
     let bgAudio = null;
+    let isMuted = false;
+
+    // 🔊 Web Audio API 싱글톤 인스턴스 (빵빠레 전용)
+    let synthAudioCtx = null;
+
+    function getSynthAudioContext() {
+        if (!synthAudioCtx) {
+            synthAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (synthAudioCtx.state === 'suspended') {
+            synthAudioCtx.resume();
+        }
+        return synthAudioCtx;
+    }
+
+    // 터치/클릭 시 AudioContext 잠금 해제 보장
+    function unlockAudioContext() {
+        const ctx = getSynthAudioContext();
+        if (ctx && ctx.state === 'suspended') {
+            ctx.resume();
+        }
+    }
+    window.addEventListener('click', unlockAudioContext, { passive: true });
+    window.addEventListener('touchstart', unlockAudioContext, { passive: true });
+    window.addEventListener('keydown', unlockAudioContext, { passive: true });
+
+    // 🔇 뮤트 토글 로직
+    function toggleMute() {
+        isMuted = !isMuted;
+        const muteBtn = document.getElementById('mute-btn');
+        const muteIcon = document.getElementById('mute-icon');
+
+        if (isMuted) {
+            if (muteIcon) muteIcon.innerText = '🔇';
+            if (muteBtn) {
+                muteBtn.childNodes[1].nodeValue = ' 음소거 ';
+                muteBtn.classList.add('is-muted');
+            }
+        } else {
+            if (muteIcon) muteIcon.innerText = '🔊';
+            if (muteBtn) {
+                muteBtn.childNodes[1].nodeValue = ' 소리 켬 ';
+                muteBtn.classList.remove('is-muted');
+            }
+        }
+
+        if (bgAudio) {
+            bgAudio.muted = isMuted;
+        }
+    }
+
+    /* 🎺 게임 종료 시 신나는 빵빠레(Fanfare) 이펙트 사운드 */
+    function playFanfareSound() {
+        if (isMuted) return; // 음소거 상태이면 빵빠레 차단
+
+        try {
+            const ctx = getSynthAudioContext();
+            const now = ctx.currentTime;
+
+            // 빵빠레 멜로디 파트: C5 -> C5 -> C5 -> E5 -> G5 -> C6(화음)
+            const notes = [
+                { freq: 523.25, time: 0, duration: 0.12 },     // C5
+                { freq: 523.25, time: 0.13, duration: 0.12 },  // C5
+                { freq: 523.25, time: 0.26, duration: 0.12 },  // C5
+                { freq: 659.25, time: 0.39, duration: 0.25 },  // E5
+                { freq: 783.99, time: 0.65, duration: 0.25 },  // G5
+                { freq: 1046.50, time: 0.92, duration: 0.8 }   // C6 (메인 피날레)
+            ];
+
+            notes.forEach(note => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(note.freq, now + note.time);
+
+                gain.gain.setValueAtTime(0.25, now + note.time);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + note.time + note.duration);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start(now + note.time);
+                osc.stop(now + note.time + note.duration);
+            });
+
+            // 피날레 C6 노트 타임에 풍성함을 더하는 화음 레이어 (C5 + E5 + G5)
+            const chordFreqs = [523.25, 659.25, 783.99];
+            chordFreqs.forEach(freq => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(freq, now + 0.92);
+
+                gain.gain.setValueAtTime(0.18, now + 0.92);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.92 + 0.8);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start(now + 0.92);
+                osc.stop(now + 0.92 + 0.8);
+            });
+
+        } catch (e) {
+            console.warn("빵빠레 사운드 재생 실패:", e);
+        }
+    }
 
     const wrapperEl = document.getElementById('cards-wrapper');
     const actionBtn = document.getElementById('action-btn');
@@ -783,7 +933,8 @@
         const randomTrack = Math.floor(Math.random() * 8) + 1; // 1 ~ 8 사이의 숫자를 무작위 선택
         bgAudio = new Audio(`sounds/${randomTrack}.mp3`);
         bgAudio.loop = true; // 무한 반복 재생
-        bgAudio.volume = 0.5; // 배경음 볼륨 적절히 조절 (0.0 ~ 1.0)
+        bgAudio.volume = 0.5; // 배경음 볼륨 적절히 조절
+        bgAudio.muted = isMuted; // 현재 뮤트 상태 적용
         
         bgAudio.play().catch(err => {
             console.warn("오디오 자동 재생이 제한되었거나 파일 로드 실패:", err);
@@ -803,7 +954,6 @@
         const sectionKo = document.querySelector('.section-ko');
         if (sectionKo) {
             const currentImgPath = `images/${currentImageType}/${currentImgNum}.jpg`;
-            // linear-gradient 흰색 반투명 레이어로 텍스트 독해력을 보장하고, background-size: cover로 카드를 꽉 채움
             sectionKo.style.backgroundImage = `linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)), url('${currentImgPath}')`;
         }
     }
@@ -813,12 +963,10 @@
         stopTimer();
         remainingSeconds = TOTAL_SECONDS;
 
-        // 1. 게임 시작 시 type1, type2, type3 중 무작위 하나 선택
         const types = ['type1', 'type2', 'type3'];
         currentImageType = types[Math.floor(Math.random() * types.length)];
         currentImgNum = 1;
 
-        // 2. 배경 사운드 랜덤 재생 시작
         playRandomBgSound();
         updateKoCardBackground();
         updateTimerUI();
@@ -857,21 +1005,19 @@
 
         if (trailEl) trailEl.style.width = `${progressPercent}%`;
 
-        // 남은 시간 비율 계산 (1.0 = 100%, 0.0 = 0%)
         const ratio = remainingSeconds / TOTAL_SECONDS;
         let newImgNum = 1;
 
         if (ratio > 0.75) {
-            newImgNum = 1; // 100% ~ 75% 여유
+            newImgNum = 1;
         } else if (ratio > 0.50) {
-            newImgNum = 2; // 75% ~ 50%
+            newImgNum = 2;
         } else if (ratio > 0.25) {
-            newImgNum = 3; // 50% ~ 25%
+            newImgNum = 3;
         } else {
-            newImgNum = 4; // 25% ~ 0% 긴박
+            newImgNum = 4;
         }
 
-        // 남은 시간 상태가 변경되면 한글 카드 배경 이미지 교체
         if (currentImgNum !== newImgNum) {
             currentImgNum = newImgNum;
             updateKoCardBackground();
@@ -941,7 +1087,6 @@
                 throw new Error("유효한 단어 데이터(1열 한국어, 2열 영어)가 없습니다.");
             }
 
-            // 🎲 추출된 단어를 무작위로 섞어서 저장
             originalWordList = shuffleArray(tempExtractList);
             wordList = [...originalWordList]; 
             
@@ -999,22 +1144,19 @@
         const vagueTextEl = document.getElementById('vague-btn-text');
         const actionTextEl = document.getElementById('action-btn-text');
 
-        // 버튼 색상 초기화
         vagueBtn.classList.remove('btn-state-yellow', 'btn-state-red', 'btn-state-blue');
 
-        // 1. 좌측 상태 버튼 워딩 및 배경색 할당
         if (isVague) {
             if (vagueTextEl) vagueTextEl.innerText = "등록 완료 ✓";
-            vagueBtn.classList.add('btn-state-blue'); // 파란색
+            vagueBtn.classList.add('btn-state-blue');
         } else if (!showAnswers) {
             if (vagueTextEl) vagueTextEl.innerText = "몰라요 ❓";
-            vagueBtn.classList.add('btn-state-yellow'); // 찡한 노란색
+            vagueBtn.classList.add('btn-state-yellow');
         } else {
             if (vagueTextEl) vagueTextEl.innerText = "틀렸어요 ❌";
-            vagueBtn.classList.add('btn-state-red'); // 찡한 빨간색
+            vagueBtn.classList.add('btn-state-red');
         }
 
-        // 2. 우측 다음/정답확인 버튼 워딩
         if (!showAnswers) {
             if (actionTextEl) actionTextEl.innerText = "정답 확인 👁️";
         } else {
@@ -1058,11 +1200,10 @@
 
         document.getElementById('card-progress').innerText = `${currentStartIndex + 1} / ${wordList.length}`;
         updateButtonsUI();
-        updateKoCardBackground(); // 카드 렌더링 시 투명 배경 이미지 적용
+        updateKoCardBackground();
         checkEnglishOverflow();
     }
 
-    /* 좌측 버튼 클릭 (몰라요/틀렸어요 -> 복습 리스트 등록) */
     function handleVagueAction(targetIndex) {
         if (wordList.length === 0) return;
 
@@ -1082,7 +1223,6 @@
         updateButtonsUI();
     }
 
-    /* 우측 버튼 클릭 (정답 확인 / 다음 단어) */
     function handlePrimaryAction() {
         if (wordList.length === 0) return;
 
@@ -1101,10 +1241,11 @@
         }
     }
 
-    /* 테스트 완료 시 복습 리스트 페이지 표출 */
+    /* 테스트 완료 시 복습 리스트 페이지 표출 및 빵빠레 사운드 재생 */
     function showSummaryNotes() {
         stopTimer(); 
-        stopBgSound(); // 테스트가 끝나면 배경 사운드 정지 및 리소스 해제
+        stopBgSound(); 
+        playFanfareSound(); 
         
         document.getElementById('game-area').classList.add('hidden');
         const summaryArea = document.getElementById('summary-area');
@@ -1130,23 +1271,20 @@
         summaryArea.classList.remove('hidden');
     }
 
-    /* 📷 이미지 네이티브 공유 및 클립보드 복사 핸들러 */
+    /* 📷 데스크탑 클립보드 복사 후 다운로드 폴더 저장 개편 로직 */
     async function copySummaryAsImage() {
         const tableWrapper = document.getElementById('summary-table-wrapper');
         const table = document.getElementById('summary-table');
 
         if (!tableWrapper || !table) return;
 
-        // 1. 원본 스타일 백업
         const origOverflow = tableWrapper.style.overflow;
         const origMaxHeight = tableWrapper.style.maxHeight;
         const origHeight = tableWrapper.style.height;
 
-        // 스티키 헤더 고정 해제 (캡처 중복 렌더링 방지)
         const thElements = table.querySelectorAll('th');
         thElements.forEach(th => th.style.position = 'static');
 
-        // 스크롤 전체 영역 해제
         tableWrapper.scrollTop = 0;
         tableWrapper.style.overflow = 'visible';
         tableWrapper.style.maxHeight = 'none';
@@ -1154,7 +1292,7 @@
 
         try {
             const canvas = await html2canvas(tableWrapper, {
-                scale: 2, // 고해상도
+                scale: 2, 
                 backgroundColor: '#ffffff',
                 logging: false,
                 useCORS: true,
@@ -1171,7 +1309,6 @@
                 const fileName = `복습_리스트_${new Date().toISOString().slice(0, 10)}.png`;
                 const file = new File([blob], fileName, { type: 'image/png' });
 
-                // 📱 1차: 모바일 OS 네이티브 공유창 (Web Share API - 카카오톡, 에어드랍, 사진 저장 등)
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
                     try {
                         await navigator.share({
@@ -1179,32 +1316,36 @@
                             title: '복습 리스트',
                             text: '답답 암기 게임 - 오늘의 복습 리스트입니다.'
                         });
-                        return; // 공유 성공 시 종료
+                        return; 
                     } catch (shareErr) {
-                        if (shareErr.name === 'AbortError') return; // 사용자가 공유 취소
+                        if (shareErr.name === 'AbortError') return; 
                         console.warn("Web Share 시도 취소/실패:", shareErr);
                     }
                 }
 
-                // 💻 2차: 데스크탑 클립보드 직접 복사 (Clipboard API)
+                let copiedToClipboard = false;
+
                 if (navigator.clipboard && navigator.clipboard.write) {
                     try {
                         await navigator.clipboard.write([
                             new ClipboardItem({ 'image/png': blob })
                         ]);
-                        alert("📋 복습 리스트 전체가 클립보드에 이미지로 복사되었습니다!\n원하는 곳(슬랙, 노션, 메모장 등)에 붙여넣기(Ctrl+V) 하세요.");
-                        return;
+                        copiedToClipboard = true;
                     } catch (clipErr) {
-                        console.warn("클립보드 복사 제한:", clipErr);
+                        console.warn("클립보드 복사 제한/실패:", clipErr);
                     }
                 }
 
-                // 💾 3차: 파일 자동 다운로드 (최종 백업)
                 const link = document.createElement('a');
                 link.href = canvas.toDataURL('image/png');
                 link.download = fileName;
                 link.click();
-                alert("이미지 파일로 다운로드되었습니다.");
+
+                if (copiedToClipboard) {
+                    alert("📋 클립보드에 이미지가 복사되었으며, 💾 다운로드 폴더에 저장을 완료했습니다!\n원하는 곳(슬랙, 노션 등)에 붙여넣기(Ctrl+V) 하실 수도 있습니다.");
+                } else {
+                    alert("💾 이미지 파일이 다운로드 폴더에 저장되었습니다.");
+                }
 
             }, 'image/png');
 
@@ -1212,7 +1353,6 @@
             console.error("캡처 에러:", err);
             alert("이미지 캡처 도중 오류가 발생했습니다: " + err.message);
         } finally {
-            // 원상 복구
             tableWrapper.style.overflow = origOverflow;
             tableWrapper.style.maxHeight = origMaxHeight;
             tableWrapper.style.height = origHeight;
@@ -1250,6 +1390,7 @@
         }
     });
 
+    // ⌨️ 키보드 단축키 처리 (화살표 & 'M' 음소거 키 지원)
     document.addEventListener('keydown', (event) => {
         if (document.activeElement.tagName === 'INPUT') return;
         
@@ -1258,6 +1399,8 @@
         } else if (event.key === 'ArrowDown') {
             event.preventDefault(); 
             handleVagueAction(currentStartIndex);
+        } else if (event.key === 'm' || event.key === 'M' || event.key === 'ㅡ') {
+            toggleMute();
         }
     });
 </script>
