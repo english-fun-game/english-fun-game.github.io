@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>답답 암기 게임</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- 📷 HTML을 이미지로 변환해주는 html2canvas 라이브러리 -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
         :root {
             --slack-purple: #4a154b;       
@@ -16,7 +18,11 @@
             --text-main: #1d1c1d;          
             --text-muted: #616061;         
             --border-color: #dddddd;
-            --amber-warn: #ecb22e;         
+            
+            /* 버튼 전용 컬러스킴 */
+            --btn-yellow: #f59e0b; /* 몰라요: 찡한 노란색 */
+            --btn-red: #dc2626;    /* 틀렸어요: 찡한 빨간색 */
+            --btn-blue: #2563eb;   /* 등록완료: 선명한 파란색 */
         }
 
         body {
@@ -182,7 +188,7 @@
             border: 1px solid var(--border-color);
             border-radius: 10px;
             padding: 12px 16px;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             flex-shrink: 0;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
             transition: all 0.3s ease;
@@ -224,22 +230,22 @@
             border: 1px solid var(--border-color);
         }
 
-        /* 데스크톱: 프로그레스바 트랙 + 다음 버튼 가로 배치 */
+        /* 프로그레스바 트랙 */
         .nyan-controls-row {
             display: flex;
             align-items: center;
-            gap: 16px;
             width: 100%;
         }
 
         .nyan-track {
             position: relative;
-            flex: 1;
+            width: 100%;
             height: 20px;
             background-color: #eef0f1;
             border-radius: 10px;
             overflow: visible;
             border: 1px solid #e0e0e0;
+            box-sizing: border-box;
         }
 
         .nyan-trail {
@@ -294,38 +300,103 @@
             to { box-shadow: 0 0 10px rgba(255, 75, 75, 0.6); }
         }
 
-        /* 데스크톱 상단 우측 다음 버튼 스타일 */
-        .header-action-btn {
-            width: 200px;
-            height: 42px;
-            padding: 0 12px;
-            background-color: var(--slack-purple);
+        /* 하단 액션 버튼 영역 (각 정확히 50%씩 반반 차지) */
+        .bottom-action-area {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            flex-shrink: 0;
+            display: flex;
+            gap: 10px;
+        }
+
+        /* 좌측 모르겠어요/틀렸어요/등록완료 버튼 */
+        .bottom-vague-btn {
+            flex: 1;
+            width: 50%;
+            height: 52px;
+            padding: 0 8px;
             color: white;
             border: none;
-            border-radius: 6px;
-            font-size: 15px;
-            font-weight: 700;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 800;
             cursor: pointer;
             box-sizing: border-box;
-            flex-shrink: 0;
-            transition: background-color 0.15s ease;
+            transition: all 0.15s ease;
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+            text-align: center;
         }
-        .header-action-btn:hover {
+
+        /* 상태별 색상 제어 클래스 */
+        .bottom-vague-btn.btn-state-yellow {
+            background-color: var(--btn-yellow);
+            color: #ffffff;
+            box-shadow: 0 3px 8px rgba(245, 158, 11, 0.3);
+        }
+        .bottom-vague-btn.btn-state-yellow:hover {
+            background-color: #d97706;
+        }
+
+        .bottom-vague-btn.btn-state-red {
+            background-color: var(--btn-red);
+            color: #ffffff;
+            box-shadow: 0 3px 8px rgba(220, 38, 38, 0.3);
+        }
+        .bottom-vague-btn.btn-state-red:hover {
+            background-color: #b91c1c;
+        }
+
+        .bottom-vague-btn.btn-state-blue {
+            background-color: var(--btn-blue);
+            color: #ffffff;
+            box-shadow: 0 3px 8px rgba(37, 99, 235, 0.3);
+        }
+        .bottom-vague-btn.btn-state-blue:hover {
+            background-color: #1d4ed8;
+        }
+
+        /* 우측 다음/정답 확인 버튼 */
+        .bottom-primary-btn {
+            flex: 1;
+            width: 50%;
+            height: 52px;
+            padding: 0 8px;
+            background-color: var(--slack-purple);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            box-sizing: border-box;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+        .bottom-primary-btn:hover {
             background-color: var(--slack-aubergine);
+        }
+
+        .bottom-vague-btn:active, .bottom-primary-btn:active {
+            transform: translateY(1px);
         }
 
         /* 카드 그리드 & 카드 높이 설정 */
         .cards-grid {
-            display: grid;
-            grid-template-columns: 1fr; 
+            display: flex;
+            flex-direction: column;
             width: 100%;
             max-width: 1200px;
-            margin: 0 auto 20px auto; 
-            flex-shrink: 0;
-            height: 590px;
+            margin: 0 auto 12px auto; 
+            flex: 1;
+            min-height: 0;
         }
 
         .card {
@@ -337,8 +408,9 @@
             box-sizing: border-box;
             overflow: hidden;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-            height: 590px; 
+            height: 100%;
             width: 100%;
+            flex: 1;
 
             -webkit-user-select: none;
             -moz-user-select: none;
@@ -351,7 +423,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 32px 36px; 
+            justify-content: center;
+            padding: 24px 32px; 
             overflow-y: auto;       
             min-height: 0;          
             box-sizing: border-box;
@@ -390,7 +463,7 @@
             font-weight: 700;
         }
 
-        /* 영어 카드 스크롤 발생 시 12px 축소 클래스 */
+        /* 영어 카드 스크롤 발생 시 폰트 축소 */
         .card-word.font-small-12 {
             font-size: 14px !important;
             line-height: 1.45 !important;
@@ -416,27 +489,6 @@
             display: none;
         }
 
-        .vague-btn {
-            display: inline-block;
-            margin-top: 16px;
-            padding: 12px 28px; 
-            background-color: #ffffff;
-            color: #d08700;
-            border: 1px solid var(--amber-warn);
-            border-radius: 6px;
-            font-size: 15px; 
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.1s ease;
-            box-shadow: 0 2px 4px rgba(236, 178, 46, 0.1);
-        }
-        .vague-btn:hover {
-            background-color: #fff9eb;
-        }
-        .show-answers .section-en .vague-btn {
-            display: none !important;
-        }
-
         .card-section::-webkit-scrollbar, .table-wrapper::-webkit-scrollbar {
             width: 6px;
         }
@@ -445,30 +497,36 @@
             border-radius: 4px;
         }
 
-        /* 결과 요약 페이지용 버튼 컨트롤 영역 */
-        .controls {
-            width: 100%;
-            flex-shrink: 0;
-            display: flex;
-            gap: 12px;
-        }
-
-        /* 결과 테이블 디자인 */
+        /* 결과 요약 페이지 컨테이너 */
         #summary-area {
             flex: 1;
             display: flex;
             flex-direction: column;
             min-height: 0;
+            height: 100%;
             justify-content: space-between;
+        }
+
+        #capture-target {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            padding: 12px;
+            background: #ffffff;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 12px;
+            box-sizing: border-box;
         }
 
         .table-wrapper {
             flex: 1;
             overflow-y: auto;
+            min-height: 0;
             border: 1px solid var(--border-color);
             background: #ffffff;
-            border-radius: 8px;
-            margin-bottom: 16px;
+            border-radius: 6px;
         }
 
         table {
@@ -498,6 +556,14 @@
             background-color: #fcfcfc;
         }
 
+        /* 결과 요약 페이지용 버튼 컨트롤 영역 */
+        .controls {
+            width: 100%;
+            flex-shrink: 0;
+            display: flex;
+            gap: 12px;
+        }
+
         .hidden {
             display: none !important;
         }
@@ -505,7 +571,7 @@
         /* 📱 모바일 UI 전용 미디어 쿼리 (650px 이하) */
         @media (max-width: 650px) {
             body {
-                padding: 12px 10px;
+                padding: 10px 8px;
             }
 
             #setup-area {
@@ -513,55 +579,51 @@
                 gap: 12px;
             }
 
-            .nyan-controls-row {
-                flex-direction: column;
-                gap: 10px;
-            }
-
-            .header-action-btn {
-                width: 100%;
-                height: 48px;
-                font-size: 16px;
+            .shortcut-text {
+                display: none !important;
             }
 
             .cards-grid {
-                margin-bottom: 20px !important; 
-                height: 420px !important;
+                margin-bottom: 8px !important; 
+                flex: 1 !important;
+                height: 100% !important;
             }
 
             #game-area .card {
                 flex-direction: column !important;
-                height: 420px !important; 
+                height: 100% !important;
+                flex: 1 !important;
             }
 
             #game-area .section-ko {
                 border-right: none !important;
                 border-bottom: 1px solid var(--border-color) !important;
                 flex: 1 !important;
+                padding: 12px 10px !important;
             }
 
             #game-area .section-en {
                 flex: 1 !important;
-            }
-
-            #game-area .card-section {
-                padding: 18px 15px !important; 
+                padding: 12px 10px !important;
             }
 
             #game-area .card-word, #game-area .placeholder {
-                font-size: 22px; 
+                font-size: 24px !important;
             }
 
             #game-area .card-word.long-text {
-                font-size: 14px !important;
-                line-height: 1.45 !important;
+                font-size: 18px !important;
+                line-height: 1.5 !important;
             }
 
-            .vague-btn {
-                padding: 12px 32px;
-                font-size: 15px;
-                margin-top: 12px;
-                width: 90%;
+            .bottom-action-area {
+                gap: 8px;
+            }
+
+            .bottom-vague-btn, .bottom-primary-btn {
+                height: 50px;
+                font-size: 18px !important;
+                padding: 0 4px;
             }
 
             #summary-area .controls {
@@ -570,15 +632,15 @@
             }
 
             #summary-area .base-btn {
-                padding: 18px !important; 
-                font-size: 18px;          
+                padding: 15px !important; 
+                font-size: 16px;          
                 border-radius: 6px;
                 width: 100%;
             }
 
             th, td {
                 padding: 12px 14px;
-                font-size: 13px;
+                font-size: 14px;
             }
         }
     </style>
@@ -602,7 +664,7 @@
 
     <!-- 게임 시작 화면 -->
     <div id="game-area" class="hidden">
-        <!-- 🐱🌈 냥캣 제한시간 타이머 & 액션 버튼 상단 통합 바 -->
+        <!-- 🐱🌈 냥캣 제한시간 타이머 바 -->
         <div id="nyan-timer-container" class="nyan-timer-box">
             <div class="nyan-timer-header">
                 <span class="nyan-title">🐱🌈 제한시간 타이머 <span class="nyan-time" id="nyan-timer-text">⏱️ 07:00</span></span>
@@ -615,37 +677,49 @@
                     </div>
                     <span class="nyan-star">⭐</span>
                 </div>
-                <button id="action-btn" class="header-action-btn" onclick="handlePrimaryAction()">정답 확인 👁️</button>
             </div>
         </div>
 
         <!-- 카드 그리드 -->
         <div class="cards-grid" id="cards-wrapper">
         </div>
+
+        <!-- 하단 배치 액션 버튼 (반반 차지) -->
+        <div class="bottom-action-area">
+            <button id="vague-btn" class="bottom-vague-btn" onclick="handleVagueAction(currentStartIndex)">
+                <span id="vague-btn-text">몰라요 ❓</span> <span class="shortcut-text">(↓)</span>
+            </button>
+            <button id="action-btn" class="bottom-primary-btn" onclick="handlePrimaryAction()">
+                <span id="action-btn-text">정답 확인 👁️</span> <span class="shortcut-text">(→)</span>
+            </button>
+        </div>
     </div>
 
-    <!-- 요약 노트 화면 -->
+    <!-- 복습 리스트 화면 -->
     <div id="summary-area" class="hidden">
-        <div class="nyan-timer-header" style="margin-bottom: 12px;">
-            <span style="font-weight: 800; color: var(--slack-purple); font-size: 16px;">📋 헷갈림 표현 요약 노트</span>
-            <span class="progress" id="summary-count" style="background: rgba(236, 178, 46, 0.15); color: #d08700;">공부할 단어: 0개</span>
-        </div>
-        
-        <div class="table-wrapper">
-            <table id="summary-table">
-                <thead>
-                    <tr>
-                        <th style="width: 45%;">KOREAN</th>
-                        <th style="width: 55%;">ENGLISH</th>
-                    </tr>
-                </thead>
-                <tbody id="summary-tbody">
-                </tbody>
-            </table>
+        <div id="capture-target">
+            <div class="nyan-timer-header" style="margin-bottom: 10px; flex-shrink: 0;">
+                <span style="font-weight: 800; color: var(--slack-purple); font-size: 17px;">📋 복습 리스트</span>
+                <span class="progress" id="summary-count" style="background: rgba(236, 178, 46, 0.15); color: #d08700;">복습할 단어: 0개</span>
+            </div>
+            
+            <div class="table-wrapper" id="summary-table-wrapper">
+                <table id="summary-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 45%;">KOREAN</th>
+                            <th style="width: 55%;">ENGLISH</th>
+                        </tr>
+                    </thead>
+                    <tbody id="summary-tbody">
+                    </tbody>
+                </table>
+            </div>
         </div>
         
         <div class="controls">
-            <button class="base-btn" style="margin: 0; background-color: var(--slack-blue);" onclick="reviewVagueWords()">헷갈림 표현만 다시 복습 🔁</button>
+            <button class="base-btn" style="margin: 0; background-color: #2b8a3e;" onclick="copySummaryAsImage()">📷 이미지 공유 / 복사</button>
+            <button class="base-btn" style="margin: 0; background-color: var(--slack-blue);" onclick="reviewVagueWords()">복습 리스트만 다시 복습 🔁</button>
             <button class="base-btn" style="margin: 0; background-color: var(--slack-purple);" onclick="restartFullGame()">전체 다시 복습 🔄</button>
         </div>
     </div>
@@ -666,6 +740,7 @@
 
     const wrapperEl = document.getElementById('cards-wrapper');
     const actionBtn = document.getElementById('action-btn');
+    const vagueBtn = document.getElementById('vague-btn');
     const statusEl = document.getElementById('status');
 
     /* 🎲 배열을 무작위로 섞는 피셔-예이츠 셔플 함수 */
@@ -748,7 +823,7 @@
         }
 
         if (wordList.length > 0) {
-            if (!confirm("시트를 최신화하면 기존의 헷갈림 체크 데이터가 모두 초기화됩니다. 진행하시겠습니까?")) {
+            if (!confirm("시트를 최신화하면 기존의 복습 리스트 데이터가 모두 초기화됩니다. 진행하시겠습니까?")) {
                 return; 
             }
         }
@@ -814,7 +889,7 @@
         }
     }
 
-    /* 영어 스크롤 발생 시 폰트 12px 축소 감지 로직 */
+    /* 영어 스크롤 발생 시 폰트 축소 감지 로직 */
     function checkEnglishOverflow() {
         const sectionEn = document.querySelector('.section-en');
         const wordEn = sectionEn ? sectionEn.querySelector('.card-word') : null;
@@ -838,13 +913,45 @@
         }
     }
 
+    /* 하단 버튼 텍스트 및 시각적 색상 피드백 갱신 */
+    function updateButtonsUI() {
+        if (wordList.length === 0) return;
+
+        const targetItem = wordList[currentStartIndex];
+        const isVague = vagueWords.some(item => item.ko === targetItem.ko && item.en === targetItem.en);
+
+        const vagueTextEl = document.getElementById('vague-btn-text');
+        const actionTextEl = document.getElementById('action-btn-text');
+
+        // 버튼 색상 초기화
+        vagueBtn.classList.remove('btn-state-yellow', 'btn-state-red', 'btn-state-blue');
+
+        // 1. 좌측 상태 버튼 워딩 및 배경색 할당
+        if (isVague) {
+            if (vagueTextEl) vagueTextEl.innerText = "등록 완료 ✓";
+            vagueBtn.classList.add('btn-state-blue'); // 파란색
+        } else if (!showAnswers) {
+            if (vagueTextEl) vagueTextEl.innerText = "몰라요 ❓";
+            vagueBtn.classList.add('btn-state-yellow'); // 찡한 노란색
+        } else {
+            if (vagueTextEl) vagueTextEl.innerText = "틀렸어요 ❌";
+            vagueBtn.classList.add('btn-state-red'); // 찡한 빨간색
+        }
+
+        // 2. 우측 다음/정답확인 버튼 워딩
+        if (!showAnswers) {
+            if (actionTextEl) actionTextEl.innerText = "정답 확인 👁️";
+        } else {
+            if (actionTextEl) actionTextEl.innerText = "다음 단어 ▶";
+        }
+    }
+
     function renderCards() {
         if (wordList.length === 0) return;
         
         wrapperEl.innerHTML = '';
         showAnswers = false;
         wrapperEl.classList.remove('show-answers');
-        actionBtn.innerText = "정답 확인 👁️"; 
 
         const targetIndex = currentStartIndex;
         
@@ -854,9 +961,6 @@
             const plainKoLength = item.ko.replace(/<[^>]*>/g, '').length;
             const isLongText = plainKoLength >= 45;
             const wordClass = isLongText ? 'card-word long-text' : 'card-word';
-
-            const isMobile = window.innerWidth <= 650;
-            const vagueBtnLabel = isMobile ? '헷갈림 체크 ❓' : '헷갈림 체크 ❓ (키보드 ↓ 방향키)';
 
             const cardHtml = `
                 <div class="card">
@@ -868,7 +972,6 @@
                     <div class="card-section section-en">
                         <div class="card-word-wrapper">
                             <div class="placeholder">?</div>
-                            <button class="vague-btn" onclick="handleVagueAction(${targetIndex}); event.stopPropagation();">${vagueBtnLabel}</button>
                             <div class="${wordClass}">${item.en}</div>
                         </div>
                     </div>
@@ -878,11 +981,13 @@
         }
 
         document.getElementById('card-progress').innerText = `${currentStartIndex + 1} / ${wordList.length}`;
+        updateButtonsUI();
         checkEnglishOverflow();
     }
 
+    /* 좌측 버튼 클릭 (몰라요/틀렸어요 -> 복습 리스트 등록) */
     function handleVagueAction(targetIndex) {
-        if (wordList.length === 0 || showAnswers) return;
+        if (wordList.length === 0) return;
 
         if (targetIndex < wordList.length) {
             const targetItem = wordList[targetIndex];
@@ -891,19 +996,23 @@
             }
         }
 
-        showAnswers = true;
-        wrapperEl.classList.add('show-answers');
-        actionBtn.innerText = "다음 세트 ▶";
-        checkEnglishOverflow();
+        if (!showAnswers) {
+            showAnswers = true;
+            wrapperEl.classList.add('show-answers');
+            checkEnglishOverflow();
+        }
+
+        updateButtonsUI();
     }
 
+    /* 우측 버튼 클릭 (정답 확인 / 다음 단어) */
     function handlePrimaryAction() {
         if (wordList.length === 0) return;
 
         if (!showAnswers) {
             showAnswers = true;
             wrapperEl.classList.add('show-answers');
-            actionBtn.innerText = "다음 세트 ▶";
+            updateButtonsUI();
             checkEnglishOverflow();
         } else {
             if (currentStartIndex + cardsPerPage < wordList.length) {
@@ -915,6 +1024,7 @@
         }
     }
 
+    /* 테스트 완료 시 복습 리스트 페이지 표출 */
     function showSummaryNotes() {
         stopTimer(); 
         document.getElementById('game-area').classList.add('hidden');
@@ -922,10 +1032,10 @@
         const tbody = document.getElementById('summary-tbody');
         
         tbody.innerHTML = '';
-        document.getElementById('summary-count').innerText = `공부할 단어: ${vagueWords.length}개`;
+        document.getElementById('summary-count').innerText = `복습할 단어: ${vagueWords.length}개`;
 
         if (vagueWords.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="2" style="text-align:center; color:var(--slack-blue); font-weight:700; padding:40px 0;">🎉 완벽합니다! 체크한 단어가 없습니다.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="2" style="text-align:center; color:var(--slack-blue); font-weight:700; padding:40px 0;">🎉 완벽합니다! 복습할 단어가 없습니다.</td></tr>`;
         } else {
             vagueWords.forEach(item => {
                 const rowHtml = `
@@ -941,12 +1051,101 @@
         summaryArea.classList.remove('hidden');
     }
 
+    /* 📷 이미지 네이티브 공유 및 클립보드 복사 핸들러 */
+    async function copySummaryAsImage() {
+        const tableWrapper = document.getElementById('summary-table-wrapper');
+        const table = document.getElementById('summary-table');
+
+        if (!tableWrapper || !table) return;
+
+        // 1. 원본 스타일 백업
+        const origOverflow = tableWrapper.style.overflow;
+        const origMaxHeight = tableWrapper.style.maxHeight;
+        const origHeight = tableWrapper.style.height;
+
+        // 스티키 헤더 고정 해제 (캡처 중복 렌더링 방지)
+        const thElements = table.querySelectorAll('th');
+        thElements.forEach(th => th.style.position = 'static');
+
+        // 스크롤 전체 영역 해제
+        tableWrapper.scrollTop = 0;
+        tableWrapper.style.overflow = 'visible';
+        tableWrapper.style.maxHeight = 'none';
+        tableWrapper.style.height = table.scrollHeight + 'px';
+
+        try {
+            const canvas = await html2canvas(tableWrapper, {
+                scale: 2, // 고해상도
+                backgroundColor: '#ffffff',
+                logging: false,
+                useCORS: true,
+                height: tableWrapper.scrollHeight,
+                windowHeight: tableWrapper.scrollHeight + 200
+            });
+
+            canvas.toBlob(async (blob) => {
+                if (!blob) {
+                    alert("이미지 생성에 실패했습니다.");
+                    return;
+                }
+
+                const fileName = `복습_리스트_${new Date().toISOString().slice(0, 10)}.png`;
+                const file = new File([blob], fileName, { type: 'image/png' });
+
+                // 📱 1차: 모바일 OS 네이티브 공유창 (Web Share API - 카카오톡, 에어드랍, 사진 저장 등)
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    try {
+                        await navigator.share({
+                            files: [file],
+                            title: '복습 리스트',
+                            text: '답답 암기 게임 - 오늘의 복습 리스트입니다.'
+                        });
+                        return; // 공유 성공 시 종료
+                    } catch (shareErr) {
+                        if (shareErr.name === 'AbortError') return; // 사용자가 공유 취소
+                        console.warn("Web Share 시도 취소/실패:", shareErr);
+                    }
+                }
+
+                // 💻 2차: 데스크탑 클립보드 직접 복사 (Clipboard API)
+                if (navigator.clipboard && navigator.clipboard.write) {
+                    try {
+                        await navigator.clipboard.write([
+                            new ClipboardItem({ 'image/png': blob })
+                        ]);
+                        alert("📋 복습 리스트 전체가 클립보드에 이미지로 복사되었습니다!\n원하는 곳(슬랙, 노션, 메모장 등)에 붙여넣기(Ctrl+V) 하세요.");
+                        return;
+                    } catch (clipErr) {
+                        console.warn("클립보드 복사 제한:", clipErr);
+                    }
+                }
+
+                // 💾 3차: 파일 자동 다운로드 (최종 백업)
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/png');
+                link.download = fileName;
+                link.click();
+                alert("이미지 파일로 다운로드되었습니다.");
+
+            }, 'image/png');
+
+        } catch (err) {
+            console.error("캡처 에러:", err);
+            alert("이미지 캡처 도중 오류가 발생했습니다: " + err.message);
+        } finally {
+            // 원상 복구
+            tableWrapper.style.overflow = origOverflow;
+            tableWrapper.style.maxHeight = origMaxHeight;
+            tableWrapper.style.height = origHeight;
+            thElements.forEach(th => th.style.position = '');
+        }
+    }
+
     function reviewVagueWords() {
         if (vagueWords.length === 0) {
-            alert("복습할 헷갈림 표현이 존재하지 않습니다.");
+            alert("복습할 단어가 존재하지 않습니다.");
             return;
         }
-        // 🎲 헷갈림 단어도 무작위로 재배치
         wordList = shuffleArray(vagueWords); 
         vagueWords = []; 
         currentStartIndex = 0;
@@ -957,7 +1156,6 @@
     }
 
     function restartFullGame() {
-        // 🎲 전체 다시 복습 시 순서 재배치
         wordList = shuffleArray(originalWordList); 
         vagueWords = []; 
         currentStartIndex = 0;
