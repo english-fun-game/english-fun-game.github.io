@@ -430,10 +430,17 @@
             box-sizing: border-box;
         }
 
+        /* 🖼️ 한글 카드 배경 설정: 모바일/데스크탑 모두 꽉 채움 (cover) */
         .section-ko {
             flex: 1;
             border-right: 1px solid var(--border-color);
             border-bottom: none;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: cover; /* 카드 전체 영역에 여백 없이 꽉 채움 */
+            transition: background-image 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
         .section-en {
@@ -445,6 +452,7 @@
             margin: auto 0; 
             width: 100%;
             text-align: center;
+            z-index: 1; /* 텍스트가 배경 이미지보다 위에 배치되도록 보장 */
         }
 
         .card-word {
@@ -600,6 +608,7 @@
                 border-bottom: 1px solid var(--border-color) !important;
                 flex: 1 !important;
                 padding: 12px 10px !important;
+                background-size: cover !important; /* 모바일 단말기에서도 꽉 차게 조율 */
             }
 
             #game-area .section-en {
@@ -659,6 +668,7 @@
         <div class="quick-btn-group">
             <button class="quick-btn" onclick="loadShortcutUrl('https://docs.google.com/spreadsheets/d/1m7KXifCB6txkKEOHqApMWOR4MQwqb6Ji1Dm-hRJYzLc/edit?usp=sharing')">🗣️ 스피킹 단어 시험 바로가기</button>
             <button class="quick-btn" onclick="loadShortcutUrl('https://docs.google.com/spreadsheets/d/1UYTEv88wdKsSS2kkB-UylHAfQAlV6yrvjwVNecG6m64/edit?usp=sharing')">✍️ 라이팅 단어 시험 바로가기</button>
+            <button class="quick-btn" onclick="loadShortcutUrl('https://docs.google.com/spreadsheets/d/1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U/edit?usp=sharing')">🍀 초록이 단어 시험 바로가기</button>
         </div>
     </div>
 
@@ -733,10 +743,15 @@
     let showAnswers = false;   
     const cardsPerPage = 1; 
     
-    // 타이머 변수
-    const TOTAL_SECONDS = 420; // 7분 = 420초
+    // 타이머 및 이미지 제어 변수
+    const TOTAL_SECONDS = 300; // 7분 = 420초
     let remainingSeconds = TOTAL_SECONDS;
     let timerInterval = null;
+    let currentImageType = 'type1'; // type1, type2, type3 중 무작위 선택
+    let currentImgNum = 1;
+
+    // 🎵 사운드 제어 변수 (sounds/1.mp3 ~ sounds/8.mp3)
+    let bgAudio = null;
 
     const wrapperEl = document.getElementById('cards-wrapper');
     const actionBtn = document.getElementById('action-btn');
@@ -761,10 +776,51 @@
         return text;
     }
 
+    /* 🎵 배경 음악 플레이어 (sounds/1.mp3 ~ 8.mp3 무작위 선곡 및 반복 재생) */
+    function playRandomBgSound() {
+        stopBgSound(); // 기존 오디오 리소스 해제
+
+        const randomTrack = Math.floor(Math.random() * 8) + 1; // 1 ~ 8 사이의 숫자를 무작위 선택
+        bgAudio = new Audio(`sounds/${randomTrack}.mp3`);
+        bgAudio.loop = true; // 무한 반복 재생
+        bgAudio.volume = 0.5; // 배경음 볼륨 적절히 조절 (0.0 ~ 1.0)
+        
+        bgAudio.play().catch(err => {
+            console.warn("오디오 자동 재생이 제한되었거나 파일 로드 실패:", err);
+        });
+    }
+
+    function stopBgSound() {
+        if (bgAudio) {
+            bgAudio.pause();
+            bgAudio.currentTime = 0;
+            bgAudio = null; // 메모리 할당 해제
+        }
+    }
+
+    /* 🖼️ 한글 카드 배경을 투명 레이어 + 배경으로 설정하는 함수 */
+    function updateKoCardBackground() {
+        const sectionKo = document.querySelector('.section-ko');
+        if (sectionKo) {
+            const currentImgPath = `images/${currentImageType}/${currentImgNum}.jpg`;
+            // linear-gradient 흰색 반투명 레이어로 텍스트 독해력을 보장하고, background-size: cover로 카드를 꽉 채움
+            sectionKo.style.backgroundImage = `linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)), url('${currentImgPath}')`;
+        }
+    }
+
     /* ⏱️ 냥캣 타이머 로직 */
     function startTimer() {
         stopTimer();
         remainingSeconds = TOTAL_SECONDS;
+
+        // 1. 게임 시작 시 type1, type2, type3 중 무작위 하나 선택
+        const types = ['type1', 'type2', 'type3'];
+        currentImageType = types[Math.floor(Math.random() * types.length)];
+        currentImgNum = 1;
+
+        // 2. 배경 사운드 랜덤 재생 시작
+        playRandomBgSound();
+        updateKoCardBackground();
         updateTimerUI();
 
         timerInterval = setInterval(() => {
@@ -800,6 +856,26 @@
         const progressPercent = Math.min(100, Math.max(0, (elapsed / TOTAL_SECONDS) * 100));
 
         if (trailEl) trailEl.style.width = `${progressPercent}%`;
+
+        // 남은 시간 비율 계산 (1.0 = 100%, 0.0 = 0%)
+        const ratio = remainingSeconds / TOTAL_SECONDS;
+        let newImgNum = 1;
+
+        if (ratio > 0.75) {
+            newImgNum = 1; // 100% ~ 75% 여유
+        } else if (ratio > 0.50) {
+            newImgNum = 2; // 75% ~ 50%
+        } else if (ratio > 0.25) {
+            newImgNum = 3; // 50% ~ 25%
+        } else {
+            newImgNum = 4; // 25% ~ 0% 긴박
+        }
+
+        // 남은 시간 상태가 변경되면 한글 카드 배경 이미지 교체
+        if (currentImgNum !== newImgNum) {
+            currentImgNum = newImgNum;
+            updateKoCardBackground();
+        }
 
         if (remainingSeconds <= 60 && remainingSeconds > 0) {
             containerEl.classList.add('warning');
@@ -982,6 +1058,7 @@
 
         document.getElementById('card-progress').innerText = `${currentStartIndex + 1} / ${wordList.length}`;
         updateButtonsUI();
+        updateKoCardBackground(); // 카드 렌더링 시 투명 배경 이미지 적용
         checkEnglishOverflow();
     }
 
@@ -1027,6 +1104,8 @@
     /* 테스트 완료 시 복습 리스트 페이지 표출 */
     function showSummaryNotes() {
         stopTimer(); 
+        stopBgSound(); // 테스트가 끝나면 배경 사운드 정지 및 리소스 해제
+        
         document.getElementById('game-area').classList.add('hidden');
         const summaryArea = document.getElementById('summary-area');
         const tbody = document.getElementById('summary-tbody');
