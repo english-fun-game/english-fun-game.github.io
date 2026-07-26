@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
+<!DOCTYPE html><html lang="ko"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>답답 암기 게임</title>
@@ -491,7 +489,7 @@
         }
 
         .card-word {
-            font-size: 26px; 
+            font-size: 40px; /* 기존 26px -> 30px (+4px) */
             font-weight: 800;
             color: var(--text-main);
             width: 100%;
@@ -501,7 +499,7 @@
         }
 
         .card-word.long-text {
-            font-size: 18px; 
+            font-size: 22px; /* 기존 18px -> 22px (+4px) */
             line-height: 1.55;
             font-weight: 700;
         }
@@ -510,6 +508,10 @@
         .card-word.font-small-12 {
             font-size: 14px !important;
             line-height: 1.45 !important;
+        }
+        
+        .section-ko .card-word {
+            font-size: 50px; /* 기존 26px -> 30px (+4px) */
         }
 
         .section-en .card-word {
@@ -524,7 +526,7 @@
         .placeholder {
             display: block;
             color: #ccd5e0;
-            font-size: 28px;
+            font-size: 32px; /* 기존 28px -> 32px (+4px) */
             font-weight: bold;
         }
 
@@ -652,11 +654,11 @@
             }
 
             #game-area .card-word, #game-area .placeholder {
-                font-size: 24px !important;
+                font-size: 34px !important; /* 기존 24px -> 28px (+4px) */
             }
 
             #game-area .card-word.long-text {
-                font-size: 18px !important;
+                font-size: 22px !important; /* 기존 18px -> 22px (+4px) */
                 line-height: 1.5 !important;
             }
 
@@ -687,11 +689,7 @@
                 font-size: 14px;
             }
         }
-    </style>
-</head>
-<body>
-
-<div class="container">
+    </style></head><body><div class="container">
     <!-- 초기 설정 화면 -->
     <div id="setup-area">
         <h1>📝 답답 암기 게임</h1>
@@ -773,10 +771,7 @@
             <button class="base-btn" style="margin: 0; background-color: var(--slack-blue);" onclick="reviewVagueWords()">복습 리스트만 다시 복습 🔁</button>
             <button class="base-btn" style="margin: 0; background-color: var(--slack-purple);" onclick="restartFullGame()">전체 다시 복습 🔄</button>
         </div>
-    </div>
-</div>
-
-<script>
+    </div></div><script>
     let originalWordList = []; 
     let wordList = [];
     let vagueWords = [];       
@@ -1402,7 +1397,4 @@
         } else if (event.key === 'm' || event.key === 'M' || event.key === 'ㅡ') {
             toggleMute();
         }
-    });
-</script>
-</body>
-</html>
+    });</script></body></html>
