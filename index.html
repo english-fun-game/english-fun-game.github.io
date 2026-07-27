@@ -146,6 +146,7 @@
         .pwa-review-btn {
             width: 100%;
             padding: 16px;
+            margin-top: 16px;
             background-color: #2563eb;
             color: white;
             border: none;
@@ -391,7 +392,7 @@
             gap: 10px;
         }
 
-        /* 좌측 모르겠어요/틀렸어요/등록완료 버튼 */
+        /* 좌측 모르겠어요/틀렸어요/등록완료/제거하기 버튼 */
         .bottom-vague-btn {
             flex: 1;
             width: 50%;
@@ -833,9 +834,6 @@
         <h1>📝 답답 암기 게임</h1>
         <input type="text" id="excel-url" placeholder="공개된 엑셀 파일 또는 구글 시트 URL 입력" />
         <button class="base-btn" onclick="loadExcelFromUrl()">불러오기</button>
-        
-        <!-- 📱 PWA 전용 무기한 누적 복습 버튼 (PWA 환경에서만 표출) -->
-        <button id="pwa-review-btn" class="pwa-review-btn hidden" onclick="startPWAReview()">🔥 저장된 헷갈린 단어 복습 (0개)</button>
 
         <div id="status" class="status-msg"></div>
 
@@ -843,6 +841,9 @@
             <button class="quick-btn" onclick="loadShortcutUrl('https://docs.google.com/spreadsheets/d/1m7KXifCB6txkKEOHqApMWOR4MQwqb6Ji1Dm-hRJYzLc/edit?usp=sharing')">🗣️ 스피킹 단어 시험 바로가기</button>
             <button class="quick-btn" onclick="loadShortcutUrl('https://docs.google.com/spreadsheets/d/1UYTEv88wdKsSS2kkB-UylHAfQAlV6yrvjwVNecG6m64/edit?usp=sharing')">✍️ 라이팅 단어 시험 바로가기</button>
             <button class="quick-btn" onclick="loadShortcutUrl('https://docs.google.com/spreadsheets/d/1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U/edit?usp=sharing')">🍀 초록이 단어 시험 바로가기</button>
+            
+            <!-- 📱 PWA 전용 무기한 누적 복습 버튼 (초록이 바로가기 밑 패딩 배치) -->
+            <button id="pwa-review-btn" class="pwa-review-btn hidden" onclick="startPWAReview()">🔥 저장된 헷갈린 단어 복습 (0개)</button>
         </div>
     </div>
 
@@ -956,8 +957,6 @@
             navigator.storage.persist().then(persistent => {
                 if (persistent) {
                     console.log("🔒 PWA 영구 저장 권한이 성공적으로 확보되었습니다.");
-                } else {
-                    console.log("ℹ️ 영구 저장 권한이 일반 보존 모드로 실행됩니다.");
                 }
             }).catch(err => {
                 console.warn("Storage persist error:", err);
@@ -981,7 +980,6 @@
         if (!isPWA() || !item) return;
 
         const savedList = getPWASavedWords();
-        // 중복 방지 (ko 및 en 기준)
         const isExists = savedList.some(w => w.ko === item.ko && w.en === item.en);
         if (!isExists) {
             savedList.push(item);
@@ -991,6 +989,20 @@
             } catch (e) {
                 console.warn("PWA 영구 저장 오류:", e);
             }
+        }
+    }
+
+    /* 📱 PWA 저장소에서 특정 단어 제거 */
+    function removeWordFromPWAStorage(item) {
+        if (!item) return;
+
+        let savedList = getPWASavedWords();
+        savedList = savedList.filter(w => !(w.ko === item.ko && w.en === item.en));
+        try {
+            localStorage.setItem(PWA_VAGUE_STORAGE_KEY, JSON.stringify(savedList));
+            updatePWAReviewButtonUI();
+        } catch (e) {
+            console.warn("PWA 영구 삭제 오류:", e);
         }
     }
 
@@ -1092,7 +1104,7 @@
                 const exUtterance = new SpeechSynthesisUtterance(cleanExEn);
                 exUtterance.lang = 'en-US';
                 exUtterance.rate = 0.85;
-                window.speechSynthesis.speak(exUtterance); // Web Speech API에 의해 단어 종료 직후 바로 재생됨
+                window.speechSynthesis.speak(exUtterance);
             }
         } catch (e) {
             console.warn("TTS 발음 재생 실패:", e);
@@ -1485,22 +1497,37 @@
         if (wordList.length === 0) return;
 
         const targetItem = wordList[currentStartIndex];
-        const isVague = vagueWords.some(item => item.ko === targetItem.ko && item.en === targetItem.en);
-
         const vagueTextEl = document.getElementById('vague-btn-text');
         const actionTextEl = document.getElementById('action-btn-text');
 
         vagueBtn.classList.remove('btn-state-yellow', 'btn-state-red', 'btn-state-blue');
 
-        if (isVague) {
-            if (vagueTextEl) vagueTextEl.innerText = "등록 완료 ✓";
-            vagueBtn.classList.add('btn-state-blue');
-        } else if (!showAnswers) {
-            if (vagueTextEl) vagueTextEl.innerText = "몰라요 ❓";
-            vagueBtn.classList.add('btn-state-yellow');
+        /* 📌 PWA 저장 단어 복습 모드인 경우: "제거하기 🗑️" 모드로 작동 */
+        if (currentCategory === 'PWA복습') {
+            const savedList = getPWASavedWords();
+            const isStillSaved = savedList.some(w => w.ko === targetItem.ko && w.en === targetItem.en);
+
+            if (!isStillSaved) {
+                if (vagueTextEl) vagueTextEl.innerText = "제거 완료 ✓";
+                vagueBtn.classList.add('btn-state-blue');
+            } else {
+                if (vagueTextEl) vagueTextEl.innerText = "제거하기 🗑️";
+                vagueBtn.classList.add('btn-state-red');
+            }
         } else {
-            if (vagueTextEl) vagueTextEl.innerText = "틀렸어요 ❌";
-            vagueBtn.classList.add('btn-state-red');
+            /* 일반 단어 테스트 모드인 경우: "몰라요 / 틀렸어요" 모드로 작동 */
+            const isVague = vagueWords.some(item => item.ko === targetItem.ko && item.en === targetItem.en);
+
+            if (isVague) {
+                if (vagueTextEl) vagueTextEl.innerText = "등록 완료 ✓";
+                vagueBtn.classList.add('btn-state-blue');
+            } else if (!showAnswers) {
+                if (vagueTextEl) vagueTextEl.innerText = "몰라요 ❓";
+                vagueBtn.classList.add('btn-state-yellow');
+            } else {
+                if (vagueTextEl) vagueTextEl.innerText = "틀렸어요 ❌";
+                vagueBtn.classList.add('btn-state-red');
+            }
         }
 
         if (!showAnswers) {
@@ -1565,11 +1592,18 @@
 
         if (targetIndex < wordList.length) {
             const targetItem = wordList[targetIndex];
-            if (!vagueWords.some(item => item.ko === targetItem.ko && item.en === targetItem.en)) {
-                vagueWords.push(targetItem);
+
+            /* 📌 PWA 저장 단어 복습 모드 시: 해당 단어 무기한 저장소에서 즉시 제거 */
+            if (currentCategory === 'PWA복습') {
+                removeWordFromPWAStorage(targetItem);
+                showToast("🗑️ 저장소에서 단어가 제거되었습니다.");
+            } else {
+                /* 일반 테스트 모드 시: 복습 목록 및 PWA 무기한 저장소에 중복 없이 추가 */
+                if (!vagueWords.some(item => item.ko === targetItem.ko && item.en === targetItem.en)) {
+                    vagueWords.push(targetItem);
+                }
+                addWordToPWAStorage(targetItem);
             }
-            // 📱 PWA 환경일 경우 localStorage 영구 무기한 저장소에 중복 없이 추가
-            addWordToPWAStorage(targetItem);
         }
 
         if (!showAnswers) {
