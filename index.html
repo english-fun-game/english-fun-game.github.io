@@ -3,8 +3,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>답답 암기 게임</title>
     
-    <!-- 📌 파비콘 (기본: 📝 이모지 SVG / 파일 사용 시 href="favicon.ico" 로 변경) -->
-    <link rel="icon" href="favicon.ico">
+    <!-- 📌 파비콘 변경 -->
+    <link rel="icon" href="favicon.png">
 
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <!-- 📷 HTML을 이미지로 변환해주는 html2canvas 라이브러리 -->
@@ -190,7 +190,8 @@
             border: 1px solid var(--border-color);
             border-radius: 10px;
             padding: 12px 16px;
-            margin-bottom: 12px;
+            margin-top: 12px;
+            margin-bottom: 0;
             flex-shrink: 0;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
             transition: all 0.3s ease;
@@ -214,34 +215,54 @@
             flex-shrink: 0;
         }
 
+        /* 🎨 상단 타이머, 공부모드, 음소거, 카운터 요소 규격 통일 */
+        .nyan-time, .study-btn, .mute-btn, .progress {
+            height: 32px;
+            line-height: 1;
+            padding: 0 10px;
+            font-size: 13px;
+            font-weight: 800;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
         .nyan-time {
             color: var(--slack-blue);
             font-family: monospace;
-            font-size: 15px;
             background: #f0f4f8;
-            padding: 2px 8px;
-            border-radius: 4px;
             border: 1px solid #d0e1f9;
-            white-space: nowrap;
+        }
+
+        /* 📖 공부모드 버튼 */
+        .study-btn {
+            background: #e0f2fe;
+            border: 1.5px solid var(--slack-blue);
+            color: var(--slack-blue);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            box-shadow: 0 2px 4px rgba(18, 100, 163, 0.1);
+        }
+
+        .study-btn:hover {
+            background: var(--slack-blue);
+            color: #ffffff;
+            transform: translateY(-1px);
         }
 
         /* 🎨 BGM 토글 버튼 스타일 */
         .mute-btn {
             background: #f3e8ff;
             border: 1.5px solid var(--slack-purple);
-            border-radius: 6px;
-            padding: 5px 10px;
-            font-size: 13px;
-            font-weight: 800;
             color: var(--slack-purple);
             cursor: pointer;
             transition: all 0.15s ease;
-            display: flex;
-            align-items: center;
             gap: 4px;
             box-shadow: 0 2px 4px rgba(74, 21, 75, 0.1);
-            flex-shrink: 0;
-            white-space: nowrap;
         }
 
         .mute-btn:hover {
@@ -263,15 +284,9 @@
         }
 
         .progress {
-            font-size: 13px;
             color: var(--text-muted);
-            font-weight: 700;
             background: #eef0f1;
-            padding: 4px 10px;
-            border-radius: 4px;
             border: 1px solid var(--border-color);
-            flex-shrink: 0;
-            white-space: nowrap;
             text-align: center;
         }
 
@@ -673,27 +688,13 @@
 
             .nyan-timer-header {
                 font-size: 12px;
-                gap: 6px;
-            }
-
-            .nyan-title {
-                font-size: 12px;
                 gap: 4px;
             }
 
-            .nyan-time {
-                font-size: 13px;
-                padding: 2px 5px;
-            }
-
-            .mute-btn {
-                padding: 4px 7px;
+            .nyan-time, .study-btn, .mute-btn, .progress {
+                height: 30px;
                 font-size: 12px;
-            }
-
-            .progress {
-                font-size: 12px;
-                padding: 3px 7px;
+                padding: 0 7px;
             }
 
             .cards-grid {
@@ -730,9 +731,9 @@
                 line-height: 1.5 !important;
             }
 
-            /* 모바일 하단 액션 버튼 */
+            /* 📱 모바일 하단 액션 버튼 높이 1.3배 확대 (62px -> 81px) */
             .bottom-vague-btn, .bottom-primary-btn {
-                height: 62px !important;
+                height: 81px !important;
                 font-size: 19px !important;
                 padding: 0 4px;
                 border-radius: 10px;
@@ -776,28 +777,6 @@
 
     <!-- 게임 시작 화면 -->
     <div id="game-area" class="hidden">
-        <!-- 🐱🌈 냥캣 타이머 바 -->
-        <div id="nyan-timer-container" class="nyan-timer-box">
-            <div class="nyan-timer-header">
-                <span class="nyan-title">🐱🌈 타이머 <span class="nyan-time" id="nyan-timer-text">⏱️ 07:00</span></span>
-                
-                <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
-                    <button id="mute-btn" class="mute-btn" onclick="toggleMute()">
-                        <span id="mute-icon">🔊</span> BGM 켜기 <span class="shortcut-text">(M)</span>
-                    </button>
-                    <span class="progress" id="card-progress">0 / 0</span>
-                </div>
-            </div>
-            <div class="nyan-controls-row">
-                <div class="nyan-track">
-                    <div class="nyan-trail" id="nyan-trail">
-                        <span class="nyan-cat">🐱</span>
-                    </div>
-                    <span class="nyan-star">⭐</span>
-                </div>
-            </div>
-        </div>
-
         <!-- 카드 그리드 -->
         <div class="cards-grid" id="cards-wrapper">
         </div>
@@ -810,6 +789,31 @@
             <button id="action-btn" class="bottom-primary-btn" onclick="handlePrimaryAction()">
                 <span id="action-btn-text">정답 확인 👁️</span> <span class="shortcut-text">(→)</span>
             </button>
+        </div>
+
+        <!-- 🐱🌈 냥캣 타이머 바 (최하단 이동) -->
+        <div id="nyan-timer-container" class="nyan-timer-box">
+            <div class="nyan-timer-header">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="nyan-title"><span class="nyan-time" id="nyan-timer-text">⏱️ 07:00</span></span>
+                    <button id="study-btn" class="study-btn" onclick="enableStudyMode()">📖 공부모드</button>
+                </div>
+                
+                <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+                    <button id="mute-btn" class="mute-btn" onclick="toggleMute()">
+                        <span id="mute-icon">🔊</span> ON <span class="shortcut-text">(M)</span>
+                    </button>
+                    <span class="progress" id="card-progress">0 / 0</span>
+                </div>
+            </div>
+            <div class="nyan-controls-row">
+                <div class="nyan-track">
+                    <div class="nyan-trail" id="nyan-trail">
+                        <span class="nyan-cat">🐱</span>
+                    </div>
+                    <span class="nyan-star">⭐</span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -849,7 +853,8 @@
     const cardsPerPage = 1; 
     
     // 타이머 및 이미지 제어 변수
-    const TOTAL_SECONDS = 420; // 7분 = 420초
+    const TOTAL_SECONDS = 420; // 기본 7분 = 420초
+    let activeTotalSeconds = TOTAL_SECONDS;
     let remainingSeconds = TOTAL_SECONDS;
     let timerInterval = null;
     let currentImageType = 'type1'; 
@@ -861,6 +866,14 @@
 
     // 🔊 Web Audio API 싱글톤 인스턴스 (빵빠레 전용)
     let synthAudioCtx = null;
+
+    /* 📖 공부모드 활성화 함수 (24시간 설정) */
+    function enableStudyMode() {
+        remainingSeconds = 86400; // 24시간 = 86400초
+        activeTotalSeconds = 86400;
+        updateTimerUI();
+        showToast("📖 공부모드가 설정되었습니다. (24시간)");
+    }
 
     /* 🔊 Web Speech API 영어 발음 재생 함수 (BGM Mute와 독립 동작) */
     function speakEnglish(text) {
@@ -958,7 +971,7 @@
     window.addEventListener('touchstart', unlockAudioContext, { passive: true });
     window.addEventListener('keydown', unlockAudioContext, { passive: true });
 
-    // 🔇 BGM 전용 음소거 토글 로직
+    // 🔇 BGM 전용 음소거 토글 로직 (ON / OFF 텍스트 표시)
     function toggleMute() {
         isMuted = !isMuted;
         const muteBtn = document.getElementById('mute-btn');
@@ -967,13 +980,13 @@
         if (isMuted) {
             if (muteIcon) muteIcon.innerText = '🔇';
             if (muteBtn) {
-                muteBtn.childNodes[1].nodeValue = ' BGM 끄기 ';
+                muteBtn.childNodes[1].nodeValue = ' OFF ';
                 muteBtn.classList.add('is-muted');
             }
         } else {
             if (muteIcon) muteIcon.innerText = '🔊';
             if (muteBtn) {
-                muteBtn.childNodes[1].nodeValue = ' BGM 켜기 ';
+                muteBtn.childNodes[1].nodeValue = ' ON ';
                 muteBtn.classList.remove('is-muted');
             }
         }
@@ -1096,6 +1109,7 @@
     /* ⏱️ 냥캣 타이머 로직 */
     function startTimer() {
         stopTimer();
+        activeTotalSeconds = TOTAL_SECONDS;
         remainingSeconds = TOTAL_SECONDS;
 
         const types = ['type1', 'type2', 'type3'];
@@ -1112,7 +1126,7 @@
 
             if (remainingSeconds <= 0) {
                 stopTimer();
-                showToast("⏰ 7분 제한 시간이 종료되었습니다!", 3500);
+                showToast("⏰ 제한 시간이 종료되었습니다!", 3500);
                 showSummaryNotes();
             }
         }, 1000);
@@ -1126,21 +1140,29 @@
     }
 
     function updateTimerUI() {
-        const mins = String(Math.floor(remainingSeconds / 60)).padStart(2, '0');
-        const secs = String(remainingSeconds % 60).padStart(2, '0');
+        const hrs = Math.floor(remainingSeconds / 3600);
+        const mins = Math.floor((remainingSeconds % 3600) / 60);
+        const secs = remainingSeconds % 60;
+        
+        let timeStr = "";
+        if (hrs > 0) {
+            timeStr = `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        } else {
+            timeStr = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
         
         const timerTextEl = document.getElementById('nyan-timer-text');
         const trailEl = document.getElementById('nyan-trail');
         const containerEl = document.getElementById('nyan-timer-container');
 
-        if (timerTextEl) timerTextEl.innerText = `⏱️ ${mins}:${secs}`;
+        if (timerTextEl) timerTextEl.innerText = `⏱️ ${timeStr}`;
 
-        const elapsed = TOTAL_SECONDS - remainingSeconds;
-        const progressPercent = Math.min(100, Math.max(0, (elapsed / TOTAL_SECONDS) * 100));
+        const elapsed = activeTotalSeconds - remainingSeconds;
+        const progressPercent = Math.min(100, Math.max(0, (elapsed / activeTotalSeconds) * 100));
 
         if (trailEl) trailEl.style.width = `${progressPercent}%`;
 
-        const ratio = remainingSeconds / TOTAL_SECONDS;
+        const ratio = remainingSeconds / activeTotalSeconds;
         let newImgNum = 1;
 
         if (ratio > 0.75) {
