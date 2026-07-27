@@ -490,7 +490,7 @@
             box-sizing: border-box;
         }
 
-        /* 🖼️ 한글 카드 배경 설정: 모바일/데스크탑 모두 꽉 채움 (cover) */
+        /* 🖼️ 한글 카드 배경 설정 */
         .section-ko {
             flex: 1;
             border-right: 1px solid var(--border-color);
@@ -524,12 +524,12 @@
             word-break: keep-all;       
             overflow-wrap: break-word; 
             white-space: normal;       
-            line-height: 1.5;
+            line-height: 1.4;
         }
 
         .card-word.long-text {
             font-size: 28px; 
-            line-height: 1.5;
+            line-height: 1.4;
             font-weight: 700;
         }
 
@@ -538,7 +538,35 @@
             color: var(--slack-blue); 
         }
 
-        .show-answers .section-en .card-word {
+        /* 📝 영어 예문 섹션 (구분선 없이 적당한 간격 배치) */
+        .card-example {
+            display: none;
+            margin-top: 18px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .ex-en {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--slack-blue);
+            line-height: 1.4;
+            word-break: keep-all;
+            overflow-wrap: break-word;
+        }
+
+        .ex-ko {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-muted);
+            line-height: 1.4;
+            margin-top: 6px;
+            word-break: keep-all;
+            overflow-wrap: break-word;
+        }
+
+        .show-answers .section-en .card-word,
+        .show-answers .section-en .card-example {
             display: block; 
         }
 
@@ -709,29 +737,48 @@
                 flex: 1 !important;
             }
 
+            /* 📱 모바일 한글 카드 섹션 (높이 비율 3) */
             #game-area .section-ko {
                 border-right: none !important;
                 border-bottom: 1px solid var(--border-color) !important;
-                flex: 1 !important;
+                flex: 3 !important;
                 padding: 12px 10px !important;
                 background-size: cover !important; 
             }
 
+            /* 📱 모바일 영어 카드 섹션 (높이 비율 5) */
             #game-area .section-en {
-                flex: 1 !important;
+                flex: 5 !important;
                 padding: 12px 10px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: center !important;
             }
 
             #game-area .card-word, #game-area .placeholder {
-                font-size: 36px !important;
+                font-size: 34px !important;
             }
 
             #game-area .card-word.long-text {
                 font-size: 22px !important;
-                line-height: 1.5 !important;
+                line-height: 1.4 !important;
             }
 
-            /* 📱 모바일 하단 액션 버튼 높이 1.3배 확대 (62px -> 81px) */
+            .card-example {
+                margin-top: 12px !important;
+            }
+
+            .ex-en {
+                font-size: 16px !important;
+            }
+
+            .ex-ko {
+                font-size: 14px !important;
+                margin-top: 4px !important;
+            }
+
+            /* 📱 모바일 하단 액션 버튼 높이 확대 */
             .bottom-vague-btn, .bottom-primary-btn {
                 height: 81px !important;
                 font-size: 19px !important;
@@ -796,7 +843,7 @@
             <div class="nyan-timer-header">
                 <div style="display: flex; align-items: center; gap: 6px;">
                     <span class="nyan-title"><span class="nyan-time" id="nyan-timer-text">⏱️ 07:00</span></span>
-                    <button id="study-btn" class="study-btn" onclick="enableStudyMode()">📖 공부모드</button>
+                    <button id="study-btn" class="study-btn" onclick="enableStudyMode()">📖 공부모드 <span class="shortcut-text">(S)</span></button>
                 </div>
                 
                 <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
@@ -850,6 +897,7 @@
     let vagueWords = [];       
     let currentStartIndex = 0; 
     let showAnswers = false;   
+    let isStudyMode = false;
     const cardsPerPage = 1; 
     
     // 타이머 및 이미지 제어 변수
@@ -867,38 +915,64 @@
     // 🔊 Web Audio API 싱글톤 인스턴스 (빵빠레 전용)
     let synthAudioCtx = null;
 
-    /* 📖 공부모드 활성화 함수 (24시간 설정) */
+    /* 📖 공부모드 활성화 함수 (24시간 설정, 현재 카드 즉시 갱신) */
     function enableStudyMode() {
+        if (isStudyMode) return;
+        isStudyMode = true;
         remainingSeconds = 86400; // 24시간 = 86400초
         activeTotalSeconds = 86400;
         updateTimerUI();
         showToast("📖 공부모드가 설정되었습니다. (24시간)");
-    }
 
-    /* 🔊 Web Speech API 영어 발음 재생 함수 (BGM Mute와 독립 동작) */
-    function speakEnglish(text) {
-        if (!('speechSynthesis' in window)) return;
-
-        try {
-            window.speechSynthesis.cancel(); // 이전 음성 재생 중단
-
-            // HTML 태그 및 특수기호(# 등) 제거
-            const cleanText = text.replace(/<[^>]*>/g, '').replace(/#/g, ' ').trim();
-            if (!cleanText) return;
-
-            const utterance = new SpeechSynthesisUtterance(cleanText);
-            utterance.lang = 'en-US'; // 미국 영어 발음
-            utterance.rate = 0.85;   // 암기 학습용 적절한 배속
-
-            window.speechSynthesis.speak(utterance);
-        } catch (e) {
-            console.warn("TTS 발음 재생 실패:", e);
+        // 진행 중인 카드가 있는 경우 예문 화면 즉시 반영
+        if (wordList.length > 0 && !document.getElementById('game-area').classList.contains('hidden')) {
+            const currentShowState = showAnswers;
+            renderCards();
+            if (currentShowState) {
+                showAnswers = true;
+                if (wrapperEl) wrapperEl.classList.add('show-answers');
+                updateButtonsUI();
+            }
         }
     }
 
+    /* 🔊 TTS 정지 함수 */
+    function stopTTS() {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+        }
+    }
+
+    /* 🔊 영어 단어 및 (공부모드 일 때만) 영어 예문 지체 없이 연속 재생 */
     function speakCurrentWord() {
-        if (wordList[currentStartIndex]) {
-            speakEnglish(wordList[currentStartIndex].en);
+        stopTTS();
+        if (!('speechSynthesis' in window)) return;
+
+        const item = wordList[currentStartIndex];
+        if (!item) return;
+
+        const cleanWord = item.en ? item.en.replace(/<[^>]*>/g, '').replace(/#/g, ' ').replace(/,/g, ' ').trim() : '';
+        const cleanExEn = (isStudyMode && item.exEn) ? item.exEn.replace(/<[^>]*>/g, '').replace(/#/g, ' ').replace(/,/g, ' ').trim() : '';
+
+        if (!cleanWord) return;
+
+        try {
+            // 1. 영어 단어 발음 생성
+            const wordUtterance = new SpeechSynthesisUtterance(cleanWord);
+            wordUtterance.lang = 'en-US';
+            wordUtterance.rate = 0.85;
+
+            window.speechSynthesis.speak(wordUtterance);
+
+            // 2. 공부모드이고 영어 예문이 존재하는 경우, 지체 없이(즉시 연속) 예문 발음 큐 추가
+            if (isStudyMode && cleanExEn) {
+                const exUtterance = new SpeechSynthesisUtterance(cleanExEn);
+                exUtterance.lang = 'en-US';
+                exUtterance.rate = 0.85;
+                window.speechSynthesis.speak(exUtterance); // Web Speech API에 의해 단어 종료 직후 바로 재생됨
+            }
+        } catch (e) {
+            console.warn("TTS 발음 재생 실패:", e);
         }
     }
 
@@ -1066,11 +1140,12 @@
         return shuffled;
     }
 
-    /* # 개수만큼 <br>로 치환하는 로직 */
+    /* # 치환 및 쉼표(,) 줄바꿈 로직 */
     function formatWordText(word) {
         if (!word) return '';
         let text = String(word).trim();
         text = text.replace(/#/g, '<br>');
+        text = text.replace(/,\s*/g, '<br>'); // 쉼표(,) 발생 시 줄바꿈 처리
         return text;
     }
 
@@ -1233,11 +1308,14 @@
             const worksheet = workbook.Sheets[firstSheetName];
             const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
             
+            /* 📌 1열: 한글, 2열: 영어, 3열: 영어 예문, 4열: 한국어 예문 번역 */
             const tempExtractList = jsonData
                 .filter(row => row && row[0] && row[1]) 
                 .map(row => ({
                     ko: formatWordText(row[0]),
-                    en: formatWordText(row[1])
+                    en: formatWordText(row[1]),
+                    exEn: formatWordText(row[2] || ''),
+                    exKo: formatWordText(row[3] || '')
                 }));
 
             if (tempExtractList.length === 0) {
@@ -1249,6 +1327,7 @@
             
             currentStartIndex = 0;
             showAnswers = false;
+            isStudyMode = false;
             statusEl.innerText = "";
             
             document.getElementById('setup-area').classList.add('hidden');
@@ -1298,6 +1377,7 @@
     }
 
     function renderCards() {
+        stopTTS();
         if (wordList.length === 0) return;
         
         wrapperEl.innerHTML = '';
@@ -1313,6 +1393,15 @@
             const isLongText = plainKoLength >= 45;
             const wordClass = isLongText ? 'card-word long-text' : 'card-word';
 
+            /* 📌 공부모드가 켜진 경우에만 예문 영역 HTML 생성 */
+            const hasExample = isStudyMode && (item.exEn || item.exKo);
+            const exampleHtml = hasExample ? `
+                <div class="card-example">
+                    ${item.exEn ? `<div class="ex-en">${item.exEn}</div>` : ''}
+                    ${item.exKo ? `<div class="ex-ko">${item.exKo}</div>` : ''}
+                </div>
+            ` : '';
+
             const cardHtml = `
                 <div class="card">
                     <div class="card-section section-ko">
@@ -1324,6 +1413,7 @@
                         <div class="card-word-wrapper">
                             <div class="placeholder">?</div>
                             <div class="${wordClass}">${item.en}</div>
+                            ${exampleHtml}
                         </div>
                     </div>
                 </div>
@@ -1349,7 +1439,7 @@
         if (!showAnswers) {
             showAnswers = true;
             wrapperEl.classList.add('show-answers');
-            speakCurrentWord(); // 🔊 정답 공개 시 자동으로 영어 발음 재생
+            speakCurrentWord();
         }
 
         updateButtonsUI();
@@ -1362,7 +1452,7 @@
             showAnswers = true;
             wrapperEl.classList.add('show-answers');
             updateButtonsUI();
-            speakCurrentWord(); // 🔊 정답 공개 시 자동으로 영어 발음 재생
+            speakCurrentWord();
         } else {
             if (currentStartIndex + cardsPerPage < wordList.length) {
                 currentStartIndex += cardsPerPage;
@@ -1375,6 +1465,7 @@
 
     /* 테스트 완료 시 복습 리스트 페이지 표출 및 빵빠레 사운드 재생 */
     function showSummaryNotes() {
+        stopTTS();
         stopTimer(); 
         stopBgSound(); 
         playFanfareSound(); 
@@ -1390,10 +1481,19 @@
             tbody.innerHTML = `<tr><td colspan="2" style="text-align:center; color:var(--slack-blue); font-weight:700; padding:40px 0;">🎉 완벽합니다! 복습할 단어가 없습니다.</td></tr>`;
         } else {
             vagueWords.forEach(item => {
+                let enCellContent = `<div style="color: var(--slack-blue); font-weight: bold;">${item.en}</div>`;
+                if (item.exEn || item.exKo) {
+                    enCellContent += `
+                        <div style="font-size: 13px; color: #4b5563; font-weight: normal; margin-top: 4px; line-height: 1.4;">
+                            ${item.exEn ? `<div>${item.exEn}</div>` : ''}
+                            ${item.exKo ? `<div style="color: #6b7280; font-size: 12px; margin-top: 2px;">${item.exKo}</div>` : ''}
+                        </div>
+                    `;
+                }
                 const rowHtml = `
                     <tr>
                         <td style="font-weight: 700; color: var(--text-main);">${item.ko}</td>
-                        <td style="color: var(--slack-blue); font-weight: bold;">${item.en}</td>
+                        <td>${enCellContent}</td>
                     </tr>
                 `;
                 tbody.insertAdjacentHTML('beforeend', rowHtml);
@@ -1437,7 +1537,7 @@
             const finalCanvas = document.createElement('canvas');
             const ctx = finalCanvas.getContext('2d');
             const scale = 2;
-            const headerHeight = 85 * scale; // 충분히 넓은 170px 높이 헤더 영역
+            const headerHeight = 85 * scale;
 
             finalCanvas.width = capturedCanvas.width;
             finalCanvas.height = capturedCanvas.height + headerHeight;
@@ -1489,7 +1589,6 @@
                 if (isMobile) {
                     let shareSuccess = false;
 
-                    // 1) 공유 시트 (Web Share API) 실행 시도
                     if (navigator.canShare && navigator.canShare({ files: [file] })) {
                         try {
                             await navigator.share({
@@ -1500,13 +1599,12 @@
                         } catch (shareErr) {
                             if (shareErr.name === 'AbortError') {
                                 URL.revokeObjectURL(blobUrl);
-                                return; // 취소한 경우
+                                return;
                             }
                             console.warn("Web Share 시도 취소/실패:", shareErr);
                         }
                     }
 
-                    // 2) 공유 시트 차단/미지원 시 -> 길게 눌러 저장/공유 가능한 모달 오픈
                     if (!shareSuccess) {
                         openImagePreviewModal(blobUrl);
                     } else {
@@ -1591,5 +1689,7 @@
             handleVagueAction(currentStartIndex);
         } else if (event.key === 'm' || event.key === 'M' || event.key === 'ㅡ') {
             toggleMute();
+        } else if (event.key === 's' || event.key === 'S' || event.key === 'ㄴ') {
+            enableStudyMode();
         }
     });</script></body></html>
