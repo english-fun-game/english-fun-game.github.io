@@ -142,6 +142,27 @@
             transform: translateY(-1px);
         }
 
+        /* 📱 PWA 전용 복습 버튼 전용 스타일 */
+        .pwa-review-btn {
+            width: 100%;
+            padding: 16px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            box-sizing: border-box;
+            transition: all 0.15s ease;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+        }
+
+        .pwa-review-btn:hover {
+            background-color: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
         /* 로딩 스테이터스 */
         .status-msg {
             color: var(--slack-blue);
@@ -813,6 +834,9 @@
         <input type="text" id="excel-url" placeholder="공개된 엑셀 파일 또는 구글 시트 URL 입력" />
         <button class="base-btn" onclick="loadExcelFromUrl()">불러오기</button>
         
+        <!-- 📱 PWA 전용 누적 복습 버튼 (PWA 환경에서만 표출) -->
+        <button id="pwa-review-btn" class="pwa-review-btn hidden" onclick="startPWAReview()">🔥 저장된 헷갈린 단어 복습 (0개)</button>
+
         <div id="status" class="status-msg"></div>
 
         <div class="quick-btn-group">
@@ -898,6 +922,7 @@
     let currentStartIndex = 0; 
     let showAnswers = false;   
     let isStudyMode = false;
+    let currentCategory = '단어암기'; // 시험 유형 저장 (스피킹, 라이팅, 초록이 등)
     const cardsPerPage = 1; 
     
     // 타이머 및 이미지 제어 변수
@@ -914,6 +939,88 @@
 
     // 🔊 Web Audio API 싱글톤 인스턴스 (빵빠레 전용)
     let synthAudioCtx = null;
+
+    // 📱 PWA 전용 localStorage 키
+    const PWA_VAGUE_STORAGE_KEY = 'pwa_vague_words_list';
+
+    /* 📱 PWA 환경 판별 함수 */
+    function isPWA() {
+        return window.matchMedia('(display-mode: standalone)').matches || 
+               window.navigator.standalone === true || 
+               document.referrer.includes('android-app://');
+    }
+
+    /* 📱 PWA 저장소 읽기 */
+    function getPWASavedWords() {
+        try {
+            const data = localStorage.getItem(PWA_VAGUE_STORAGE_KEY);
+            return data ? JSON.parse(data) : [];
+        } catch (e) {
+            console.warn("PWA 저장소 읽기 오류:", e);
+            return [];
+        }
+    }
+
+    /* 📱 PWA 저장소에 헷갈린 단어 중복 없이 저장 */
+    function addWordToPWAStorage(item) {
+        if (!isPWA() || !item) return;
+
+        const savedList = getPWASavedWords();
+        // 중복 방지 (ko 및 en 기준)
+        const isExists = savedList.some(w => w.ko === item.ko && w.en === item.en);
+        if (!isExists) {
+            savedList.push(item);
+            try {
+                localStorage.setItem(PWA_VAGUE_STORAGE_KEY, JSON.stringify(savedList));
+                updatePWAReviewButtonUI();
+            } catch (e) {
+                console.warn("PWA 저장소 저장 오류:", e);
+            }
+        }
+    }
+
+    /* 📱 PWA 복습 버튼 UI 갱신 */
+    function updatePWAReviewButtonUI() {
+        const pwaBtn = document.getElementById('pwa-review-btn');
+        if (!pwaBtn) return;
+
+        if (isPWA()) {
+            pwaBtn.classList.remove('hidden');
+            const savedList = getPWASavedWords();
+            pwaBtn.innerText = `🔥 저장된 헷갈린 단어 복습 (${savedList.length}개)`;
+        } else {
+            pwaBtn.classList.add('hidden');
+        }
+    }
+
+    /* 📱 PWA 전용 저장 단어 복습 시작 */
+    function startPWAReview() {
+        if (!isPWA()) return;
+        const savedList = getPWASavedWords();
+
+        if (savedList.length === 0) {
+            showToast("저장된 헷갈린 단어가 없습니다.");
+            return;
+        }
+
+        currentCategory = "PWA복습";
+        originalWordList = shuffleArray([...savedList]);
+        wordList = [...originalWordList];
+        vagueWords = [];
+
+        currentStartIndex = 0;
+        showAnswers = false;
+        isStudyMode = false;
+
+        document.getElementById('setup-area').classList.add('hidden');
+        document.getElementById('summary-area').classList.add('hidden');
+        document.getElementById('game-area').classList.remove('hidden');
+
+        document.body.classList.add('game-active');
+
+        renderCards();
+        startTimer();
+    }
 
     /* 📖 공부모드 활성화 함수 (24시간 설정, 현재 카드 즉시 갱신) */
     function enableStudyMode() {
@@ -951,8 +1058,9 @@
         const item = wordList[currentStartIndex];
         if (!item) return;
 
-        const cleanWord = item.en ? item.en.replace(/<[^>]*>/g, '').replace(/#/g, ' ').replace(/,/g, ' ').trim() : '';
-        const cleanExEn = (isStudyMode && item.exEn) ? item.exEn.replace(/<[^>]*>/g, '').replace(/#/g, ' ').replace(/,/g, ' ').trim() : '';
+        // TTS 발음 시 HTML 태그, # 및 특수기호 정돈
+        const cleanWord = item.en ? item.en.replace(/<[^>]*>/g, '').replace(/#/g, ' ').trim() : '';
+        const cleanExEn = (isStudyMode && item.exEn) ? item.exEn.replace(/<[^>]*>/g, '').replace(/#/g, ' ').trim() : '';
 
         if (!cleanWord) return;
 
@@ -1140,12 +1248,12 @@
         return shuffled;
     }
 
-    /* # 치환 및 쉼표(,) 줄바꿈 로직 */
+    /* # 치환 및 쉼표(,) 보존 후 줄바꿈 로직 */
     function formatWordText(word) {
         if (!word) return '';
         let text = String(word).trim();
         text = text.replace(/#/g, '<br>');
-        text = text.replace(/,\s*/g, '<br>'); // 쉼표(,) 발생 시 줄바꿈 처리
+        text = text.replace(/,\s*/g, ',<br>'); // 📌 쉼표(,)를 보존하면서 뒤에 줄바꿈(<br>) 추가
         return text;
     }
 
@@ -1280,6 +1388,17 @@
             if (!confirm("시트를 최신화하면 기존의 복습 리스트 데이터가 모두 초기화됩니다. 진행하시겠습니까?")) {
                 return; 
             }
+        }
+
+        /* 📌 시험 유형(카테고리) 자동 판별 */
+        if (url.includes("1m7KXifCB6txkKEOHqApMWOR4MQwqb6Ji1Dm-hRJYzLc")) {
+            currentCategory = "스피킹";
+        } else if (url.includes("1UYTEv88wdKsSS2kkB-UylHAfQAlV6yrvjwVNecG6m64")) {
+            currentCategory = "라이팅";
+        } else if (url.includes("1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U")) {
+            currentCategory = "초록이";
+        } else {
+            currentCategory = "단어암기";
         }
 
         if (url.includes("docs.google.com/spreadsheets")) {
@@ -1434,6 +1553,8 @@
             if (!vagueWords.some(item => item.ko === targetItem.ko && item.en === targetItem.en)) {
                 vagueWords.push(targetItem);
             }
+            // 📱 PWA 환경일 경우 localStorage 영구 저장소에 중복 없이 추가
+            addWordToPWAStorage(targetItem);
         }
 
         if (!showAnswers) {
@@ -1533,7 +1654,7 @@
                 windowHeight: tableWrapper.scrollHeight + 200
             });
 
-            // 2. 상단 날짜 영역 캔버스 생성
+            // 2. 상단 날짜 및 유형 영역 캔버스 생성
             const finalCanvas = document.createElement('canvas');
             const ctx = finalCanvas.getContext('2d');
             const scale = 2;
@@ -1546,21 +1667,26 @@
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
 
-            // 4. 연도 월 일만 크게 렌더링
-            ctx.fillStyle = '#1d1c1d';
-            ctx.font = `900 ${38 * scale}px 'Pretendard', -apple-system, sans-serif`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-
+            // 4. 날짜 및 시, 분 추출
             const now = new Date();
             const year = now.getFullYear();
             const month = String(now.getMonth() + 1).padStart(2, '0');
             const day = String(now.getDate()).padStart(2, '0');
-            const dateStr = `${year}. ${month}. ${day}`;
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
 
-            ctx.fillText(dateStr, finalCanvas.width / 2, headerHeight / 2);
+            // 📌 텍스트 및 파일명 형식: "스피킹_2026_07_27_10_41"
+            const titleStr = `${currentCategory}_${year}_${month}_${day}_${hours}_${minutes}`;
 
-            // 5. 구분선 그리기
+            // 5. 헤더 텍스트 렌더링
+            ctx.fillStyle = '#1d1c1d';
+            const dynamicFontSize = Math.min(36 * scale, (finalCanvas.width / (titleStr.length * 0.75)));
+            ctx.font = `900 ${dynamicFontSize}px 'Pretendard', -apple-system, sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(titleStr, finalCanvas.width / 2, headerHeight / 2);
+
+            // 6. 구분선 그리기
             ctx.strokeStyle = '#e0e0e0';
             ctx.lineWidth = 1.5 * scale;
             ctx.beginPath();
@@ -1568,17 +1694,17 @@
             ctx.lineTo(finalCanvas.width, headerHeight);
             ctx.stroke();
 
-            // 6. 원본 캡처 이미지 합성
+            // 7. 원본 캡처 이미지 합성
             ctx.drawImage(capturedCanvas, 0, headerHeight);
 
-            // 7. 최종 이미지 처리
+            // 8. 최종 이미지 처리
             finalCanvas.toBlob(async (blob) => {
                 if (!blob) {
                     showToast("이미지 생성에 실패했습니다.");
                     return;
                 }
 
-                const fileName = `복습_리스트_${year}${month}${day}.png`;
+                const fileName = `${titleStr}.png`;
                 const file = new File([blob], fileName, { type: 'image/png' });
                 const blobUrl = URL.createObjectURL(blob);
 
@@ -1593,7 +1719,7 @@
                         try {
                             await navigator.share({
                                 files: [file],
-                                title: '복습 리스트'
+                                title: titleStr
                             });
                             shareSuccess = true;
                         } catch (shareErr) {
@@ -1692,4 +1818,10 @@
         } else if (event.key === 's' || event.key === 'S' || event.key === 'ㄴ') {
             enableStudyMode();
         }
-    });</script></body></html>
+    });
+
+    // 🚀 페이지 초기 로드 시 PWA 환경 및 버튼 상태 체크
+    window.addEventListener('DOMContentLoaded', () => {
+        updatePWAReviewButtonUI();
+    });
+    </script></body></html>
