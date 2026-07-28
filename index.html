@@ -1216,14 +1216,14 @@
             transform: translateY(0);
         }
 
-        /* 📱 모바일 전용 미디어 쿼리 (game-active 여백 원복 및 스피커/반복 버튼 위치 분리) */
+        /* 📱 모바일 전용 미디어 쿼리 */
         @media (max-width: 650px) {
             body {
                 padding: 10px 8px;
             }
 
             body.game-active {
-                padding: 10px 12px !important; /* [1] 기존 숨통 트이는 여백으로 원복 */
+                padding: 10px 12px !important;
             }
 
             #game-area {
@@ -1318,7 +1318,6 @@
                 border-radius: 10px;
             }
 
-            /* [2] 모바일 전용: 스피커(상단 우측) & 반복(하단 우측) 각자 독립 위치 설정 */
             .show-answers .section-en .card-top-actions {
                 display: block;
                 position: static;
@@ -1473,7 +1472,6 @@
                     <button id="autoplay-btn" class="autoplay-btn" onclick="handleAutoplayBtnClick()">
                         <span id="autoplay-btn-label">🖐️ 수동</span> <span class="shortcut-text">(S)</span>
                     </button>
-                    <!-- [3] 시작시 노래 기본 뮤트 상태 반영 -->
                     <button id="mute-btn" class="mute-btn is-muted" onclick="toggleMute()">
                         <span id="mute-btn-label">🔇 뮤트</span> <span class="shortcut-text">(D)</span>
                     </button>
@@ -1529,11 +1527,6 @@
 </div>
 
 <script>
-    /**
-     * =========================================================================
-     * ⚡ 100% Client-Side Pure JavaScript Advanced Speaking Feedback Engine
-     * =========================================================================
-     */
     class ClientSpeakingEngine {
         constructor(minGreenConfidence = 0.82) {
             this.minGreenConfidence = minGreenConfidence;
@@ -1751,7 +1744,7 @@
 
     // 🎵 사운드 및 TTS 음성 제어
     let bgAudio = null;
-    let isMuted = true; // [3] 시작 시 노래는 기본 뮤트 상태로 설정
+    let isMuted = true;
     let synthAudioCtx = null;
     let selectedVoiceURI = ''; 
     let currentPitch = 1.0;
@@ -1764,7 +1757,7 @@
     let speakingType = 'sentence';
     let speakingStep = 1;
     let speakingSpeechSpeed = 1.0;
-    let isSpeakingTextVisible = false; // 첫 화면 기본 문장 비노출
+    let isSpeakingTextVisible = false;
     let speakingRecognition = null;
     let speakingRecordedTranscript = '';
     let speakingTimerInterval = null;
@@ -2421,14 +2414,13 @@
         return text;
     }
 
-    /* [3] bgAudio 오디오 객체 생성 시 기본 isMuted (true) 적용 */
     function playRandomBgSound() {
         stopBgSound();
         const randomTrack = Math.floor(Math.random() * 8) + 1;
         bgAudio = new Audio(`sounds/${randomTrack}.mp3`);
         bgAudio.loop = true;
         bgAudio.volume = 0.5;
-        bgAudio.muted = isMuted; // 기본값 true (음소거 상태)
+        bgAudio.muted = isMuted;
         bgAudio.play().catch(err => {});
     }
 
@@ -2686,7 +2678,6 @@
                         </div>
                     </div>
                     <div class="card-section section-en" onclick="if(showAnswers) speakCurrentWord();">
-                        <!-- 액션 버튼 그룹 (모바일에서 개별 절대위치 처리 가능하도록 클래스 지정) -->
                         <div class="card-top-actions">
                             <button type="button" class="card-action-btn card-repeat-btn" title="다시 듣기 (Space)" onclick="event.stopPropagation(); speakCurrentWord();">
                                 🔁<span class="desktop-shortcut">(Space)</span>
@@ -3022,7 +3013,7 @@
         speakingTargetText = targetText ? targetText.replace(/<[^>]*>/g, '').replace(/#/g, ' ').trim() : '';
         speakingStep = 1;
         speakingSpeechSpeed = 1.0;
-        isSpeakingTextVisible = false; // 첫 화면 기본 문장 비노출 설정
+        isSpeakingTextVisible = false;
         speakingRecordedTranscript = '';
 
         const modal = document.getElementById('speaking-modal');
@@ -3069,40 +3060,49 @@
         window.speechSynthesis.speak(utter);
     }
 
-    function setupMicVolumeVisualizer(stream) {
-        try {
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            micAudioContext = new AudioContext();
-            const source = micAudioContext.createMediaStreamSource(stream);
-            micAnalyser = micAudioContext.createAnalyser();
-            micAnalyser.fftSize = 64;
-            source.connect(micAnalyser);
+    /* 📌 [수정] 모바일 브라우저 충돌 방지: getUserMedia는 시각화 전용으로 독립 처리 */
+    function setupMicVolumeVisualizer() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
 
-            const dataArray = new Uint8Array(micAnalyser.frequencyBinCount);
+        navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+            window.speakingAudioStream = stream;
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                micAudioContext = new AudioContext();
+                const source = micAudioContext.createMediaStreamSource(stream);
+                micAnalyser = micAudioContext.createAnalyser();
+                micAnalyser.fftSize = 64;
+                source.connect(micAnalyser);
 
-            function updateWaveVisual() {
-                if (!isSpeakingRecording) return;
-                micAnalyser.getByteFrequencyData(dataArray);
+                const dataArray = new Uint8Array(micAnalyser.frequencyBinCount);
 
-                let sum = 0;
-                for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
-                let average = sum / dataArray.length;
+                function updateWaveVisual() {
+                    if (!isSpeakingRecording) return;
+                    micAnalyser.getByteFrequencyData(dataArray);
 
-                const bars = document.querySelectorAll('.speaking-wave-bar');
-                bars.forEach((bar, index) => {
-                    let h = Math.min(80, Math.max(12, average * (0.8 + (index % 3) * 0.3)));
-                    bar.style.height = `${h}px`;
-                });
+                    let sum = 0;
+                    for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+                    let average = sum / dataArray.length;
 
-                micAnimFrameId = requestAnimationFrame(updateWaveVisual);
+                    const bars = document.querySelectorAll('.speaking-wave-bar');
+                    bars.forEach((bar, index) => {
+                        let h = Math.min(80, Math.max(12, average * (0.8 + (index % 3) * 0.3)));
+                        bar.style.height = `${h}px`;
+                    });
+
+                    micAnimFrameId = requestAnimationFrame(updateWaveVisual);
+                }
+
+                updateWaveVisual();
+            } catch(e) {
+                console.warn("마이크 시각화 설정 오류 (음성 인식 기능은 계속 동작):", e);
             }
-
-            updateWaveVisual();
-        } catch(e) {
-            console.warn("마이크 시각화 설정 실패:", e);
-        }
+        }).catch(err => {
+            console.warn("마이크 사용자 권한 차단 또는 접근 실패:", err);
+        });
     }
 
+    /* 📌 [수정] 모바일 호환 SpeechRecognition 설정 및 결과 가공 로직 보완 */
     function startSpeakingRecording() {
         stopTTS();
         speakingStep = 2;
@@ -3133,21 +3133,20 @@
                 }
                 speakingRecognition = new SpeechRecognition();
                 speakingRecognition.lang = 'en-US';
-                speakingRecognition.continuous = !isMobile;
+                
+                // 모바일 브라우저 연결 유지 이슈 해결을 위한 옵션 세팅
+                speakingRecognition.continuous = false; // 모바일은 단발성 인식이 안정적
                 speakingRecognition.interimResults = true;
                 speakingRecognition.maxAlternatives = 1;
 
                 speakingRecognition.onresult = (e) => {
-                    let interimText = '';
-                    let finalText = '';
+                    let accumulatedText = '';
                     for (let i = 0; i < e.results.length; ++i) {
-                        if (e.results[i].isFinal) {
-                            finalText += e.results[i][0].transcript + ' ';
-                        } else {
-                            interimText += e.results[i][0].transcript;
-                        }
+                        accumulatedText += e.results[i][0].transcript + ' ';
                     }
-                    speakingRecordedTranscript = (finalText + ' ' + interimText).trim();
+                    if (accumulatedText.trim()) {
+                        speakingRecordedTranscript = accumulatedText.trim();
+                    }
                 };
 
                 speakingRecognition.onerror = (e) => {
@@ -3158,6 +3157,7 @@
                 };
 
                 speakingRecognition.onend = () => {
+                    // 녹음 진행 중 모바일 브라우저가 자동으로 인식을 자를 경우 즉시 재시작
                     if (isSpeakingRecording && speakingRecognition) {
                         try { speakingRecognition.start(); } catch(err){}
                     }
@@ -3171,14 +3171,8 @@
             showToast("⚠️ 사용 중인 브라우저가 음성 인식을 지원하지 않습니다. (Chrome/Safari 권장)");
         }
 
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-                window.speakingAudioStream = stream;
-                setupMicVolumeVisualizer(stream);
-            }).catch(err => {
-                console.warn("MediaDevices getUserMedia Error:", err);
-            });
-        }
+        // 웨이브 파형 시각화 실행 (실패해도 Recognition에는 영향 없음)
+        setupMicVolumeVisualizer();
     }
 
     function stopSpeakingRecording() {
@@ -3188,7 +3182,10 @@
             speakingTimerInterval = null;
         }
         if (speakingRecognition) {
-            try { speakingRecognition.stop(); } catch(e) {}
+            try { 
+                speakingRecognition.onend = null; // 재시작 이벤트 핸들러 제거
+                speakingRecognition.stop(); 
+            } catch(e) {}
             speakingRecognition = null;
         }
         if (micAnimFrameId) {
@@ -3368,7 +3365,7 @@
         }
     }
 
-    // ⌨️ 단축키 조작 (A: 시험, S: 수동, D: 뮤트, F: 목소리, Space: 발음 반복, Z: 스피킹)
+    // ⌨️ 단축키 조작
     document.addEventListener('keydown', (event) => {
         const autoplayModal = document.getElementById('autoplay-modal');
         const voiceModal = document.getElementById('voice-modal');
@@ -3396,7 +3393,6 @@
 
         if (document.activeElement.tagName === 'INPUT') return;
 
-        // 발음 다시 듣기 단축키 Spacebar 매핑 및 스크롤 방지
         if (event.code === 'Space' || event.key === ' ') {
             event.preventDefault();
             speakCurrentWord();
