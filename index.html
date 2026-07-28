@@ -18,7 +18,7 @@
             --slack-blue: #1264a3;         
             --slack-bg: #f4f5f6;            
             --card-bg: #ffffff;            
-            --card-back-bg: #f8f9fa;       
+            --card-back-bg: #f8f9fa;        
             --text-main: #1d1c1d;          
             --text-muted: #616061;         
             --border-color: #e2e8f0;
@@ -27,6 +27,10 @@
             --btn-yellow: #f59e0b; /* 몰라요: 찡한 노란색 */
             --btn-red: #dc2626;    /* 틀렸어요: 찡한 빨간색 */
             --btn-blue: #2563eb;   /* 등록완료: 선명한 파란색 */
+            
+            /* 스피킹 모달 전용 색상 */
+            --speaking-blue: #3b82f6;
+            --speaking-dark-blue: #2563eb;
         }
 
         body {
@@ -76,7 +80,7 @@
             flex-shrink: 0;
         }
 
-        /* 📌 진입 화면 Layout: 최상단 제목부터 연속 나열 */
+        /* 📌 진입 화면 Layout */
         #setup-area {
             max-width: 460px;
             margin: 0 auto; 
@@ -174,8 +178,8 @@
 
         .clear-pwa-btn {
             width: 100%;
-            padding: 11px;
-            margin-top: 2px;
+            padding: 12px;
+            margin-top: 14px; 
             background-color: #ffffff;
             color: #dc2626;
             border: 1.5px solid #dc2626;
@@ -239,7 +243,7 @@
             background-color: #ffffff;
             border: 1px solid var(--border-color);
             border-radius: 16px;
-            padding: 14px 22px;
+            padding: 12px 18px;
             margin-top: 2px;
             margin-bottom: 0;
             flex-shrink: 0;
@@ -253,17 +257,17 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             font-size: 14px;
             font-weight: 800;
             gap: 8px;
         }
 
-        .nyan-time, .study-btn, .mute-btn, .progress, .autoplay-btn {
+        .study-btn, .mute-btn, .voice-btn, .autoplay-btn {
             height: 38px;
             line-height: 1;
-            padding: 0 14px;
-            font-size: 14px;
+            padding: 0 12px;
+            font-size: 13px;
             font-weight: 800;
             border-radius: 10px;
             display: inline-flex;
@@ -282,6 +286,29 @@
             margin-left: 3px;
         }
 
+        /* nyan-controls-row: [프로그레스바 , 남은 시간 , 단어 갯수] 정렬 */
+        .nyan-controls-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .nyan-time, .progress {
+            height: 28px;
+            padding: 0 10px;
+            font-size: 13px;
+            font-weight: 900 !important;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            white-space: nowrap;
+            flex-shrink: 0;
+            letter-spacing: -0.2px;
+        }
+
         .nyan-time {
             color: var(--slack-blue);
             font-family: 'Slack-Lato', 'Pretendard', monospace, sans-serif;
@@ -296,14 +323,14 @@
             text-align: center;
         }
 
-        .study-btn, .autoplay-btn, .mute-btn {
+        .study-btn, .autoplay-btn, .mute-btn, .voice-btn {
             background-color: #f8f9fa;
             border: 1.5px solid #cbd5e1;
             color: #64748b;
             cursor: pointer;
         }
 
-        .study-btn:hover, .autoplay-btn:hover, .mute-btn:hover {
+        .study-btn:hover, .autoplay-btn:hover, .mute-btn:hover, .voice-btn:hover {
             background-color: #f1f5f9;
             transform: translateY(-1px);
         }
@@ -336,6 +363,12 @@
             box-shadow: 0 2px 5px rgba(239, 68, 68, 0.15);
         }
 
+        .voice-btn {
+            background-color: #fff7ed;
+            border-color: #f97316;
+            color: #c2410c;
+        }
+
         .nyan-timer-box.study-mode-on .nyan-time {
             background: #f1f5f9;
             color: #64748b;
@@ -353,15 +386,9 @@
             transform: translateY(2px);
         }
 
-        .nyan-controls-row {
-            display: flex;
-            align-items: center;
-            width: 100%;
-        }
-
         .nyan-track {
             position: relative;
-            width: 100%;
+            flex: 1;
             height: 24px;
             background-color: #eef0f1;
             border-radius: 12px;
@@ -507,37 +534,7 @@
             flex: 1;
             background-color: var(--card-back-bg);
             position: relative;
-        }
-
-        .replay-btn {
-            position: absolute;
-            right: 20px;
-            bottom: 20px;
-            padding: 6px 14px;
-            height: 38px;
-            border-radius: 20px;
-            background-color: #ffffff;
-            border: 2px solid var(--slack-blue);
-            color: var(--slack-blue);
-            font-size: 14px;
-            font-weight: 800;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
             cursor: pointer;
-            box-shadow: 0 3px 8px rgba(18, 100, 163, 0.18);
-            transition: all 0.15s ease;
-            z-index: 10;
-        }
-
-        .replay-btn:hover {
-            background-color: #e0f2fe;
-            transform: scale(1.05);
-        }
-
-        .show-answers .section-en .replay-btn {
-            display: flex;
         }
 
         .card-word-wrapper {
@@ -545,6 +542,10 @@
             width: 100%;
             text-align: center;
             z-index: 1; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         .card-word {
@@ -601,6 +602,51 @@
             display: block; 
         }
 
+        /* 데스크탑 기본: 우측 상단 배치 */
+        .card-top-actions {
+            display: none;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            gap: 6px;
+            z-index: 10;
+        }
+
+        .show-answers .section-en .card-top-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .card-action-btn {
+            padding: 5px 10px;
+            border-radius: 12px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 1.2px solid #cbd5e1;
+            color: #475569;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-action-btn:hover {
+            background-color: #ffffff;
+            border-color: #94a3b8;
+            color: #0f172a;
+            transform: translateY(-1px);
+        }
+
+        .desktop-shortcut {
+            font-size: 11px;
+            font-weight: 800;
+            margin-left: 3px;
+            opacity: 0.75;
+        }
+
         .placeholder {
             display: block;
             color: #ccd5e0;
@@ -629,13 +675,14 @@
             background: #ffffff;
             border-radius: 12px;
             width: 100%;
-            max-width: 380px;
+            max-width: 460px;
             padding: 22px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
             display: flex;
             flex-direction: column;
             gap: 16px;
             box-sizing: border-box;
+            max-height: 90vh;
         }
 
         .modal-header {
@@ -647,6 +694,254 @@
             color: var(--text-main);
         }
 
+        /* 🎙️ 스피킹 첨삭 모달 스타일 */
+        .speaking-modal-card {
+            background: var(--speaking-blue);
+            color: #ffffff;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 440px;
+            height: 90vh;
+            max-height: 680px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+            transition: background 0.3s ease;
+        }
+
+        .speaking-modal-card.white-theme {
+            background: #ffffff;
+            color: #1d1c1d;
+        }
+
+        .speaking-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 18px;
+            font-weight: 800;
+            z-index: 2;
+        }
+
+        .speaking-close-btn {
+            background: none;
+            border: none;
+            color: currentColor;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 800;
+        }
+
+        .speaking-content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 16px;
+            padding: 10px 0;
+            overflow-y: auto;
+            z-index: 2;
+        }
+
+        .speaking-title {
+            font-size: 28px;
+            font-weight: 900;
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .speaking-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+            margin: 0;
+            word-break: keep-all;
+        }
+
+        .speaking-pill-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .speaking-pill-btn {
+            background: rgba(255, 255, 255, 0.95);
+            color: #1e293b;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            transition: all 0.15s ease;
+        }
+
+        .speaking-pill-btn:hover {
+            transform: translateY(-1px);
+            background: #ffffff;
+        }
+
+        .speaking-circle-play-btn {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin: 16px 0 8px 0;
+        }
+
+        .speaking-circle-play-btn:hover {
+            transform: scale(1.08);
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .speaking-timer-text {
+            font-size: 32px;
+            font-weight: 900;
+            font-family: monospace;
+            letter-spacing: -1px;
+        }
+
+        .speaking-waveform-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            height: 90px;
+            margin: 12px 0;
+        }
+
+        .speaking-wave-bar {
+            width: 10px;
+            height: 12px;
+            background: #3b82f6;
+            border-radius: 6px;
+            transition: height 0.08s ease-out;
+        }
+
+        .speaking-bottom-btn {
+            width: 100%;
+            padding: 16px;
+            background: #ffffff;
+            color: #1e293b;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.15s ease;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .speaking-bottom-btn:hover {
+            background: #f8fafc;
+            transform: translateY(-1px);
+        }
+
+        .speaking-two-btn-row {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            z-index: 2;
+        }
+
+        .speaking-two-btn-row .btn-light {
+            flex: 1;
+            padding: 14px;
+            background: #ffffff;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .speaking-two-btn-row .btn-dark {
+            flex: 1;
+            padding: 14px;
+            background: #2563eb;
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        /* 결과 화면 디자인 요소 */
+        .result-score-box {
+            background: #f1f5f9;
+            border-radius: 16px;
+            padding: 16px;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .result-score-val {
+            font-size: 48px;
+            font-weight: 900;
+            color: #0f172a;
+            margin-top: 4px;
+        }
+
+        .result-card-box {
+            border-radius: 16px;
+            padding: 16px;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: left;
+        }
+
+        .result-card-box.question {
+            background: #3b82f6;
+            color: #ffffff;
+        }
+
+        .result-card-box.my-answer {
+            background: #ffffff;
+            color: #0f172a;
+            border: 1.5px solid #e2e8f0;
+        }
+
+        .word-match-correct {
+            color: #16a34a;
+            font-weight: 800;
+        }
+
+        .word-match-fuzzy {
+            color: #d97706;
+            font-weight: 800;
+            border-bottom: 2px dashed #f59e0b;
+        }
+
+        .word-match-wrong {
+            color: #dc2626;
+            font-weight: 800;
+            text-decoration: line-through;
+        }
+
         .sec-select-area {
             display: flex;
             flex-direction: column;
@@ -654,9 +949,10 @@
         }
 
         .sec-select-title {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 700;
             color: var(--text-muted);
+            line-height: 1.4;
         }
 
         .sec-btn-grid {
@@ -682,6 +978,133 @@
             background: #dcfce7;
             color: #15803d;
             border-color: #16a34a;
+        }
+
+        .voice-list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 260px;
+            overflow-y: auto;
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            padding: 8px;
+            background: #f8f9fa;
+        }
+
+        .voice-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #ffffff;
+            border: 1.5px solid var(--border-color);
+            padding: 10px 12px;
+            border-radius: 8px;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .voice-item:hover {
+            border-color: var(--slack-blue);
+            background-color: #f0f7ff;
+        }
+
+        .voice-item.selected {
+            border-color: #f97316;
+            background: #fff7ed;
+            box-shadow: 0 2px 6px rgba(249, 115, 22, 0.15);
+        }
+
+        .voice-info {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            text-align: left;
+            flex: 1;
+        }
+
+        .voice-name {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .voice-lang {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .voice-badge {
+            background: #e2e8f0;
+            color: #334155;
+            font-size: 10px;
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-weight: 700;
+        }
+
+        .voice-test-btn {
+            padding: 6px 12px;
+            background: #ffffff;
+            border: 1.5px solid var(--slack-blue);
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--slack-blue);
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.15s ease;
+        }
+
+        .voice-test-btn:hover {
+            background: #e0f2fe;
+            transform: scale(1.03);
+        }
+
+        .voice-tune-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .tune-card {
+            background: #ffffff;
+            border: 1.5px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.15s ease;
+        }
+
+        .tune-card.selected {
+            border-color: #2563eb;
+            background: #eff6ff;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.15);
+        }
+
+        .tune-title {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .tune-desc {
+            font-size: 10.5px;
+            color: var(--text-muted);
         }
 
         #summary-area {
@@ -793,10 +1216,22 @@
             transform: translateY(0);
         }
 
-        /* 📱 모바일 전용 미디어 쿼리 */
+        /* 📱 모바일 전용 미디어 쿼리 (game-active 여백 원복 및 스피커/반복 버튼 위치 분리) */
         @media (max-width: 650px) {
             body {
                 padding: 10px 8px;
+            }
+
+            body.game-active {
+                padding: 10px 12px !important; /* [1] 기존 숨통 트이는 여백으로 원복 */
+            }
+
+            #game-area {
+                gap: 10px !important;
+            }
+
+            .nyan-timer-box {
+                padding: 12px 14px !important;
             }
 
             #setup-area {
@@ -808,20 +1243,21 @@
                 font-size: 28px;
             }
 
-            .shortcut-text {
+            .shortcut-text, .desktop-shortcut {
                 display: none !important;
             }
 
             .nyan-timer-header {
-                font-size: 12px;
-                gap: 4px;
+                font-size: 11px;
+                gap: 3px;
+                margin-bottom: 6px;
             }
 
-            .nyan-time, .study-btn, .mute-btn, .progress, .autoplay-btn {
+            .study-btn, .mute-btn, .voice-btn, .autoplay-btn {
                 height: 32px;
-                font-size: 12px;
+                font-size: 11px;
                 font-weight: 800;
-                padding: 0 6px;
+                padding: 0 5px;
             }
 
             .cards-grid {
@@ -853,14 +1289,6 @@
                 justify-content: center !important;
             }
 
-            .replay-btn {
-                right: 12px;
-                bottom: 12px;
-                height: 36px;
-                padding: 0 10px;
-                font-size: 12px;
-            }
-
             #game-area .card-word, #game-area .placeholder {
                 font-size: 34px !important;
             }
@@ -888,6 +1316,24 @@
                 font-size: 17px !important;
                 padding: 0 4px;
                 border-radius: 10px;
+            }
+
+            /* [2] 모바일 전용: 스피커(상단 우측) & 반복(하단 우측) 각자 독립 위치 설정 */
+            .show-answers .section-en .card-top-actions {
+                display: block;
+                position: static;
+            }
+
+            .card-action-btn.card-speaking-btn {
+                position: absolute;
+                top: 12px;
+                right: 12px;
+            }
+
+            .card-action-btn.card-repeat-btn {
+                position: absolute;
+                bottom: 12px;
+                right: 12px;
             }
 
             #summary-area .controls {
@@ -936,8 +1382,54 @@
     </div>
 </div>
 
+<!-- 🎙️ 음성(Voice) 선택 모달 -->
+<div id="voice-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeVoiceModal()">
+    <div class="modal-card">
+        <div class="modal-header">
+            <span>🎙️ 음성 선택 (시스템 최적화)</span>
+            <button onclick="closeVoiceModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖</button>
+        </div>
+
+        <div class="sec-select-area">
+            <div class="sec-select-title">1️⃣ 감지된 지역별 영어 보이스</div>
+            <div id="voice-list-wrapper" class="voice-list-container">
+            </div>
+        </div>
+
+        <div class="sec-select-area">
+            <div class="sec-select-title">2️⃣ 음성 톤 & 억양 캐릭터 변경</div>
+            <div class="voice-tune-grid">
+                <div id="tune-normal" class="tune-card selected" onclick="selectVoiceTune('normal', 1.0, 0.85)">
+                    <span class="tune-title">🎙️ 기본 톤</span>
+                    <span class="tune-desc">표준 피치 & 명확한 발음</span>
+                </div>
+                <div id="tune-deep" class="tune-card" onclick="selectVoiceTune('deep', 0.75, 0.8)">
+                    <span class="tune-title">🧔 중저음 톤</span>
+                    <span class="tune-desc">차분하고 묵직한 보이스</span>
+                </div>
+                <div id="tune-bright" class="tune-card" onclick="selectVoiceTune('bright', 1.3, 0.9)">
+                    <span class="tune-title">👩 밝은 고음 톤</span>
+                    <span class="tune-desc">또렷하고 높은 보이스</span>
+                </div>
+                <div id="tune-fast" class="tune-card" onclick="selectVoiceTune('fast', 1.1, 1.1)">
+                    <span class="tune-title">⚡ 빠른 속도</span>
+                    <span class="tune-desc">실제 원어민 회화 속도</span>
+                </div>
+            </div>
+        </div>
+
+        <button class="base-btn" style="background:var(--slack-purple); width:100%; padding:12px;" onclick="closeVoiceModal()">적용 완료</button>
+    </div>
+</div>
+
+<!-- 🎙️ 스피킹 연습 & 첨삭 모달 -->
+<div id="speaking-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeSpeakingModal()">
+    <div id="speaking-card" class="speaking-modal-card">
+    </div>
+</div>
+
 <div class="container">
-    <!-- 초기 설정 화면 (최상단 제목 ➔ 입력창 ➔ 버튼 순서 배치) -->
+    <!-- 초기 설정 화면 -->
     <div id="setup-area">
         <h1>🎮 퐁크러쉬</h1>
         <input type="text" id="excel-url" placeholder="공개된 엑셀 파일 또는 구글 시트 URL 입력" />
@@ -950,7 +1442,7 @@
             <button class="quick-btn" onclick="loadShortcutUrl('https://docs.google.com/spreadsheets/d/1UYTEv88wdKsSS2kkB-UylHAfQAlV6yrvjwVNecG6m64/edit?usp=sharing')">✍️ 라이팅 단어 시험 바로가기</button>
             <button class="quick-btn" onclick="loadShortcutUrl('https://docs.google.com/spreadsheets/d/1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U/edit?usp=sharing')">🍀 초록이 단어 시험 바로가기</button>
             
-            <button id="pwa-review-btn" class="pwa-review-btn hidden" onclick="startPWAReview()">🔥 저장된 헷갈린 단어 복습 (0개)</button>
+            <button id="pwa-review-btn" class="pwa-review-btn hidden" onclick="startPWAReview()">🔥 통합 단어시험 바로가기 (0개)</button>
             <button id="clear-pwa-btn" class="clear-pwa-btn hidden" onclick="confirmClearPWASavedWords()">🗑️ 저장된 단어 전체 삭제</button>
         </div>
     </div>
@@ -974,26 +1466,24 @@
         <!-- 🐱🌈 냥캣 타이머 바 -->
         <div id="nyan-timer-container" class="nyan-timer-box">
             <div class="nyan-timer-header">
-                <div style="display: flex; align-items: center; gap: 4px;">
-                    <!-- 1. [ 시험 <-> 공부 ] (Q) -->
+                <div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
                     <button id="study-btn" class="study-btn" onclick="toggleStudyMode()">
-                        <span id="study-btn-label">📝 시험</span> <span class="shortcut-text">(Q)</span>
+                        <span id="study-btn-label">📝 시험</span> <span class="shortcut-text">(A)</span>
                     </button>
-                    <!-- 2. [ 수동 <-> 자동 ] (W) -->
                     <button id="autoplay-btn" class="autoplay-btn" onclick="handleAutoplayBtnClick()">
-                        <span id="autoplay-btn-label">🖐️ 수동</span> <span class="shortcut-text">(W)</span>
+                        <span id="autoplay-btn-label">🖐️ 수동</span> <span class="shortcut-text">(S)</span>
                     </button>
-                    <!-- 3. [ 노래 <-> 뮤트 ] (E) -->
-                    <button id="mute-btn" class="mute-btn active-music" onclick="toggleMute()">
-                        <span id="mute-btn-label">🎵 노래</span> <span class="shortcut-text">(E)</span>
+                    <!-- [3] 시작시 노래 기본 뮤트 상태 반영 -->
+                    <button id="mute-btn" class="mute-btn is-muted" onclick="toggleMute()">
+                        <span id="mute-btn-label">🔇 뮤트</span> <span class="shortcut-text">(D)</span>
                     </button>
-                </div>
-                
-                <div style="display: flex; align-items: center; gap: 4px; flex-shrink: 0;">
-                    <span class="nyan-time" id="nyan-timer-text">⏱️ 07:00</span>
-                    <span class="progress" id="card-progress">0 / 0</span>
+                    <button id="voice-btn" class="voice-btn" onclick="openVoiceModal()">
+                        🎙️ 목소리 <span id="voice-mode-tag">(자동)</span> <span class="shortcut-text">(F)</span>
+                    </button>
                 </div>
             </div>
+
+            <!-- [프로그레스바 , 남은 시간 , 단어 갯수] 순서 정렬 -->
             <div class="nyan-controls-row">
                 <div class="nyan-track">
                     <div class="nyan-trail" id="nyan-trail">
@@ -1001,6 +1491,8 @@
                     </div>
                     <span class="nyan-star">⭐</span>
                 </div>
+                <span class="nyan-time" id="nyan-timer-text">07:00</span>
+                <span class="progress" id="card-progress">0 / 0</span>
             </div>
         </div>
     </div>
@@ -1031,11 +1523,209 @@
             <button class="base-btn" style="margin: 0; background-color: #2b8a3e;" onclick="copySummaryAsImage()">📷 이미지 저장 및 공유</button>
             <button class="base-btn" style="margin: 0; background-color: var(--slack-blue);" onclick="reviewVagueWords()">복습 리스트만 다시 복습 🔁</button>
             <button class="base-btn" style="margin: 0; background-color: var(--slack-purple);" onclick="restartFullGame()">전체 다시 복습 🔄</button>
+            <button class="base-btn" style="margin: 0; background-color: #475569;" onclick="goToHome()">🏠 홈으로</button>
         </div>
     </div>
 </div>
 
 <script>
+    /**
+     * =========================================================================
+     * ⚡ 100% Client-Side Pure JavaScript Advanced Speaking Feedback Engine
+     * =========================================================================
+     */
+    class ClientSpeakingEngine {
+        constructor(minGreenConfidence = 0.82) {
+            this.minGreenConfidence = minGreenConfidence;
+        }
+
+        normalize(word) {
+            return word ? word.replace(/[^\w\s]/g, '').toLowerCase().trim() : '';
+        }
+
+        levenshteinDistance(s1, s2) {
+            if (s1.length < s2.length) return this.levenshteinDistance(s2, s1);
+            if (s2.length === 0) return s1.length;
+
+            let previousRow = Array.from({ length: s2.length + 1 }, (_, i) => i);
+            for (let i = 0; i < s1.length; i++) {
+                let currentRow = [i + 1];
+                for (let j = 0; j < s2.length; j++) {
+                    let insertions = previousRow[j + 1] + 1;
+                    let deletions = currentRow[j] + 1;
+                    let substitutions = previousRow[j] + (s1[i] !== s2[j] ? 1 : 0);
+                    currentRow.push(Math.min(insertions, deletions, substitutions));
+                }
+                previousRow = currentRow;
+            }
+            return previousRow[s2.length];
+        }
+
+        similarityRatio(s1, s2) {
+            const dist = this.levenshteinDistance(s1, s2);
+            const maxLen = Math.max(s1.length, s2.length);
+            return maxLen === 0 ? 1.0 : 1.0 - (dist / maxLen);
+        }
+
+        getStem(word) {
+            let w = word.toLowerCase().trim();
+            if (w.length <= 3) return w;
+
+            if (w.endsWith('ies')) return w.slice(0, -3) + 'y';
+            if (w.endsWith('es')) return w.slice(0, -2);
+            if (w.endsWith('s') && !w.endsWith('ss')) return w.slice(0, -1);
+
+            if (w.endsWith('ied')) return w.slice(0, -3) + 'y';
+            if (w.endsWith('ed')) {
+                if (w.length > 4 && w[w.length - 3] === w[w.length - 4]) return w.slice(0, -3);
+                return w.slice(0, -2);
+            }
+
+            if (w.endsWith('ing') && w.length > 4) return w.slice(0, -3);
+
+            return w;
+        }
+
+        alignWords(targetWords, sttWords) {
+            const n = targetWords.length;
+            const m = sttWords.length;
+
+            const dp = Array.from({ length: n + 1 }, () => Array(m + 1).fill(0));
+            for (let i = 0; i <= n; i++) dp[i][0] = i * -1;
+            for (let j = 0; j <= m; j++) dp[0][j] = j * -1;
+
+            for (let i = 1; i <= n; i++) {
+                for (let j = 1; j <= m; j++) {
+                    const tNorm = this.normalize(targetWords[i - 1]);
+                    const sNorm = this.normalize(sttWords[j - 1]);
+                    const sim = this.similarityRatio(tNorm, sNorm);
+
+                    const matchScore = sim > 0.85 ? 2 : (sim > 0.5 ? 0.5 : -1);
+                    dp[i][j] = Math.max(
+                        dp[i - 1][j - 1] + matchScore,
+                        dp[i - 1][j] - 1,
+                        dp[i][j - 1] - 1
+                    );
+                }
+            }
+
+            const aligned = [];
+            let i = n, j = m;
+            while (i > 0 || j > 0) {
+                if (i > 0 && j > 0) {
+                    const tNorm = this.normalize(targetWords[i - 1]);
+                    const sNorm = this.normalize(sttWords[j - 1]);
+                    const sim = this.similarityRatio(tNorm, sNorm);
+                    const matchScore = sim > 0.85 ? 2 : (sim > 0.5 ? 0.5 : -1);
+
+                    if (dp[i][j] === dp[i - 1][j - 1] + matchScore) {
+                        aligned.push({ target: targetWords[i - 1], stt: sttWords[j - 1] });
+                        i--; j--;
+                        continue;
+                    }
+                }
+
+                if (i > 0 && (j === 0 || dp[i][j] === dp[i - 1][j] - 1)) {
+                    aligned.push({ target: targetWords[i - 1], stt: '' });
+                    i--;
+                } else {
+                    aligned.push({ target: '', stt: sttWords[j - 1] });
+                    j--;
+                }
+            }
+
+            return aligned.reverse();
+        }
+
+        evaluate(targetSentence, sttTranscript) {
+            const targetWords = targetSentence.trim().split(/\s+/).filter(Boolean);
+            const sttWords = sttTranscript.trim().split(/\s+/).filter(Boolean);
+
+            if (sttWords.length === 0) {
+                return {
+                    overallScore: 0,
+                    details: targetWords.map(tw => ({
+                        targetWord: tw,
+                        spokenWord: '[미인식]',
+                        color: 'RED',
+                        score: 0,
+                        reason: '단어를 발음하지 않음'
+                    }))
+                };
+            }
+
+            const alignedPairs = this.alignWords(targetWords, sttWords);
+            const details = [];
+            let totalScore = 0;
+            let validTargetCount = 0;
+
+            alignedPairs.forEach(pair => {
+                const targetRaw = pair.target;
+                const sttRaw = pair.stt;
+
+                if (!targetRaw && sttRaw) {
+                    details.push({
+                        targetWord: '',
+                        spokenWord: sttRaw,
+                        color: 'RED',
+                        score: 0,
+                        reason: `추가 발음: '${sttRaw}'`
+                    });
+                    return;
+                }
+
+                validTargetCount++;
+                const tNorm = this.normalize(targetRaw);
+                const sNorm = this.normalize(sttRaw);
+
+                let color = 'RED';
+                let score = 0;
+                let reason = '';
+
+                if (!sNorm) {
+                    color = 'RED';
+                    score = 0;
+                    reason = `단어 누락 (원문: '${targetRaw}')`;
+                } else if (tNorm === sNorm) {
+                    color = 'GREEN';
+                    score = 100;
+                    reason = `정확한 단어 일치 ('${targetRaw}')`;
+                } else {
+                    const tStem = this.getStem(tNorm);
+                    const sStem = this.getStem(sNorm);
+                    const sim = this.similarityRatio(tNorm, sNorm);
+
+                    if (tStem === sStem) {
+                        color = 'ORANGE';
+                        score = 50;
+                        reason = `단/복수 또는 시제 변형 오류 (원문: '${targetRaw}' ↔ 발음: '${sttRaw}')`;
+                    } else if (sim >= 0.55) {
+                        color = 'ORANGE';
+                        score = 40;
+                        reason = `유사 발음 오독 (원문: '${targetRaw}' ↔ 발음: '${sttRaw}')`;
+                    } else {
+                        color = 'RED';
+                        score = 0;
+                        reason = `잘못된 단어 선택 (원문: '${targetRaw}' ↔ 발음: '${sttRaw}')`;
+                    }
+                }
+
+                totalScore += score;
+                details.push({
+                    targetWord: targetRaw,
+                    spokenWord: sttRaw || '[미인식]',
+                    color: color,
+                    score: score,
+                    reason: reason
+                });
+            });
+
+            const count = validTargetCount > 0 ? validTargetCount : 1;
+            const overallScore = Math.round(totalScore / count);
+            return { overallScore, details };
+        }
+    }
+
     let originalWordList = []; 
     let wordList = [];
     let vagueWords = [];       
@@ -1046,25 +1736,49 @@
     const cardsPerPage = 1; 
     
     // 타이머
-    const TOTAL_SECONDS = 420; // 7분 = 420초
+    const TOTAL_SECONDS = 420;
     let activeTotalSeconds = TOTAL_SECONDS;
     let remainingSeconds = TOTAL_SECONDS;
     let timerInterval = null;
     let currentImageType = 'type1'; 
     let currentImgNum = 1;
 
-    // 🤖 자동재생 제어 변수 (기본 추천 대기시간: 2.0초)
+    // 🤖 자동재생 제어 변수
     let isAutoplay = false;
     let autoplayIntervalSec = 2.0; 
     let tempAutoplaySec = 2.0;
     let autoplayTimer = null;
 
-    // 🎵 사운드 제어
+    // 🎵 사운드 및 TTS 음성 제어
     let bgAudio = null;
-    let isMuted = false;
+    let isMuted = true; // [3] 시작 시 노래는 기본 뮤트 상태로 설정
     let synthAudioCtx = null;
+    let selectedVoiceURI = ''; 
+    let currentPitch = 1.0;
+    let currentRate = 0.85;
+    let currentTuneProfile = 'normal';
+    let availableVoices = [];
+
+    // 🎙️ 스피킹 첨삭 기능 변수
+    let speakingTargetText = '';
+    let speakingType = 'sentence';
+    let speakingStep = 1;
+    let speakingSpeechSpeed = 1.0;
+    let isSpeakingTextVisible = false; // 첫 화면 기본 문장 비노출
+    let speakingRecognition = null;
+    let speakingRecordedTranscript = '';
+    let speakingTimerInterval = null;
+    let speakingSeconds = 0;
+    let isSpeakingRecording = false;
+
+    // 실시간 음량 시각화 관련 객체
+    let micAudioContext = null;
+    let micAnalyser = null;
+    let micAnimFrameId = null;
 
     const PWA_VAGUE_STORAGE_KEY = 'pwa_vague_words_list_v1';
+    const SELECTED_VOICE_STORAGE_KEY = 'selected_tts_voice_uri_v4';
+    const SELECTED_TUNE_STORAGE_KEY = 'selected_tts_tune_profile_v4';
 
     function registerServiceWorker() {
         if ('serviceWorker' in navigator) {
@@ -1077,11 +1791,222 @@
     function requestPersistentStorage() {
         if (navigator.storage && navigator.storage.persist) {
             navigator.storage.persist().then(persistent => {
-                if (persistent) {
-                    console.log("🔒 브라우저 영구 저장 권한 확보 완료");
-                }
+                if (persistent) console.log("🔒 브라우저 영구 저장 권한 확보 완료");
             }).catch(err => console.warn(err));
         }
+    }
+
+    function fetchSystemVoices() {
+        if (!('speechSynthesis' in window)) return [];
+        let voices = window.speechSynthesis.getVoices();
+        const filtered = voices.filter(v => v.lang.toLowerCase().startsWith('en') || v.lang === '' || v.lang.toLowerCase().startsWith('en_'));
+        availableVoices = filtered.length > 0 ? filtered : voices;
+
+        availableVoices.sort((a, b) => {
+            const langA = a.lang.toLowerCase();
+            const langB = b.lang.toLowerCase();
+            if (langA.includes('us') && !langB.includes('us')) return -1;
+            if (!langA.includes('us') && langB.includes('us')) return 1;
+            return a.name.localeCompare(b.name);
+        });
+
+        return availableVoices;
+    }
+
+    function initVoiceEngine() {
+        fetchSystemVoices();
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = () => {
+                fetchSystemVoices();
+                if (!document.getElementById('voice-modal').classList.contains('hidden')) {
+                    renderVoiceListUI();
+                }
+            };
+        }
+        let pollCount = 0;
+        const voiceInterval = setInterval(() => {
+            pollCount++;
+            const v = fetchSystemVoices();
+            if (v.length > 0 || pollCount > 10) clearInterval(voiceInterval);
+        }, 300);
+    }
+
+    function openVoiceModal() {
+        const modal = document.getElementById('voice-modal');
+        if (modal) modal.classList.remove('hidden');
+        loadSavedVoiceSettings();
+        fetchSystemVoices();
+        renderVoiceListUI();
+        updateTuneCardsUI();
+    }
+
+    function closeVoiceModal() {
+        const modal = document.getElementById('voice-modal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    function loadSavedVoiceSettings() {
+        try {
+            selectedVoiceURI = localStorage.getItem(SELECTED_VOICE_STORAGE_KEY) || '';
+            currentTuneProfile = localStorage.getItem(SELECTED_TUNE_STORAGE_KEY) || 'normal';
+            applyTuneProfileValues(currentTuneProfile);
+            updateVoiceModeTagUI();
+        } catch(e) {}
+    }
+
+    function updateVoiceModeTagUI() {
+        const tag = document.getElementById('voice-mode-tag');
+        if (tag) {
+            tag.innerText = selectedVoiceURI ? '(지정)' : '(자동)';
+        }
+    }
+
+    function applyTuneProfileValues(profile) {
+        currentTuneProfile = profile;
+        if (profile === 'deep') { currentPitch = 0.75; currentRate = 0.8; }
+        else if (profile === 'bright') { currentPitch = 1.3; currentRate = 0.9; }
+        else if (profile === 'fast') { currentPitch = 1.1; currentRate = 1.1; }
+        else { currentPitch = 1.0; currentRate = 0.85; }
+    }
+
+    function getFlagByLang(lang, name) {
+        const l = lang.toLowerCase();
+        const n = name.toLowerCase();
+        if (l.includes('au') || n.includes('australia')) return '🇦🇺 호주';
+        if (l.includes('in') || n.includes('india')) return '🇮🇳 인도';
+        if (l.includes('ng') || n.includes('nigeria')) return '🇳🇬 나이지리아';
+        if (l.includes('gb') || l.includes('uk') || n.includes('united kingdom')) return '🇬🇧 영국';
+        if (l.includes('us') || n.includes('united states')) return '🇺🇸 미국';
+        if (l.includes('ca') || n.includes('canada')) return '🇨🇦 캐나다';
+        if (l.includes('ph') || n.includes('philippines')) return '🇵🇭 필리핀';
+        return '🌐 영어';
+    }
+
+    function renderVoiceListUI() {
+        const wrapper = document.getElementById('voice-list-wrapper');
+        if (!wrapper) return;
+
+        const voices = availableVoices.length > 0 ? availableVoices : fetchSystemVoices();
+        let html = '';
+
+        const isAutoSelected = !selectedVoiceURI;
+        html += `
+            <div class="voice-item ${isAutoSelected ? 'selected' : ''}" onclick="selectVoiceAuto()">
+                <div class="voice-info">
+                    <span class="voice-name">🎲 자동 (데스크탑: 남성 / 모바일: US/UK 발음 랜덤)</span>
+                    <span class="voice-lang">
+                        <span class="voice-badge" style="background:#dcfce7; color:#15803d;">기본 추천</span>
+                    </span>
+                </div>
+            </div>
+        `;
+
+        voices.forEach((voice) => {
+            const isSelected = (voice.voiceURI === selectedVoiceURI);
+            const flagBadge = getFlagByLang(voice.lang, voice.name);
+            let engineType = voice.name.includes('Google') ? 'Google' : (voice.name.includes('Microsoft') ? 'Microsoft' : (voice.name.includes('Samsung') ? 'Samsung' : 'System'));
+
+            html += `
+                <div class="voice-item ${isSelected ? 'selected' : ''}" onclick="selectVoiceEngine('${voice.voiceURI.replace(/'/g, "\\'")}')">
+                    <div class="voice-info">
+                        <span class="voice-name">${voice.name}</span>
+                        <span class="voice-lang">
+                            <span class="voice-badge">${flagBadge}</span>
+                            <span class="voice-badge" style="background:#f1f5f9; color:#475569;">${engineType}</span>
+                        </span>
+                    </div>
+                    <button type="button" class="voice-test-btn" onclick="event.stopPropagation(); testVoiceWithSample('${voice.voiceURI.replace(/'/g, "\\'")}')">테스트 🔊</button>
+                </div>
+            `;
+        });
+        wrapper.innerHTML = html;
+    }
+
+    function selectVoiceAuto() {
+        selectedVoiceURI = '';
+        try { localStorage.removeItem(SELECTED_VOICE_STORAGE_KEY); } catch(e) {}
+        renderVoiceListUI();
+        updateVoiceModeTagUI();
+        showToast("🎙️ 음성이 자동 (랜덤 순환) 모드로 설정되었습니다.");
+    }
+
+    function selectVoiceEngine(uri) {
+        selectedVoiceURI = uri;
+        try { localStorage.setItem(SELECTED_VOICE_STORAGE_KEY, uri); } catch(e) {}
+        renderVoiceListUI();
+        updateVoiceModeTagUI();
+        showToast("🎙️ 특정 음성이 고정 선택되었습니다.");
+    }
+
+    function selectVoiceTune(profile, pitch, rate) {
+        applyTuneProfileValues(profile);
+        try { localStorage.setItem(SELECTED_TUNE_STORAGE_KEY, profile); } catch(e) {}
+        updateTuneCardsUI();
+        testVoiceWithSample(selectedVoiceURI);
+    }
+
+    function updateTuneCardsUI() {
+        ['normal', 'deep', 'bright', 'fast'].forEach(p => {
+            const card = document.getElementById(`tune-${p}`);
+            if (card) {
+                if (p === currentTuneProfile) card.classList.add('selected');
+                else card.classList.remove('selected');
+            }
+        });
+    }
+
+    function getRandomOrSelectedVoice() {
+        const voices = availableVoices.length > 0 ? availableVoices : window.speechSynthesis.getVoices();
+        if (voices.length === 0) return null;
+
+        if (selectedVoiceURI) {
+            const matched = voices.find(v => v.voiceURI === selectedVoiceURI);
+            if (matched) return matched;
+        }
+
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        if (!isMobile) {
+            const maleKeywords = ['david', 'mark', 'george', 'james', 'guy', 'male', 'natural', 'richard', 'ryan'];
+            const maleVoices = voices.filter(v => {
+                const name = v.name.toLowerCase();
+                const lang = v.lang.toLowerCase();
+                return (lang.startsWith('en') || lang === '') && maleKeywords.some(k => name.includes(k));
+            });
+            if (maleVoices.length > 0) {
+                return maleVoices[Math.floor(Math.random() * maleVoices.length)];
+            }
+        } else {
+            const usUkVoices = voices.filter(v => {
+                const l = v.lang.toLowerCase();
+                return l === 'en-us' || l === 'en_us' || l === 'en-gb' || l === 'en_gb' || l.includes('us') || l.includes('gb');
+            });
+            if (usUkVoices.length > 0) {
+                return usUkVoices[Math.floor(Math.random() * usUkVoices.length)];
+            }
+        }
+
+        const enVoices = voices.filter(v => v.lang.toLowerCase().startsWith('en'));
+        const pool = enVoices.length > 0 ? enVoices : voices;
+        return pool[Math.floor(Math.random() * pool.length)];
+    }
+
+    function testVoiceWithSample(uri) {
+        stopTTS();
+        if (!('speechSynthesis' in window)) return;
+        
+        const utter = new SpeechSynthesisUtterance("Hello! Welcome to Pong Crush English test.");
+        utter.pitch = currentPitch;
+        utter.rate = currentRate;
+        
+        const voiceObj = getRandomOrSelectedVoice();
+        if (voiceObj) {
+            utter.voice = voiceObj;
+            utter.lang = voiceObj.lang || 'en-US';
+        } else {
+            utter.lang = 'en-US';
+        }
+        window.speechSynthesis.speak(utter);
     }
 
     function getPWASavedWords() {
@@ -1093,7 +2018,6 @@
 
     function addWordToPWAStorage(item) {
         if (!item) return;
-
         const savedList = getPWASavedWords();
         const isExists = savedList.some(w => w.ko === item.ko && w.en === item.en);
         if (!isExists) {
@@ -1107,7 +2031,6 @@
 
     function removeWordFromPWAStorage(item) {
         if (!item) return;
-
         let savedList = getPWASavedWords();
         savedList = savedList.filter(w => !(w.ko === item.ko && w.en === item.en));
         try {
@@ -1123,7 +2046,7 @@
 
         const savedList = getPWASavedWords();
         pwaBtn.classList.remove('hidden');
-        pwaBtn.innerText = `🔥 저장된 헷갈린 단어 복습 (${savedList.length}개)`;
+        pwaBtn.innerText = `🔥 통합 단어시험 바로가기 (${savedList.length}개)`;
 
         if (clearBtn) {
             if (savedList.length > 0) clearBtn.classList.remove('hidden');
@@ -1147,7 +2070,6 @@
         }
     }
 
-    /* 🤖 [수동 <-> 자동] 버튼 클릭 처리 (W) */
     function handleAutoplayBtnClick() {
         if (isAutoplay) {
             isAutoplay = false;
@@ -1166,10 +2088,8 @@
 
     function openAutoplayModal() {
         tempAutoplaySec = autoplayIntervalSec || 2.0;
-
         const modal = document.getElementById('autoplay-modal');
         if (modal) modal.classList.remove('hidden');
-
         updateTempSecButtonsUI(tempAutoplaySec);
     }
 
@@ -1187,11 +2107,8 @@
         const buttons = document.querySelectorAll('.sec-btn');
         const secValues = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0];
         buttons.forEach((btn, index) => {
-            if (secValues[index] === selectedSec) {
-                btn.classList.add('selected');
-            } else {
-                btn.classList.remove('selected');
-            }
+            if (secValues[index] === selectedSec) btn.classList.add('selected');
+            else btn.classList.remove('selected');
         });
     }
 
@@ -1209,7 +2126,6 @@
         
         closeAutoplayModal();
         showToast(`🤖 자동재생 ON (대기: ${autoplayIntervalSec}초)`);
-
         startAutoplayLoopForCurrentCard();
     }
 
@@ -1246,13 +2162,10 @@
         }
 
         speakCurrentWord(() => {
-            if (isAutoplay) {
-                handlePrimaryAction();
-            }
+            if (isAutoplay) handlePrimaryAction();
         });
     }
 
-    /* 📖 [ 시험 <-> 공부 ] 토글 (Q) */
     function toggleStudyMode() {
         isStudyMode = !isStudyMode;
         const containerEl = document.getElementById('nyan-timer-container');
@@ -1267,7 +2180,7 @@
                 timerInterval = null;
             }
             containerEl.classList.add('study-mode-on');
-            if (timerTextEl) timerTextEl.innerText = "😴 휴식중";
+            if (timerTextEl) timerTextEl.innerText = "휴식중";
             if (catEmojiEl) catEmojiEl.innerText = "💤";
             if (studyBtn) studyBtn.classList.add('active');
             if (studyBtnLabel) studyBtnLabel.innerText = "📖 공부";
@@ -1341,13 +2254,28 @@
 
         try {
             const wordUtterance = new SpeechSynthesisUtterance(cleanWord);
-            wordUtterance.lang = 'en-US';
-            wordUtterance.rate = 0.85;
+            wordUtterance.pitch = currentPitch;
+            wordUtterance.rate = currentRate;
+
+            const voiceObj = getRandomOrSelectedVoice();
+            if (voiceObj) {
+                wordUtterance.voice = voiceObj;
+                wordUtterance.lang = voiceObj.lang || 'en-US';
+            } else {
+                wordUtterance.lang = 'en-US';
+            }
 
             if (isStudyMode && cleanExEn) {
                 const exUtterance = new SpeechSynthesisUtterance(cleanExEn);
-                exUtterance.lang = 'en-US';
-                exUtterance.rate = 0.85;
+                exUtterance.pitch = currentPitch;
+                exUtterance.rate = currentRate;
+                
+                if (voiceObj) {
+                    exUtterance.voice = voiceObj;
+                    exUtterance.lang = voiceObj.lang || 'en-US';
+                } else {
+                    exUtterance.lang = 'en-US';
+                }
 
                 wordUtterance.onend = () => {
                     window.speechSynthesis.speak(exUtterance);
@@ -1394,28 +2322,6 @@
         }, duration);
     }
 
-    function openImagePreviewModal(blobUrl) {
-        let modal = document.getElementById('image-preview-modal');
-        if (!modal) {
-            modal = document.createElement('div');
-            modal.id = 'image-preview-modal';
-            modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;backdrop-filter:blur(5px);';
-            modal.innerHTML = `
-                <div style="background:#fff;border-radius:12px;padding:16px;max-width:100%;max-height:90%;display:flex;flex-direction:column;align-items:center;gap:12px;box-shadow:0 10px 25px rgba(0,0,0,0.3);overflow:hidden;width:100%;">
-                    <div style="font-size:15px;font-weight:800;color:#1d1c1d;text-align:center;line-height:1.4;">
-                        📷 이미지를 <span style="color:#2563eb;">길게 누르시면</span><br>갤러리 저장 및 공유가 가능합니다!
-                    </div>
-                    <div style="flex:1;overflow:auto;width:100%;display:flex;justify-content:center;align-items:flex-start;border:1px solid #ddd;border-radius:8px;background:#f8f9fa;padding:8px;box-sizing:border-box;">
-                        <img id="preview-img-element" style="max-width:100%;height:auto;display:block;border-radius:4px;" />
-                    </div>
-                    <button onclick="document.getElementById('image-preview-modal').remove()" style="width:100%;padding:14px;background:#4a154b;color:#fff;border:none;border-radius:8px;font-weight:700;font-size:16px;cursor:pointer;">닫기 ✖</button>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-        document.getElementById('preview-img-element').src = blobUrl;
-    }
-
     function getSynthAudioContext() {
         if (!synthAudioCtx) {
             synthAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1436,7 +2342,6 @@
     window.addEventListener('touchstart', unlockAudioContext, { passive: true });
     window.addEventListener('keydown', unlockAudioContext, { passive: true });
 
-    /* 🎵 [ 노래 <-> 뮤트 ] 토글 스타일 (E) */
     function toggleMute() {
         isMuted = !isMuted;
         const muteBtn = document.getElementById('mute-btn');
@@ -1491,25 +2396,6 @@
                 osc.start(now + note.time);
                 osc.stop(now + note.time + note.duration);
             });
-
-            const chordFreqs = [523.25, 659.25, 783.99];
-            chordFreqs.forEach(freq => {
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(freq, now + 0.92);
-
-                gain.gain.setValueAtTime(0.18, now + 0.92);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.92 + 0.8);
-
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-
-                osc.start(now + 0.92);
-                osc.stop(now + 0.92 + 0.8);
-            });
-
         } catch (e) {}
     }
 
@@ -1535,15 +2421,14 @@
         return text;
     }
 
+    /* [3] bgAudio 오디오 객체 생성 시 기본 isMuted (true) 적용 */
     function playRandomBgSound() {
         stopBgSound();
-
         const randomTrack = Math.floor(Math.random() * 8) + 1;
         bgAudio = new Audio(`sounds/${randomTrack}.mp3`);
         bgAudio.loop = true;
         bgAudio.volume = 0.5;
-        bgAudio.muted = isMuted;
-        
+        bgAudio.muted = isMuted; // 기본값 true (음소거 상태)
         bgAudio.play().catch(err => {});
     }
 
@@ -1614,7 +2499,7 @@
         const trailEl = document.getElementById('nyan-trail');
         const containerEl = document.getElementById('nyan-timer-container');
 
-        if (timerTextEl) timerTextEl.innerText = `⏱️ ${timeStr}`;
+        if (timerTextEl) timerTextEl.innerText = timeStr;
 
         const elapsed = activeTotalSeconds - remainingSeconds;
         const progressPercent = Math.min(100, Math.max(0, (elapsed / activeTotalSeconds) * 100));
@@ -1624,15 +2509,10 @@
         const ratio = remainingSeconds / activeTotalSeconds;
         let newImgNum = 1;
 
-        if (ratio > 0.75) {
-            newImgNum = 1;
-        } else if (ratio > 0.50) {
-            newImgNum = 2;
-        } else if (ratio > 0.25) {
-            newImgNum = 3;
-        } else {
-            newImgNum = 4;
-        }
+        if (ratio > 0.75) newImgNum = 1;
+        else if (ratio > 0.50) newImgNum = 2;
+        else if (ratio > 0.25) newImgNum = 3;
+        else newImgNum = 4;
 
         if (currentImgNum !== newImgNum) {
             currentImgNum = newImgNum;
@@ -1651,6 +2531,34 @@
         loadExcelFromUrl();
     }
 
+    async function fetchSheetData(url) {
+        let exportUrl = url;
+        if (exportUrl.includes("docs.google.com/spreadsheets")) {
+            if (exportUrl.includes("/edit")) exportUrl = exportUrl.split('/edit')[0] + '/export?format=xlsx';
+            else if (!exportUrl.includes("/export")) exportUrl = exportUrl + '/export?format=xlsx';
+        }
+
+        const response = await fetch(exportUrl);
+        if (!response.ok) throw new Error("파일 로드 실패. 링크 공유 권한을 확인하세요.");
+        
+        const arrayBuffer = await response.arrayBuffer();
+        const data = new Uint8Array(arrayBuffer);
+        const workbook = XLSX.read(data, { type: 'array' });
+        
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        
+        return jsonData
+            .filter(row => row && row[0] && row[1]) 
+            .map(row => ({
+                ko: formatWordText(row[0]),
+                en: formatWordText(row[1]),
+                exEn: formatWordText(row[2] || ''),
+                exKo: formatWordText(row[3] || '')
+            }));
+    }
+
     async function loadExcelFromUrl() {
         let url = document.getElementById('excel-url').value.trim();
         
@@ -1660,56 +2568,16 @@
             return;
         }
 
-        if (wordList.length > 0) {
-            if (!confirm("시트를 최신화하면 기존의 복습 리스트 데이터가 모두 초기화됩니다. 진행하시겠습니까?")) {
-                return; 
-            }
-        }
-
-        if (url.includes("1m7KXifCB6txkKEOHqApMWOR4MQwqb6Ji1Dm-hRJYzLc")) {
-            currentCategory = "스피킹";
-        } else if (url.includes("1UYTEv88wdKsSS2kkB-UylHAfQAlV6yrvjwVNecG6m64")) {
-            currentCategory = "라이팅";
-        } else if (url.includes("1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U")) {
-            currentCategory = "초록이";
-        } else {
-            currentCategory = "단어암기";
-        }
-
-        if (url.includes("docs.google.com/spreadsheets")) {
-            if (url.includes("/edit")) {
-                url = url.split('/edit')[0] + '/export?format=xlsx';
-            } else if (!url.includes("/export")) {
-                url = url + '/export?format=xlsx';
-            }
-        }
+        if (url.includes("1m7KXifCB6txkKEOHqApMWOR4MQwqb6Ji1Dm-hRJYzLc")) currentCategory = "스피킹";
+        else if (url.includes("1UYTEv88wdKsSS2kkB-UylHAfQAlV6yrvjwVNecG6m64")) currentCategory = "라이팅";
+        else if (url.includes("1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U")) currentCategory = "초록이";
+        else currentCategory = "단어암기";
 
         statusEl.classList.remove('error');
         statusEl.innerHTML = '<div class="spinner"></div> 데이터 동기화 중...';
 
-        vagueWords = []; 
-        document.getElementById('summary-tbody').innerHTML = '';
-
         try {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error("파일 로드 실패. 링크 공유 권한을 확인하세요.");
-            
-            const arrayBuffer = await response.arrayBuffer();
-            const data = new Uint8Array(arrayBuffer);
-            const workbook = XLSX.read(data, { type: 'array' });
-            
-            const firstSheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[firstSheetName];
-            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-            
-            const tempExtractList = jsonData
-                .filter(row => row && row[0] && row[1]) 
-                .map(row => ({
-                    ko: formatWordText(row[0]),
-                    en: formatWordText(row[1]),
-                    exEn: formatWordText(row[2] || ''),
-                    exKo: formatWordText(row[3] || '')
-                }));
+            const tempExtractList = await fetchSheetData(url);
 
             if (tempExtractList.length === 0) {
                 throw new Error("유효한 단어 데이터(1열 한국어, 2열 영어)가 없습니다.");
@@ -1807,6 +2675,9 @@
                 </div>
             ` : '';
 
+            const speakingTargetTextToUse = (hasExample && item.exEn) ? item.exEn : item.en;
+            const speakingTypeToUse = (hasExample && item.exEn) ? 'sentence' : 'word';
+
             const cardHtml = `
                 <div class="card">
                     <div class="card-section section-ko">
@@ -1814,13 +2685,22 @@
                             <div class="${wordClass}">${item.ko}</div>
                         </div>
                     </div>
-                    <div class="card-section section-en">
+                    <div class="card-section section-en" onclick="if(showAnswers) speakCurrentWord();">
+                        <!-- 액션 버튼 그룹 (모바일에서 개별 절대위치 처리 가능하도록 클래스 지정) -->
+                        <div class="card-top-actions">
+                            <button type="button" class="card-action-btn card-repeat-btn" title="다시 듣기 (Space)" onclick="event.stopPropagation(); speakCurrentWord();">
+                                🔁<span class="desktop-shortcut">(Space)</span>
+                            </button>
+                            <button type="button" class="card-action-btn card-speaking-btn" title="스피킹 연습 (Z)" onclick="event.stopPropagation(); openSpeakingModal('${speakingTypeToUse}', '${speakingTargetTextToUse.replace(/'/g, "\\'")}');">
+                                🎙️<span class="desktop-shortcut">(Z)</span>
+                            </button>
+                        </div>
+                        
                         <div class="card-word-wrapper">
                             <div class="placeholder">?</div>
                             <div class="${wordClass}">${item.en}</div>
                             ${exampleHtml}
                         </div>
-                        <button type="button" class="replay-btn" onclick="event.stopPropagation(); speakCurrentWord();" title="다시 듣기 (R)">🔄 R</button>
                     </div>
                 </div>
             `;
@@ -1831,9 +2711,7 @@
         updateButtonsUI();
         updateKoCardBackground();
 
-        if (isAutoplay) {
-            startAutoplayLoopForCurrentCard();
-        }
+        if (isAutoplay) startAutoplayLoopForCurrentCard();
     }
 
     function handleVagueAction(targetIndex) {
@@ -1875,9 +2753,7 @@
             updateButtonsUI();
             
             speakCurrentWord(() => {
-                if (isAutoplay) {
-                    handlePrimaryAction();
-                }
+                if (isAutoplay) handlePrimaryAction();
             });
         } else {
             if (currentStartIndex + cardsPerPage < wordList.length) {
@@ -1893,7 +2769,7 @@
         const savedList = getPWASavedWords();
 
         if (savedList.length === 0) {
-            showToast("저장된 헷갈린 단어가 없습니다.");
+            showToast("저장된 단어가 없습니다.");
             return;
         }
 
@@ -1929,7 +2805,7 @@
             
             document.body.classList.remove('game-active');
             updatePWAReviewButtonUI();
-            showToast("🎉 저장된 헷갈린 단어 복습이 모두 완료되었습니다!");
+            showToast("🎉 저장된 통합 단어시험 복습이 완료되었습니다!");
             return;
         }
 
@@ -1964,6 +2840,18 @@
         }
 
         summaryArea.classList.remove('hidden');
+    }
+
+    function goToHome() {
+        stopTTS();
+        stopTimer();
+        stopBgSound();
+        document.getElementById('game-area').classList.add('hidden');
+        document.getElementById('summary-area').classList.add('hidden');
+        document.getElementById('setup-area').classList.remove('hidden');
+        document.body.classList.remove('game-active');
+        updatePWAReviewButtonUI();
+        showToast("🏠 초기 화면으로 이동했습니다.");
     }
 
     async function copySummaryAsImage() {
@@ -2129,41 +3017,408 @@
         startTimer(); 
     }
 
-    // ⌨️ [Q, W, E, R] 단축키 및 키보드 조작
-    document.addEventListener('keydown', (event) => {
-        const modal = document.getElementById('autoplay-modal');
-        const isModalOpen = modal && !modal.classList.contains('hidden');
+    function openSpeakingModal(type, targetText) {
+        speakingType = type;
+        speakingTargetText = targetText ? targetText.replace(/<[^>]*>/g, '').replace(/#/g, ' ').trim() : '';
+        speakingStep = 1;
+        speakingSpeechSpeed = 1.0;
+        isSpeakingTextVisible = false; // 첫 화면 기본 문장 비노출 설정
+        speakingRecordedTranscript = '';
 
-        if (isModalOpen) {
-            if (event.key === 'Escape') {
-                closeAutoplayModal();
-                return;
+        const modal = document.getElementById('speaking-modal');
+        if (modal) modal.classList.remove('hidden');
+
+        renderSpeakingModalUI();
+        speakTargetTextInModal();
+    }
+
+    function closeSpeakingModal() {
+        stopTTS();
+        stopSpeakingRecording();
+        const modal = document.getElementById('speaking-modal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    function toggleSpeakingSpeechSpeed() {
+        speakingSpeechSpeed = (speakingSpeechSpeed === 1.0) ? 0.75 : 1.0;
+        renderSpeakingModalUI();
+        speakTargetTextInModal();
+    }
+
+    function toggleSpeakingTextVisibility() {
+        isSpeakingTextVisible = !isSpeakingTextVisible;
+        renderSpeakingModalUI();
+    }
+
+    function speakTargetTextInModal() {
+        stopTTS();
+        if (!('speechSynthesis' in window) || !speakingTargetText) return;
+
+        const utter = new SpeechSynthesisUtterance(speakingTargetText);
+        utter.pitch = currentPitch;
+        utter.rate = currentRate * speakingSpeechSpeed;
+
+        const voiceObj = getRandomOrSelectedVoice();
+        if (voiceObj) {
+            utter.voice = voiceObj;
+            utter.lang = voiceObj.lang || 'en-US';
+        } else {
+            utter.lang = 'en-US';
+        }
+
+        window.speechSynthesis.speak(utter);
+    }
+
+    function setupMicVolumeVisualizer(stream) {
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            micAudioContext = new AudioContext();
+            const source = micAudioContext.createMediaStreamSource(stream);
+            micAnalyser = micAudioContext.createAnalyser();
+            micAnalyser.fftSize = 64;
+            source.connect(micAnalyser);
+
+            const dataArray = new Uint8Array(micAnalyser.frequencyBinCount);
+
+            function updateWaveVisual() {
+                if (!isSpeakingRecording) return;
+                micAnalyser.getByteFrequencyData(dataArray);
+
+                let sum = 0;
+                for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+                let average = sum / dataArray.length;
+
+                const bars = document.querySelectorAll('.speaking-wave-bar');
+                bars.forEach((bar, index) => {
+                    let h = Math.min(80, Math.max(12, average * (0.8 + (index % 3) * 0.3)));
+                    bar.style.height = `${h}px`;
+                });
+
+                micAnimFrameId = requestAnimationFrame(updateWaveVisual);
             }
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                confirmAutoplayModal();
-                return;
+
+            updateWaveVisual();
+        } catch(e) {
+            console.warn("마이크 시각화 설정 실패:", e);
+        }
+    }
+
+    function startSpeakingRecording() {
+        stopTTS();
+        speakingStep = 2;
+        speakingRecordedTranscript = '';
+        speakingSeconds = 0;
+        isSpeakingRecording = true;
+
+        renderSpeakingModalUI();
+
+        if (speakingTimerInterval) clearInterval(speakingTimerInterval);
+        speakingTimerInterval = setInterval(() => {
+            speakingSeconds++;
+            const timerEl = document.getElementById('speaking-rec-timer');
+            if (timerEl) {
+                const mins = String(Math.floor(speakingSeconds / 60)).padStart(2, '0');
+                const secs = String(speakingSeconds % 60).padStart(2, '0');
+                timerEl.innerText = `${mins}:${secs}`;
             }
-            return; 
+        }, 1000);
+
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (SpeechRecognition) {
+            try {
+                if (speakingRecognition) {
+                    try { speakingRecognition.abort(); } catch(e){}
+                }
+                speakingRecognition = new SpeechRecognition();
+                speakingRecognition.lang = 'en-US';
+                speakingRecognition.continuous = !isMobile;
+                speakingRecognition.interimResults = true;
+                speakingRecognition.maxAlternatives = 1;
+
+                speakingRecognition.onresult = (e) => {
+                    let interimText = '';
+                    let finalText = '';
+                    for (let i = 0; i < e.results.length; ++i) {
+                        if (e.results[i].isFinal) {
+                            finalText += e.results[i][0].transcript + ' ';
+                        } else {
+                            interimText += e.results[i][0].transcript;
+                        }
+                    }
+                    speakingRecordedTranscript = (finalText + ' ' + interimText).trim();
+                };
+
+                speakingRecognition.onerror = (e) => {
+                    console.warn("SpeechRecognition Error:", e.error);
+                    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+                        showToast("⚠️ 마이크 권한을 허용해주세요.");
+                    }
+                };
+
+                speakingRecognition.onend = () => {
+                    if (isSpeakingRecording && speakingRecognition) {
+                        try { speakingRecognition.start(); } catch(err){}
+                    }
+                };
+
+                speakingRecognition.start();
+            } catch (e) {
+                console.warn("SpeechRecognition start error:", e);
+            }
+        } else {
+            showToast("⚠️ 사용 중인 브라우저가 음성 인식을 지원하지 않습니다. (Chrome/Safari 권장)");
+        }
+
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+                window.speakingAudioStream = stream;
+                setupMicVolumeVisualizer(stream);
+            }).catch(err => {
+                console.warn("MediaDevices getUserMedia Error:", err);
+            });
+        }
+    }
+
+    function stopSpeakingRecording() {
+        isSpeakingRecording = false;
+        if (speakingTimerInterval) {
+            clearInterval(speakingTimerInterval);
+            speakingTimerInterval = null;
+        }
+        if (speakingRecognition) {
+            try { speakingRecognition.stop(); } catch(e) {}
+            speakingRecognition = null;
+        }
+        if (micAnimFrameId) {
+            cancelAnimationFrame(micAnimFrameId);
+            micAnimFrameId = null;
+        }
+        if (micAudioContext) {
+            try { micAudioContext.close(); } catch(e){}
+            micAudioContext = null;
+        }
+        if (window.speakingAudioStream) {
+            try {
+                window.speakingAudioStream.getTracks().forEach(track => track.stop());
+            } catch(e){}
+            window.speakingAudioStream = null;
+        }
+    }
+
+    function submitSpeakingRecording() {
+        stopSpeakingRecording();
+        speakingStep = 3; 
+        renderSpeakingModalUI();
+
+        setTimeout(() => {
+            speakingStep = 4; 
+            renderSpeakingModalUI();
+        }, 1200);
+    }
+
+    function renderSpeakingModalUI() {
+        const card = document.getElementById('speaking-card');
+        if (!card) return;
+
+        let titleText = speakingType === 'word' ? 'Listen to a Word' : 'Listen to a Sentence';
+        let speedLabel = speakingSpeechSpeed === 1.0 ? '재생 속도 (Normal)' : '재생 속도 (Slow 0.75x)';
+        let textVisibilityLabel = isSpeakingTextVisible ? '문장 숨기기' : '문장 보기';
+
+        if (speakingStep === 1) {
+            card.className = "speaking-modal-card";
+            card.innerHTML = `
+                <div class="speaking-top-bar">
+                    <button class="speaking-close-btn" onclick="closeSpeakingModal()">✕ <span style="font-size:12px; opacity:0.8; font-weight:600;">(ESC)</span></button>
+                    <span></span>
+                    <span></span>
+                </div>
+
+                <div class="speaking-content-area">
+                    <h2 class="speaking-title">${titleText}</h2>
+                    <p class="speaking-subtitle">문장을 듣고 준비가 되면 녹음하기 버튼을 눌러주세요</p>
+
+                    <div class="speaking-pill-group">
+                        <button class="speaking-pill-btn" onclick="toggleSpeakingSpeechSpeed()">${speedLabel}</button>
+                        <button class="speaking-pill-btn" onclick="toggleSpeakingTextVisibility()">${textVisibilityLabel}</button>
+                    </div>
+
+                    ${isSpeakingTextVisible ? `<div style="font-size:22px; font-weight:800; margin-top:12px; word-break:keep-all;">"${speakingTargetText}"</div>` : ''}
+
+                    <div class="speaking-circle-play-btn" onclick="speakTargetTextInModal()">▶</div>
+                    <div class="speaking-timer-text">00:04</div>
+                </div>
+
+                <button class="speaking-bottom-btn" onclick="startSpeakingRecording()">녹음하기</button>
+            `;
+        } else if (speakingStep === 2) {
+            card.className = "speaking-modal-card white-theme";
+            card.innerHTML = `
+                <div class="speaking-top-bar" style="color:#0f172a;">
+                    <button class="speaking-close-btn" onclick="closeSpeakingModal()">✕ <span style="font-size:12px; opacity:0.8; font-weight:600;">(ESC)</span></button>
+                    <span></span>
+                    <span></span>
+                </div>
+
+                <div class="speaking-content-area" style="color:#0f172a;">
+                    <h2 class="speaking-title">Record Your Answer</h2>
+
+                    <div class="speaking-pill-group">
+                        <button class="speaking-pill-btn" style="background:#f1f5f9; border:1px solid #cbd5e1;" onclick="toggleSpeakingTextVisibility()">${textVisibilityLabel}</button>
+                    </div>
+
+                    ${isSpeakingTextVisible ? `<div style="font-size:20px; font-weight:800; color:#2563eb; margin-top:8px;">"${speakingTargetText}"</div>` : ''}
+
+                    <div class="speaking-waveform-box">
+                        <div class="speaking-wave-bar"></div>
+                        <div class="speaking-wave-bar"></div>
+                        <div class="speaking-wave-bar"></div>
+                        <div class="speaking-wave-bar"></div>
+                        <div class="speaking-wave-bar"></div>
+                    </div>
+
+                    <div id="speaking-rec-timer" class="speaking-timer-text" style="color:#0f172a;">00:00</div>
+                </div>
+
+                <div class="speaking-two-btn-row">
+                    <button class="btn-light" onclick="startSpeakingRecording()">다시하기</button>
+                    <button class="btn-dark" onclick="submitSpeakingRecording()">답변 제출</button>
+                </div>
+            `;
+        } else if (speakingStep === 3) {
+            card.className = "speaking-modal-card white-theme";
+            card.innerHTML = `
+                <div class="speaking-top-bar" style="color:#0f172a;">
+                    <button class="speaking-close-btn" onclick="closeSpeakingModal()">✕ <span style="font-size:12px; opacity:0.8; font-weight:600;">(ESC)</span></button>
+                    <span></span>
+                    <span></span>
+                </div>
+
+                <div class="speaking-content-area" style="color:#0f172a;">
+                    <div style="font-size:40px; display:flex; gap:12px; margin-bottom:12px;">
+                        <span style="animation: bounce 0.6s infinite alternate; animation-delay:0.1s;">●</span>
+                        <span style="animation: bounce 0.6s infinite alternate; animation-delay:0.3s;">●</span>
+                        <span style="animation: bounce 0.6s infinite alternate; animation-delay:0.5s;">●</span>
+                    </div>
+                    <div style="font-size:18px; font-weight:800; color:#475569;">음성 발음 및 정밀 시퀀스 분석 중...</div>
+                </div>
+            `;
+        } else if (speakingStep === 4) {
+            card.className = "speaking-modal-card white-theme";
+
+            const engine = new ClientSpeakingEngine();
+            const evalResult = engine.evaluate(speakingTargetText, speakingRecordedTranscript);
+
+            let formattedUserAnswerHtml = '';
+            evalResult.details.forEach(item => {
+                if (!item.targetWord && item.spokenWord) {
+                    formattedUserAnswerHtml += `<span class="word-match-wrong" title="${item.reason}">${item.spokenWord}</span> `;
+                } else if (item.color === 'GREEN') {
+                    formattedUserAnswerHtml += `<span class="word-match-correct" title="${item.reason}">${item.spokenWord}</span> `;
+                } else if (item.color === 'ORANGE') {
+                    formattedUserAnswerHtml += `<span class="word-match-fuzzy" title="${item.reason}">${item.spokenWord}</span> `;
+                } else {
+                    formattedUserAnswerHtml += `<span class="word-match-wrong" title="${item.reason}">${item.spokenWord}</span> `;
+                }
+            });
+
+            card.innerHTML = `
+                <div class="speaking-top-bar" style="color:#0f172a;">
+                    <button class="speaking-close-btn" onclick="closeSpeakingModal()">✕ <span style="font-size:12px; opacity:0.8; font-weight:600;">(ESC)</span></button>
+                    <span></span>
+                    <span></span>
+                </div>
+
+                <div class="speaking-content-area" style="color:#0f172a; justify-content:flex-start;">
+                    <h2 class="speaking-title" style="text-align:left; width:100%;">Results</h2>
+                    <p class="speaking-subtitle" style="text-align:left; width:100%; color:#64748b;">내 음성은 실시간으로 확인하고 교정할 수 있어요</p>
+
+                    <div class="result-score-box" style="margin-top:10px;">
+                        <div style="font-size:13px; font-weight:700; color:#64748b;">Latest Score</div>
+                        <div class="result-score-val">${evalResult.overallScore}</div>
+                    </div>
+
+                    <div class="result-card-box question" style="margin-top:10px;">
+                        <div style="font-size:13px; font-weight:800; display:flex; align-items:center; gap:6px;">
+                            Question <button onclick="speakTargetTextInModal()" style="background:none; border:none; color:white; cursor:pointer; font-size:16px;">🔊</button>
+                        </div>
+                        <div style="font-size:16px; font-weight:800; margin-top:4px;">${speakingTargetText}</div>
+                    </div>
+
+                    <div class="result-card-box my-answer" style="margin-top:8px;">
+                        <div style="font-size:13px; font-weight:800; color:#475569;">
+                            My Answer
+                        </div>
+                        <div style="font-size:15px; margin-top:4px; line-height:1.4;">
+                            ${formattedUserAnswerHtml || '<span class="word-match-wrong">음성이 인식되지 않았습니다.</span>'}
+                        </div>
+                    </div>
+
+                    <div style="width:100%; font-size:12px; color:#64748b; text-align:left; margin-top:8px; padding:8px; background:#f8fafc; border-radius:8px;">
+                        ⓘ <b>단어 색상별 의미:</b> <span style="color:#16a34a; font-weight:800;">초록색</span>: 완전 일치, <span style="color:#d97706; font-weight:800;">주황색</span>: 문법/단복수/근접발음 오독, <span style="color:#dc2626; font-weight:800;">빨간색</span>: 미인식/잘못된 단어
+                    </div>
+                </div>
+
+                <div class="speaking-two-btn-row">
+                    <button class="btn-light" onclick="startSpeakingRecording()">다시하기</button>
+                    <button class="btn-dark" style="background:#0f172a;" onclick="closeSpeakingModal()">확인 완료</button>
+                </div>
+            `;
+        }
+    }
+
+    // ⌨️ 단축키 조작 (A: 시험, S: 수동, D: 뮤트, F: 목소리, Space: 발음 반복, Z: 스피킹)
+    document.addEventListener('keydown', (event) => {
+        const autoplayModal = document.getElementById('autoplay-modal');
+        const voiceModal = document.getElementById('voice-modal');
+        const speakingModal = document.getElementById('speaking-modal');
+
+        const isAutoplayOpen = autoplayModal && !autoplayModal.classList.contains('hidden');
+        const isVoiceOpen = voiceModal && !voiceModal.classList.contains('hidden');
+        const isSpeakingOpen = speakingModal && !speakingModal.classList.contains('hidden');
+
+        if (isAutoplayOpen) {
+            if (event.key === 'Escape') closeAutoplayModal();
+            if (event.key === 'Enter') { event.preventDefault(); confirmAutoplayModal(); }
+            return;
+        }
+
+        if (isVoiceOpen) {
+            if (event.key === 'Escape') closeVoiceModal();
+            return;
+        }
+
+        if (isSpeakingOpen) {
+            if (event.key === 'Escape') closeSpeakingModal();
+            return;
         }
 
         if (document.activeElement.tagName === 'INPUT') return;
+
+        // 발음 다시 듣기 단축키 Spacebar 매핑 및 스크롤 방지
+        if (event.code === 'Space' || event.key === ' ') {
+            event.preventDefault();
+            speakCurrentWord();
+            return;
+        }
         
         const key = event.key.toLowerCase();
 
-        if (event.key === 'ArrowRight') {
-            handlePrimaryAction();
-        } else if (event.key === 'ArrowDown') {
-            event.preventDefault(); 
-            handleVagueAction(currentStartIndex);
-        } else if (key === 'q' || event.key === 'ㅂ') {
-            toggleStudyMode();
-        } else if (key === 'w' || event.key === 'ㅈ') {
-            handleAutoplayBtnClick();
-        } else if (key === 'e' || event.key === 'ㄷ') {
-            toggleMute();
-        } else if (key === 'r' || event.key === 'ㄱ') {
-            speakCurrentWord();
+        if (event.key === 'ArrowRight') handlePrimaryAction();
+        else if (event.key === 'ArrowDown') { event.preventDefault(); handleVagueAction(currentStartIndex); }
+        else if (key === 'a' || event.key === 'ㅁ') toggleStudyMode();
+        else if (key === 's' || event.key === 'ㄴ') handleAutoplayBtnClick();
+        else if (key === 'd' || event.key === 'ㅇ') toggleMute();
+        else if (key === 'f' || event.key === 'ㄹ') openVoiceModal();
+        else if (key === 'z' || event.key === 'ㅋ') {
+            if (showAnswers && wordList[currentStartIndex]) {
+                const item = wordList[currentStartIndex];
+                const hasExample = isStudyMode && (item.exEn || item.exKo);
+                const speakingTargetTextToUse = (hasExample && item.exEn) ? item.exEn : item.en;
+                const speakingTypeToUse = (hasExample && item.exEn) ? 'sentence' : 'word';
+                openSpeakingModal(speakingTypeToUse, speakingTargetTextToUse);
+            }
         }
     });
 
@@ -2171,6 +3426,8 @@
         registerServiceWorker();
         requestPersistentStorage();
         updatePWAReviewButtonUI();
+        initVoiceEngine();
+        loadSavedVoiceSettings();
     });
 </script>
 </body>
