@@ -1768,6 +1768,7 @@
     let micAudioContext = null;
     let micAnalyser = null;
     let micAnimFrameId = null;
+    let simulatedWaveInterval = null;
 
     const PWA_VAGUE_STORAGE_KEY = 'pwa_vague_words_list_v1';
     const SELECTED_VOICE_STORAGE_KEY = 'selected_tts_voice_uri_v4';
@@ -3060,8 +3061,23 @@
         window.speechSynthesis.speak(utter);
     }
 
-    /* 📌 [수정] 모바일 브라우저 충돌 방지: getUserMedia는 시각화 전용으로 독립 처리 */
+    /* 📌 마이크 시각화 (모바일은 가상 웨이브로 점유 충돌 방지) */
     function setupMicVolumeVisualizer() {
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        if (isMobile) {
+            if (simulatedWaveInterval) clearInterval(simulatedWaveInterval);
+            simulatedWaveInterval = setInterval(() => {
+                if (!isSpeakingRecording) return;
+                const bars = document.querySelectorAll('.speaking-wave-bar');
+                bars.forEach((bar) => {
+                    const randomHeight = Math.floor(Math.random() * 50) + 15;
+                    bar.style.height = `${randomHeight}px`;
+                });
+            }, 100);
+            return;
+        }
+
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
 
         navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
@@ -3092,17 +3108,16 @@
 
                     micAnimFrameId = requestAnimationFrame(updateWaveVisual);
                 }
-
                 updateWaveVisual();
             } catch(e) {
-                console.warn("마이크 시각화 설정 오류 (음성 인식 기능은 계속 동작):", e);
+                console.warn("마이크 시각화 설정 오류:", e);
             }
         }).catch(err => {
-            console.warn("마이크 사용자 권한 차단 또는 접근 실패:", err);
+            console.warn("마이크 접근 실패:", err);
         });
     }
 
-    /* 📌 [수정] 모바일 호환 SpeechRecognition 설정 및 결과 가공 로직 보완 */
+    /* 📌 녹음 및 음성인식 시작 */
     function startSpeakingRecording() {
         stopTTS();
         speakingStep = 2;
@@ -3123,7 +3138,8 @@
             }
         }, 1000);
 
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        setupMicVolumeVisualizer();
+
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
         if (SpeechRecognition) {
@@ -3133,31 +3149,30 @@
                 }
                 speakingRecognition = new SpeechRecognition();
                 speakingRecognition.lang = 'en-US';
-                
-                // 모바일 브라우저 연결 유지 이슈 해결을 위한 옵션 세팅
-                speakingRecognition.continuous = false; // 모바일은 단발성 인식이 안정적
+                speakingRecognition.continuous = true;
                 speakingRecognition.interimResults = true;
                 speakingRecognition.maxAlternatives = 1;
 
                 speakingRecognition.onresult = (e) => {
-                    let accumulatedText = '';
+                    let currentText = '';
                     for (let i = 0; i < e.results.length; ++i) {
-                        accumulatedText += e.results[i][0].transcript + ' ';
+                        currentText += e.results[i][0].transcript + ' ';
                     }
-                    if (accumulatedText.trim()) {
-                        speakingRecordedTranscript = accumulatedText.trim();
+                    if (currentText.trim()) {
+                        speakingRecordedTranscript = currentText.trim();
                     }
                 };
 
                 speakingRecognition.onerror = (e) => {
-                    console.warn("SpeechRecognition Error:", e.error);
-                    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
-                        showToast("⚠️ 마이크 권한을 허용해주세요.");
+                    console.warn("SpeechRecognition 오류:", e.error);
+                    if (e.error === 'not-allowed') {
+                        showToast("⚠️ 마이크 권한이 거부되어 있습니다.");
+                    } else if (e.error === 'no-speech') {
+                        console.log("음성 미감지 - 대기 중");
                     }
                 };
 
                 speakingRecognition.onend = () => {
-                    // 녹음 진행 중 모바일 브라우저가 자동으로 인식을 자를 경우 즉시 재시작
                     if (isSpeakingRecording && speakingRecognition) {
                         try { speakingRecognition.start(); } catch(err){}
                     }
@@ -3165,26 +3180,29 @@
 
                 speakingRecognition.start();
             } catch (e) {
-                console.warn("SpeechRecognition start error:", e);
+                console.warn("SpeechRecognition 시작 실패:", e);
             }
         } else {
-            showToast("⚠️ 사용 중인 브라우저가 음성 인식을 지원하지 않습니다. (Chrome/Safari 권장)");
+            showToast("⚠️ 현재 브라우저에서 음성 인식을 지원하지 않습니다.");
         }
-
-        // 웨이브 파형 시각화 실행 (실패해도 Recognition에는 영향 없음)
-        setupMicVolumeVisualizer();
     }
 
+    /* 📌 녹음 정지 및 자원 해제 */
     function stopSpeakingRecording() {
         isSpeakingRecording = false;
+
+        if (simulatedWaveInterval) {
+            clearInterval(simulatedWaveInterval);
+            simulatedWaveInterval = null;
+        }
         if (speakingTimerInterval) {
             clearInterval(speakingTimerInterval);
             speakingTimerInterval = null;
         }
         if (speakingRecognition) {
-            try { 
-                speakingRecognition.onend = null; // 재시작 이벤트 핸들러 제거
-                speakingRecognition.stop(); 
+            try {
+                speakingRecognition.onend = null;
+                speakingRecognition.stop();
             } catch(e) {}
             speakingRecognition = null;
         }
@@ -3204,15 +3222,25 @@
         }
     }
 
+    /* 📌 답변 제출 (모바일 패킷 유실 방지 800ms 버퍼링 적용) */
     function submitSpeakingRecording() {
-        stopSpeakingRecording();
-        speakingStep = 3; 
+        isSpeakingRecording = false;
+
+        if (speakingRecognition) {
+            try {
+                speakingRecognition.onend = null;
+                speakingRecognition.stop();
+            } catch(e){}
+        }
+
+        speakingStep = 3;
         renderSpeakingModalUI();
 
         setTimeout(() => {
-            speakingStep = 4; 
+            stopSpeakingRecording();
+            speakingStep = 4;
             renderSpeakingModalUI();
-        }, 1200);
+        }, 800);
     }
 
     function renderSpeakingModalUI() {
