@@ -1647,8 +1647,13 @@
         }
 
         evaluate(targetSentence, sttTranscript) {
-            const targetWords = targetSentence.trim().split(/\s+/).filter(Boolean);
-            const sttWords = sttTranscript.trim().split(/\s+/).filter(Boolean);
+            // 📌 [수정] 쉼표, 마침표 등 특수문자 뒤 공백이 없는 단어(예: research,scholars)도
+            // 단어 분리 이전에 특수문자를 공백으로 변환하여 각각 독립된 단어로 인식하도록 보정
+            const cleanTargetSentence = targetSentence.replace(/[^\w\s]/g, ' ');
+            const cleanSttTranscript = sttTranscript.replace(/[^\w\s]/g, ' ');
+
+            const targetWords = cleanTargetSentence.trim().split(/\s+/).filter(Boolean);
+            const sttWords = cleanSttTranscript.trim().split(/\s+/).filter(Boolean);
 
             if (sttWords.length === 0) {
                 return {
@@ -1735,8 +1740,8 @@
         }
     }
 
-    let loadedRawWordList = []; // 엑셀 원본 단어 목록 전체
-    let perDayCount = 30;       // Day당 문제 개수 (기본 30개)
+    let loadedRawWordList = []; 
+    let perDayCount = 30;       
     let originalWordList = []; 
     let wordList = [];
     let vagueWords = [];       
@@ -1778,7 +1783,7 @@
     let isSpeakingTextVisible = false;
     let speakingRecognition = null;
     let speakingRecordedTranscript = '';
-    let sessionFinalTranscript = ''; // STT 중복방지용 최종 버퍼
+    let sessionFinalTranscript = ''; 
     let speakingTimerInterval = null;
     let speakingSeconds = 0;
     let isSpeakingRecording = false;
@@ -2579,7 +2584,6 @@
             return;
         }
 
-        // 시험 유형 지정 및 초기 세팅값 적용 (스피킹: 30, 라이팅: 30, 초록이: 60)
         if (url.includes("1m7KXifCB6txkKEOHqApMWOR4MQwqb6Ji1Dm-hRJYzLc")) {
             currentCategory = "스피킹";
             perDayCount = 30;
@@ -2607,7 +2611,6 @@
             loadedRawWordList = tempExtractList;
             statusEl.innerText = "";
 
-            // Day 선택 모달 오픈
             openDayModal();
 
         } catch (error) {
@@ -2678,7 +2681,6 @@
         gridEl.innerHTML = html;
     }
 
-    /* 📌 Day 범위 선택 및 무작위 셔플 실행 */
     function selectDayRange(dayIndex) {
         closeDayModal();
         let selectedSubset = [];
@@ -2699,7 +2701,6 @@
             return;
         }
 
-        // 선택한 범위 내 단어 무작위 셔플
         originalWordList = shuffleArray(selectedSubset);
         wordList = [...originalWordList]; 
 
@@ -3105,7 +3106,6 @@
         }
     }
 
-    /* 📌 복습 리스트 재셔플 */
     function reviewVagueWords() {
         if (vagueWords.length === 0) {
             showToast("복습할 단어가 존재하지 않습니다.");
@@ -3125,7 +3125,6 @@
         showToast(`🔁 헷갈린 단어 ${wordList.length}개가 섞여서 재배치되었습니다!`);
     }
 
-    /* 📌 전체 단어 다시 복습 및 재셔플 */
     function restartFullGame() {
         wordList = shuffleArray(originalWordList); 
         vagueWords = []; 
@@ -3192,6 +3191,7 @@
         window.speechSynthesis.speak(utter);
     }
 
+    /* 📌 [수정] 모바일/데스크톱 마이크 음량 실제 감지 및 노이즈 게이트(Threshold) 보정 */
     function setupMicVolumeVisualizer() {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
 
@@ -3215,10 +3215,17 @@
                     for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
                     let average = sum / dataArray.length;
 
+                    // 노이즈 게이트 임계값 (이 데시벨 이하 정적/소음 상황에서는 솟구치지 않음)
+                    const NOISE_GATE_THRESHOLD = 18; 
+
                     const bars = document.querySelectorAll('.speaking-wave-bar');
                     bars.forEach((bar, index) => {
-                        let h = Math.min(80, Math.max(12, average * (0.8 + (index % 3) * 0.3)));
-                        bar.style.height = `${h}px`;
+                        if (average < NOISE_GATE_THRESHOLD) {
+                            bar.style.height = '12px'; // 말하지 않을 땐 평평한 기본선 유지
+                        } else {
+                            let h = Math.min(80, Math.max(12, (average - NOISE_GATE_THRESHOLD) * (1.2 + (index % 3) * 0.4)));
+                            bar.style.height = `${h}px`;
+                        }
                     });
 
                     micAnimFrameId = requestAnimationFrame(updateWaveVisual);
@@ -3231,19 +3238,6 @@
         }).catch(err => {
             console.warn("마이크 사용자 권한 차단 또는 접근 실패:", err);
         });
-    }
-
-    function startMobileWaveformSimulation() {
-        function updateSimulatedWave() {
-            if (!isSpeakingRecording) return;
-            const bars = document.querySelectorAll('.speaking-wave-bar');
-            bars.forEach((bar) => {
-                let h = Math.floor(Math.random() * 50) + 15;
-                bar.style.height = `${h}px`;
-            });
-            micAnimFrameId = requestAnimationFrame(updateSimulatedWave);
-        }
-        updateSimulatedWave();
     }
 
     function startSpeakingRecording() {
@@ -3326,11 +3320,8 @@
             showToast("⚠️ 사용 중인 브라우저가 음성 인식을 지원하지 않습니다. (Chrome/Safari 권장)");
         }
 
-        if (!isMobile) {
-            setupMicVolumeVisualizer();
-        } else {
-            startMobileWaveformSimulation();
-        }
+        // 실시간 음량 시각화 적용
+        setupMicVolumeVisualizer();
     }
 
     function stopSpeakingRecording() {
