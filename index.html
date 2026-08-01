@@ -286,7 +286,6 @@
             margin-left: 3px;
         }
 
-        /* nyan-controls-row: [프로그레스바 , 남은 시간 , 단어 갯수] 정렬 */
         .nyan-controls-row {
             display: flex;
             align-items: center;
@@ -602,7 +601,6 @@
             display: block; 
         }
 
-        /* 데스크탑 기본: 우측 상단 배치 */
         .card-top-actions {
             display: none;
             position: absolute;
@@ -1357,6 +1355,28 @@
 <body>
 <div id="toast-container" class="toast-container"></div>
 
+<!-- 📅 Day 선택 모달 -->
+<div id="day-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeDayModal()">
+    <div class="modal-card" style="max-height: 85vh; display: flex; flex-direction: column;">
+        <div class="modal-header">
+            <span id="day-modal-title">📅 학습 Day 선택</span>
+            <button onclick="closeDayModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖</button>
+        </div>
+
+        <div class="sec-select-area">
+            <div class="sec-select-title">🔢 Day당 문제 개수 선택</div>
+            <div class="sec-btn-grid" id="day-count-options">
+            </div>
+        </div>
+
+        <div class="sec-select-area" style="flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden;">
+            <div class="sec-select-title" id="day-list-title">📌 학습할 Day 선택</div>
+            <div id="day-buttons-grid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; overflow-y:auto; max-height: 320px; padding: 4px; box-sizing: border-box;">
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- 🤖 자동재생 설정 모달 -->
 <div id="autoplay-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeAutoplayModal()">
     <div class="modal-card">
@@ -1448,11 +1468,9 @@
 
     <!-- 게임 시작 화면 -->
     <div id="game-area" class="hidden">
-        <!-- 카드 그리드 -->
         <div class="cards-grid" id="cards-wrapper">
         </div>
 
-        <!-- 하단 배치 액션 버튼 -->
         <div class="bottom-action-area">
             <button id="vague-btn" class="bottom-vague-btn" onclick="handleVagueAction(currentStartIndex)">
                 <span id="vague-btn-text">몰라요 ❓</span> <span class="shortcut-text">(↓)</span>
@@ -1462,7 +1480,6 @@
             </button>
         </div>
 
-        <!-- 🐱🌈 냥캣 타이머 바 -->
         <div id="nyan-timer-container" class="nyan-timer-box">
             <div class="nyan-timer-header">
                 <div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
@@ -1481,7 +1498,6 @@
                 </div>
             </div>
 
-            <!-- [프로그레스바 , 남은 시간 , 단어 갯수] 순서 정렬 -->
             <div class="nyan-controls-row">
                 <div class="nyan-track">
                     <div class="nyan-trail" id="nyan-trail">
@@ -1719,6 +1735,8 @@
         }
     }
 
+    let loadedRawWordList = []; // 엑셀 원본 단어 목록 전체
+    let perDayCount = 30;       // Day당 문제 개수 (기본 30개)
     let originalWordList = []; 
     let wordList = [];
     let vagueWords = [];       
@@ -1760,15 +1778,15 @@
     let isSpeakingTextVisible = false;
     let speakingRecognition = null;
     let speakingRecordedTranscript = '';
+    let sessionFinalTranscript = ''; // STT 중복방지용 최종 버퍼
     let speakingTimerInterval = null;
     let speakingSeconds = 0;
     let isSpeakingRecording = false;
 
-    // 실시간 음량 시각화 관련 객체
+    // 실시간 음량 시각화 객체
     let micAudioContext = null;
     let micAnalyser = null;
     let micAnimFrameId = null;
-    let simulatedWaveInterval = null;
 
     const PWA_VAGUE_STORAGE_KEY = 'pwa_vague_words_list_v1';
     const SELECTED_VOICE_STORAGE_KEY = 'selected_tts_voice_uri_v4';
@@ -2561,10 +2579,20 @@
             return;
         }
 
-        if (url.includes("1m7KXifCB6txkKEOHqApMWOR4MQwqb6Ji1Dm-hRJYzLc")) currentCategory = "스피킹";
-        else if (url.includes("1UYTEv88wdKsSS2kkB-UylHAfQAlV6yrvjwVNecG6m64")) currentCategory = "라이팅";
-        else if (url.includes("1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U")) currentCategory = "초록이";
-        else currentCategory = "단어암기";
+        // 시험 유형 지정 및 초기 세팅값 적용 (스피킹: 30, 라이팅: 30, 초록이: 60)
+        if (url.includes("1m7KXifCB6txkKEOHqApMWOR4MQwqb6Ji1Dm-hRJYzLc")) {
+            currentCategory = "스피킹";
+            perDayCount = 30;
+        } else if (url.includes("1UYTEv88wdKsSS2kkB-UylHAfQAlV6yrvjwVNecG6m64")) {
+            currentCategory = "라이팅";
+            perDayCount = 30;
+        } else if (url.includes("1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U")) {
+            currentCategory = "초록이";
+            perDayCount = 60;
+        } else {
+            currentCategory = "단어암기";
+            perDayCount = 30;
+        }
 
         statusEl.classList.remove('error');
         statusEl.innerHTML = '<div class="spinner"></div> 데이터 동기화 중...';
@@ -2576,28 +2604,120 @@
                 throw new Error("유효한 단어 데이터(1열 한국어, 2열 영어)가 없습니다.");
             }
 
-            originalWordList = shuffleArray(tempExtractList);
-            wordList = [...originalWordList]; 
-            
-            currentStartIndex = 0;
-            showAnswers = false;
-            isStudyMode = false;
+            loadedRawWordList = tempExtractList;
             statusEl.innerText = "";
-            
-            document.getElementById('setup-area').classList.add('hidden');
-            document.getElementById('summary-area').classList.add('hidden');
-            document.getElementById('game-area').classList.remove('hidden');
-            
-            document.body.classList.add('game-active');
-            
-            renderCards();
-            startTimer();
+
+            // Day 선택 모달 오픈
+            openDayModal();
 
         } catch (error) {
             console.error(error);
             statusEl.classList.add('error');
             statusEl.innerText = "에러: " + error.message;
         }
+    }
+
+    function openDayModal() {
+        const modal = document.getElementById('day-modal');
+        if (!modal) return;
+
+        const titleEl = document.getElementById('day-modal-title');
+        if (titleEl) titleEl.innerText = `📅 ${currentCategory} 시험 Day 선택`;
+
+        modal.classList.remove('hidden');
+        renderDayCountOptionsUI();
+        renderDayButtonsUI();
+    }
+
+    function closeDayModal() {
+        const modal = document.getElementById('day-modal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    function renderDayCountOptionsUI() {
+        const optionsContainer = document.getElementById('day-count-options');
+        if (!optionsContainer) return;
+
+        const counts = [10, 20, 30, 40, 50, 60];
+        optionsContainer.innerHTML = counts.map(count => `
+            <button class="sec-btn ${count === perDayCount ? 'selected' : ''}" onclick="setPerDayCount(${count})">${count}개</button>
+        `).join('');
+    }
+
+    function setPerDayCount(count) {
+        perDayCount = count;
+        renderDayCountOptionsUI();
+        renderDayButtonsUI();
+    }
+
+    function renderDayButtonsUI() {
+        const titleEl = document.getElementById('day-list-title');
+        const gridEl = document.getElementById('day-buttons-grid');
+        if (!gridEl) return;
+
+        const totalWords = loadedRawWordList.length;
+        if (titleEl) titleEl.innerText = `📌 학습할 Day 선택 (총 ${totalWords}개 단어 / Day당 ${perDayCount}개)`;
+
+        const totalDays = Math.ceil(totalWords / perDayCount);
+        let html = `
+            <button class="sec-btn" style="grid-column: span 3; background:#e0f2fe; color:#0369a1; border-color:#0284c7;" onclick="selectDayRange(-1)">
+                🔥 전체 단어 복습 (1 ~ ${totalWords}번)
+            </button>
+        `;
+
+        for (let i = 0; i < totalDays; i++) {
+            const startIdx = i * perDayCount + 1;
+            const endIdx = Math.min((i + 1) * perDayCount, totalWords);
+            html += `
+                <button class="sec-btn" onclick="selectDayRange(${i})">
+                    Day ${i + 1}<br><span style="font-size:11px; opacity:0.8; font-weight:normal;">(${startIdx}~${endIdx})</span>
+                </button>
+            `;
+        }
+
+        gridEl.innerHTML = html;
+    }
+
+    /* 📌 Day 범위 선택 및 무작위 셔플 실행 */
+    function selectDayRange(dayIndex) {
+        closeDayModal();
+        let selectedSubset = [];
+        let dayLabel = "";
+
+        if (dayIndex === -1) {
+            selectedSubset = [...loadedRawWordList];
+            dayLabel = "전체 단어";
+        } else {
+            const start = dayIndex * perDayCount;
+            const end = Math.min((dayIndex + 1) * perDayCount, loadedRawWordList.length);
+            selectedSubset = loadedRawWordList.slice(start, end);
+            dayLabel = `Day ${dayIndex + 1}`;
+        }
+
+        if (selectedSubset.length === 0) {
+            showToast("⚠️ 선택한 범위에 단어가 존재하지 않습니다.");
+            return;
+        }
+
+        // 선택한 범위 내 단어 무작위 셔플
+        originalWordList = shuffleArray(selectedSubset);
+        wordList = [...originalWordList]; 
+
+        currentStartIndex = 0;
+        showAnswers = false;
+        isStudyMode = false;
+        vagueWords = [];
+
+        document.getElementById('setup-area').classList.add('hidden');
+        document.getElementById('summary-area').classList.add('hidden');
+        document.getElementById('game-area').classList.remove('hidden');
+
+        document.body.classList.add('game-active');
+
+        renderCards();
+        startTimer();
+
+        showToast(`🎲 ${dayLabel} (${wordList.length}개 단어) 무작위 셔플 완료! 시험을 시작합니다.`);
     }
 
     function updateButtonsUI() {
@@ -2985,28 +3105,39 @@
         }
     }
 
+    /* 📌 복습 리스트 재셔플 */
     function reviewVagueWords() {
         if (vagueWords.length === 0) {
             showToast("복습할 단어가 존재하지 않습니다.");
             return;
         }
+
         wordList = shuffleArray(vagueWords); 
         vagueWords = []; 
         currentStartIndex = 0;
+
         document.getElementById('summary-area').classList.add('hidden');
         document.getElementById('game-area').classList.remove('hidden');
+
         renderCards();
         startTimer(); 
+
+        showToast(`🔁 헷갈린 단어 ${wordList.length}개가 섞여서 재배치되었습니다!`);
     }
 
+    /* 📌 전체 단어 다시 복습 및 재셔플 */
     function restartFullGame() {
         wordList = shuffleArray(originalWordList); 
         vagueWords = []; 
         currentStartIndex = 0;
+
         document.getElementById('summary-area').classList.add('hidden');
         document.getElementById('game-area').classList.remove('hidden');
+
         renderCards();
         startTimer(); 
+
+        showToast("🔄 단어가 새로운 순서로 다시 무작위 섞였습니다!");
     }
 
     function openSpeakingModal(type, targetText) {
@@ -3061,23 +3192,7 @@
         window.speechSynthesis.speak(utter);
     }
 
-    /* 📌 마이크 시각화 (모바일은 가상 웨이브로 점유 충돌 방지) */
     function setupMicVolumeVisualizer() {
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-        if (isMobile) {
-            if (simulatedWaveInterval) clearInterval(simulatedWaveInterval);
-            simulatedWaveInterval = setInterval(() => {
-                if (!isSpeakingRecording) return;
-                const bars = document.querySelectorAll('.speaking-wave-bar');
-                bars.forEach((bar) => {
-                    const randomHeight = Math.floor(Math.random() * 50) + 15;
-                    bar.style.height = `${randomHeight}px`;
-                });
-            }, 100);
-            return;
-        }
-
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
 
         navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
@@ -3108,20 +3223,34 @@
 
                     micAnimFrameId = requestAnimationFrame(updateWaveVisual);
                 }
+
                 updateWaveVisual();
             } catch(e) {
                 console.warn("마이크 시각화 설정 오류:", e);
             }
         }).catch(err => {
-            console.warn("마이크 접근 실패:", err);
+            console.warn("마이크 사용자 권한 차단 또는 접근 실패:", err);
         });
     }
 
-    /* 📌 녹음 및 음성인식 시작 */
+    function startMobileWaveformSimulation() {
+        function updateSimulatedWave() {
+            if (!isSpeakingRecording) return;
+            const bars = document.querySelectorAll('.speaking-wave-bar');
+            bars.forEach((bar) => {
+                let h = Math.floor(Math.random() * 50) + 15;
+                bar.style.height = `${h}px`;
+            });
+            micAnimFrameId = requestAnimationFrame(updateSimulatedWave);
+        }
+        updateSimulatedWave();
+    }
+
     function startSpeakingRecording() {
         stopTTS();
         speakingStep = 2;
         speakingRecordedTranscript = '';
+        sessionFinalTranscript = '';
         speakingSeconds = 0;
         isSpeakingRecording = true;
 
@@ -3138,8 +3267,7 @@
             }
         }, 1000);
 
-        setupMicVolumeVisualizer();
-
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
         if (SpeechRecognition) {
@@ -3149,26 +3277,38 @@
                 }
                 speakingRecognition = new SpeechRecognition();
                 speakingRecognition.lang = 'en-US';
-                speakingRecognition.continuous = true;
+                
+                speakingRecognition.continuous = !isMobile;
                 speakingRecognition.interimResults = true;
                 speakingRecognition.maxAlternatives = 1;
 
                 speakingRecognition.onresult = (e) => {
-                    let currentText = '';
-                    for (let i = 0; i < e.results.length; ++i) {
-                        currentText += e.results[i][0].transcript + ' ';
+                    let currentFinal = '';
+                    let currentInterim = '';
+
+                    for (let i = e.resultIndex; i < e.results.length; ++i) {
+                        const transcript = e.results[i][0].transcript;
+                        if (e.results[i].isFinal) {
+                            currentFinal += transcript + ' ';
+                        } else {
+                            currentInterim += transcript;
+                        }
                     }
-                    if (currentText.trim()) {
-                        speakingRecordedTranscript = currentText.trim();
+
+                    if (currentFinal) {
+                        sessionFinalTranscript += currentFinal;
+                    }
+
+                    const fullText = (sessionFinalTranscript + currentInterim).trim();
+                    if (fullText) {
+                        speakingRecordedTranscript = fullText;
                     }
                 };
 
                 speakingRecognition.onerror = (e) => {
-                    console.warn("SpeechRecognition 오류:", e.error);
-                    if (e.error === 'not-allowed') {
-                        showToast("⚠️ 마이크 권한이 거부되어 있습니다.");
-                    } else if (e.error === 'no-speech') {
-                        console.log("음성 미감지 - 대기 중");
+                    console.warn("SpeechRecognition Error:", e.error);
+                    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+                        showToast("⚠️ 마이크 권한을 허용해주세요.");
                     }
                 };
 
@@ -3180,29 +3320,29 @@
 
                 speakingRecognition.start();
             } catch (e) {
-                console.warn("SpeechRecognition 시작 실패:", e);
+                console.warn("SpeechRecognition start error:", e);
             }
         } else {
-            showToast("⚠️ 현재 브라우저에서 음성 인식을 지원하지 않습니다.");
+            showToast("⚠️ 사용 중인 브라우저가 음성 인식을 지원하지 않습니다. (Chrome/Safari 권장)");
+        }
+
+        if (!isMobile) {
+            setupMicVolumeVisualizer();
+        } else {
+            startMobileWaveformSimulation();
         }
     }
 
-    /* 📌 녹음 정지 및 자원 해제 */
     function stopSpeakingRecording() {
         isSpeakingRecording = false;
-
-        if (simulatedWaveInterval) {
-            clearInterval(simulatedWaveInterval);
-            simulatedWaveInterval = null;
-        }
         if (speakingTimerInterval) {
             clearInterval(speakingTimerInterval);
             speakingTimerInterval = null;
         }
         if (speakingRecognition) {
-            try {
+            try { 
                 speakingRecognition.onend = null;
-                speakingRecognition.stop();
+                speakingRecognition.stop(); 
             } catch(e) {}
             speakingRecognition = null;
         }
@@ -3222,25 +3362,15 @@
         }
     }
 
-    /* 📌 답변 제출 (모바일 패킷 유실 방지 800ms 버퍼링 적용) */
     function submitSpeakingRecording() {
-        isSpeakingRecording = false;
-
-        if (speakingRecognition) {
-            try {
-                speakingRecognition.onend = null;
-                speakingRecognition.stop();
-            } catch(e){}
-        }
-
-        speakingStep = 3;
+        stopSpeakingRecording();
+        speakingStep = 3; 
         renderSpeakingModalUI();
 
         setTimeout(() => {
-            stopSpeakingRecording();
-            speakingStep = 4;
+            speakingStep = 4; 
             renderSpeakingModalUI();
-        }, 800);
+        }, 1200);
     }
 
     function renderSpeakingModalUI() {
@@ -3393,15 +3523,22 @@
         }
     }
 
-    // ⌨️ 단축키 조작
+    // ⌨️ 단축키 키보드 이벤트
     document.addEventListener('keydown', (event) => {
+        const dayModal = document.getElementById('day-modal');
         const autoplayModal = document.getElementById('autoplay-modal');
         const voiceModal = document.getElementById('voice-modal');
         const speakingModal = document.getElementById('speaking-modal');
 
+        const isDayOpen = dayModal && !dayModal.classList.contains('hidden');
         const isAutoplayOpen = autoplayModal && !autoplayModal.classList.contains('hidden');
         const isVoiceOpen = voiceModal && !voiceModal.classList.contains('hidden');
         const isSpeakingOpen = speakingModal && !speakingModal.classList.contains('hidden');
+
+        if (isDayOpen) {
+            if (event.key === 'Escape') closeDayModal();
+            return;
+        }
 
         if (isAutoplayOpen) {
             if (event.key === 'Escape') closeAutoplayModal();
