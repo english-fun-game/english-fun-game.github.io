@@ -13,20 +13,24 @@
         :root {
             --slack-purple: #4a154b;        
             --slack-aubergine: #611f69;    
-            --slack-blue: #1264a3;         
-            --slack-bg: #f4f5f6;            
+            --slack-blue: #1264a3;          
+            --slack-bg: #f8fafc;            
             --card-bg: #ffffff;            
-            --card-back-bg: #f8f9fa;        
-            --text-main: #1d1c1d;          
-            --text-muted: #616061;         
+            --card-back-bg: #f1f5f9;        
+            --text-main: #0f172a;          
+            --text-muted: #64748b;         
             --border-color: #e2e8f0;
             
             --btn-yellow: #f59e0b;
             --btn-red: #dc2626;    
             --btn-blue: #2563eb;   
             
+            /* 🌿 은은한 초록색 체크 스타일 */
+            --check-green-bg: #f0fdf4;
+            --check-green-border: #bbf7d0;
+            --check-green-text: #16a34a;
+            
             --speaking-blue: #3b82f6;
-            --speaking-dark-blue: #2563eb;
         }
 
         body {
@@ -66,25 +70,45 @@
             height: 100%;
         }
 
+        /* 🎈 깔끔한 메인 타이틀 */
         h1 {
-            margin: 0 0 8px 0;
-            color: var(--slack-purple);
-            font-size: 32px;
+            margin: 0 0 16px 0;
+            font-size: 36px;
             font-weight: 900;
             letter-spacing: -1px;
             text-align: center;
             flex-shrink: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2px;
+            color: var(--slack-purple);
         }
 
-        /* 📌 진입 화면 Layout */
+        .bounce-char {
+            display: inline-block;
+            animation: textBounce 2s infinite ease-in-out;
+        }
+
+        @keyframes textBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        /* 📌 진입 화면 깔끔한 프레임 */
         #setup-area {
-            max-width: 460px;
+            max-width: 480px;
             margin: 0 auto; 
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 10px; 
+            gap: 12px; 
             box-sizing: border-box;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);
         }
 
         .intro-img {
@@ -93,17 +117,17 @@
             border-radius: 16px;
             margin-bottom: 4px;
             object-fit: cover;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
         }
 
         .base-btn {
             width: 100%;
-            padding: 13px;
+            padding: 15px;
             background-color: var(--slack-purple);
             color: white;
             border: none;
-            border-radius: 10px; 
-            font-size: 16px;
+            border-radius: 12px; 
+            font-size: 17px;
             cursor: pointer;
             font-weight: 800;
             box-sizing: border-box;
@@ -118,46 +142,46 @@
         .quick-btn-group {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 12px;
             width: 100%;
-            margin-top: 2px;
+            margin-top: 4px;
         }
 
         .quick-btn {
             width: 100%;
-            padding: 12px 14px;
+            padding: 16px 18px;
             background-color: #ffffff;
             color: var(--slack-purple);
-            border: 1.5px solid var(--slack-purple);
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: 700;
+            border: 2px solid var(--slack-purple);
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 800;
             cursor: pointer;
             transition: all 0.15s ease;
             box-sizing: border-box;
             text-align: center;
+            box-shadow: 0 2px 8px rgba(74, 21, 75, 0.05);
         }
 
         .quick-btn:hover {
-            background-color: #f4ecf5;
+            background-color: #fcf4fc;
             transform: translateY(-1px);
         }
 
-        /* 📌 복습 버튼 파란색 계열 스타일 적용 */
         .pwa-review-btn {
             width: 100%;
-            padding: 13px;
-            margin-top: 6px;
+            padding: 16px 18px;
+            margin-top: 2px;
             background-color: #2563eb;
             color: white;
             border: none;
-            border-radius: 10px;
-            font-size: 15px;
+            border-radius: 14px;
+            font-size: 17px;
             font-weight: 800;
             cursor: pointer;
             box-sizing: border-box;
             transition: all 0.15s ease;
-            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
         }
 
         .pwa-review-btn:hover {
@@ -165,23 +189,77 @@
             transform: translateY(-1px);
         }
 
-        .clear-pwa-btn {
+        .backup-restore-group {
+            display: flex;
+            gap: 10px;
             width: 100%;
-            padding: 10px;
-            margin-top: 4px; 
-            background-color: #ffffff;
-            color: #64748b;
-            border: 1.5px solid #cbd5e1;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            box-sizing: border-box;
-            transition: all 0.15s ease;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px dashed var(--border-color);
         }
 
-        .clear-pwa-btn:hover {
-            background-color: #f1f5f9;
+        .backup-btn, .restore-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 13.5px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .backup-btn {
+            background: #ffffff;
+            color: #2563eb;
+            border: 1.5px solid #2563eb;
+        }
+
+        .backup-btn:hover {
+            background: #eff6ff;
+            transform: translateY(-1px);
+        }
+
+        .restore-btn {
+            background: #ffffff;
+            color: #16a34a;
+            border: 1.5px solid #16a34a;
+        }
+
+        .restore-btn:hover {
+            background: #f0fdf4;
+            transform: translateY(-1px);
+        }
+
+        /* ⏳ 심플 로딩 팝업 */
+        .loading-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 20000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px 32px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .loading-title {
+            color: var(--text-main);
+            font-size: 15px;
+            font-weight: 800;
         }
 
         .status-msg {
@@ -196,17 +274,15 @@
             justify-content: center;
             gap: 8px;
         }
-        .status-msg:not(:empty) {
-            margin: -2px 0 2px 0;
-        }
+
         .status-msg.error {
             color: #d63031;
         }
 
         .spinner {
             display: inline-block;
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
             border: 3px solid rgba(18, 100, 163, 0.2);
             border-radius: 50%;
             border-top-color: var(--slack-blue);
@@ -233,9 +309,8 @@
             border-radius: 16px;
             padding: 12px 18px;
             margin-top: 2px;
-            margin-bottom: 0;
             flex-shrink: 0;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
             transition: all 0.3s ease;
             width: 100%;
             box-sizing: border-box;
@@ -265,7 +340,7 @@
             white-space: nowrap;
             flex-shrink: 0;
             letter-spacing: -0.2px;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.15s ease;
         }
 
         .shortcut-text {
@@ -326,51 +401,30 @@
             background-color: #e0f2fe;
             border-color: #0284c7;
             color: #0369a1;
-            box-shadow: 0 2px 5px rgba(2, 132, 199, 0.15);
         }
 
         .autoplay-btn.active {
             background-color: #dcfce7;
             border-color: #16a34a;
             color: #15803d;
-            box-shadow: 0 2px 5px rgba(22, 163, 74, 0.15);
         }
 
         .mute-btn.active-music {
             background-color: #f3e8ff;
             border-color: #9333ea;
             color: #7e22ce;
-            box-shadow: 0 2px 5px rgba(147, 51, 234, 0.15);
         }
 
         .mute-btn.is-muted {
             background-color: #fee2e2;
             border-color: #ef4444;
             color: #b91c1c;
-            box-shadow: 0 2px 5px rgba(239, 68, 68, 0.15);
         }
 
         .voice-btn {
             background-color: #fff7ed;
             border-color: #f97316;
             color: #c2410c;
-        }
-
-        .nyan-timer-box.study-mode-on .nyan-time {
-            background: #f1f5f9;
-            color: #64748b;
-            border-color: #cbd5e1;
-        }
-
-        .nyan-timer-box.study-mode-on .nyan-track {
-            opacity: 0.55;
-            background-color: #e2e8f0;
-            border-color: #cbd5e1;
-        }
-
-        .nyan-timer-box.study-mode-on .nyan-cat {
-            animation: none;
-            transform: translateY(2px);
         }
 
         .nyan-track {
@@ -402,7 +456,7 @@
             top: -6px;
             font-size: 24px;
             user-select: none;
-            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.15));
             animation: nyan-bounce 0.6s infinite alternate;
         }
 
@@ -442,7 +496,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             text-align: center;
             white-space: nowrap;
         }
@@ -450,19 +504,16 @@
         .bottom-vague-btn.btn-state-yellow {
             background-color: var(--btn-yellow);
             color: #ffffff;
-            box-shadow: 0 6px 16px rgba(245, 158, 11, 0.35);
         }
 
         .bottom-vague-btn.btn-state-red {
             background-color: var(--btn-red);
             color: #ffffff;
-            box-shadow: 0 6px 16px rgba(220, 38, 38, 0.35);
         }
 
-        .bottom-vague-btn.btn-state-blue {
-            background-color: var(--btn-blue);
+        .bottom-vague-btn.btn-state-green {
+            background-color: #16a34a;
             color: #ffffff;
-            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
         }
 
         .bottom-primary-btn {
@@ -486,7 +537,7 @@
             flex-direction: row; 
             box-sizing: border-box;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
             height: 100%;
             width: 100%;
             flex: 1;
@@ -495,15 +546,18 @@
             position: relative;
         }
 
+        /* 🎯 글자가 완전히 중앙에 배치되는 구조 */
         .card-section {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 32px 48px; 
-            overflow-y: auto;        
+            padding: 32px 24px; 
+            overflow-y: auto;         
             min-height: 0;          
             box-sizing: border-box;
+            position: relative;
+            height: 100%;
         }
 
         .section-ko {
@@ -514,37 +568,48 @@
             background-position: center;
             background-size: cover; 
             transition: background-image 0.3s ease;
-            position: relative;
-            overflow: hidden;
         }
 
-        .vague-check-badge {
+        .vague-check-badges-wrap {
             position: absolute;
-            top: 12px;
-            left: 12px;
-            background: rgba(37, 99, 235, 0.12);
-            color: #2563eb;
-            border: 1.5px solid rgba(37, 99, 235, 0.3);
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 800;
+            top: 14px;
+            left: 14px;
             display: flex;
-            align-items: center;
-            gap: 4px;
-            backdrop-filter: blur(4px);
+            flex-wrap: wrap;
+            gap: 6px;
+            max-width: calc(100% - 28px);
             z-index: 5;
+            pointer-events: none;
+        }
+
+        .check-icon-badge {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--check-green-bg);
+            border: 1.5px solid var(--check-green-border);
+            color: var(--check-green-text);
+            font-size: 13px;
+            font-weight: 900;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            animation: badgePopIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes badgePopIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
         }
 
         .section-en {
             flex: 1;
             background-color: var(--card-back-bg);
-            position: relative;
             cursor: pointer;
         }
 
         .card-word-wrapper {
-            margin: auto 0; 
             width: 100%;
             text-align: center;
             z-index: 1; 
@@ -552,10 +617,11 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            margin: auto 0;
         }
 
         .card-word {
-            font-size: clamp(42px, 4.5vw, 76px); 
+            font-size: clamp(38px, 4.2vw, 70px); 
             font-weight: 900;
             color: var(--text-main);
             width: 100%;
@@ -564,10 +630,11 @@
             white-space: normal;        
             line-height: 1.3;
             letter-spacing: -1px;
+            text-align: center;
         }
 
         .card-word.long-text {
-            font-size: clamp(24px, 2.5vw, 38px); 
+            font-size: clamp(22px, 2.3vw, 36px); 
             line-height: 1.4;
             font-weight: 800;
         }
@@ -579,13 +646,13 @@
 
         .card-example {
             display: none;
-            margin-top: 24px;
+            margin-top: 20px;
             text-align: center;
             width: 100%;
         }
 
         .ex-en {
-            font-size: clamp(20px, 2vw, 32px);
+            font-size: clamp(18px, 1.8vw, 28px);
             font-weight: 800;
             color: var(--slack-blue);
             line-height: 1.4;
@@ -594,11 +661,11 @@
         }
 
         .ex-ko {
-            font-size: clamp(16px, 1.5vw, 24px);
+            font-size: clamp(15px, 1.4vw, 22px);
             font-weight: 700;
             color: var(--text-muted);
             line-height: 1.4;
-            margin-top: 8px;
+            margin-top: 6px;
             word-break: keep-all;
             overflow-wrap: break-word;
         }
@@ -611,9 +678,9 @@
         .card-top-actions {
             display: none;
             position: absolute;
-            top: 10px;
-            right: 10px;
-            gap: 6px;
+            top: 14px;
+            right: 14px;
+            gap: 8px;
             z-index: 10;
         }
 
@@ -623,9 +690,9 @@
         }
 
         .card-action-btn {
-            padding: 5px 10px;
+            padding: 6px 12px;
             border-radius: 12px;
-            background-color: rgba(255, 255, 255, 0.9);
+            background-color: rgba(255, 255, 255, 0.95);
             border: 1.2px solid #cbd5e1;
             color: #475569;
             font-size: 13px;
@@ -654,9 +721,10 @@
 
         .placeholder {
             display: block;
-            color: #ccd5e0;
+            color: #cbd5e1;
             font-size: clamp(48px, 5vw, 80px); 
             font-weight: 900;
+            text-align: center;
         }
 
         .show-answers .section-en .placeholder {
@@ -666,7 +734,7 @@
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(15, 23, 42, 0.4);
             backdrop-filter: blur(4px);
             z-index: 10000;
             display: flex;
@@ -678,11 +746,11 @@
 
         .modal-card {
             background: #ffffff;
-            border-radius: 12px;
+            border-radius: 16px;
             width: 100%;
             max-width: 460px;
             padding: 22px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             display: flex;
             flex-direction: column;
             gap: 16px;
@@ -707,7 +775,6 @@
             color: var(--text-main);
         }
 
-        /* 📌 취약 모달 3기둥(Column) 레이아웃 */
         .weak-col-container {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -747,7 +814,6 @@
             color: #2563eb;
             cursor: pointer;
             text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.04);
             transition: all 0.15s ease;
             box-sizing: border-box;
         }
@@ -883,7 +949,7 @@
             height: 90vh;
             max-height: 680px;
             padding: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -1149,24 +1215,23 @@
             body.game-active { padding: 10px 12px !important; }
             #game-area { gap: 10px !important; }
             .nyan-timer-box { padding: 12px 14px !important; }
-            #setup-area { margin-top: 12px; gap: 10px; }
-            h1 { font-size: 28px; }
+            #setup-area { margin-top: 8px; gap: 10px; padding: 18px; }
+            h1 { font-size: 30px; }
+            .quick-btn, .pwa-review-btn { padding: 14px 16px; font-size: 16px; }
             .shortcut-text, .desktop-shortcut { display: none !important; }
             .nyan-timer-header { font-size: 11px; gap: 3px; margin-bottom: 6px; }
             .study-btn, .mute-btn, .voice-btn, .autoplay-btn { height: 32px; font-size: 11px; font-weight: 800; padding: 0 5px; }
             .cards-grid { margin-bottom: 8px !important; flex: 1 !important; height: 100% !important; }
             #game-area .card { flex-direction: column !important; height: 100% !important; flex: 1 !important; }
-            #game-area .section-ko { border-right: none !important; border-bottom: 1px solid var(--border-color) !important; flex: 3 !important; padding: 12px 10px !important; background-size: cover !important; }
-            #game-area .section-en { flex: 5 !important; padding: 12px 10px !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; }
-            #game-area .card-word, #game-area .placeholder { font-size: 34px !important; }
-            #game-area .card-word.long-text { font-size: 22px !important; line-height: 1.4 !important; }
+            #game-area .section-ko { border-right: none !important; border-bottom: 1px solid var(--border-color) !important; flex: 3 !important; padding: 20px 12px !important; background-size: cover !important; }
+            #game-area .section-en { flex: 5 !important; padding: 20px 12px !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; }
+            #game-area .card-word, #game-area .placeholder { font-size: 32px !important; }
+            #game-area .card-word.long-text { font-size: 20px !important; line-height: 1.4 !important; }
             .card-example { margin-top: 12px !important; }
-            .ex-en { font-size: 16px !important; }
-            .ex-ko { font-size: 14px !important; margin-top: 4px !important; }
+            .ex-en { font-size: 15px !important; }
+            .ex-ko { font-size: 13px !important; margin-top: 4px !important; }
             .bottom-vague-btn, .bottom-primary-btn { height: 64px !important; font-size: 17px !important; padding: 0 4px; border-radius: 10px; }
-            .show-answers .section-en .card-top-actions { display: block; position: static; }
-            .card-action-btn.card-speaking-btn { position: absolute; top: 12px; right: 12px; }
-            .card-action-btn.card-repeat-btn { position: absolute; bottom: 12px; right: 12px; }
+            .show-answers .section-en .card-top-actions { display: flex; position: absolute; top: 10px; right: 10px; }
             #summary-area .controls { flex-direction: column; gap: 8px; }
             #summary-area .base-btn { padding: 14px !important; font-size: 15px !important; border-radius: 8px; width: 100%; }
             th, td { padding: 10px 12px; font-size: 13px; }
@@ -1174,6 +1239,14 @@
     </style>
 </head>
 <body>
+
+<!-- ⏳ 깔끔한 데이터 로딩 오버레이 -->
+<div id="loading-overlay" class="loading-overlay hidden">
+    <div class="loading-card">
+        <div class="spinner"></div>
+        <div class="loading-title">단어장 데이터를 가져오는 중...</div>
+    </div>
+</div>
 
 <!-- 📅 Day 선택 모달 -->
 <div id="day-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeDayModal()">
@@ -1197,7 +1270,7 @@
     </div>
 </div>
 
-<!-- 🔥 취약 단어 복습 3기둥(Column) 세로 모달 -->
+<!-- 🔥 취약 단어 복습 세로 모달 -->
 <div id="weak-review-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeWeakReviewModal()">
     <div class="modal-card tall-modal">
         <div class="modal-header">
@@ -1209,9 +1282,7 @@
             🔥 전체 취약 단어 복습 (0개)
         </button>
 
-        <!-- 3기둥 레이아웃 (스피킹 | 라이팅 | 초록이) -->
         <div class="weak-col-container">
-            <!-- 기둥 1: 스피킹 -->
             <div class="weak-col">
                 <div class="weak-col-header">🗣️ 스피킹</div>
                 <button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '스피킹')">
@@ -1221,7 +1292,6 @@
                 </div>
             </div>
 
-            <!-- 기둥 2: 라이팅 -->
             <div class="weak-col">
                 <div class="weak-col-header">✍️ 라이팅</div>
                 <button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '라이팅')">
@@ -1231,7 +1301,6 @@
                 </div>
             </div>
 
-            <!-- 기둥 3: 초록이 -->
             <div class="weak-col">
                 <div class="weak-col-header">🍀 초록이</div>
                 <button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '초록이')">
@@ -1322,10 +1391,18 @@
 </div>
 
 <div class="container">
-    <!-- 📌 진입 화면 Layout (intro.png 최상단 + 인풋박스 제거) -->
+    <!-- 📌 진입 화면 Layout -->
     <div id="setup-area">
         <img src="intro.png" alt="퐁크러쉬 인트로" class="intro-img" onerror="this.style.display='none'">
-        <h1>🎮 퐁크러쉬</h1>
+        
+        <h1>
+            <span class="bounce-char" style="animation-delay: 0.0s;">🎮</span>
+            <span class="bounce-char" style="animation-delay: 0.1s;"> </span>
+            <span class="bounce-char" style="animation-delay: 0.2s;">퐁</span>
+            <span class="bounce-char" style="animation-delay: 0.3s;">크</span>
+            <span class="bounce-char" style="animation-delay: 0.4s;">러</span>
+            <span class="bounce-char" style="animation-delay: 0.5s;">쉬</span>
+        </h1>
 
         <div id="status" class="status-msg"></div>
 
@@ -1335,7 +1412,12 @@
             <button class="quick-btn" onclick="loadShortcutUrl('https://docs.google.com/spreadsheets/d/1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U/edit?usp=sharing')">🍀 초록이 단어 시험 바로가기</button>
             
             <button id="pwa-review-btn" class="pwa-review-btn hidden" onclick="openWeakReviewModal()">🔥 취약 단어 복습 (0개)</button>
-            
+
+            <div class="backup-restore-group">
+                <button type="button" class="backup-btn" onclick="backupWeakWords()">💾 취약 단어 백업</button>
+                <button type="button" class="restore-btn" onclick="restoreWeakWords()">📂 취약 단어 불러오기</button>
+            </div>
+            <input type="file" id="restore-file-input" accept=".txt,.json" style="display:none" onchange="handleRestoreFile(event)">
         </div>
     </div>
 
@@ -1384,7 +1466,7 @@
         </div>
     </div>
 
-    <!-- 📌 복습 리스트 화면 복원 -->
+    <!-- 📌 복습 리스트 화면 -->
     <div id="summary-area" class="hidden">
         <div id="capture-target">
             <div class="nyan-timer-header" style="margin-bottom: 10px; flex-shrink: 0;">
@@ -1623,7 +1705,7 @@
     let currentCategory = '단어암기'; 
     let isWeakReviewMode = false; 
     let testedWeakWordsInSession = []; 
-    let isCurrentCardChecked = false; // 📌 [신규] 카드의 체크 중복 카운트 방지 플래그
+    let isCurrentCardChecked = false; 
     const cardsPerPage = 1; 
     
     // 타이머
@@ -1942,29 +2024,90 @@
 
     function updatePWAReviewButtonUI() {
         const pwaBtn = document.getElementById('pwa-review-btn');
-        const clearBtn = document.getElementById('clear-pwa-btn');
         if (!pwaBtn) return;
 
         const savedList = getPWASavedWords();
         pwaBtn.classList.remove('hidden');
         pwaBtn.innerText = `🔥 취약 단어 복습 (${savedList.length}개)`;
+    }
 
-        if (clearBtn) {
-            if (savedList.length > 0) clearBtn.classList.remove('hidden');
-            else clearBtn.classList.add('hidden');
+    function backupWeakWords() {
+        const savedList = getPWASavedWords();
+        if (savedList.length === 0) {
+            alert("백업할 취약 단어가 없습니다.");
+            return;
+        }
+
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const fileName = `pongcrush_weak_words_${year}${month}${day}.txt`;
+
+        const jsonStr = JSON.stringify(savedList, null, 2);
+        const blob = new Blob([jsonStr], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+
+    function restoreWeakWords() {
+        const input = document.getElementById('restore-file-input');
+        if (input) {
+            input.value = ''; 
+            input.click();
         }
     }
 
-    function confirmClearPWASavedWords() {
-        const savedList = getPWASavedWords();
-        if (savedList.length === 0) return;
+    function handleRestoreFile(event) {
+        const file = event.target.files[0];
+        if (!file) return;
 
-        if (confirm(`정말로 저장된 취약 단어 (${savedList.length}개)를 모두 삭제하시겠습니까?`)) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
             try {
-                localStorage.removeItem(PWA_VAGUE_STORAGE_KEY);
+                const importedList = JSON.parse(e.target.result);
+                if (!Array.isArray(importedList)) {
+                    throw new Error("올바른 백업 파일 형식이 아닙니다.");
+                }
+
+                let currentList = getPWASavedWords();
+                let addedCount = 0;
+
+                importedList.forEach(item => {
+                    if (item && item.ko && item.en) {
+                        const existingIdx = currentList.findIndex(w => w.ko === item.ko && w.en === item.en);
+                        if (existingIdx > -1) {
+                            currentList[existingIdx].vagueCount = Math.max(currentList[existingIdx].vagueCount || 1, item.vagueCount || 1);
+                        } else {
+                            currentList.push({
+                                ko: item.ko,
+                                en: item.en,
+                                exEn: item.exEn || '',
+                                exKo: item.exKo || '',
+                                category: item.category || '기타',
+                                dayIndex: item.dayIndex !== undefined ? item.dayIndex : -1,
+                                vagueCount: item.vagueCount || 1
+                            });
+                            addedCount++;
+                        }
+                    }
+                });
+
+                localStorage.setItem(PWA_VAGUE_STORAGE_KEY, JSON.stringify(currentList));
                 updatePWAReviewButtonUI();
-            } catch (e) {}
-        }
+                alert(`백업 파일에서 ${importedList.length}개 단어를 확인했습니다.\n(신규 추가: ${addedCount}개, 업데이트 완료)`);
+            } catch (err) {
+                alert("파일을 불러오는 중 오류가 발생했습니다: " + err.message);
+            }
+        };
+        reader.readAsText(file, 'UTF-8');
     }
 
     function handleAutoplayBtnClick() {
@@ -2471,7 +2614,6 @@
             }));
     }
 
-    /* 📌 [수정] 인풋박스 제거 반영 매개변수 바인딩 */
     async function loadExcelFromUrl(targetUrl) {
         let url = targetUrl || '';
         
@@ -2496,7 +2638,10 @@
         }
 
         statusEl.classList.remove('error');
-        statusEl.innerHTML = '<div class="spinner"></div> 데이터 동기화 중...';
+        statusEl.innerText = "";
+        
+        const loadingModal = document.getElementById('loading-overlay');
+        if (loadingModal) loadingModal.classList.remove('hidden');
 
         try {
             const tempExtractList = await fetchSheetData(url);
@@ -2506,12 +2651,13 @@
             }
 
             loadedRawWordList = tempExtractList;
-            statusEl.innerText = "";
 
+            if (loadingModal) loadingModal.classList.add('hidden');
             openDayModal();
 
         } catch (error) {
             console.error(error);
+            if (loadingModal) loadingModal.classList.add('hidden');
             statusEl.classList.add('error');
             statusEl.innerText = "에러: " + error.message;
         }
@@ -2695,7 +2841,6 @@
         startTimer();
     }
 
-    /* 📌 [수정] 이미 몰라요/틀렸어요 체크한 카드는 "체크 완료 ✓" 버튼으로 고정 */
     function updateButtonsUI() {
         if (wordList.length === 0) return;
 
@@ -2703,11 +2848,11 @@
         const vagueTextEl = document.getElementById('vague-btn-text');
         const actionTextEl = document.getElementById('action-btn-text');
 
-        vagueBtn.classList.remove('btn-state-yellow', 'btn-state-red', 'btn-state-blue');
+        vagueBtn.classList.remove('btn-state-yellow', 'btn-state-red', 'btn-state-green');
 
         if (isCurrentCardChecked) {
             if (vagueTextEl) vagueTextEl.innerText = "체크 완료 ✓";
-            vagueBtn.classList.add('btn-state-blue');
+            vagueBtn.classList.add('btn-state-green');
         } else if (isWeakReviewMode) {
             if (!showAnswers) {
                 if (vagueTextEl) vagueTextEl.innerText = "또 몰라요 ❓";
@@ -2722,7 +2867,7 @@
 
             if (isVague) {
                 if (vagueTextEl) vagueTextEl.innerText = "체크 완료 ✓";
-                vagueBtn.classList.add('btn-state-blue');
+                vagueBtn.classList.add('btn-state-green');
             } else if (!showAnswers) {
                 if (vagueTextEl) vagueTextEl.innerText = "몰라요 ❓";
                 vagueBtn.classList.add('btn-state-yellow');
@@ -2739,14 +2884,37 @@
         }
     }
 
+    function getCardCheckCount(item) {
+        if (!item) return 0;
+        const savedList = getPWASavedWords();
+        const matchedSaved = savedList.find(w => w.ko === item.ko && w.en === item.en);
+        return matchedSaved ? (matchedSaved.vagueCount || 0) : 0;
+    }
+
+    function renderCheckBadgesHtml(countVal) {
+        if (countVal <= 0) return '';
+        let html = '';
+        for (let i = 0; i < countVal; i++) {
+            html += `<span class="check-icon-badge" title="${i + 1}회 체크">✔</span>`;
+        }
+        return html;
+    }
+
+    function updateCardCheckBadges(item) {
+        const container = document.getElementById('card-check-badges-container');
+        if (!container) return;
+        const countVal = getCardCheckCount(item);
+        container.innerHTML = renderCheckBadgesHtml(countVal);
+    }
+
     function renderCards() {
         stopTTS();
         clearAutoplayTimer();
-        if (wordList.length === 0) return;
+        if (wordList.length === 0) return; 
         
         wrapperEl.innerHTML = '';
         showAnswers = false;
-        isCurrentCardChecked = false; // 카드 전환 시 체크 플래그 초기화
+        isCurrentCardChecked = false;
         wrapperEl.classList.remove('show-answers');
 
         const targetIndex = currentStartIndex;
@@ -2769,22 +2937,13 @@
             const speakingTargetTextToUse = (hasExample && item.exEn) ? item.exEn : item.en;
             const speakingTypeToUse = (hasExample && item.exEn) ? 'sentence' : 'word';
 
-            const savedList = getPWASavedWords();
-            const matchedSaved = savedList.find(w => w.ko === item.ko && w.en === item.en);
-            const countVal = matchedSaved ? (matchedSaved.vagueCount || 1) : (item.vagueCount || 1);
-            
-            const badgeHtml = countVal > 0 ? `
-                <div class="vague-check-badge">
-                    <span>⚠️</span>
-                    <span>${'✔ '.repeat(Math.min(countVal, 3))}</span>
-                    <span>(${countVal}회)</span>
-                </div>
-            ` : '';
+            const countVal = getCardCheckCount(item);
+            const badgesHtml = `<div id="card-check-badges-container" class="vague-check-badges-wrap">${renderCheckBadgesHtml(countVal)}</div>`;
 
             const cardHtml = `
                 <div class="card">
                     <div class="card-section section-ko">
-                        ${badgeHtml}
+                        ${badgesHtml}
                         <div class="card-word-wrapper">
                             <div class="${wordClass}">${item.ko}</div>
                         </div>
@@ -2817,7 +2976,6 @@
         if (isAutoplay) startAutoplayLoopForCurrentCard();
     }
 
-    /* 📌 [수정] 이미 체크된 카드는 중복 카운팅 방지 */
     function handleVagueAction(targetIndex) {
         clearAutoplayTimer();
         if (wordList.length === 0) return;
@@ -2831,6 +2989,8 @@
                 }
                 addWordToPWAStorage(targetItem);
                 isCurrentCardChecked = true;
+                
+                updateCardCheckBadges(targetItem);
             }
         }
 
@@ -2867,7 +3027,6 @@
         }
     }
 
-    /* 📌 [수정] 복습 완료 리스트: 체크 횟수 내림차순 정렬 및 한글 뜻 영역 횟수 뱃지 노출 */
     function showSummaryNotes() {
         stopTTS();
         stopTimer(); 
@@ -2885,12 +3044,11 @@
         const targetDisplayList = isWeakReviewMode ? [...testedWeakWordsInSession] : [...vagueWords];
         const savedList = getPWASavedWords();
 
-        // 📌 체크 횟수(vagueCount) 내림차순 정렬
         targetDisplayList.sort((a, b) => {
             const savedA = savedList.find(w => w.ko === a.ko && w.en === a.en);
             const savedB = savedList.find(w => w.ko === b.ko && w.en === b.en);
-            const countA = savedA ? (savedA.vagueCount || 1) : (a.vagueCount || 1);
-            const countB = savedB ? (savedB.vagueCount || 1) : (b.vagueCount || 1);
+            const countA = savedA ? (savedA.vagueCount || 0) : 0;
+            const countB = savedB ? (savedB.vagueCount || 0) : 0;
             return countB - countA;
         });
 
@@ -2919,14 +3077,15 @@
                 }
 
                 const matchedSaved = savedList.find(w => w.ko === item.ko && w.en === item.en);
-                const countVal = matchedSaved ? (matchedSaved.vagueCount || 1) : (item.vagueCount || 1);
+                const countVal = matchedSaved ? (matchedSaved.vagueCount || 0) : 0;
 
                 const koCellContent = `
                     <div style="font-weight: 700; color: var(--text-main); display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap;">
                         <span>${item.ko}</span>
-                        <span style="font-size: 11px; color: #2563eb; background: #eff6ff; border: 1px solid #bfdbfe; padding: 2px 6px; border-radius: 12px; font-weight: 800; white-space: nowrap;">
+                        ${countVal > 0 ? `
+                        <span style="font-size: 11px; color: #16a34a; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 2px 6px; border-radius: 12px; font-weight: 800; white-space: nowrap;">
                             ⚠️ ${countVal}회 체크
-                        </span>
+                        </span>` : ''}
                     </div>
                 `;
 
