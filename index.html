@@ -1324,6 +1324,7 @@
 <div class="container">
     <!-- 📌 진입 화면 Layout (intro.png 최상단 + 인풋박스 제거) -->
     <div id="setup-area">
+        <img src="intro.png" alt="퐁크러쉬 인트로" class="intro-img" onerror="this.style.display='none'">
         <h1>🎮 퐁크러쉬</h1>
 
         <div id="status" class="status-msg"></div>
@@ -1334,7 +1335,7 @@
             <button class="quick-btn" onclick="loadShortcutUrl('https://docs.google.com/spreadsheets/d/1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U/edit?usp=sharing')">🍀 초록이 단어 시험 바로가기</button>
             
             <button id="pwa-review-btn" class="pwa-review-btn hidden" onclick="openWeakReviewModal()">🔥 취약 단어 복습 (0개)</button>
-            <button id="clear-pwa-btn" class="clear-pwa-btn hidden" onclick="confirmClearPWASavedWords()">🗑️ 전체 취약 단어 비우기</button>
+            
         </div>
     </div>
 
