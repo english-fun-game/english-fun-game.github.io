@@ -50,6 +50,29 @@
             overflow-y: auto; 
         }
 
+        /* 📌 좌측 하단 버전 표기 스타일 */
+        .app-version {
+            position: fixed;
+            bottom: 12px;
+            left: 14px;
+            font-size: 24px;
+            font-weight: 700;
+            color: #94a3b8; /* 과하지 않은 은은한 회색 */
+            z-index: 100;
+            pointer-events: none; /* 클릭/터치 이벤트 방해 금지 */
+            user-select: none;
+        }
+
+        /* 모바일 모드 및 게임 진행 중에도 방해되지 않도록 처리 */
+        @media (max-width: 650px) {
+            .app-version {
+                bottom: 8px;
+                left: 10px;
+                font-size: 14px;
+                opacity: 0.7;
+            }
+        }
+
         body.game-active {
             height: 100vh;
             height: 100dvh;
@@ -1496,6 +1519,8 @@
         </div>
     </div>
 </div>
+<!-- 📌 좌측 하단 버전 표기 -->
+<div class="app-version">v1.0.0</div>
 
 <script>
     class ClientSpeakingEngine {
