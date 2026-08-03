@@ -18,7 +18,7 @@
             --card-bg: #ffffff;            
             --card-back-bg: #f1f5f9;        
             --text-main: #0f172a;          
-            --text-muted: #64748b;          
+            --text-muted: #64748b;         
             --border-color: #e2e8f0;
             
             --btn-yellow: #f59e0b;
@@ -49,13 +49,15 @@
             overflow-y: auto; 
         }
 
+        /* 📌 좌측 하단 버전 표기 스타일 - 얇고 작게 변경 */
         .app-version {
             position: fixed;
-            bottom: 12px;
-            left: 14px;
-            font-size: 24px;
-            font-weight: 700;
+            bottom: 8px;
+            left: 8px;
+            font-size: 12px;
+            font-weight: 400; 
             color: #94a3b8;
+            opacity: 0.6;
             z-index: 100;
             pointer-events: none;
             user-select: none;
@@ -63,10 +65,10 @@
 
         @media (max-width: 650px) {
             .app-version {
-                bottom: 8px;
-                left: 10px;
-                font-size: 14px;
-                opacity: 0.7;
+                font-size: 9px; 
+                bottom: 4px;
+                left: 6px;
+                opacity: 0.5;
             }
         }
 
@@ -250,6 +252,7 @@
             transform: translateY(-1px);
         }
 
+        /* ⏳ 심플 로딩 팝업 */
         .loading-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -298,9 +301,9 @@
 
         .spinner {
             display: inline-block;
-            width: 22px;
-            height: 22px;
-            border: 3.5px solid rgba(18, 100, 163, 0.2);
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(18, 100, 163, 0.2);
             border-radius: 50%;
             border-top-color: var(--slack-blue);
             animation: spin 0.8s linear infinite;
@@ -309,6 +312,7 @@
             to { transform: rotate(360deg); }
         }
 
+        /* 📌 게임 플레이 화면 */
         #game-area {
             flex: 1;
             display: flex;
@@ -558,7 +562,7 @@
             align-items: center;
             justify-content: center;
             padding: 32px 24px; 
-            overflow-y: auto;          
+            overflow-y: auto;         
             min-height: 0;          
             box-sizing: border-box;
             position: relative;
@@ -644,269 +648,40 @@
             font-weight: 800;
         }
 
-        .section-en .card-word,
-        .section-en .ex-en-card,
-        .section-en .ex-ko-card {
-            display: none; 
-        }
-
-        .show-answers .section-en .card-word,
-        .show-answers .section-en .ex-en-card,
-        .show-answers .section-en .ex-ko-card {
-            display: block; 
-        }
-
         .section-en .card-word {
+            display: none; 
             color: var(--slack-blue); 
         }
 
-        .ex-ko-card {
-            font-size: clamp(15px, 1.5vw, 22px);
-            font-weight: 700;
-            color: #475569;
-            margin-top: 12px;
-            line-height: 1.4;
-            word-break: keep-all;
-            overflow-wrap: break-word;
+        .card-example {
+            display: none;
+            margin-top: 20px;
             text-align: center;
-            background: rgba(255, 255, 255, 0.85);
-            padding: 6px 12px;
-            border-radius: 8px;
-            border: 1px solid rgba(203, 213, 225, 0.6);
+            width: 100%;
         }
 
-        .ex-en-card {
-            font-size: clamp(16px, 1.7vw, 26px);
+        .ex-en {
+            font-size: clamp(18px, 1.8vw, 28px);
             font-weight: 800;
             color: var(--slack-blue);
-            margin-top: 12px;
             line-height: 1.4;
             word-break: keep-all;
             overflow-wrap: break-word;
-            text-align: center;
         }
 
-        /* ✍️ 영작 테스트 진입 버튼 */
-        .card-top-actions-ko {
-            position: absolute;
-            top: 14px;
-            right: 14px;
-            display: flex;
-            gap: 8px;
-            z-index: 10;
-        }
-
-        .writing-test-trigger-btn {
-            padding: 10px 18px;
-            border-radius: 14px;
-            background-color: #0284c7;
-            border: 2px solid #0369a1;
-            color: #ffffff;
-            font-size: 15px;
-            font-weight: 900;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            transition: all 0.15s ease;
-            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
-        }
-
-        .writing-test-trigger-btn:hover {
-            background-color: #0369a1;
-            transform: translateY(-1px);
-        }
-
-        /* 텍스트 입력창 */
-        .sentence-test-textarea {
-            width: 100%;
-            height: 110px;
-            padding: 14px 16px;
-            font-size: 18px;
+        .ex-ko {
+            font-size: clamp(15px, 1.4vw, 22px);
             font-weight: 700;
-            font-family: inherit;
-            border: 2px solid var(--slack-blue);
-            border-radius: 14px;
-            outline: none;
-            box-sizing: border-box;
-            text-align: left;
-            background: #ffffff;
-            color: var(--text-main);
-            resize: none;
-            overflow: hidden;
-            transition: all 0.2s ease;
-            line-height: 1.45;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
-        }
-
-        .sentence-test-textarea:focus {
-            border-color: var(--slack-purple);
-            box-shadow: 0 0 0 4px rgba(74, 21, 75, 0.12);
-        }
-
-        /* 🎓 모달 너비 97% & 높이 90vh */
-        .ai-modal-card {
-            background: #ffffff;
-            border-radius: 24px;
-            width: 97vw;
-            max-width: 1550px;
-            height: 90vh;
-            max-height: 90vh;
-            padding: 28px 36px;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            box-sizing: border-box;
-            overflow-y: auto;
-            position: relative;
-        }
-
-        .ai-modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 14px;
-            flex-shrink: 0;
-        }
-
-        .ai-modal-title {
-            font-size: 24px;
-            font-weight: 900;
-            color: var(--slack-purple);
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .ai-close-btn {
-            background: #f1f5f9;
-            border: 1.5px solid #cbd5e1;
-            border-radius: 10px;
-            padding: 8px 16px;
-            font-size: 15px;
-            font-weight: 800;
-            cursor: pointer;
             color: var(--text-muted);
-            transition: all 0.15s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
+            line-height: 1.4;
+            margin-top: 6px;
+            word-break: keep-all;
+            overflow-wrap: break-word;
         }
 
-        .ai-close-btn:hover {
-            background: #e2e8f0;
-            color: #0f172a;
-        }
-
-        .ai-status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 16px;
-            border-radius: 16px;
-            font-size: 15px;
-            font-weight: 800;
-        }
-
-        .ai-status-badge.good { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
-        .ai-status-badge.warn { background: #fef3c7; color: #b45309; border: 1px solid #fde047; }
-        .ai-status-badge.info { background: #e0f2fe; color: #0369a1; border: 1px solid #7dd3fc; }
-
-        .ai-single-line-box {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 16px 22px;
-            border-radius: 16px;
-            border: 1.5px solid var(--border-color);
-            background: #f8fafc;
-            box-sizing: border-box;
-            flex-shrink: 0;
-        }
-
-        .ai-single-line-box.target {
-            background: #f0fdf4;
-            border-color: #bbf7d0;
-        }
-
-        .ai-single-line-box.user {
-            background: #eff6ff;
-            border-color: #bfdbfe;
-        }
-
-        .ai-line-label {
-            font-size: 16px;
-            font-weight: 800;
-            white-space: nowrap;
-            flex-shrink: 0;
-            padding: 8px 14px;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.95);
-        }
-
-        .ai-single-line-box.target .ai-line-label { color: #15803d; border: 1px solid #86efac; }
-        .ai-single-line-box.user .ai-line-label { color: #1d4ed8; border: 1px solid #93c5fd; }
-
-        .ai-line-content {
-            font-size: 24px;
-            font-weight: 900;
-            color: var(--text-main);
-            word-break: break-word;
-            line-height: 1.45;
-        }
-
-        .ai-feedback-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            flex: 1;
-            min-height: 0;
-            overflow-y: auto;
-        }
-
-        @media (max-width: 768px) {
-            .ai-feedback-grid { grid-template-columns: 1fr; }
-        }
-
-        .ai-card {
-            border-radius: 16px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            box-sizing: border-box;
-            border: 1.5px solid var(--border-color);
-        }
-
-        .ai-card.grammar {
-            background: #fffbebf5;
-            border-color: #fde68a;
-            grid-column: span 2;
-        }
-
-        @media (max-width: 768px) {
-            .ai-card.grammar { grid-column: span 1; }
-        }
-
-        .ai-card-title {
-            font-size: 18px;
-            font-weight: 900;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .ai-card.grammar .ai-card-title { color: #b45309; }
-
-        .ai-card-body {
-            font-size: 18px;
-            font-weight: 800;
-            line-height: 1.65;
-            color: #1e293b;
-            white-space: pre-wrap;
+        .show-answers .section-en .card-word,
+        .show-answers .section-en .card-example {
+            display: block; 
         }
 
         .card-top-actions {
@@ -1088,6 +863,7 @@
             color: #2563eb;
         }
 
+        /* 📌 복습 리스트 화면 Layout */
         #summary-area {
             flex: 1;
             display: flex;
@@ -1172,6 +948,7 @@
             gap: 12px;
         }
 
+        /* 🎙️ 스피킹 첨삭 모달 스타일 */
         .speaking-modal-card {
             background: var(--speaking-blue);
             color: #ffffff;
@@ -1441,11 +1218,298 @@
         .tune-desc { font-size: 10.5px; color: var(--text-muted); }
 
         .hidden { display: none !important; }
+
+        /* ✍️ 영작 테스트 진입 버튼 (PC 전용) */
+        .card-top-actions-ko {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .writing-test-trigger-btn {
+            padding: 10px 18px;
+            border-radius: 14px;
+            background-color: #0284c7;
+            border: 2px solid #0369a1;
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 900;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.15s ease;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+        }
+
+        .writing-test-trigger-btn:hover {
+            background-color: #0369a1;
+            transform: translateY(-1px);
+        }
+
+        .sentence-test-textarea {
+            width: 100%;
+            height: 110px;
+            padding: 14px 16px;
+            font-size: 18px;
+            font-weight: 700;
+            font-family: inherit;
+            border: 2px solid var(--slack-blue);
+            border-radius: 14px;
+            outline: none;
+            box-sizing: border-box;
+            text-align: left;
+            background: #ffffff;
+            color: var(--text-main);
+            resize: none;
+            overflow: hidden;
+            transition: all 0.2s ease;
+            line-height: 1.45;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .sentence-test-textarea:focus {
+            border-color: var(--slack-purple);
+            box-shadow: 0 0 0 4px rgba(74, 21, 75, 0.12);
+        }
+
+        /* 🔘 명확한 AI 칩 버튼 스타일링 */
+        .ai-chip-btn {
+            background: #f1f5f9;
+            color: #0f172a;
+            border: 2px solid #cbd5e1;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: all 0.15s ease;
+        }
+
+        .ai-chip-btn:hover {
+            background: #ffffff;
+            border-color: #94a3b8;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .ai-chip-btn.green-chip {
+            background: #dcfce7;
+            color: #15803d;
+            border-color: #86efac;
+        }
+
+        .ai-chip-btn.green-chip:hover {
+            background: #bbf7d0;
+            border-color: #4ade80;
+        }
+
+        .ai-modal-card {
+            background: #ffffff;
+            border-radius: 24px;
+            width: 97vw;
+            max-width: 1550px;
+            height: 90vh;
+            max-height: 90vh;
+            padding: 28px 36px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .ai-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 14px;
+            flex-shrink: 0;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .ai-modal-title {
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--slack-purple);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .ai-close-btn {
+            background: #f1f5f9;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 8px 16px;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .ai-close-btn:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+
+        .ai-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 16px;
+            border-radius: 16px;
+            font-size: 15px;
+            font-weight: 800;
+        }
+
+        .ai-status-badge.good { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+        .ai-status-badge.warn { background: #fef3c7; color: #b45309; border: 1px solid #fde047; }
+        .ai-status-badge.info { background: #e0f2fe; color: #0369a1; border: 1px solid #7dd3fc; }
+
+        .ai-single-line-box {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 22px;
+            border-radius: 16px;
+            border: 1.5px solid var(--border-color);
+            background: #f8fafc;
+            box-sizing: border-box;
+            flex-shrink: 0;
+        }
+
+        .ai-single-line-box.target {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+
+        .ai-single-line-box.user {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+        }
+
+        .ai-line-label {
+            font-size: 16px;
+            font-weight: 800;
+            white-space: nowrap;
+            flex-shrink: 0;
+            padding: 8px 14px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .ai-single-line-box.target .ai-line-label { color: #15803d; border: 1px solid #86efac; }
+        .ai-single-line-box.user .ai-line-label { color: #1d4ed8; border: 1px solid #93c5fd; }
+
+        .ai-line-content {
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--text-main);
+            word-break: break-word;
+            line-height: 1.45;
+        }
+
+        .ai-feedback-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+        }
+
+        @media (max-width: 768px) {
+            .ai-feedback-grid { grid-template-columns: 1fr; }
+        }
+
+        .ai-card {
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-sizing: border-box;
+            border: 1.5px solid var(--border-color);
+        }
+
+        .ai-card.grammar {
+            background: #fffbebf5;
+            border-color: #fde68a;
+            grid-column: span 2;
+        }
+
+        @media (max-width: 768px) {
+            .ai-card.grammar { grid-column: span 1; }
+        }
+
+        .ai-card-title {
+            font-size: 18px;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ai-card.grammar .ai-card-title { color: #b45309; }
+
+        .ai-card-body {
+            font-size: 18px;
+            font-weight: 800;
+            line-height: 1.65;
+            color: #1e293b;
+            white-space: pre-wrap;
+        }
+
+        @media (max-width: 650px) {
+            body { padding: 10px 8px; }
+            body.game-active { padding: 10px 12px !important; }
+            #game-area { gap: 10px !important; }
+            .nyan-timer-box { padding: 12px 14px !important; }
+            #setup-area { margin-top: 8px; gap: 10px; padding: 18px; }
+            h1 { font-size: 30px; }
+            .quick-btn, .pwa-review-btn { padding: 14px 16px; font-size: 16px; }
+            .shortcut-text, .desktop-shortcut { display: none !important; }
+            .card-top-actions-ko { display: none !important; } 
+            .nyan-timer-header { font-size: 11px; gap: 3px; margin-bottom: 6px; }
+            .study-btn, .mute-btn, .voice-btn, .autoplay-btn { height: 32px; font-size: 11px; font-weight: 800; padding: 0 5px; }
+            .cards-grid { margin-bottom: 8px !important; flex: 1 !important; height: 100% !important; }
+            #game-area .card { flex-direction: column !important; height: 100% !important; flex: 1 !important; }
+            #game-area .section-ko { border-right: none !important; border-bottom: 1px solid var(--border-color) !important; flex: 3 !important; padding: 20px 12px !important; background-size: cover !important; }
+            #game-area .section-en { flex: 5 !important; padding: 20px 12px !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; }
+            #game-area .card-word, #game-area .placeholder { font-size: 32px !important; }
+            #game-area .card-word.long-text { font-size: 20px !important; line-height: 1.4 !important; }
+            .card-example { margin-top: 12px !important; }
+            .ex-en { font-size: 15px !important; }
+            .ex-ko { font-size: 13px !important; margin-top: 4px !important; }
+            .bottom-vague-btn, .bottom-primary-btn { height: 64px !important; font-size: 17px !important; padding: 0 4px; border-radius: 10px; }
+            .show-answers .section-en .card-top-actions { display: flex; position: absolute; top: 10px; right: 10px; }
+            #summary-area .controls { flex-direction: column; gap: 8px; }
+            #summary-area .base-btn { padding: 14px !important; font-size: 15px !important; border-radius: 8px; width: 100%; }
+            th, td { padding: 10px 12px; font-size: 13px; }
+        }
     </style>
 </head>
 <body>
 
-<!-- ⏳ 데이터 로딩 오버레이 -->
+<!-- ⏳ 단어장 데이터 로딩 오버레이 (기존) -->
 <div id="loading-overlay" class="loading-overlay hidden">
     <div class="loading-card">
         <div class="spinner"></div>
@@ -1453,27 +1517,127 @@
     </div>
 </div>
 
-<!-- 🎓 영작 테스트 및 AI 첨삭 모달 -->
+<!-- 🤖 AI 엔진 전용 로딩 오버레이 (최초 다운로드 시 표시) -->
+<div id="ai-loading-overlay" class="loading-overlay hidden" style="z-index: 25000;">
+    <div class="loading-card" style="max-width: 320px; text-align: center;">
+        <div class="spinner"></div>
+        <div class="loading-title" id="ai-loading-text" style="color: #1264a3; margin-top: 8px;">AI 엔진 준비 중... (최초 1회)</div>
+        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.4; margin-top: 8px;">
+            최초 실행 시 브라우저에 AI 모델(약 800MB~1.5GB)을 다운로드하여 캐시에 저장합니다.<br>네트워크 환경에 따라 수 분이 소요될 수 있습니다.
+        </div>
+    </div>
+</div>
+
+<!-- ℹ️ 모델 정보 모달 -->
+<div id="model-info-modal" class="modal-overlay hidden" style="z-index: 20000;" onclick="if(event.target === this) closeModelInfoModal()">
+    <div class="modal-card">
+        <div class="modal-header">
+            <span>ℹ️ Llama-3.2-1B 모델 정보</span>
+            <button onclick="closeModelInfoModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button>
+        </div>
+        <div style="font-size: 14px; line-height: 1.6; color: var(--text-main);">
+            <ul style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px;">
+                <li><b>개발사:</b> Meta (메타)</li>
+                <li><b>모델명:</b> Llama 3.2 1B Instruct (WebLLM용 최적화)</li>
+                <li><b>특징:</b> 파라미터 10억 개(1B) 규모의 초경량 로컬 AI 모델입니다.</li>
+                <li><b>용도:</b> 모바일 기기 및 브라우저 환경에서 <b>서버 연결 없이 온디바이스</b>로 텍스트 생성, 번역, 문법 교정을 수행하도록 설계되었습니다. 개인정보가 외부 서버로 전송되지 않아 보안성이 뛰어납니다.</li>
+            </ul>
+        </div>
+        <button class="base-btn" style="background:#1264a3; margin-top:8px; padding:12px;" onclick="closeModelInfoModal()">확인 (Enter)</button>
+    </div>
+</div>
+
+<!-- ⚙️ AI 파라미터 조절 설정 모달 -->
+<div id="ai-settings-modal" class="modal-overlay hidden" style="z-index: 20000;" onclick="if(event.target === this) closeAISettingsModal()">
+    <div class="modal-card" style="max-width: 520px; max-height: 85vh; overflow-y: auto;">
+        <div class="modal-header">
+            <span>⚙️ AI 파라미터 정밀 설정</span>
+            <button onclick="closeAISettingsModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button>
+        </div>
+
+        <div class="setting-field" style="display:flex; flex-direction:column; gap:6px; background:#f8fafc; padding:12px; border-radius:12px; border:1px solid var(--border-color);">
+            <div class="setting-label" style="font-size:14px; font-weight:800; display:flex; justify-content:space-between;">
+                <span>1. Max Tokens (최대 출력 토큰)</span>
+                <span id="val-max-tokens" style="color:#0284c7;">512</span>
+            </div>
+            <input type="range" id="input-max-tokens" min="128" max="2048" step="64" value="512" oninput="document.getElementById('val-max-tokens').innerText = this.value">
+            <div class="setting-desc" style="font-size:12px; color:var(--text-muted); line-height:1.4;">💡 AI가 한 번에 답변으로 생성할 수 있는 최대 단어/토큰의 양입니다. 크면 긴 응답을 얻지만 시간과 배터 소모가 늘어납니다.</div>
+        </div>
+
+        <div class="setting-field" style="display:flex; flex-direction:column; gap:6px; background:#f8fafc; padding:12px; border-radius:12px; border:1px solid var(--border-color); margin-top:8px;">
+            <div class="setting-label" style="font-size:14px; font-weight:800; display:flex; justify-content:space-between;">
+                <span>2. Context Window (컨텍스트 기억 크기)</span>
+                <span id="val-context-window" style="color:#0284c7;">2048</span>
+            </div>
+            <select id="input-context-window" style="padding: 8px; border-radius: 8px; border: 1px solid var(--border-color); font-weight: 800;">
+                <option value="1024">1,024 (소형 메모리, 빠른 반응)</option>
+                <option value="2048" selected>2,048 (표준 세팅 추천)</option>
+                <option value="4096">4,096 (대용량 컨텍스트)</option>
+                <option value="8192">8,192 (최대 메모리, 메모리 사용량 증가)</option>
+            </select>
+            <div class="setting-desc" style="font-size:12px; color:var(--text-muted); line-height:1.4;">💡 AI 모델이 한 번에 참조하여 문맥을 이해할 수 있는 전체 기억 범위입니다.</div>
+        </div>
+
+        <div class="setting-field" style="display:flex; flex-direction:column; gap:6px; background:#f8fafc; padding:12px; border-radius:12px; border:1px solid var(--border-color); margin-top:8px;">
+            <div class="setting-label" style="font-size:14px; font-weight:800; display:flex; justify-content:space-between;">
+                <span>3. Temperature (창의성/샘플링 온도)</span>
+                <span id="val-temperature" style="color:#0284c7;">0.1</span>
+            </div>
+            <input type="range" id="input-temperature" min="0.0" max="1.0" step="0.05" value="0.1" oninput="document.getElementById('val-temperature').innerText = this.value">
+            <div class="setting-desc" style="font-size:12px; color:var(--text-muted); line-height:1.4;">💡 0에 가까울수록 일관되고 결정론적인 문법 검사를 수행하며, 높아질수록 다채롭고 창의적인 단어를 선택합니다.</div>
+        </div>
+
+        <div class="setting-field" style="display:flex; flex-direction:column; gap:6px; background:#f8fafc; padding:12px; border-radius:12px; border:1px solid var(--border-color); margin-top:8px;">
+            <div class="setting-label" style="font-size:14px; font-weight:800; display:flex; justify-content:space-between;">
+                <span>4. Top P (핵심 누적 확률)</span>
+                <span id="val-top-p" style="color:#0284c7;">0.95</span>
+            </div>
+            <input type="range" id="input-top-p" min="0.1" max="1.0" step="0.05" value="0.95" oninput="document.getElementById('val-top-p').innerText = this.value">
+            <div class="setting-desc" style="font-size:12px; color:var(--text-muted); line-height:1.4;">💡 답변 선택 시 상위 누적 확률 영역 단어들만 채택하는 샘플링 임계값입니다.</div>
+        </div>
+
+        <button class="base-btn" style="background:#16a34a; padding:14px; margin-top:12px;" onclick="applyAISettingsUI()">적용 및 저장</button>
+    </div>
+</div>
+
+<!-- 🎓 영작 테스트 및 AI 첨삭 모달 (PC 전용) -->
 <div id="ai-feedback-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeAIFeedbackModal()">
     <div class="ai-modal-card">
         <div class="ai-modal-header">
             <div class="ai-modal-title">
                 <span>🎓 1:1 AI 문법 정밀 첨삭 리포트</span>
-                <div id="ai-modal-status-badge" class="ai-status-badge info hidden">
-                    <span>🤖 AI 분석 진행 중...</span>
+                <!-- 🟢 모델 정보 및 토큰/컨텍스트 설정 칩 -->
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <button type="button" class="ai-chip-btn green-chip" onclick="openModelInfoModal()">
+                        🟢 Llama-3.2-1B ℹ️
+                    </button>
+                    <button type="button" class="ai-chip-btn" onclick="openAISettingsModal()">
+                        ⚙️ <span id="chip-token-info">max_tokens: 512 / Context: 2048</span>
+                    </button>
                 </div>
             </div>
-            <button onclick="closeAIFeedbackModal()" class="ai-close-btn">✕ (ESC)</button>
+            
+            <!-- ⚡ AI 연산 중지 버튼 (Q / ㅂ) 및 인라인 로더 -->
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <button id="ai-stop-btn" class="hidden" onclick="window.stopAIComputation && window.stopAIComputation()" style="background: #dc2626; color: white; border: none; padding: 8px 14px; border-radius: 10px; font-weight: 900; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3);">
+                    🛑 AI 연산 중지 <span style="font-size: 11px; background: rgba(255,255,255,0.2); padding: 2px 5px; border-radius: 6px;">(Q)</span>
+                </button>
+                <div id="inline-ai-loader" class="hidden" style="display: flex; align-items: center; gap: 8px; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 6px 12px; border-radius: 10px;">
+                    <div class="spinner" style="width: 16px; height: 16px; border-width: 2px;"></div>
+                    <span style="font-size: 12px; font-weight: 800; color: #15803d;">1B 토큰 생성 중...</span>
+                </div>
+                <button onclick="closeAIFeedbackModal()" class="ai-close-btn">✕ 나가기 (ESC)</button>
+            </div>
         </div>
 
-        <!-- 1단계: 영작 입력 뷰 (단어 먼저, 한글 문장 뜻 아래) -->
+        <!-- 1단계: 영작 입력 뷰 -->
         <div id="writing-input-view" style="display: flex; flex-direction: column; gap: 16px; flex: 1; justify-content: center;">
             <div class="ai-single-line-box target" style="background: #fef3c7; border-color: #fde68a;">
-                <span class="ai-line-label" style="color: #b45309; border-color: #fcd34d;">🇬🇧 영어 단어 힌트</span>
+                <span class="ai-line-label" style="color: #b45309; border-color: #fcd34d;">🇬🇧 단어 힌트</span>
                 <span id="writing-modal-en-hint" class="ai-line-content" style="color: #78350f;">-</span>
             </div>
             <div class="ai-single-line-box target" style="background: #e0f2fe; border-color: #bae6fd;">
-                <span class="ai-line-label" style="color: #0369a1; border-color: #7dd3fc;">🇰🇷 한글 문장 뜻</span>
+                <span class="ai-line-label" style="color: #0369a1; border-color: #7dd3fc;">🇰🇷 한글 의미</span>
                 <span id="writing-modal-ko-text" class="ai-line-content" style="color: #0c4a6e;">-</span>
             </div>
             <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -1485,7 +1649,7 @@
             </button>
         </div>
 
-        <!-- 2단계: AI 문법 분석 결과 리포트 뷰 -->
+        <!-- 2단계: AI 문법 분석 결과 리포트 뷰 (실시간 스트리밍 출력) -->
         <div id="writing-result-view" class="hidden" style="display: flex; flex-direction: column; gap: 14px; flex: 1; min-height: 0; overflow-y: auto;">
             <div class="ai-single-line-box target">
                 <span class="ai-line-label">📖 정답 예문</span>
@@ -1496,7 +1660,10 @@
                 <span id="ai-modal-user-text" class="ai-line-content">-</span>
             </div>
             <div id="ai-modal-feedback-container" class="ai-feedback-grid">
-                <!-- AI 피드백 카드 영역 -->
+                <div class="ai-card grammar" style="grid-column: span 2;">
+                    <div class="ai-card-title">🔍 문법 & 철자 오류 분석 피드백 (1B 실시간 스트리밍)</div>
+                    <div id="streaming-grammar-body" class="ai-card-body">분석 대기 중...</div>
+                </div>
             </div>
         </div>
     </div>
@@ -1507,7 +1674,7 @@
     <div class="modal-card" style="max-height: 85vh; display: flex; flex-direction: column;">
         <div class="modal-header">
             <span id="day-modal-title">📅 학습 Day 선택</span>
-            <button onclick="closeDayModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖</button>
+            <button onclick="closeDayModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button>
         </div>
 
         <div class="sec-select-area">
@@ -1524,12 +1691,12 @@
     </div>
 </div>
 
-<!-- 🔥 취약 단어 복습 모달 -->
+<!-- 🔥 취약 단어 복습 세로 모달 -->
 <div id="weak-review-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeWeakReviewModal()">
     <div class="modal-card tall-modal">
         <div class="modal-header">
             <span>🔥 취약 단어 복습</span>
-            <button onclick="closeWeakReviewModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖</button>
+            <button onclick="closeWeakReviewModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button>
         </div>
 
         <button id="weak-review-all-btn" class="base-btn" style="background:#2563eb; padding:13px; font-size:15px; flex-shrink:0;" onclick="startWeakReviewSession('ALL')">
@@ -1572,7 +1739,7 @@
     <div class="modal-card">
         <div class="modal-header">
             <span>🤖 자동재생 설정</span>
-            <button onclick="closeAutoplayModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖</button>
+            <button onclick="closeAutoplayModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button>
         </div>
 
         <div class="sec-select-area">
@@ -1603,7 +1770,7 @@
     <div class="modal-card">
         <div class="modal-header">
             <span>🎙️ 음성 선택 (시스템 최적화)</span>
-            <button onclick="closeVoiceModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖</button>
+            <button onclick="closeVoiceModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button>
         </div>
 
         <div class="sec-select-area">
@@ -1749,45 +1916,95 @@
         </div>
     </div>
 </div>
+<!-- 📌 좌측 하단 버전 표기 -->
+<div class="app-version">v1.6.9 (AI Logic Integrated)</div>
 
-<div class="app-version">v1.6.1 (Grammar Focus 1B)</div>
-
-<!-- 🤖 WebLLM 로컬 AI 모듈 (1B 모델 적용 및 문법 오류 위주 정밀 검사) -->
+<!-- 🤖 AI 엔진 모듈 통합 스크립트 -->
 <script type="module">
     import * as webllm from "https://esm.run/@mlc-ai/web-llm";
+
+    const DEFAULT_CONFIG = {
+        modelName: "Llama-3.2-1B-Instruct-q4f16_1-MLC",
+        maxTokens: 512,
+        contextWindow: 2048,
+        temperature: 0.1,
+        topP: 0.95
+    };
+
+    const STORAGE_KEY = 'pongcrush_ai_settings_v1';
+
+    function getAISettings() {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            return saved ? { ...DEFAULT_CONFIG, ...JSON.parse(saved) } : { ...DEFAULT_CONFIG };
+        } catch (e) {
+            return { ...DEFAULT_CONFIG };
+        }
+    }
+
+    function saveAISettings(newSettings) {
+        try {
+            const current = getAISettings();
+            const updated = { ...current, ...newSettings };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+            return updated;
+        } catch (e) {
+            console.error("AI 설정 저장 실패:", e);
+            return getAISettings();
+        }
+    }
 
     let aiEngine = null;
     let isAiInitializing = false;
     let isAiReady = false;
+    let isAiCancelled = false;
 
+    // 🤖 WebLLM 엔진 초기화
     async function initLocalAIEngine() {
         if (aiEngine || isAiInitializing) return aiEngine;
         if (!navigator.gpu) {
+            alert("⚠️ 현재 브라우저가 WebGPU를 지원하지 않아 AI 엔진을 시작할 수 없습니다.\nChrome 또는 Edge 브라우저 최신 버전을 사용해주세요.");
             console.warn("⚠️ WebGPU 미지원 환경입니다.");
             return null;
         }
 
         isAiInitializing = true;
-        const loadingText = document.getElementById('loading-text');
-        const loadingOverlay = document.getElementById('loading-overlay');
+        const loadingText = document.getElementById('ai-loading-text');
+        const loadingOverlay = document.getElementById('ai-loading-overlay');
         
         if (loadingText && loadingOverlay) {
-            loadingText.innerText = "🤖 문법 분석 1B AI 엔진 로딩 중... (GPU)";
+            loadingText.innerText = "🤖 1B AI 모델 로딩 중... (GPU)";
             loadingOverlay.classList.remove('hidden');
         }
 
         try {
-            const selectedModel = "Llama-3.2-1B-Instruct-q4f16_1-MLC";
-            aiEngine = await webllm.CreateMLCEngine(selectedModel, {
+            const config = getAISettings();
+            aiEngine = await webllm.CreateMLCEngine(config.modelName, {
                 initProgressCallback: (progress) => {
-                    if (loadingText) loadingText.innerText = `🤖 1B AI 엔진 준비 중: ${Math.round(progress.progress * 100)}%`;
+                    if (loadingText) {
+                        loadingText.innerText = `🤖 1B AI 엔진 준비 중: ${Math.round(progress.progress * 100)}%`;
+                    }
+                },
+                appConfig: {
+                    model_list: [
+                        {
+                            model: "https://huggingface.co/mlc-ai/Llama-3.2-1B-Instruct-q4f16_1-MLC",
+                            model_id: "Llama-3.2-1B-Instruct-q4f16_1-MLC",
+                            model_lib: webllm.modelLibURLPrefix + webllm.webLLMVersion + "/Llama-3.2-1B-Instruct-q4f16_1-ctx4k_cs1k-webgpu.wasm",
+                            overrides: {
+                                context_window_size: config.contextWindow
+                            }
+                        }
+                    ]
                 }
             });
             isAiReady = true;
-            console.log("✅ 문법 분석 1B 로컬 AI 엔진 준비 완료");
+            console.log("✅ 1B 로컬 AI 엔진 준비 완료");
         } catch (err) {
             console.warn("⚠️ 로컬 AI 초기화 실패:", err);
             aiEngine = null;
+            
+            alert("1B AI 엔진을 초기화하지 못했습니다.\n\n원인: " + err.message + "\n\n1. 하드디스크 여유 공간이 부족할 수 있습니다.\n2. 시크릿 모드를 해제한 후 다시 실행해주세요.\n3. 브라우저가 WebGPU를 지원하는지 확인해주세요.");
         } finally {
             isAiInitializing = false;
             if (loadingOverlay) loadingOverlay.classList.add('hidden');
@@ -1796,84 +2013,87 @@
         return aiEngine;
     }
 
-    // 🎯 문법 오류 최소 2개(또는 발견된 오류) 위주로만 심플하게 점검하는 프롬프트
-    window.requestLocalAICorrection = async function(userText, targetText, categoryText) {
-        if (!navigator.gpu) return {
-            status: "info",
-            badgeText: "WebGPU 미지원",
-            grammar: "현재 브라우저에서 WebGPU를 지원하지 않습니다. (Chrome/Edge 권장)",
-            summary: "WebGPU 지원 브라우저를 사용해 보세요."
-        };
+    function stopAIComputation() {
+        isAiCancelled = true;
+        const inlineLoader = document.getElementById('inline-ai-loader');
+        const stopBtn = document.getElementById('ai-stop-btn');
+        const badgeEl = document.getElementById('ai-modal-status-badge');
+        const streamingBody = document.getElementById('streaming-grammar-body');
+
+        if (inlineLoader) inlineLoader.classList.add('hidden');
+        if (stopBtn) stopBtn.classList.add('hidden');
+        if (badgeEl) {
+            badgeEl.className = "ai-status-badge warn";
+            badgeEl.innerHTML = "<span>🛑 연산 중지됨</span>";
+            badgeEl.classList.remove('hidden');
+        }
+        if (streamingBody) {
+            streamingBody.innerText += "\n\n(사용자에 의해 AI 연산이 즉시 중단되었습니다.)";
+        }
+    }
+
+    async function requestLocalAIStreamingCorrection(userText, targetText, onTokenCallback) {
+        if (!navigator.gpu) {
+            onTokenCallback("WebGPU를 지원하지 않는 브라우저입니다. (Chrome/Edge 최신 버전 권장)");
+            return;
+        }
 
         if (!isAiReady) {
             const engine = await initLocalAIEngine();
-            if (!engine) return {
-                status: "info",
-                badgeText: "AI 로드 실패",
-                grammar: "GPU AI 엔진을 초기화하지 못했습니다.",
-                summary: "AI 모델 로딩을 확인해 주세요."
-            };
+            if (!engine) {
+                onTokenCallback("1B AI 엔진을 로드하는데 실패했습니다. 팝업 메시지를 확인해주세요.");
+                return;
+            }
         }
+
+        isAiCancelled = false;
+        const stopBtn = document.getElementById('ai-stop-btn');
+        if (stopBtn) stopBtn.classList.remove('hidden');
+
+        const config = getAISettings();
 
         try {
             const prompt = `You are a strict English grammar checker. Compare the Student Sentence against the Target Answer.
 Target Answer: "${targetText}"
 Student Sentence: "${userText}"
 
-Check ONLY grammar, spelling, and mechanical errors. Identify up to 2 specific grammar or spelling errors in the student sentence. If there are no grammar errors, clearly state that there are no grammar errors.
+Analyze the grammar and spelling. You MUST find and list at least 2 specific grammar, spelling, or mechanics errors in the student sentence. If there are fewer clear errors, point out minor mechanical, structural, or preposition details to ensure at least 2 analytical points are provided.
 
-Provide your response in Korean using EXACTLY this format separated by |||:
-[STATUS] (warn if errors exist, good if no errors)
-|||
-[BADGE] (Short status in Korean, e.g., 🔴 문법 오류 발견 or 🟢 문법 오류 없음!)
-|||
-[GRAMMAR_ERRORS] (List up to 2 specific grammar/spelling errors or state clearly that no grammar errors were found.)
-|||
-[SUMMARY] (1 short encouraging sentence in Korean.)`;
+Provide your feedback clearly in Korean.`;
 
-            const response = await aiEngine.chat.completions.create({
+            const asyncStream = await aiEngine.chat.completions.create({
                 messages: [{ role: "user", content: prompt }],
-                temperature: 0.1,
-                max_tokens: 300
+                temperature: parseFloat(config.temperature),
+                top_p: parseFloat(config.topP),
+                max_tokens: parseInt(config.maxTokens, 10),
+                stream: true
             });
 
-            const rawText = response.choices[0].message.content.trim();
-            const parts = rawText.split('|||').map(s => s.trim());
-
-            let status = "warn";
-            let badgeText = "🔴 문법 오류 점검";
-            let grammar = "제출하신 문장의 문법 및 철자 오류를 검토해 보세요.";
-            let summary = "정확한 문법 구조로 완성도를 높여보세요!";
-
-            if (parts.length >= 4) {
-                status = parts[0].toLowerCase().includes('good') ? 'good' : 'warn';
-                badgeText = parts[1] || badgeText;
-                grammar = parts[2] || grammar;
-                summary = parts[3] || summary;
-            } else {
-                grammar = rawText || grammar;
+            for await (const chunk of asyncStream) {
+                if (isAiCancelled) {
+                    break;
+                }
+                const delta = chunk.choices[0]?.delta?.content || "";
+                if (delta) {
+                    onTokenCallback(delta);
+                }
             }
-
-            if (grammar.length < 3 || grammar.includes("Identify up to")) {
-                grammar = "문법 및 철자 오류가 발견되지 않았거나 명확하지 않습니다.";
-            }
-
-            return {
-                status: status,
-                badgeText: badgeText,
-                grammar: grammar,
-                summary: summary
-            };
         } catch (e) {
-            console.error("AI 피드백 오류:", e);
-            return {
-                status: "warn",
-                badgeText: "🔴 문법 오류 확인",
-                grammar: "제출하신 문장의 스펠링 오타나 어법을 검토해 보세요.",
-                summary: "정답 예문과 비교하며 문법을 점검해 보세요!"
-            };
+            if (!isAiCancelled) {
+                console.error("AI 스트리밍 오류:", e);
+                onTokenCallback("\n\n(AI 토큰 생성 중 오류가 발생했습니다. 브라우저 메모리 부족일 수 있습니다.)");
+            }
+        } finally {
+            if (stopBtn) stopBtn.classList.add('hidden');
         }
-    };
+    }
+
+    // 외부 일반 스크립트에서도 호출할 수 있도록 글로벌(window) 객체에 바인딩
+    window.initLocalAIEngine = initLocalAIEngine;
+    window.stopAIComputation = stopAIComputation;
+    window.requestLocalAIStreamingCorrection = requestLocalAIStreamingCorrection;
+    window.getAISettings = getAISettings;
+    window.saveAISettings = saveAISettings;
 </script>
 
 <script>
@@ -1995,7 +2215,7 @@ Provide your response in Korean using EXACTLY this format separated by |||:
                         spokenWord: '[미인식]',
                         color: 'RED',
                         score: 0,
-                        reason: '발음하지 않음'
+                        reason: '단어를 발음하지 않음'
                     }))
                 };
             }
@@ -2031,11 +2251,11 @@ Provide your response in Korean using EXACTLY this format separated by |||:
                 if (!sNorm) {
                     color = 'RED';
                     score = 0;
-                    reason = `누락`;
+                    reason = `단어 누락 (원문: '${targetRaw}')`;
                 } else if (tNorm === sNorm) {
                     color = 'GREEN';
                     score = 100;
-                    reason = `일치`;
+                    reason = `정확한 단어 일치 ('${targetRaw}')`;
                 } else {
                     const tStem = this.getStem(tNorm);
                     const sStem = this.getStem(sNorm);
@@ -2044,15 +2264,15 @@ Provide your response in Korean using EXACTLY this format separated by |||:
                     if (tStem === sStem) {
                         color = 'ORANGE';
                         score = 50;
-                        reason = `어형 변형`;
+                        reason = `단/복수 또는 시제 변형 오류 (원문: '${targetRaw}' ↔ 발음: '${sttRaw}')`;
                     } else if (sim >= 0.55) {
                         color = 'ORANGE';
                         score = 40;
-                        reason = `유사 발음`;
+                        reason = `유사 발음 오독 (원문: '${targetRaw}' ↔ 발음: '${sttRaw}')`;
                     } else {
                         color = 'RED';
                         score = 0;
-                        reason = `불일치`;
+                        reason = `잘못된 단어 선택 (원문: '${targetRaw}' ↔ 발음: '${sttRaw}')`;
                     }
                 }
 
@@ -2077,27 +2297,29 @@ Provide your response in Korean using EXACTLY this format separated by |||:
     let currentDayIndex = 0;    
     let originalWordList = []; 
     let wordList = [];
-    let vagueWords = [];        
+    let vagueWords = [];       
     let currentStartIndex = 0; 
     let showAnswers = false;    
     
+    // 📝 모드 상태 (문장 vs 단어)
     let currentAppMode = 'sentence';
-    
+
     let currentCategory = '단어암기'; 
     let isWeakReviewMode = false; 
     let testedWeakWordsInSession = []; 
     let isCurrentCardChecked = false; 
     let cardsPerPage = 1; 
-    
     let currentImageType = 'type1'; 
     let currentImgNum = 1;
 
+    // 🤖 자동재생
     let isAutoplay = false;
     let autoplayIntervalSec = 2.0; 
     let tempAutoplaySec = 2.0;
     let autoplayTimer = null;
     let isAutoplayReadKorean = false; 
 
+    // 🎵 음성 제어
     let bgAudio = null;
     let isMuted = true;
     let synthAudioCtx = null;
@@ -2107,6 +2329,7 @@ Provide your response in Korean using EXACTLY this format separated by |||:
     let currentTuneProfile = 'normal';
     let availableVoices = [];
 
+    // 🎙️ 스피킹 첨삭
     let speakingTargetText = '';
     let speakingType = 'sentence';
     let speakingStep = 1;
@@ -2127,6 +2350,174 @@ Provide your response in Korean using EXACTLY this format separated by |||:
     const SELECTED_VOICE_STORAGE_KEY = 'selected_tts_voice_uri_v4';
     const SELECTED_TUNE_STORAGE_KEY = 'selected_tts_tune_profile_v4';
 
+    // ---------------- AI 기능 연동 JS ----------------
+    function updateAIChipUI() {
+        if (typeof window.getAISettings === 'function') {
+            const cfg = window.getAISettings();
+            const chipInfo = document.getElementById('chip-token-info');
+            if (chipInfo) {
+                chipInfo.innerText = `max_tokens: ${cfg.maxTokens} / Context: ${cfg.contextWindow}`;
+            }
+        }
+    }
+
+    function openAISettingsModal() {
+        const modal = document.getElementById('ai-settings-modal');
+        if (!modal) return;
+        if (typeof window.getAISettings === 'function') {
+            const cfg = window.getAISettings();
+            document.getElementById('input-max-tokens').value = cfg.maxTokens;
+            document.getElementById('val-max-tokens').innerText = cfg.maxTokens;
+            document.getElementById('input-context-window').value = cfg.contextWindow;
+            document.getElementById('input-temperature').value = cfg.temperature;
+            document.getElementById('val-temperature').innerText = cfg.temperature;
+            document.getElementById('input-top-p').value = cfg.topP;
+            document.getElementById('val-top-p').innerText = cfg.topP;
+        }
+        modal.classList.remove('hidden');
+    }
+
+    function closeAISettingsModal() {
+        const modal = document.getElementById('ai-settings-modal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    function applyAISettingsUI() {
+        if (typeof window.saveAISettings === 'function') {
+            window.saveAISettings({
+                maxTokens: document.getElementById('input-max-tokens').value,
+                contextWindow: document.getElementById('input-context-window').value,
+                temperature: document.getElementById('input-temperature').value,
+                topP: document.getElementById('input-top-p').value
+            });
+            updateAIChipUI();
+            alert("✅ AI 설정이 저장되었습니다!");
+        }
+        closeAISettingsModal();
+    }
+
+    function openModelInfoModal() {
+        const modal = document.getElementById('model-info-modal');
+        if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeModelInfoModal() {
+        const modal = document.getElementById('model-info-modal');
+        if (modal) modal.classList.add('hidden');
+    }
+    
+    function closeAIFeedbackModal() {
+        if (typeof window.stopAIComputation === 'function') {
+            window.stopAIComputation();
+        }
+        const modal = document.getElementById('ai-feedback-modal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    function openWritingModalFromCard() {
+        const isMobile = window.innerWidth <= 650;
+        if (isMobile) return;
+
+        const modal = document.getElementById('ai-feedback-modal');
+        const inputView = document.getElementById('writing-input-view');
+        const resultView = document.getElementById('writing-result-view');
+        const koTextEl = document.getElementById('writing-modal-ko-text');
+        const enHintEl = document.getElementById('writing-modal-en-hint');
+        const textareaEl = document.getElementById('modal-sentence-textarea');
+        const badgeEl = document.getElementById('ai-modal-status-badge');
+
+        const item = wordList[currentStartIndex];
+        if (!item) return;
+
+        const cleanKo = item.exKo || item.ko.replace(/<[^>]*>/g, '').replace(/<br>/g, ' ');
+        const cleanEnHint = item.en.replace(/<[^>]*>/g, '').replace(/<br>/g, ' ');
+
+        if (enHintEl) enHintEl.innerText = cleanEnHint;
+        if (koTextEl) koTextEl.innerText = cleanKo;
+        if (textareaEl) {
+            textareaEl.value = '';
+            textareaEl.disabled = false;
+        }
+
+        if (inputView) inputView.classList.remove('hidden');
+        if (resultView) resultView.classList.add('hidden');
+        if (badgeEl) badgeEl.classList.add('hidden');
+
+        if (modal) modal.classList.remove('hidden');
+
+        setTimeout(() => {
+            if (textareaEl) {
+                textareaEl.focus();
+                textareaEl.onkeydown = (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        submitModalWritingTest();
+                    }
+                };
+            }
+        }, 50);
+    }
+
+    async function submitModalWritingTest() {
+        const inputView = document.getElementById('writing-input-view');
+        const resultView = document.getElementById('writing-result-view');
+        const userTextEl = document.getElementById('ai-modal-user-text');
+        const targetTextEl = document.getElementById('ai-modal-target-text');
+        const streamingBody = document.getElementById('streaming-grammar-body');
+        const badgeEl = document.getElementById('ai-modal-status-badge');
+        const inlineLoader = document.getElementById('inline-ai-loader');
+        const textareaEl = document.getElementById('modal-sentence-textarea');
+
+        const userText = textareaEl ? textareaEl.value.trim() : '';
+        const item = wordList[currentStartIndex];
+        if (!item) return;
+
+        const targetText = item.exEn || item.en || '';
+        const cleanTarget = targetText ? targetText.replace(/<[^>]*>/g, '').replace(/#/g, ' ').trim() : '';
+
+        if (inputView) inputView.classList.add('hidden');
+        if (resultView) resultView.classList.remove('hidden');
+
+        if (userTextEl) userTextEl.innerText = userText || "(작성된 문장이 없습니다)";
+        if (targetTextEl) targetTextEl.innerText = cleanTarget || "(예시 문장 없음)";
+        if (streamingBody) streamingBody.innerText = "";
+
+        if (inlineLoader) inlineLoader.classList.remove('hidden');
+
+        if (badgeEl) {
+            badgeEl.className = "ai-status-badge info";
+            badgeEl.innerHTML = "<span>🤖 1B 토큰 분석 중...</span>";
+            badgeEl.classList.remove('hidden');
+        }
+
+        try {
+            if (window.requestLocalAIStreamingCorrection && userText) {
+                await window.requestLocalAIStreamingCorrection(userText, cleanTarget, (token) => {
+                    if (streamingBody) {
+                        if (streamingBody.innerText === "분석 대기 중...") {
+                            streamingBody.innerText = "";
+                        }
+                        streamingBody.innerText += token;
+                    }
+                });
+
+                if (badgeEl) {
+                    badgeEl.className = "ai-status-badge warn";
+                    badgeEl.innerHTML = "<span>🔴 문법 오류 점검 완료</span>";
+                }
+            } else {
+                if (streamingBody) streamingBody.innerText = "영문장을 입력하지 않았습니다. 단서를 참고해 다시 작성해 보세요!";
+            }
+        } catch (err) {
+            console.error("AI streaming error:", err);
+            if (streamingBody) streamingBody.innerText = "스트리밍 생성 중 오류가 발생했습니다.";
+        } finally {
+            if (inlineLoader) inlineLoader.classList.add('hidden');
+        }
+    }
+    // ------------------------------------------------
+
     function registerServiceWorker() {
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./sw.js')
@@ -2138,7 +2529,7 @@ Provide your response in Korean using EXACTLY this format separated by |||:
     function requestPersistentStorage() {
         if (navigator.storage && navigator.storage.persist) {
             navigator.storage.persist().then(persistent => {
-                if (persistent) console.log("🔒 영구 저장 권한 확보 완료");
+                if (persistent) console.log("🔒 브라우저 영구 저장 권한 확보 완료");
             }).catch(err => console.warn(err));
         }
     }
@@ -2876,13 +3267,31 @@ Provide your response in Korean using EXACTLY this format separated by |||:
         }
     }
 
+    // 변경된 진행상태(개수 기반) 업데이트
     function updateProgressUI() {
         if (wordList.length === 0) return;
+
         const progressPercent = Math.min(100, Math.max(0, ((currentStartIndex + 1) / wordList.length) * 100));
+        
         const trailEl = document.getElementById('nyan-trail');
         if (trailEl) trailEl.style.width = `${progressPercent}%`;
+
         const cardProgEl = document.getElementById('card-progress');
         if (cardProgEl) cardProgEl.innerText = `${currentStartIndex + 1} / ${wordList.length}`;
+
+        // 이미지를 남은 개수(진행도)에 비례해서 전환
+        const ratio = 1 - (currentStartIndex / wordList.length);
+        let newImgNum = 1;
+
+        if (ratio > 0.75) newImgNum = 1;
+        else if (ratio > 0.50) newImgNum = 2;
+        else if (ratio > 0.25) newImgNum = 3;
+        else newImgNum = 4;
+
+        if (currentImgNum !== newImgNum) {
+            currentImgNum = newImgNum;
+            updateKoCardBackground();
+        }
     }
 
     function loadShortcutUrl(url) {
@@ -3033,7 +3442,7 @@ Provide your response in Korean using EXACTLY this format separated by |||:
 
         currentStartIndex = 0;
         showAnswers = false;
-
+        
         resetDefaultSessionSettings();
 
         document.getElementById('setup-area').classList.add('hidden');
@@ -3045,8 +3454,8 @@ Provide your response in Korean using EXACTLY this format separated by |||:
         const types = ['type1', 'type2', 'type3'];
         currentImageType = types[Math.floor(Math.random() * types.length)];
         currentImgNum = 1;
-
         playRandomBgSound();
+
         renderCards();
     }
 
@@ -3137,7 +3546,7 @@ Provide your response in Korean using EXACTLY this format separated by |||:
 
         currentStartIndex = 0;
         showAnswers = false;
-
+        
         resetDefaultSessionSettings();
 
         document.getElementById('setup-area').classList.add('hidden');
@@ -3146,7 +3555,11 @@ Provide your response in Korean using EXACTLY this format separated by |||:
 
         document.body.classList.add('game-active');
 
+        const types = ['type1', 'type2', 'type3'];
+        currentImageType = types[Math.floor(Math.random() * types.length)];
+        currentImgNum = 1;
         playRandomBgSound();
+
         renderCards();
     }
 
@@ -3216,148 +3629,6 @@ Provide your response in Korean using EXACTLY this format separated by |||:
         container.innerHTML = renderCheckBadgesHtml(countVal);
     }
 
-    function closeAIFeedbackModal() {
-        const modal = document.getElementById('ai-feedback-modal');
-        if (modal) modal.classList.add('hidden');
-    }
-
-    // ✍️ 영작 모달 열기 (단어 힌트 먼저, 한글 문장 뜻 아래)
-    function openWritingModalFromCard() {
-        const modal = document.getElementById('ai-feedback-modal');
-        const inputView = document.getElementById('writing-input-view');
-        const resultView = document.getElementById('writing-result-view');
-        const koTextEl = document.getElementById('writing-modal-ko-text');
-        const enHintEl = document.getElementById('writing-modal-en-hint');
-        const textareaEl = document.getElementById('modal-sentence-textarea');
-        const badgeEl = document.getElementById('ai-modal-status-badge');
-
-        const item = wordList[currentStartIndex];
-        if (!item) return;
-
-        const cleanKo = item.exKo || item.ko.replace(/<[^>]*>/g, '').replace(/<br>/g, ' ');
-        const cleanEnHint = item.en.replace(/<[^>]*>/g, '').replace(/<br>/g, ' ');
-
-        if (enHintEl) enHintEl.innerText = cleanEnHint;
-        if (koTextEl) koTextEl.innerText = cleanKo;
-        if (textareaEl) {
-            textareaEl.value = '';
-            textareaEl.disabled = false;
-        }
-
-        if (inputView) inputView.classList.remove('hidden');
-        if (resultView) resultView.classList.add('hidden');
-        if (badgeEl) badgeEl.classList.add('hidden');
-
-        if (modal) modal.classList.remove('hidden');
-
-        setTimeout(() => {
-            if (textareaEl) {
-                textareaEl.focus();
-                textareaEl.onkeydown = (e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        submitModalWritingTest();
-                    }
-                };
-            }
-        }, 50);
-    }
-
-    // ✍️ 모달 안에서 영작 제출 후 AI 문법 오류 분석 및 결과 뷰 렌더링
-    async function submitModalWritingTest() {
-        const inputView = document.getElementById('writing-input-view');
-        const resultView = document.getElementById('writing-result-view');
-        const userTextEl = document.getElementById('ai-modal-user-text');
-        const targetTextEl = document.getElementById('ai-modal-target-text');
-        const feedbackContainer = document.getElementById('ai-modal-feedback-container');
-        const badgeEl = document.getElementById('ai-modal-status-badge');
-        const textareaEl = document.getElementById('modal-sentence-textarea');
-
-        const userText = textareaEl ? textareaEl.value.trim() : '';
-        const item = wordList[currentStartIndex];
-        if (!item) return;
-
-        const targetText = item.exEn || item.en || '';
-        const cleanTarget = targetText ? targetText.replace(/<[^>]*>/g, '').replace(/#/g, ' ').trim() : '';
-
-        if (inputView) inputView.classList.add('hidden');
-        if (resultView) resultView.classList.remove('hidden');
-
-        if (userTextEl) userTextEl.innerText = userText || "(작성된 문장이 없습니다)";
-        if (targetTextEl) targetTextEl.innerText = cleanTarget || "(예시 문장 없음)";
-
-        if (feedbackContainer) {
-            feedbackContainer.innerHTML = `
-                <div style="grid-column: span 2; display:flex; align-items:center; justify-content:center; gap:12px; padding:50px; background:#f8fafc; border-radius:16px; border:1.5px dashed #cbd5e1;">
-                    <div class="spinner"></div>
-                    <span style="font-size:17px; font-weight:800; color:#0369a1;">1B AI가 문법 및 철자 오류를 정밀 분석 중입니다...</span>
-                </div>
-            `;
-        }
-
-        if (badgeEl) {
-            badgeEl.className = "ai-status-badge info";
-            badgeEl.innerHTML = "<span>🤖 AI 분석 진행 중...</span>";
-            badgeEl.classList.remove('hidden');
-        }
-
-        try {
-            if (window.requestLocalAICorrection && userText) {
-                const aiRes = await window.requestLocalAICorrection(userText, cleanTarget, currentCategory);
-                
-                const statusClass = aiRes.status || "warn";
-                const badgeText = aiRes.badgeText || "🔴 문법 오류 점검 리포트";
-
-                if (badgeEl) {
-                    badgeEl.className = `ai-status-badge ${statusClass}`;
-                    badgeEl.innerHTML = `<span>${badgeText}</span>`;
-                }
-
-                if (feedbackContainer) {
-                    feedbackContainer.innerHTML = `
-                        <div class="ai-card grammar">
-                            <div class="ai-card-title">🔍 문법 & 철자 오류 분석 피드백</div>
-                            <div class="ai-card-body">${aiRes.grammar || '문법 오류가 발견되지 않았습니다.'}</div>
-                        </div>
-                        <div class="ai-card" style="grid-column: span 2; background: #f8fafc;">
-                            <div class="ai-card-title">📝 AI 선생님 총평</div>
-                            <div class="ai-card-body">${aiRes.summary || '정확한 문법 구조를 유지해 보세요!'}</div>
-                        </div>
-                    `;
-                }
-            } else {
-                if (badgeEl) {
-                    badgeEl.className = "ai-status-badge warn";
-                    badgeEl.innerHTML = "<span>⚠️ 문장 미입력</span>";
-                }
-                if (feedbackContainer) {
-                    feedbackContainer.innerHTML = `
-                        <div class="ai-card grammar" style="grid-column: span 2;">
-                            <div class="ai-card-title">💡 안내</div>
-                            <div class="ai-card-body">영문장을 입력하지 않았습니다. 단서를 참고해 영작을 다시 시도해 보세요!</div>
-                        </div>
-                    `;
-                }
-            }
-        } catch (err) {
-            console.error("AI correction execution error:", err);
-            if (badgeEl) {
-                badgeEl.className = "ai-status-badge warn";
-                badgeEl.innerHTML = "<span>🔴 분석 완료</span>";
-            }
-            if (feedbackContainer) {
-                feedbackContainer.innerHTML = `
-                    <div class="ai-card grammar" style="grid-column: span 2;">
-                        <div class="ai-card-title">💡 분석 완료</div>
-                        <div class="ai-card-body">문법 검사가 완료되었습니다. 정답 예문과 비교하며 학습해 보세요.</div>
-                    </div>
-                `;
-            }
-        }
-    }
-
-    // ✍️ 카드 렌더링 (문장모드일 때 한글 번역위치를 영어 카드 밑으로 이동)
     function renderCards() {
         stopTTS();
         clearAutoplayTimer();
@@ -3377,18 +3648,19 @@ Provide your response in Korean using EXACTLY this format separated by |||:
             const isLongText = plainKoLength >= 45;
             const wordClass = isLongText ? 'card-word long-text' : 'card-word';
 
+            const hasExample = (currentAppMode !== 'word') && (item.exEn || item.exKo);
+            const exampleHtml = hasExample ? `
+                <div class="card-example">
+                    ${item.exEn ? `<div class="ex-en">${item.exEn}</div>` : ''}
+                    ${item.exKo ? `<div class="ex-ko">${item.exKo}</div>` : ''}
+                </div>
+            ` : '';
+
+            const speakingTargetTextToUse = (hasExample && item.exEn) ? item.exEn : item.en;
+            const speakingTypeToUse = (hasExample && item.exEn) ? 'sentence' : 'word';
+
             const countVal = getCardCheckCount(item);
             const badgesHtml = `<div id="card-check-badges-container" class="vague-check-badges-wrap">${renderCheckBadgesHtml(countVal)}</div>`;
-
-            // 왼쪽 카드(한글 뜻)는 순수 한국어 단어/뜻만 표시
-            const koCardContent = `<div class="${wordClass}">${item.ko}</div>`;
-
-            // 오른쪽 카드(영어) 영역: 영어 단어/문장 아래에 한글 번역(exKo) 배치
-            const hasEnExample = (currentAppMode !== 'word') && item.exEn;
-            const enMainContent = hasEnExample ? item.exEn : item.en;
-            
-            const hasKoExample = (currentAppMode !== 'word') && item.exKo;
-            const koExampleHtml = hasKoExample ? `<div class="ex-ko-card">${item.exKo}</div>` : '';
 
             const cardHtml = `
                 <div class="card">
@@ -3399,9 +3671,8 @@ Provide your response in Korean using EXACTLY this format separated by |||:
                                 ✍️ 영작 테스트 <span class="desktop-shortcut">(T)</span>
                             </button>
                         </div>
-
                         <div class="card-word-wrapper">
-                            ${koCardContent}
+                            <div class="${wordClass}">${item.ko}</div>
                         </div>
                     </div>
                     <div class="card-section section-en" onclick="if(showAnswers) speakCurrentWord();">
@@ -3409,15 +3680,15 @@ Provide your response in Korean using EXACTLY this format separated by |||:
                             <button type="button" class="card-action-btn card-repeat-btn" title="다시 듣기 (Space)" onclick="event.stopPropagation(); speakCurrentWord();">
                                 🔁<span class="desktop-shortcut">(Space)</span>
                             </button>
-                            <button type="button" class="card-action-btn card-speaking-btn" title="스피킹 연습 (Z)" onclick="event.stopPropagation(); openSpeakingModal('${hasEnExample ? 'sentence' : 'word'}', '${enMainContent.replace(/'/g, "\\'")}');">
+                            <button type="button" class="card-action-btn card-speaking-btn" title="스피킹 연습 (Z)" onclick="event.stopPropagation(); openSpeakingModal('${speakingTypeToUse}', '${speakingTargetTextToUse.replace(/'/g, "\\'")}');">
                                 🎙️<span class="desktop-shortcut">(Z)</span>
                             </button>
                         </div>
                         
                         <div class="card-word-wrapper">
                             <div class="placeholder">?</div>
-                            <div class="${wordClass}">${enMainContent}</div>
-                            ${koExampleHtml}
+                            <div class="${wordClass}">${item.en}</div>
+                            ${exampleHtml}
                         </div>
                     </div>
                 </div>
@@ -3728,7 +3999,7 @@ Provide your response in Korean using EXACTLY this format separated by |||:
                 console.warn("마이크 시각화 설정 오류:", e);
             }
         }).catch(err => {
-            console.warn("마이크 접근 실패:", err);
+            console.warn("마이크 사용자 권한 차단 또는 접근 실패:", err);
             startMobileWaveformSimulation();
         });
     }
@@ -3864,7 +4135,7 @@ Provide your response in Korean using EXACTLY this format separated by |||:
         }, 1200);
     }
 
-    async function renderSpeakingModalUI() {
+    function renderSpeakingModalUI() {
         const card = document.getElementById('speaking-card');
         if (!card) return;
 
@@ -3947,7 +4218,7 @@ Provide your response in Korean using EXACTLY this format separated by |||:
                         <span style="animation: bounce 0.6s infinite alternate; animation-delay:0.3s;">●</span>
                         <span style="animation: bounce 0.6s infinite alternate; animation-delay:0.5s;">●</span>
                     </div>
-                    <div style="font-size:18px; font-weight:800; color:#475569;">음성 발음 및 문법 분석 중...</div>
+                    <div style="font-size:18px; font-weight:800; color:#475569;">음성 발음 및 정밀 시퀀스 분석 중...</div>
                 </div>
             `;
         } else if (speakingStep === 4) {
@@ -3978,6 +4249,12 @@ Provide your response in Korean using EXACTLY this format separated by |||:
 
                 <div class="speaking-content-area" style="color:#0f172a; justify-content:flex-start;">
                     <h2 class="speaking-title" style="text-align:left; width:100%;">Results</h2>
+                    <p class="speaking-subtitle" style="text-align:left; width:100%; color:#64748b;">내 음성은 실시간으로 확인하고 교정할 수 있어요</p>
+
+                    <div class="result-score-box" style="margin-top:10px;">
+                        <div style="font-size:13px; font-weight:700; color:#64748b;">Latest Score</div>
+                        <div class="result-score-val">${evalResult.overallScore}</div>
+                    </div>
 
                     <div class="result-card-box question" style="margin-top:10px;">
                         <div style="font-size:13px; font-weight:800; display:flex; align-items:center; gap:6px;">
@@ -3988,14 +4265,15 @@ Provide your response in Korean using EXACTLY this format separated by |||:
 
                     <div class="result-card-box my-answer" style="margin-top:8px;">
                         <div style="font-size:13px; font-weight:800; color:#475569;">
-                            My Spoken Answer
+                            My Answer
                         </div>
                         <div style="font-size:15px; margin-top:4px; line-height:1.4;">
                             ${formattedUserAnswerHtml || '<span class="word-match-wrong">음성이 인식되지 않았습니다.</span>'}
                         </div>
-                        <div id="modal-ai-msg" class="ai-feedback-section" style="margin-top:12px; padding:12px;">
-                            🤖 <b>AI 문법 분석 중...</b>
-                        </div>
+                    </div>
+
+                    <div style="width:100%; font-size:12px; color:#64748b; text-align:left; margin-top:8px; padding:8px; background:#f8fafc; border-radius:8px;">
+                        ⓘ <b>단어 색상별 의미:</b> <span style="color:#16a34a; font-weight:800;">초록색</span>: 완전 일치, <span style="color:#d97706; font-weight:800;">주황색</span>: 문법/단복수/근접발음 오독, <span style="color:#dc2626; font-weight:800;">빨간색</span>: 미인식/잘못된 단어
                     </div>
                 </div>
 
@@ -4004,42 +4282,50 @@ Provide your response in Korean using EXACTLY this format separated by |||:
                     <button class="btn-dark" style="background:#0f172a;" onclick="closeSpeakingModal()">확인 완료</button>
                 </div>
             `;
-
-            if (window.requestLocalAICorrection && speakingRecordedTranscript.trim()) {
-                const aiRes = await window.requestLocalAICorrection(speakingRecordedTranscript, speakingTargetText, 'Speaking');
-                const aiBox = document.getElementById('modal-ai-msg');
-                if (aiBox) {
-                    aiBox.innerHTML = `
-                        <div style="font-size:15px; font-weight:800; color:#0369a1; margin-bottom:6px;">🎓 ${aiRes.badgeText || "문법 점검 완료"}</div>
-                        <div style="font-size:15px; line-height:1.6; color:#0f172a;">${aiRes.grammar || aiRes.summary}</div>
-                    `;
-                }
-            } else {
-                const aiBox = document.getElementById('modal-ai-msg');
-                if (aiBox) aiBox.style.display = 'none';
-            }
         }
     }
 
-    // ⌨️ 단축키 및 T 키 단축키 이벤트 바인딩 (정답 오픈 시에도 T키 사용 가능)
+    // ⌨️ 단축키 키보드 이벤트
     document.addEventListener('keydown', (event) => {
         const dayModal = document.getElementById('day-modal');
         const weakReviewModal = document.getElementById('weak-review-modal');
         const autoplayModal = document.getElementById('autoplay-modal');
         const voiceModal = document.getElementById('voice-modal');
         const speakingModal = document.getElementById('speaking-modal');
-        const aiModal = document.getElementById('ai-feedback-modal');
+        const modelInfoModal = document.getElementById('model-info-modal');
 
         const isDayOpen = dayModal && !dayModal.classList.contains('hidden');
         const isWeakReviewOpen = weakReviewModal && !weakReviewModal.classList.contains('hidden');
         const isAutoplayOpen = autoplayModal && !autoplayModal.classList.contains('hidden');
         const isVoiceOpen = voiceModal && !voiceModal.classList.contains('hidden');
         const isSpeakingOpen = speakingModal && !speakingModal.classList.contains('hidden');
+        const isModelInfoOpen = modelInfoModal && !modelInfoModal.classList.contains('hidden');
+
+        if (isModelInfoOpen) {
+            if (event.key === 'Escape') closeModelInfoModal();
+            return;
+        }
+
+        // AI 모달 ESC 및 Q 닫기 연동
+        const aiSettingsModal = document.getElementById('ai-settings-modal');
+        const isAISettingsOpen = aiSettingsModal && !aiSettingsModal.classList.contains('hidden');
+        
+        if (isAISettingsOpen) {
+            if (event.key === 'Escape') closeAISettingsModal();
+            return;
+        }
+
+        const aiModal = document.getElementById('ai-feedback-modal');
         const isAIOpen = aiModal && !aiModal.classList.contains('hidden');
 
         if (isAIOpen) {
             if (event.key === 'Escape') {
                 closeAIFeedbackModal();
+            } else if (event.key.toLowerCase() === 'q' || event.key === 'ㅂ') {
+                event.preventDefault();
+                if (typeof window.stopAIComputation === 'function') {
+                    window.stopAIComputation();
+                }
             } else if (event.key === 'Enter' && event.target.tagName !== 'TEXTAREA' && event.target.tagName !== 'BUTTON') {
                 closeAIFeedbackModal();
             }
@@ -4072,7 +4358,7 @@ Provide your response in Korean using EXACTLY this format separated by |||:
             return;
         }
 
-        if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
+        if (document.activeElement.tagName === 'INPUT') return;
 
         if (event.code === 'Space' || event.key === ' ') {
             event.preventDefault();
@@ -4089,17 +4375,19 @@ Provide your response in Korean using EXACTLY this format separated by |||:
         else if (key === 'd' || event.key === 'ㅇ') toggleMute();
         else if (key === 'f' || event.key === 'ㄹ') openVoiceModal();
         else if (key === 't' || event.key === 'ㅅ') {
-            if (currentAppMode === 'sentence' && wordList[currentStartIndex]) {
+            const isMobile = window.innerWidth <= 650;
+            // 모바일이 아닐 때만 영작 테스트 진입 활성화
+            if (!isMobile && wordList[currentStartIndex]) {
                 event.preventDefault();
                 openWritingModalFromCard();
             }
         }
         else if (key === 'z' || event.key === 'ㅋ') {
-            if (wordList[currentStartIndex]) {
+            if (showAnswers && wordList[currentStartIndex]) {
                 const item = wordList[currentStartIndex];
-                const hasEnExample = (currentAppMode !== 'word') && item.exEn;
-                const speakingTargetTextToUse = (hasEnExample) ? item.exEn : item.en;
-                const speakingTypeToUse = (hasEnExample) ? 'sentence' : 'word';
+                const hasExample = (currentAppMode !== 'word') && (item.exEn || item.exKo);
+                const speakingTargetTextToUse = (hasExample && item.exEn) ? item.exEn : item.en;
+                const speakingTypeToUse = (hasExample && item.exEn) ? 'sentence' : 'word';
                 openSpeakingModal(speakingTypeToUse, speakingTargetTextToUse);
             }
         }
@@ -4111,6 +4399,11 @@ Provide your response in Korean using EXACTLY this format separated by |||:
         updatePWAReviewButtonUI();
         initVoiceEngine();
         loadSavedVoiceSettings();
+        
+        // AI 설정 칩 초기화
+        if (typeof updateAIChipUI === 'function') {
+            updateAIChipUI();
+        }
     });
 </script>
 </body>
