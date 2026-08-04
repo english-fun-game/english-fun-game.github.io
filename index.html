@@ -311,11 +311,6 @@
             to { transform: rotate(360deg); }
         }
 
-        @keyframes loading-swipe {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-
         /* 📌 게임 플레이 화면 */
         #game-area {
             flex: 1;
@@ -376,11 +371,34 @@
         .nyan-controls-row {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             width: 100%;
         }
 
+        /* 🔥 타이머:단어수 = 7:3 비율 설정 */
+        .nyan-track {
+            position: relative;
+            flex: 7; /* 70% 영역 */
+            height: 24px;
+            background-color: #eef0f1;
+            border-radius: 12px;
+            overflow: visible;
+            border: 1px solid #cbd5e1;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            /* 7등분 시각적 눈금선 표시 */
+            background-image: repeating-linear-gradient(
+                to right,
+                transparent 0,
+                transparent calc(100% / 7 - 1px),
+                #cbd5e1 calc(100% / 7 - 1px),
+                #cbd5e1 calc(100% / 7)
+            );
+        }
+
         .progress {
+            flex: 3; /* 30% 영역 */
+            width: 100%;
             height: 28px;
             padding: 0 10px;
             font-size: 13px;
@@ -441,18 +459,6 @@
             color: #c2410c;
         }
 
-        .nyan-track {
-            position: relative;
-            flex: 1;
-            height: 24px;
-            background-color: #eef0f1;
-            border-radius: 12px;
-            overflow: visible;
-            border: 1px solid #e0e0e0;
-            box-sizing: border-box;
-            transition: all 0.3s ease;
-        }
-
         .nyan-trail {
             position: absolute;
             left: 0;
@@ -461,7 +467,7 @@
             width: 0%;
             background: linear-gradient(90deg, #ff4b4b, #ffb800, #20d070, #00b0ff, #9d4edd);
             border-radius: 12px;
-            transition: width 0.4s ease-out;
+            transition: width 1s linear; /* 1초마다 자연스럽게 이동 */
         }
 
         .nyan-cat {
@@ -624,6 +630,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            gap: 20px; 
             flex: 1;
             width: 100%;
             min-height: 0;
@@ -631,9 +638,10 @@
             z-index: 1;
         }
 
+        /* 🔥 볼드체 제거(font-weight: 500으로 통일) */
         .card-word {
             font-size: clamp(38px, 4.2vw, 70px); 
-            font-weight: 900;
+            font-weight: 500;
             color: var(--text-main);
             width: 100%;
             word-break: keep-all;        
@@ -642,12 +650,13 @@
             line-height: 1.3;
             letter-spacing: -1px;
             text-align: center;
+            margin: 0;
         }
 
         .card-word.long-text {
             font-size: clamp(22px, 2.3vw, 36px); 
             line-height: 1.4;
-            font-weight: 800;
+            font-weight: 500;
         }
 
         .section-en .card-word {
@@ -657,14 +666,14 @@
 
         .card-example {
             display: none;
-            margin-top: 20px;
             text-align: center;
             width: 100%;
+            margin: 0; 
         }
         
         .ex-en {
             font-size: clamp(18px, 1.8vw, 28px);
-            font-weight: 500;
+            font-weight: 400;
             color: var(--slack-blue);
             line-height: 1.4;
             word-break: keep-all;
@@ -673,7 +682,7 @@
 
         .ex-ko, .card-synonyms {
             font-size: clamp(15px, 1.4vw, 22px);
-            font-weight: 500;
+            font-weight: 400;
             color: var(--text-muted);
             line-height: 1.4;
             margin-top: 6px;
@@ -681,7 +690,6 @@
             overflow-wrap: break-word;
         }
 
-        /* 동의어 영역은 무조건 하단 배치 (구분선 제거) */
         .card-synonyms {
             display: none;
             margin-top: auto; 
@@ -1450,11 +1458,11 @@
             display: flex;
             justify-content: space-between;
             width: 100%;
-            margin: auto 0; /* 초기엔 중앙 정렬 */
+            margin: auto 0; 
             padding-bottom: 0;
             position: relative;
             flex-shrink: 0;
-            transition: all 0.3s ease; /* 부드러운 위치 이동 */
+            transition: all 0.3s ease; 
         }
         
         .ai-step {
@@ -1545,28 +1553,50 @@
             .quick-btn, .pwa-review-btn { padding: 14px 16px; font-size: 16px; }
             .shortcut-text, .desktop-shortcut { display: none !important; }
             .card-top-actions-ko { display: none !important; } 
+            
+            /* 반복버튼 모바일에서 삭제 */
+            .card-repeat-btn { display: none !important; }
+            
             .nyan-timer-header { font-size: 11px; gap: 3px; margin-bottom: 6px; }
             .study-btn, .mute-btn, .voice-btn, .autoplay-btn { height: 32px; font-size: 11px; font-weight: 800; padding: 0 5px; }
             .cards-grid { margin-bottom: 8px !important; flex: 1 !important; height: 100% !important; }
             
-            /* 🔥 모바일 비율을 다시 3:5로 변경 (section-ko: flex 3, section-en: flex 5) */
+            /* 🔥 모바일 2.5:3.5 비율 및 내부 패딩/간격 100% 동일하게 강제 통일 */
             #game-area .card { flex-direction: column !important; height: 100% !important; flex: 1 !important; }
-            #game-area .section-ko { border-right: none !important; border-bottom: 1px solid var(--border-color) !important; flex: 3 !important; padding: 20px 12px !important; background-size: cover !important; }
-            #game-area .section-en { flex: 5 !important; justify-content: flex-start !important; }
+            #game-area .section-ko { border-right: none !important; border-bottom: 1px solid var(--border-color) !important; flex: 2.5 !important; padding: 20px 16px !important; background-size: cover !important; z-index: 1 !important; position: relative !important; }
+            #game-area .section-en { flex: 3.5 !important; padding: 20px 16px !important; position: relative !important; z-index: 2 !important; }
             
-            /* 모바일 폰트 크기 완벽 조정 (단어: 36px, 예문/동의어: 14px) 및 볼드 해제 */
-            #game-area .card-word, #game-area .placeholder { font-size: 36px !important; word-break: keep-all !important; overflow-wrap: break-word !important; }
-            #game-area .card-word.long-text { font-size: 22px !important; line-height: 1.4 !important; word-break: keep-all !important; }
+            /* 단어와 예문 사이 간격(Gap) 모바일 완벽 통일 */
+            .card-content-center { gap: 12px !important; justify-content: center !important; }
+
+            /* 폰트: 단어 36px, 예문/동의어 16px (볼드체 제거, font-weight: 500 & 400 사용) */
+            #game-area .card-word, #game-area .placeholder { font-size: 36px !important; font-weight: 900 !important; word-break: keep-all !important; overflow-wrap: break-word !important; margin: 0 !important; }
+            #game-area .card-word.long-text { font-size: 22px !important; line-height: 1.4 !important; font-weight: 500 !important; word-break: keep-all !important; }
             
-            .card-example { margin-top: 12px !important; width: 100%; }
-            .ex-en { font-size: 14px !important; line-height: 1.3 !important; word-break: keep-all !important; overflow-wrap: break-word !important; font-weight: 500 !important; }
-            .ex-ko { font-size: 14px !important; margin-top: 6px !important; line-height: 1.3 !important; word-break: keep-all !important; overflow-wrap: break-word !important; font-weight: 500 !important; }
+            .card-example { margin-top: 0 !important; width: 100%; }
+            .ex-en { font-size: 16px !important; line-height: 1.3 !important; font-weight: 400 !important; word-break: keep-all !important; overflow-wrap: break-word !important; }
+            .ex-ko { font-size: 16px !important; margin-top: 6px !important; line-height: 1.3 !important; font-weight: 400 !important; word-break: keep-all !important; overflow-wrap: break-word !important; }
             
-            /* 동의어 영역 구분선 완벽 제거 및 하단 배치 유지 */
-            .card-synonyms { font-size: 14px !important; word-break: keep-all !important; overflow-wrap: break-word !important; margin-top: auto !important; font-weight: 500 !important; border-top: none !important; padding-top: 0 !important; padding-bottom: 8px !important; }
+            /* 동의어 영역 구분선 완벽 제거 및 영어 카드 최하단 배치 고정 */
+            .card-synonyms { font-size: 16px !important; word-break: keep-all !important; overflow-wrap: break-word !important; margin-top: auto !important; font-weight: 400 !important; border-top: none !important; padding-top: 0 !important; padding-bottom: 0 !important; }
 
             .bottom-vague-btn, .bottom-primary-btn { height: 64px !important; font-size: 17px !important; padding: 0 4px; border-radius: 10px; }
-            .show-answers .section-en .card-top-actions { display: flex; position: absolute; top: 10px; right: 10px; }
+            
+            /* 🔥 영어 카드 액션 버튼을 영어 카드 내부에 안전하게 배치 (겹침 방지) */
+            .show-answers .section-en .card-top-actions { 
+                display: flex; 
+                position: absolute; 
+                top: 12px; 
+                right: 12px; 
+                transform: none; 
+                z-index: 100;
+            }
+            .show-answers .section-en .card-action-btn {
+                background-color: #ffffff !important;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important;
+                border: 1px solid #cbd5e1 !important;
+            }
+            
             #summary-area .controls { flex-direction: column; gap: 8px; }
             #summary-area .base-btn { padding: 14px !important; font-size: 15px !important; border-radius: 8px; width: 100%; }
             th, td { padding: 10px 12px; font-size: 13px; }
@@ -1716,7 +1746,6 @@
             <div class="ai-modal-title">
                 <span>로컬 AI 영작 첨삭</span>
                 <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                    <!-- 🔥 AI 첨삭 끄기/켜기 토글 스위치 추가 -->
                     <button type="button" id="ai-toggle-btn" class="ai-chip-btn green-chip" onclick="toggleAIEnabled()">🤖 AI 첨삭: ON</button>
                     <button type="button" id="ai-model-chip-btn" class="ai-chip-btn green-chip" onclick="openModelSelectModal()">🟢 Llama-1B</button>
                     <button type="button" class="ai-chip-btn" onclick="openAISettingsModal()">⚙️ 설정</button>
@@ -1738,10 +1767,12 @@
             <!-- 1단계: 작성 단계 -->
             <div id="writing-input-view" style="display: flex; flex-direction: column; gap: 16px; flex: 1;">
                 <div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 8px;">
-                    <div id="writing-modal-en-hint" style="font-size: 20px; font-weight: 700; color: var(--slack-blue);"></div>
-                    <div id="writing-modal-ko-text" style="font-size: 24px; font-weight: 900; color: var(--text-main); word-break: keep-all;"></div>
+                    <!-- 🔥 입력 뷰 폰트 32px 시원시원하게 변경 -->
+                    <div id="writing-modal-en-hint" style="font-size: 32px; font-weight: 700; color: var(--slack-blue); line-height: 1.3;"></div>
+                    <div id="writing-modal-ko-text" style="font-size: 32px; font-weight: 900; color: var(--text-main); word-break: keep-all; line-height: 1.3;"></div>
                 </div>
-                <textarea id="modal-sentence-textarea" class="sentence-test-textarea" placeholder="영문장을 작성하세요 (Shift+Enter 줄바꿈, Enter 제출)" style="flex: 1; min-height: 120px; font-size: 18px; padding: 20px;"></textarea>
+                <!-- 🔥 맞춤법 검사기(빨간줄) 끄기 속성 추가 및 폰트 32px -->
+                <textarea id="modal-sentence-textarea" class="sentence-test-textarea" placeholder="영문장을 작성하세요 (Shift+Enter 줄바꿈, Enter 제출)" style="flex: 1; min-height: 120px; font-size: 32px; padding: 24px; line-height: 1.4;" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
                 
                 <button type="button" class="base-btn" style="background: var(--slack-purple); padding: 18px; font-size: 18px; flex-shrink: 0;" onclick="submitModalWritingTest()">
                     ✍️ 제출 (Enter)
@@ -2054,7 +2085,7 @@
 </div>
 
 <!-- 📌 좌측 하단 버전 표기 -->
-<div class="app-version">v3.4.0 (AI Toggle Switch Added)</div>
+<div class="app-version">v4.0.0 (Data Img & Font Weight Cleanup)</div>
 
 <!-- 🤖 AI 엔진 모듈 통합 스크립트 -->
 <script type="module">
@@ -2070,8 +2101,9 @@
 
     const STORAGE_KEY = 'pongcrush_ai_settings_v2';
     
-    // 🔥 AI 토글 전역 상태 변수
     window.isAIEnabledForWriting = localStorage.getItem('pongcrush_ai_toggle') !== 'false';
+
+    window.isAllDbLoaded = false;
 
     function getAISettings() {
         try {
@@ -2100,17 +2132,13 @@
     let isAiCancelled = false;
     window.isFirstTokenForUI = true;
     window.fullAiResponse = "";
-
-    // ---------------- AI UI 로직 ----------------
     
-    // 🔥 AI 토글 스위치 끄기/켜기 함수
     window.toggleAIEnabled = function() {
         window.isAIEnabledForWriting = !window.isAIEnabledForWriting;
         localStorage.setItem('pongcrush_ai_toggle', window.isAIEnabledForWriting);
         window.updateAIToggleUI();
     };
 
-    // 🔥 AI 토글 스위치 UI 업데이트
     window.updateAIToggleUI = function() {
         const btn = document.getElementById('ai-toggle-btn');
         const disclaimer = document.getElementById('ai-disclaimer-text');
@@ -2124,7 +2152,7 @@
         } else {
             btn.innerHTML = '🤖 AI 첨삭: OFF';
             btn.classList.remove('green-chip');
-            if (disclaimer) disclaimer.style.display = 'none'; // AI가 꺼져있으면 굳이 안내문 안 보여줌
+            if (disclaimer) disclaimer.style.display = 'none'; 
         }
     };
     
@@ -2675,14 +2703,16 @@ When you finish the evaluation, STOP generating immediately.
     let testedWeakWordsInSession = []; 
     let isCurrentCardChecked = false; 
     let cardsPerPage = 1; 
-    let currentImageType = 'type1'; 
-    let currentImgNum = 1;
 
     let isAutoplay = false;
     let autoplayIntervalSec = 2.0; 
     let tempAutoplaySec = 2.0;
     let autoplayTimer = null;
     let isAutoplayReadKorean = false; 
+
+    // 🔥 학습 시간 타이머 변수
+    let sessionStartTimeMs = 0;
+    let sessionTimerInterval = null;
 
     let bgAudio = null;
     let isMuted = true;
@@ -2785,7 +2815,7 @@ When you finish the evaluation, STOP generating immediately.
             disclaimerEl.innerHTML = `※ 현재 구동 중인 로컬 모델은 ${compareText}, 복잡한 문맥 추론에 한계가 있을 수 있습니다.`;
         }
 
-        // 파이프라인 무조건 다시 보이게 초기화
+        // 파이프라인 초기화
         document.querySelectorAll('.ai-step').forEach(el => el.classList.remove('active', 'done', 'error'));
         const pipeline = document.getElementById('ai-pipeline');
         if (pipeline) {
@@ -2863,7 +2893,6 @@ When you finish the evaluation, STOP generating immediately.
             streamingBody.style.display = 'none';
         }
 
-        // 🔥 AI 토글 꺼져있으면 바로 스킵 처리
         if (!window.isAIEnabledForWriting) {
             if (streamingBody) {
                 streamingBody.style.display = 'block';
@@ -2872,10 +2901,9 @@ When you finish the evaluation, STOP generating immediately.
             if (pipeline) pipeline.style.display = 'none';
             if (progressText) progressText.innerText = '';
             if (inlineLoaderBtn) inlineLoaderBtn.classList.add('hidden');
-            return; // 여기서 멈춤
+            return; 
         }
 
-        // AI 켜져있을 경우 UI 초기화
         if (pipeline) {
             pipeline.style.display = 'flex';
             pipeline.style.borderBottom = 'none';
@@ -3221,6 +3249,10 @@ When you finish the evaluation, STOP generating immediately.
                     savedItem.exKo = match.exKo;
                     isModified = true;
                 }
+                if (savedItem.imgUrl !== match.imgUrl) {
+                    savedItem.imgUrl = match.imgUrl;
+                    isModified = true;
+                }
             }
         });
 
@@ -3239,6 +3271,7 @@ When you finish the evaluation, STOP generating immediately.
             savedList[index].vagueCount = (savedList[index].vagueCount || 1) + 1;
             if (!savedList[index].category) savedList[index].category = currentCategory;
             if (savedList[index].dayIndex === undefined) savedList[index].dayIndex = currentDayIndex;
+            if (item.imgUrl) savedList[index].imgUrl = item.imgUrl;
         } else {
             savedList.push({
                 ...item,
@@ -3300,8 +3333,8 @@ When you finish the evaluation, STOP generating immediately.
     }
 
     async function restoreWeakWords() {
-        if (!loadedRawWordList || loadedRawWordList.length === 0) {
-            const confirmLoad = confirm("⚠️ 현재 메모리에 로드된 단어장이 없습니다.\n완벽한 동의어/예문 복원을 위해 기본 3종(스피킹, 라이팅, 초록이) 단어장을 모두 불러오시겠습니까?\n(예를 누르면 다운로드 후 파일 선택창이 열립니다.)");
+        if (!window.isAllDbLoaded) {
+            const confirmLoad = confirm("⚠️ 현재 브라우저 메모리에 전체 단어장 DB가 로드되어 있지 않습니다.\n(특정 시험만 본 상태에서 불러오면 스피킹 등의 예문이 누락될 수 있습니다.)\n\n완벽한 복원을 위해 기본 3종(스피킹, 라이팅, 초록이) 단어장을 모두 불러오시겠습니까?");
             
             if (!confirmLoad) return;
             
@@ -3325,6 +3358,8 @@ When you finish the evaluation, STOP generating immediately.
                     loadedRawWordList = loadedRawWordList.concat(res);
                 });
                 
+                window.isAllDbLoaded = true; 
+                
             } catch (err) {
                 alert("통합 데이터를 불러오는데 실패했습니다: " + err.message);
                 if (loadingModal) loadingModal.classList.add('hidden');
@@ -3334,7 +3369,7 @@ When you finish the evaluation, STOP generating immediately.
             if (loadingModal) loadingModal.classList.add('hidden');
             if (loadingText) loadingText.innerText = "단어장 데이터를 가져오는 중...";
             
-            alert("✅ 최신화가 완료되었습니다. 이제 백업 파일(.txt)을 선택해주세요.");
+            alert("✅ 통합 DB 최신화가 완료되었습니다. 이제 백업 파일(.txt)을 선택해주세요.");
         }
         
         const input = document.getElementById('restore-file-input');
@@ -3366,6 +3401,7 @@ When you finish the evaluation, STOP generating immediately.
                         let syn = item.synonyms || '';
                         let exEn = item.exEn || '';
                         let exKo = item.exKo || '';
+                        let imgUrl = item.imgUrl || '';
 
                         const matchKo = sanitizeForMatch(item.ko);
                         const matchEn = sanitizeForMatch(item.en);
@@ -3379,6 +3415,7 @@ When you finish the evaluation, STOP generating immediately.
                                 if (!syn && match.synonyms) syn = match.synonyms;
                                 if (!exEn && match.exEn) exEn = match.exEn;
                                 if (!exKo && match.exKo) exKo = match.exKo;
+                                if (!imgUrl && match.imgUrl) imgUrl = match.imgUrl;
                             }
                         }
 
@@ -3392,6 +3429,7 @@ When you finish the evaluation, STOP generating immediately.
                             if (!currentList[existingIdx].synonyms && syn) currentList[existingIdx].synonyms = syn;
                             if (!currentList[existingIdx].exEn && exEn) currentList[existingIdx].exEn = exEn;
                             if (!currentList[existingIdx].exKo && exKo) currentList[existingIdx].exKo = exKo;
+                            if (!currentList[existingIdx].imgUrl && imgUrl) currentList[existingIdx].imgUrl = imgUrl;
                             updatedCount++;
                         } else {
                             currentList.push({
@@ -3400,6 +3438,7 @@ When you finish the evaluation, STOP generating immediately.
                                 exEn: exEn,
                                 exKo: exKo,
                                 synonyms: syn,
+                                imgUrl: imgUrl,
                                 category: item.category || '기타',
                                 dayIndex: item.dayIndex !== undefined ? item.dayIndex : -1,
                                 vagueCount: item.vagueCount || 1
@@ -3804,40 +3843,39 @@ When you finish the evaluation, STOP generating immediately.
         }
     }
 
-    function updateKoCardBackground() {
-        const sectionKo = document.querySelector('.section-ko');
-        if (sectionKo) {
-            const currentImgPath = `images/${currentImageType}/${currentImgNum}.jpg`;
-            sectionKo.style.backgroundImage = `linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)), url('${currentImgPath}')`;
+    // 🔥 타이머 관련 함수 추가
+    function startStudyTimer() {
+        sessionStartTimeMs = Date.now();
+        if (sessionTimerInterval) clearInterval(sessionTimerInterval);
+        
+        const trailEl = document.getElementById('nyan-trail');
+        if (trailEl) trailEl.style.width = `0%`;
+
+        sessionTimerInterval = setInterval(() => {
+            const elapsed = Date.now() - sessionStartTimeMs;
+            const elapsedSec = elapsed / 1000;
+            const maxSec = 420; // 7 minutes
+            let pct = (elapsedSec / maxSec) * 100;
+            if (pct > 100) pct = 100;
+            if (trailEl) trailEl.style.width = `${pct}%`;
+        }, 1000);
+    }
+
+    function stopStudyTimer() {
+        if (sessionTimerInterval) {
+            clearInterval(sessionTimerInterval);
+            sessionTimerInterval = null;
         }
     }
 
     function updateProgressUI() {
         if (wordList.length === 0) return;
-
-        const progressPercent = Math.min(100, Math.max(0, ((currentStartIndex + 1) / wordList.length) * 100));
-        
-        const trailEl = document.getElementById('nyan-trail');
-        if (trailEl) trailEl.style.width = `${progressPercent}%`;
-
         const cardProgEl = document.getElementById('card-progress');
         if (cardProgEl) cardProgEl.innerText = `${currentStartIndex + 1} / ${wordList.length}`;
-
-        const ratio = 1 - (currentStartIndex / wordList.length);
-        let newImgNum = 1;
-
-        if (ratio > 0.75) newImgNum = 1;
-        else if (ratio > 0.50) newImgNum = 2;
-        else if (ratio > 0.25) newImgNum = 3;
-        else newImgNum = 4;
-
-        if (currentImgNum !== newImgNum) {
-            currentImgNum = newImgNum;
-            updateKoCardBackground();
-        }
     }
 
     function loadShortcutUrl(url) {
+        window.isAllDbLoaded = false; 
         loadExcelFromUrl(url);
     }
 
@@ -3848,16 +3886,14 @@ When you finish the evaluation, STOP generating immediately.
             else if (!exportUrl.includes("/export")) exportUrl = exportUrl + '/export?format=xlsx';
         }
 
-        const cacheBustedUrl = exportUrl + '&_t=' + new Date().getTime();
-
         let response;
         try {
-            response = await fetch(cacheBustedUrl, { cache: 'no-store' });
-        } catch (e) {
             response = await fetch(exportUrl);
+        } catch (e) {
+            console.warn(e);
         }
 
-        if (!response.ok) throw new Error("파일 로드 실패. 링크 공유 권한을 확인하세요.");
+        if (!response || !response.ok) throw new Error("파일 로드 실패. 링크 공유 권한을 확인하세요.");
         
         const arrayBuffer = await response.arrayBuffer();
         const data = new Uint8Array(arrayBuffer);
@@ -3874,7 +3910,8 @@ When you finish the evaluation, STOP generating immediately.
                 en: formatWordText(row[1]),
                 exEn: formatWordText(row[2] || ''),
                 exKo: formatWordText(row[3] || ''),
-                synonyms: (row[4] || '').toString().trim()
+                synonyms: (row[4] || '').toString().trim(),
+                imgUrl: (row[5] || '').toString().trim() // 엑셀 6열의 이미지 URL 가져오기
             }));
     }
 
@@ -4003,9 +4040,8 @@ When you finish the evaluation, STOP generating immediately.
 
         document.body.classList.add('game-active');
 
-        const types = ['type1', 'type2', 'type3'];
-        currentImageType = types[Math.floor(Math.random() * types.length)];
-        currentImgNum = 1;
+        // 🔥 타이머 시작
+        startStudyTimer();
         playRandomBgSound();
 
         renderCards();
@@ -4107,9 +4143,8 @@ When you finish the evaluation, STOP generating immediately.
 
         document.body.classList.add('game-active');
 
-        const types = ['type1', 'type2', 'type3'];
-        currentImageType = types[Math.floor(Math.random() * types.length)];
-        currentImgNum = 1;
+        // 🔥 타이머 시작
+        startStudyTimer();
         playRandomBgSound();
 
         renderCards();
@@ -4224,9 +4259,12 @@ When you finish the evaluation, STOP generating immediately.
             const countVal = getCardCheckCount(item);
             const badgesHtml = `<div id="card-check-badges-container" class="vague-check-badges-wrap">${renderCheckBadgesHtml(countVal)}</div>`;
 
+            // 🔥 엑셀 데이터의 이미지를 배경으로 깔아줍니다 (opacity 0.90로 조정)
+            const bgStyle = item.imgUrl ? `style="background-image: linear-gradient(rgba(255, 255, 255, 0.90), rgba(255, 255, 255, 0.90)), url('${item.imgUrl}'); background-size: cover; background-position: center;"` : '';
+
             const cardHtml = `
                 <div class="card">
-                    <div class="card-section section-ko">
+                    <div class="card-section section-ko" ${bgStyle}>
                         ${badgesHtml}
                         <div class="card-top-actions-ko">
                             <button type="button" class="writing-test-trigger-btn" title="영작 테스트 (T)" onclick="event.stopPropagation(); openWritingModalFromCard();">
@@ -4262,7 +4300,6 @@ When you finish the evaluation, STOP generating immediately.
 
         updateProgressUI();
         updateButtonsUI();
-        updateKoCardBackground();
 
         if (isAutoplay) startAutoplayLoopForCurrentCard();
     }
@@ -4321,6 +4358,7 @@ When you finish the evaluation, STOP generating immediately.
     function showSummaryNotes() {
         stopTTS();
         stopBgSound(); 
+        stopStudyTimer(); // 🔥 요약화면 진입시 타이머 중지
         playFanfareSound(); 
 
         document.getElementById('game-area').classList.add('hidden');
@@ -4418,6 +4456,7 @@ When you finish the evaluation, STOP generating immediately.
     function goToHome() {
         stopTTS();
         stopBgSound();
+        stopStudyTimer(); // 🔥 홈으로 갈 때 타이머 중지
         document.getElementById('game-area').classList.add('hidden');
         document.getElementById('summary-area').classList.add('hidden');
         document.getElementById('setup-area').classList.remove('hidden');
@@ -4436,6 +4475,9 @@ When you finish the evaluation, STOP generating immediately.
         document.getElementById('summary-area').classList.add('hidden');
         document.getElementById('game-area').classList.remove('hidden');
 
+        // 🔥 다시 복습 시작 시 타이머 리셋
+        startStudyTimer();
+
         renderCards();
     }
 
@@ -4446,6 +4488,9 @@ When you finish the evaluation, STOP generating immediately.
 
         document.getElementById('summary-area').classList.add('hidden');
         document.getElementById('game-area').classList.remove('hidden');
+
+        // 🔥 재시작 시 타이머 리셋
+        startStudyTimer();
 
         renderCards();
     }
