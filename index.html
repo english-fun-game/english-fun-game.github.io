@@ -16,7 +16,7 @@
             --slack-blue: #1264a3;          
             --slack-bg: #f8fafc;            
             --card-bg: #ffffff;            
-            --card-back-bg: #f1f5f9;        
+            --card-back-bg: #f1f5f9;       
             --text-main: #0f172a;          
             --text-muted: #64748b;         
             --border-color: #e2e8f0;
@@ -375,10 +375,10 @@
             width: 100%;
         }
 
-        /* 🔥 타이머:단어수 = 7:3 비율 설정 */
+        /* 🔥 타이머 눈금선 관련 설정 (가상 요소 덧씌우기) */
         .nyan-track {
             position: relative;
-            flex: 7; /* 70% 영역 */
+            flex: 1; /* 데스크탑에서는 남은 영역을 유연하게 차지 */
             height: 24px;
             background-color: #eef0f1;
             border-radius: 12px;
@@ -386,22 +386,30 @@
             border: 1px solid #cbd5e1;
             box-sizing: border-box;
             transition: all 0.3s ease;
-            /* 7등분 시각적 눈금선 표시 */
+        }
+
+        /* 무지개 아래(z-index: 1)에 7등분 눈금선이 노출되도록 오버레이 처리 */
+        .nyan-track::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 12px;
+            pointer-events: none;
+            z-index: 1; /* 🔥 무지개(z-index:2) 아래로 확실하게 렌더링 */
             background-image: repeating-linear-gradient(
                 to right,
                 transparent 0,
-                transparent calc(100% / 7 - 1px),
-                #cbd5e1 calc(100% / 7 - 1px),
-                #cbd5e1 calc(100% / 7)
+                transparent calc(100% / 7 - 2px),
+                rgba(15, 23, 42, 0.45) calc(100% / 7 - 2px), 
+                rgba(15, 23, 42, 0.45) calc(100% / 7)
             );
         }
 
-        .progress {
-            flex: 3; /* 30% 영역 */
-            width: 100%;
+        /* 🔥 타이머 및 진행률 데스크탑 큼직한 UI */
+        .timer-text, .progress {
+            padding: 0 16px;
             height: 28px;
-            padding: 0 10px;
-            font-size: 13px;
+            font-size: 15px;
             font-weight: 900 !important;
             border-radius: 8px;
             display: inline-flex;
@@ -411,10 +419,25 @@
             white-space: nowrap;
             flex-shrink: 0;
             letter-spacing: -0.2px;
+        }
+
+        .timer-text {
+            color: #d97706;
+            background: #fffbeb;
+            border: 1.5px solid #fcd34d;
+            transition: all 0.3s ease;
+        }
+
+        .timer-text.overtime {
+            color: #ffffff !important;
+            background-color: #dc2626 !important;
+            border-color: #b91c1c !important;
+        }
+
+        .progress {
             color: var(--text-muted);
             background: #f1f5f9;
             border: 1.5px solid #cbd5e1;
-            text-align: center;
         }
 
         .study-btn, .autoplay-btn, .mute-btn, .voice-btn {
@@ -467,7 +490,8 @@
             width: 0%;
             background: linear-gradient(90deg, #ff4b4b, #ffb800, #20d070, #00b0ff, #9d4edd);
             border-radius: 12px;
-            transition: width 1s linear; /* 1초마다 자연스럽게 이동 */
+            transition: width 1s linear; 
+            z-index: 2; /* 🔥 눈금선(1) 보다 위로 올라와 눈금을 덮음 */
         }
 
         .nyan-cat {
@@ -478,14 +502,6 @@
             user-select: none;
             filter: drop-shadow(0 2px 3px rgba(0,0,0,0.15));
             animation: nyan-bounce 0.6s infinite alternate;
-        }
-
-        .nyan-star {
-            position: absolute;
-            right: 10px;
-            top: 1px;
-            font-size: 16px;
-            user-select: none;
         }
 
         @keyframes nyan-bounce {
@@ -573,6 +589,7 @@
             justify-content: space-between; 
             padding: 24px; 
             overflow-y: auto;          
+            overflow-x: hidden;
             min-height: 0;          
             box-sizing: border-box;
             position: relative;
@@ -625,38 +642,44 @@
             flex-direction: column;
         }
 
+        /* 🔥 [데스크탑] 50/50 비율 고정형 카드 컨텐츠 레이아웃 */
         .card-content-center {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 20px; 
-            flex: 1;
             width: 100%;
+            flex: 1; 
             min-height: 0;
-            margin: auto 0;
+            padding-bottom: 0; 
             z-index: 1;
+            gap: 0; 
         }
 
-        /* 🔥 볼드체 제거(font-weight: 500으로 통일) */
-        .card-word {
-            font-size: clamp(38px, 4.2vw, 70px); 
-            font-weight: 900;
-            color: var(--text-main);
+        /* 상위 50% 구획 (메인 단어용) - 무조건 하단 기준 정렬 */
+        .card-word, .placeholder {
+            flex: 5; /* 50% 변경 */
             width: 100%;
+            display: flex;
+            align-items: flex-end; 
+            justify-content: center;
+            /* padding-bottom 제거 */
+            box-sizing: border-box;
+            
+            font-size: 60px !important;
+            font-weight: 900 !important;
+            color: var(--text-main);
             word-break: keep-all;        
             overflow-wrap: break-word; 
             white-space: normal;        
-            line-height: 1.3;
-            letter-spacing: -1px;
+            line-height: 1.2;
+            letter-spacing: -1.5px;
             text-align: center;
             margin: 0;
         }
 
         .card-word.long-text {
-            font-size: clamp(22px, 2.3vw, 36px); 
-            line-height: 1.4;
-            font-weight: 500;
+            font-size: 60px !important; 
+            line-height: 1.3;
+            font-weight: 900 !important;
         }
 
         .section-en .card-word {
@@ -664,43 +687,72 @@
             color: var(--slack-blue); 
         }
 
-        .card-example {
+        .placeholder {
+            color: #cbd5e1;
+        }
+
+        .show-answers .section-en .card-word {
+            display: flex; 
+        }
+        
+        .show-answers .section-en .placeholder {
             display: none;
+        }
+
+        /* 하위 50% 구획 (예문 및 동의어용) */
+        .card-example {
+            flex: 5; /* 50% 변경 */
+            display: flex; 
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; 
             text-align: center;
             width: 100%;
             margin: 0; 
+            padding-top: 24px; /* 단어 쪽에 있던 패딩을 예문 위로 이동 */
+            box-sizing: border-box;
         }
         
+        .section-en .card-example {
+            display: none;
+        }
+        .show-answers .section-en .card-example {
+            display: flex;
+        }
+
         .ex-en {
-            font-size: clamp(18px, 1.8vw, 28px);
-            font-weight: 400;
+            font-size: 32px !important; 
+            font-weight: 600;
             color: var(--slack-blue);
             line-height: 1.4;
             word-break: keep-all;
             overflow-wrap: break-word;
         }
 
-        .ex-ko, .card-synonyms {
-            font-size: clamp(15px, 1.4vw, 22px);
-            font-weight: 400;
+        .ex-ko {
+            font-size: 32px !important; 
+            font-weight: 500;
             color: var(--text-muted);
             line-height: 1.4;
-            margin-top: 6px;
             word-break: keep-all;
             overflow-wrap: break-word;
         }
 
         .card-synonyms {
             display: none;
+            font-size: 32px !important; 
+            font-weight: 500;
+            color: var(--text-muted);
+            line-height: 1.4;
             margin-top: auto; 
             padding-bottom: 8px; 
             width: 100%; 
             text-align: center;
             flex-shrink: 0;
+            word-break: keep-all;
+            overflow-wrap: break-word;
         }
 
-        .show-answers .section-en .card-word,
-        .show-answers .section-en .card-example,
         .show-answers .section-en .card-synonyms {
             display: block; 
         }
@@ -747,19 +799,6 @@
             font-weight: 800;
             margin-left: 3px;
             opacity: 0.75;
-        }
-
-        .placeholder {
-            display: block;
-            color: #cbd5e1;
-            font-size: clamp(48px, 5vw, 80px); 
-            font-weight: 900;
-            text-align: center;
-            margin: auto 0;
-        }
-
-        .show-answers .section-en .placeholder {
-            display: none;
         }
 
         .modal-overlay {
@@ -1542,7 +1581,7 @@
             border-color: #fecaca;
         }
 
-        /* 📱 모바일 최적화 및 폰트 사이징 업그레이드 */
+        /* 📱 모바일 최적화 및 폰트 사이징 복구 (데스크탑 CSS 무시) */
         @media (max-width: 650px) {
             body { padding: 10px 8px; }
             body.game-active { padding: 10px 12px !important; }
@@ -1563,22 +1602,78 @@
             
             /* 🔥 모바일 2.5:3.5 비율 및 내부 패딩/간격 100% 동일하게 강제 통일 */
             #game-area .card { flex-direction: column !important; height: 100% !important; flex: 1 !important; }
+            
+            /* 🔥 모바일 스크롤 원천 차단 */
+            #game-area .card-section {
+                overflow: hidden !important; 
+                padding-bottom: 40px !important; /* 동의어 공간 확보 */
+            }
+
             #game-area .section-ko { border-right: none !important; border-bottom: 1px solid var(--border-color) !important; flex: 2.5 !important; padding: 20px 16px !important; background-size: cover !important; z-index: 1 !important; position: relative !important; }
             #game-area .section-en { flex: 3.5 !important; padding: 20px 16px !important; position: relative !important; z-index: 2 !important; }
             
-            /* 단어와 예문 사이 간격(Gap) 모바일 완벽 통일 */
-            .card-content-center { gap: 12px !important; justify-content: center !important; }
+            /* 🔥 모바일에서 가운데 정렬 복구 */
+            .card-content-center { 
+                gap: 12px !important; 
+                justify-content: center !important; 
+                margin: auto 0 !important; 
+                padding-bottom: 30px !important; /* 동의어랑 안 겹치게 여유 공간 */
+                flex: 1 !important; 
+                display: flex !important; 
+                flex-direction: column !important; 
+                height: 100%;
+            }
 
-            /* 폰트: 단어 36px, 예문/동의어 16px (볼드체 제거, font-weight: 500 & 400 사용) */
-            #game-area .card-word, #game-area .placeholder { font-size: 36px !important; font-weight: 900 !important; word-break: keep-all !important; overflow-wrap: break-word !important; margin: 0 !important; }
-            #game-area .card-word.long-text { font-size: 22px !important; line-height: 1.4 !important; font-weight: 500 !important; word-break: keep-all !important; }
+            /* 🔥 모바일에서 한글/영어 단어 최대 볼드 처리 (font-weight: 900) */
+            #game-area .card-word, #game-area .placeholder { 
+                flex: none !important; 
+                height: auto !important;
+                padding-bottom: 0 !important;
+                font-size: 36px !important; 
+                font-weight: 900 !important; 
+                word-break: break-word !important; 
+                overflow-wrap: break-word !important; 
+                margin: 0 !important; 
+                max-width: 100% !important;
+            }
+            #game-area .card-word.long-text { font-size: 22px !important; line-height: 1.4 !important; font-weight: 900 !important; word-break: break-word !important; }
             
-            .card-example { margin-top: 0 !important; width: 100%; }
-            .ex-en { font-size: 16px !important; line-height: 1.3 !important; font-weight: 400 !important; word-break: keep-all !important; overflow-wrap: break-word !important; }
-            .ex-ko { font-size: 16px !important; margin-top: 6px !important; line-height: 1.3 !important; font-weight: 400 !important; word-break: keep-all !important; overflow-wrap: break-word !important; }
+            .card-example { 
+                flex: none !important; 
+                flex-direction: column !important;
+                height: auto !important;
+                padding-top: 0 !important;
+                margin-top: 0 !important; 
+                width: 100%; 
+                max-width: 100% !important;
+            }
             
-            /* 동의어 영역 구분선 완벽 제거 및 영어 카드 최하단 배치 고정 */
-            .card-synonyms { font-size: 16px !important; word-break: keep-all !important; overflow-wrap: break-word !important; margin-top: auto !important; font-weight: 400 !important; border-top: none !important; padding-top: 0 !important; padding-bottom: 0 !important; }
+            /* 🔥 모바일 카드 오픈 전 영어 숨김 로직 완벽 제어 */
+            .section-en .card-word { display: none !important; }
+            .show-answers .section-en .card-word { display: flex !important; }
+            .show-answers .section-en .placeholder { display: none !important; }
+            .section-en .card-example { display: none !important; }
+            .show-answers .section-en .card-example { display: flex !important; }
+
+            .ex-en { font-size: 18px !important; line-height: 1.3 !important; font-weight: 400 !important; word-break: break-word !important; overflow-wrap: break-word !important; width: 100% !important; box-sizing: border-box !important; }
+            .ex-ko { font-size: 18px !important; line-height: 1.3 !important; font-weight: 400 !important; word-break: break-word !important; overflow-wrap: break-word !important; width: 100% !important; box-sizing: border-box !important; }
+            
+            /* 동의어 영역 무조건 카드 맨 바닥에 고정 (가운데 정렬 안 깨짐) */
+            .card-synonyms { 
+                position: absolute !important;
+                bottom: 20px !important;
+                left: 16px !important;
+                right: 16px !important;
+                font-size: 16px !important; 
+                word-break: break-word !important; 
+                overflow-wrap: break-word !important; 
+                margin: 0 !important; 
+                font-weight: 400 !important; 
+                border-top: none !important; 
+                padding: 0 !important; 
+                text-align: center !important;
+                max-width: calc(100% - 32px) !important;
+            }
 
             .bottom-vague-btn, .bottom-primary-btn { height: 64px !important; font-size: 17px !important; padding: 0 4px; border-radius: 10px; }
             
@@ -1596,6 +1691,12 @@
                 box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important;
                 border: 1px solid #cbd5e1 !important;
             }
+
+            /* 🔥 하단 타이머 UI 모바일 전용 6:2:2 분할 비율 */
+            .nyan-controls-row { gap: 6px !important; }
+            .nyan-track { flex: 6 !important; }
+            .timer-text { flex: 2 !important; padding: 0 !important; font-size: 11px !important; width: 100%; }
+            .progress { flex: 2 !important; padding: 0 !important; font-size: 11px !important; width: 100%; }
             
             #summary-area .controls { flex-direction: column; gap: 8px; }
             #summary-area .base-btn { padding: 14px !important; font-size: 15px !important; border-radius: 8px; width: 100%; }
@@ -1634,7 +1735,7 @@
     <div class="modal-card" style="max-width: 580px;">
         <div class="modal-header">
             <span>🤖 AI 모델 선택</span>
-            <button onclick="closeModelSelectModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖</button>
+            <button onclick="closeModelSelectModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button>
         </div>
         <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5; font-weight: 600;">
             기기 성능과 배터리 상황에 맞춰 원하는 AI 모델을 선택하세요.<br>
@@ -1648,7 +1749,7 @@
                     <span style="font-weight: 900; font-size: 16px; color: #15803d;">🟢 Llama-3.2-1B (초경량)</span>
                     <span class="model-badge">다운로드 약 0.8GB</span>
                 </div>
-                <div style="font-size: 13px; color: var(--text-muted);">가장 빠르고 배터리 소모가 적습니다. 모바일 기기나 간단한 문법 교정에 적합합니다.</div>
+                <div style="font-size: 13px; color: var(--text-muted);">가장 빠르고 배터 소모가 적습니다. 모바일 기기나 간단한 문법 교정에 적합합니다.</div>
             </div>
             
             <!-- 3B Model -->
@@ -1757,7 +1858,7 @@
                 <button id="ai-combined-stop-btn" class="ai-combined-stop-btn hidden" onclick="window.stopAIComputation && window.stopAIComputation()">
                     <span id="ai-loader-text" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">🛑 AI 상시 강제 중단 (Q)</span>
                 </button>
-                <button onclick="closeAIFeedbackModal()" class="ai-close-btn">✕ 나가기</button>
+                <button onclick="closeAIFeedbackModal()" class="ai-close-btn">✕ 나가기 <span style="font-size:11px; opacity:0.8;">(ESC)</span></button>
             </div>
         </div>
 
@@ -1767,11 +1868,11 @@
             <!-- 1단계: 작성 단계 -->
             <div id="writing-input-view" style="display: flex; flex-direction: column; gap: 16px; flex: 1;">
                 <div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 8px;">
-                    <!-- 🔥 입력 뷰 폰트 32px 시원시원하게 변경 -->
+                    <!-- 🔥 입력 뷰 폰트 시원시원하게 변경 -->
                     <div id="writing-modal-en-hint" style="font-size: 32px; font-weight: 700; color: var(--slack-blue); line-height: 1.3;"></div>
                     <div id="writing-modal-ko-text" style="font-size: 32px; font-weight: 900; color: var(--text-main); word-break: keep-all; line-height: 1.3;"></div>
                 </div>
-                <!-- 🔥 맞춤법 검사기(빨간줄) 끄기 속성 추가 및 폰트 32px -->
+                <!-- 🔥 맞춤법 검사기(빨간줄) 끄기 속성 추가 및 폰트 -->
                 <textarea id="modal-sentence-textarea" class="sentence-test-textarea" placeholder="영문장을 작성하세요 (Shift+Enter 줄바꿈, Enter 제출)" style="flex: 1; min-height: 120px; font-size: 32px; padding: 24px; line-height: 1.4;" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
                 
                 <button type="button" class="base-btn" style="background: var(--slack-purple); padding: 18px; font-size: 18px; flex-shrink: 0;" onclick="submitModalWritingTest()">
@@ -2046,8 +2147,8 @@
                     <div class="nyan-trail" id="nyan-trail">
                         <span class="nyan-cat" id="nyan-cat-emoji">🐱</span>
                     </div>
-                    <span class="nyan-star">⭐</span>
                 </div>
+                <span class="timer-text" id="study-timer-text">00:00</span>
                 <span class="progress" id="card-progress">0 / 0</span>
             </div>
         </div>
@@ -2085,7 +2186,7 @@
 </div>
 
 <!-- 📌 좌측 하단 버전 표기 -->
-<div class="app-version">v4.0.0 (Data Img & Font Weight Cleanup)</div>
+<div class="app-version">v5.7.0 (Fixed Mobile Layout & Keyboard Shortcuts)</div>
 
 <!-- 🤖 AI 엔진 모듈 통합 스크립트 -->
 <script type="module">
@@ -2103,6 +2204,7 @@
     
     window.isAIEnabledForWriting = localStorage.getItem('pongcrush_ai_toggle') !== 'false';
 
+    // 🔥 통합 단어장 캐싱 상태 확인용 전역 변수
     window.isAllDbLoaded = false;
 
     function getAISettings() {
@@ -2132,6 +2234,8 @@
     let isAiCancelled = false;
     window.isFirstTokenForUI = true;
     window.fullAiResponse = "";
+    
+    // ---------------- AI UI 로직 ----------------
     
     window.toggleAIEnabled = function() {
         window.isAIEnabledForWriting = !window.isAIEnabledForWriting;
@@ -2703,6 +2807,10 @@ When you finish the evaluation, STOP generating immediately.
     let testedWeakWordsInSession = []; 
     let isCurrentCardChecked = false; 
     let cardsPerPage = 1; 
+    
+    // 🔥 고양이 이미지 관련 변수 복구
+    let currentImageType = 'type1'; 
+    let currentImgNum = 1;
 
     let isAutoplay = false;
     let autoplayIntervalSec = 2.0; 
@@ -3249,10 +3357,6 @@ When you finish the evaluation, STOP generating immediately.
                     savedItem.exKo = match.exKo;
                     isModified = true;
                 }
-                if (savedItem.imgUrl !== match.imgUrl) {
-                    savedItem.imgUrl = match.imgUrl;
-                    isModified = true;
-                }
             }
         });
 
@@ -3271,7 +3375,6 @@ When you finish the evaluation, STOP generating immediately.
             savedList[index].vagueCount = (savedList[index].vagueCount || 1) + 1;
             if (!savedList[index].category) savedList[index].category = currentCategory;
             if (savedList[index].dayIndex === undefined) savedList[index].dayIndex = currentDayIndex;
-            if (item.imgUrl) savedList[index].imgUrl = item.imgUrl;
         } else {
             savedList.push({
                 ...item,
@@ -3401,7 +3504,6 @@ When you finish the evaluation, STOP generating immediately.
                         let syn = item.synonyms || '';
                         let exEn = item.exEn || '';
                         let exKo = item.exKo || '';
-                        let imgUrl = item.imgUrl || '';
 
                         const matchKo = sanitizeForMatch(item.ko);
                         const matchEn = sanitizeForMatch(item.en);
@@ -3415,7 +3517,6 @@ When you finish the evaluation, STOP generating immediately.
                                 if (!syn && match.synonyms) syn = match.synonyms;
                                 if (!exEn && match.exEn) exEn = match.exEn;
                                 if (!exKo && match.exKo) exKo = match.exKo;
-                                if (!imgUrl && match.imgUrl) imgUrl = match.imgUrl;
                             }
                         }
 
@@ -3429,7 +3530,6 @@ When you finish the evaluation, STOP generating immediately.
                             if (!currentList[existingIdx].synonyms && syn) currentList[existingIdx].synonyms = syn;
                             if (!currentList[existingIdx].exEn && exEn) currentList[existingIdx].exEn = exEn;
                             if (!currentList[existingIdx].exKo && exKo) currentList[existingIdx].exKo = exKo;
-                            if (!currentList[existingIdx].imgUrl && imgUrl) currentList[existingIdx].imgUrl = imgUrl;
                             updatedCount++;
                         } else {
                             currentList.push({
@@ -3438,7 +3538,6 @@ When you finish the evaluation, STOP generating immediately.
                                 exEn: exEn,
                                 exKo: exKo,
                                 synonyms: syn,
-                                imgUrl: imgUrl,
                                 category: item.category || '기타',
                                 dayIndex: item.dayIndex !== undefined ? item.dayIndex : -1,
                                 vagueCount: item.vagueCount || 1
@@ -3843,21 +3942,64 @@ When you finish the evaluation, STOP generating immediately.
         }
     }
 
-    // 🔥 타이머 관련 함수 추가
+    function updateKoCardBackground() {
+        const sectionKo = document.querySelector('.section-ko');
+        if (sectionKo) {
+            const currentImgPath = `images/${currentImageType}/${currentImgNum}.jpg`;
+            sectionKo.style.backgroundImage = `linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)), url('${currentImgPath}')`;
+        }
+    }
+
     function startStudyTimer() {
         sessionStartTimeMs = Date.now();
         if (sessionTimerInterval) clearInterval(sessionTimerInterval);
         
         const trailEl = document.getElementById('nyan-trail');
         if (trailEl) trailEl.style.width = `0%`;
+        
+        const timerTextEl = document.getElementById('study-timer-text');
+        if (timerTextEl) {
+            timerTextEl.innerText = "07:00";
+            timerTextEl.classList.remove('overtime');
+        }
 
         sessionTimerInterval = setInterval(() => {
             const elapsed = Date.now() - sessionStartTimeMs;
-            const elapsedSec = elapsed / 1000;
+            const elapsedSec = Math.floor(elapsed / 1000);
             const maxSec = 420; // 7 minutes
             let pct = (elapsedSec / maxSec) * 100;
-            if (pct > 100) pct = 100;
+            
+            if (pct > 100) pct = 100; 
+            
             if (trailEl) trailEl.style.width = `${pct}%`;
+            
+            if (timerTextEl) {
+                if (elapsedSec <= maxSec) {
+                    const remainSec = maxSec - elapsedSec;
+                    const mins = String(Math.floor(remainSec / 60)).padStart(2, '0');
+                    const secs = String(remainSec % 60).padStart(2, '0');
+                    timerTextEl.innerText = `${mins}:${secs}`;
+                    timerTextEl.classList.remove('overtime');
+                } else {
+                    const overSec = elapsedSec - maxSec;
+                    const mins = String(Math.floor(overSec / 60)).padStart(2, '0');
+                    const secs = String(overSec % 60).padStart(2, '0');
+                    timerTextEl.innerText = `${mins}:${secs}`;
+                    timerTextEl.classList.add('overtime');
+                }
+            }
+
+            // 7분 타이머 경과에 따라 고양이 배경 이미지 4등분 변경
+            let newImgNum = 1;
+            if (pct >= 75) newImgNum = 4;
+            else if (pct >= 50) newImgNum = 3;
+            else if (pct >= 25) newImgNum = 2;
+            else newImgNum = 1;
+
+            if (currentImgNum !== newImgNum) {
+                currentImgNum = newImgNum;
+                updateKoCardBackground();
+            }
         }, 1000);
     }
 
@@ -3910,8 +4052,7 @@ When you finish the evaluation, STOP generating immediately.
                 en: formatWordText(row[1]),
                 exEn: formatWordText(row[2] || ''),
                 exKo: formatWordText(row[3] || ''),
-                synonyms: (row[4] || '').toString().trim(),
-                imgUrl: (row[5] || '').toString().trim() // 엑셀 6열의 이미지 URL 가져오기
+                synonyms: (row[4] || '').toString().trim()
             }));
     }
 
@@ -4040,6 +4181,10 @@ When you finish the evaluation, STOP generating immediately.
 
         document.body.classList.add('game-active');
 
+        const types = ['type1', 'type2', 'type3'];
+        currentImageType = types[Math.floor(Math.random() * types.length)];
+        currentImgNum = 1;
+
         // 🔥 타이머 시작
         startStudyTimer();
         playRandomBgSound();
@@ -4143,6 +4288,10 @@ When you finish the evaluation, STOP generating immediately.
 
         document.body.classList.add('game-active');
 
+        const types = ['type1', 'type2', 'type3'];
+        currentImageType = types[Math.floor(Math.random() * types.length)];
+        currentImgNum = 1;
+
         // 🔥 타이머 시작
         startStudyTimer();
         playRandomBgSound();
@@ -4236,19 +4385,15 @@ When you finish the evaluation, STOP generating immediately.
             const wordClass = isLongText ? 'card-word long-text' : 'card-word';
 
             const exampleKoHtml = item.exKo ? `
-                <div class="card-example" style="display:block;">
-                    <div class="ex-ko">${item.exKo}</div>
-                </div>
+                <div class="ex-ko">${item.exKo}</div>
             ` : '';
 
             const exampleEnHtml = item.exEn ? `
-                <div class="card-example">
-                    <div class="ex-en">${item.exEn}</div>
-                </div>
+                <div class="ex-en">${item.exEn}</div>
             ` : '';
 
             const synonymsHtml = item.synonyms ? `
-                <div class="card-synonyms ex-ko">
+                <div class="card-synonyms">
                     ${item.synonyms}
                 </div>
             ` : '';
@@ -4259,21 +4404,22 @@ When you finish the evaluation, STOP generating immediately.
             const countVal = getCardCheckCount(item);
             const badgesHtml = `<div id="card-check-badges-container" class="vague-check-badges-wrap">${renderCheckBadgesHtml(countVal)}</div>`;
 
-            // 🔥 엑셀 데이터의 이미지를 배경으로 깔아줍니다 (opacity 0.90로 조정)
-            const bgStyle = item.imgUrl ? `style="background-image: linear-gradient(rgba(255, 255, 255, 0.90), rgba(255, 255, 255, 0.90)), url('${item.imgUrl}'); background-size: cover; background-position: center;"` : '';
-
+            // 🔥 구조 변경: 예문과 동의어 모두 .card-example 블록 하위에 배치
             const cardHtml = `
                 <div class="card">
-                    <div class="card-section section-ko" ${bgStyle}>
+                    <div class="card-section section-ko">
                         ${badgesHtml}
                         <div class="card-top-actions-ko">
                             <button type="button" class="writing-test-trigger-btn" title="영작 테스트 (T)" onclick="event.stopPropagation(); openWritingModalFromCard();">
                                 ✍️ 영작 테스트 <span class="desktop-shortcut">(T)</span>
                             </button>
                         </div>
+                        
                         <div class="card-content-center">
                             <div class="${wordClass}">${item.ko}</div>
-                            ${exampleKoHtml}
+                            <div class="card-example">
+                                ${exampleKoHtml}
+                            </div>
                         </div>
                     </div>
                     <div class="card-section section-en" onclick="if(showAnswers) speakCurrentWord();">
@@ -4289,9 +4435,13 @@ When you finish the evaluation, STOP generating immediately.
                         <div class="card-content-center">
                             <div class="placeholder">?</div>
                             <div class="${wordClass}">${item.en}</div>
-                            ${exampleEnHtml}
+                            ${item.exEn || item.synonyms ? `
+                                <div class="card-example">
+                                    ${exampleEnHtml}
+                                    ${synonymsHtml}
+                                </div>
+                            ` : ''}
                         </div>
-                        ${synonymsHtml}
                     </div>
                 </div>
             `;
@@ -4300,6 +4450,7 @@ When you finish the evaluation, STOP generating immediately.
 
         updateProgressUI();
         updateButtonsUI();
+        updateKoCardBackground(); // 🔥 고양이 배경 이미지 렌더링 호출
 
         if (isAutoplay) startAutoplayLoopForCurrentCard();
     }
@@ -4733,69 +4884,64 @@ When you finish the evaluation, STOP generating immediately.
         }
     }
 
-    function submitSpeakingRecording() {
+    function finishSpeakingRecording() {
         stopSpeakingRecording();
-        speakingStep = 3; 
+        speakingStep = 3;
         renderSpeakingModalUI();
-
-        setTimeout(() => {
-            speakingStep = 4; 
-            renderSpeakingModalUI();
-        }, 1200);
     }
 
     function renderSpeakingModalUI() {
         const card = document.getElementById('speaking-card');
         if (!card) return;
 
-        let titleText = speakingType === 'word' ? 'Listen to a Word' : 'Listen to a Sentence';
-        let speedLabel = speakingSpeechSpeed === 1.0 ? '재생 속도 (Normal)' : '재생 속도 (Slow 0.75x)';
-        let textVisibilityLabel = isSpeakingTextVisible ? '문장 숨기기' : '문장 보기';
-
         if (speakingStep === 1) {
-            card.className = "speaking-modal-card";
+            card.className = 'speaking-modal-card';
+            
+            const displayText = isSpeakingTextVisible 
+                ? `<div style="font-size: clamp(22px, 3vw, 32px); font-weight: 800; line-height: 1.4; color: #ffffff; padding: 10px;">${speakingTargetText}</div>` 
+                : `<div style="font-size: 60px; color: rgba(255,255,255,0.4);">❓</div>`;
+
+            const speedLabel = (speakingSpeechSpeed === 1.0) ? '🐢 느리게 듣기' : '🐰 원상태로 듣기';
+
             card.innerHTML = `
                 <div class="speaking-top-bar">
-                    <button class="speaking-close-btn" onclick="closeSpeakingModal()">✕ <span style="font-size:12px; opacity:0.8; font-weight:600;">(ESC)</span></button>
-                    <span></span>
-                    <span></span>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:24px;">🎙️</span>
+                        <span>스피킹 훈련</span>
+                    </div>
+                    <button class="speaking-close-btn" onclick="closeSpeakingModal()">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button>
                 </div>
-
+                
                 <div class="speaking-content-area">
-                    <h2 class="speaking-title">${titleText}</h2>
-                    <p class="speaking-subtitle">문장을 듣고 준비가 되면 녹음하기 버튼을 눌러주세요</p>
-
+                    <div class="speaking-title">원어민 발음을 듣고<br>문장을 기억해 보세요</div>
+                    <div class="speaking-subtitle">준비가 되면 마이크 버튼을 눌러 스피킹을 시작하세요</div>
+                    
+                    <button type="button" class="speaking-circle-play-btn" onclick="speakTargetTextInModal()">▶</button>
+                    
                     <div class="speaking-pill-group">
                         <button class="speaking-pill-btn" onclick="toggleSpeakingSpeechSpeed()">${speedLabel}</button>
-                        <button class="speaking-pill-btn" onclick="toggleSpeakingTextVisibility()">${textVisibilityLabel}</button>
+                        <button class="speaking-pill-btn" onclick="toggleSpeakingTextVisibility()">${isSpeakingTextVisible ? '🙈 텍스트 숨기기' : '👁️ 텍스트 보기'}</button>
                     </div>
 
-                    ${isSpeakingTextVisible ? `<div style="font-size:22px; font-weight:800; margin-top:12px; word-break:keep-all;">"${speakingTargetText}"</div>` : ''}
-
-                    <div class="speaking-circle-play-btn" onclick="speakTargetTextInModal()">▶</div>
-                    <div class="speaking-timer-text">00:04</div>
+                    ${displayText}
                 </div>
 
-                <button class="speaking-bottom-btn" onclick="startSpeakingRecording()">녹음하기</button>
+                <button class="speaking-bottom-btn" style="background:#ffffff; color:#1d4ed8;" onclick="startSpeakingRecording()">🎙️ 마이크 켜고 말하기 (시작)</button>
             `;
         } else if (speakingStep === 2) {
-            card.className = "speaking-modal-card white-theme";
+            card.className = 'speaking-modal-card white-theme';
+            
             card.innerHTML = `
-                <div class="speaking-top-bar" style="color:#0f172a;">
-                    <button class="speaking-close-btn" onclick="closeSpeakingModal()">✕ <span style="font-size:12px; opacity:0.8; font-weight:600;">(ESC)</span></button>
-                    <span></span>
-                    <span></span>
+                <div class="speaking-top-bar" style="color: #1e293b;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="color: #ef4444;">🔴</span>
+                        <span>녹음 중...</span>
+                    </div>
                 </div>
 
-                <div class="speaking-content-area" style="color:#0f172a;">
-                    <h2 class="speaking-title">Record Your Answer</h2>
-
-                    <div class="speaking-pill-group">
-                        <button class="speaking-pill-btn" style="background:#f1f5f9; border:1px solid #cbd5e1;" onclick="toggleSpeakingTextVisibility()">${textVisibilityLabel}</button>
-                    </div>
-
-                    ${isSpeakingTextVisible ? `<div style="font-size:20px; font-weight:800; color:#2563eb; margin-top:8px;">"${speakingTargetText}"</div>` : ''}
-
+                <div class="speaking-content-area" style="color: #1e293b;">
+                    <div id="speaking-rec-timer" class="speaking-timer-text">00:00</div>
+                    
                     <div class="speaking-waveform-box">
                         <div class="speaking-wave-bar"></div>
                         <div class="speaking-wave-bar"></div>
@@ -4804,217 +4950,178 @@ When you finish the evaluation, STOP generating immediately.
                         <div class="speaking-wave-bar"></div>
                     </div>
 
-                    <div id="speaking-rec-timer" class="speaking-timer-text" style="color:#0f172a;">00:00</div>
+                    <div style="font-size: 15px; font-weight: 700; color: #64748b; margin-top: 20px;">자신 있게 말해보세요!</div>
                 </div>
 
-                <div class="speaking-two-btn-row">
-                    <button class="btn-light" onclick="startSpeakingRecording()">다시하기</button>
-                    <button class="btn-dark" onclick="submitSpeakingRecording()">답변 제출</button>
-                </div>
+                <button class="speaking-bottom-btn" style="background:#ef4444; color:#ffffff;" onclick="finishSpeakingRecording()">⏹️ 녹음 완료 및 평가 받기</button>
             `;
         } else if (speakingStep === 3) {
-            card.className = "speaking-modal-card white-theme";
-            card.innerHTML = `
-                <div class="speaking-top-bar" style="color:#0f172a;">
-                    <button class="speaking-close-btn" onclick="closeSpeakingModal()">✕ <span style="font-size:12px; opacity:0.8; font-weight:600;">(ESC)</span></button>
-                    <span></span>
-                    <span></span>
-                </div>
-
-                <div class="speaking-content-area" style="color:#0f172a;">
-                    <div style="font-size:40px; display:flex; gap:12px; margin-bottom:12px;">
-                        <span style="animation: bounce 0.6s infinite alternate; animation-delay:0.1s;">●</span>
-                        <span style="animation: bounce 0.6s infinite alternate; animation-delay:0.3s;">●</span>
-                        <span style="animation: bounce 0.6s infinite alternate; animation-delay:0.5s;">●</span>
-                    </div>
-                    <div style="font-size:18px; font-weight:800; color:#475569;">음성 발음 및 정밀 시퀀스 분석 중...</div>
-                </div>
-            `;
-        } else if (speakingStep === 4) {
-            card.className = "speaking-modal-card white-theme";
-
+            card.className = 'speaking-modal-card white-theme';
+            
             const engine = new ClientSpeakingEngine();
             const evalResult = engine.evaluate(speakingTargetText, speakingRecordedTranscript);
 
-            let formattedUserAnswerHtml = '';
-            evalResult.details.forEach(item => {
-                if (!item.targetWord && item.spokenWord) {
-                    formattedUserAnswerHtml += `<span class="word-match-wrong" title="${item.reason}">${item.spokenWord}</span> `;
-                } else if (item.color === 'GREEN') {
-                    formattedUserAnswerHtml += `<span class="word-match-correct" title="${item.reason}">${item.spokenWord}</span> `;
-                } else if (item.color === 'ORANGE') {
-                    formattedUserAnswerHtml += `<span class="word-match-fuzzy" title="${item.reason}">${item.spokenWord}</span> `;
-                } else {
-                    formattedUserAnswerHtml += `<span class="word-match-wrong" title="${item.reason}">${item.spokenWord}</span> `;
-                }
+            let scoreColor = '#dc2626'; 
+            if (evalResult.overallScore >= 80) scoreColor = '#16a34a'; 
+            else if (evalResult.overallScore >= 50) scoreColor = '#f59e0b'; 
+
+            let evalHtml = '';
+            evalResult.details.forEach(d => {
+                if (d.color === 'GREEN') evalHtml += `<span class="word-match-correct">${d.spokenWord}</span> `;
+                else if (d.color === 'ORANGE') evalHtml += `<span class="word-match-fuzzy" title="${d.reason}">${d.spokenWord}</span> `;
+                else evalHtml += `<span class="word-match-wrong" title="${d.reason}">${d.targetWord}</span> `;
             });
 
+            if (evalResult.details.length === 0 || !speakingRecordedTranscript) {
+                evalHtml = '<span style="color:#64748b; font-weight:600;">(마이크에 인식된 음성이 없습니다)</span>';
+            }
+
             card.innerHTML = `
-                <div class="speaking-top-bar" style="color:#0f172a;">
-                    <button class="speaking-close-btn" onclick="closeSpeakingModal()">✕ <span style="font-size:12px; opacity:0.8; font-weight:600;">(ESC)</span></button>
-                    <span></span>
-                    <span></span>
+                <div class="speaking-top-bar" style="color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 8px;">
+                    <span>📊 평가 결과</span>
+                    <button class="speaking-close-btn" onclick="closeSpeakingModal()" style="color: #64748b;">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button>
                 </div>
 
-                <div class="speaking-content-area" style="color:#0f172a; justify-content:flex-start;">
-                    <h2 class="speaking-title" style="text-align:left; width:100%;">Results</h2>
-                    <p class="speaking-subtitle" style="text-align:left; width:100%; color:#64748b;">내 음성은 실시간으로 확인하고 교정할 수 있어요</p>
-
-                    <div class="result-score-box" style="margin-top:10px;">
-                        <div style="font-size:13px; font-weight:700; color:#64748b;">Latest Score</div>
-                        <div class="result-score-val">${evalResult.overallScore}</div>
+                <div class="speaking-content-area" style="justify-content: flex-start; gap: 12px; padding: 0;">
+                    
+                    <div class="result-score-box">
+                        <div style="font-size: 13px; font-weight: 800; color: #64748b;">발음 및 유사도 점수</div>
+                        <div class="result-score-val" style="color: ${scoreColor};">${evalResult.overallScore}점</div>
                     </div>
 
-                    <div class="result-card-box question" style="margin-top:10px;">
-                        <div style="font-size:13px; font-weight:800; display:flex; align-items:center; gap:6px;">
-                            Question <button onclick="speakTargetTextInModal()" style="background:none; border:none; color:white; cursor:pointer; font-size:16px;">🔊</button>
-                        </div>
-                        <div style="font-size:16px; font-weight:800; margin-top:4px;">${speakingTargetText}</div>
+                    <div class="result-card-box question">
+                        <div style="font-size: 11px; font-weight: 800; opacity: 0.8; margin-bottom: 4px;">원문 (정답)</div>
+                        <div style="font-size: 16px; font-weight: 800; line-height: 1.4;">${speakingTargetText}</div>
                     </div>
 
-                    <div class="result-card-box my-answer" style="margin-top:8px;">
-                        <div style="font-size:13px; font-weight:800; color:#475569;">
-                            My Answer
-                        </div>
-                        <div style="font-size:15px; margin-top:4px; line-height:1.4;">
-                            ${formattedUserAnswerHtml || '<span class="word-match-wrong">음성이 인식되지 않았습니다.</span>'}
-                        </div>
+                    <div class="result-card-box my-answer">
+                        <div style="font-size: 11px; font-weight: 800; color: #64748b; margin-bottom: 4px;">내 발음 분석 결과</div>
+                        <div style="font-size: 16px; line-height: 1.4;">${evalHtml}</div>
                     </div>
 
-                    <div style="width:100%; font-size:12px; color:#64748b; text-align:left; margin-top:8px; padding:8px; background:#f8fafc; border-radius:8px;">
-                        ⓘ <b>단어 색상별 의미:</b> <span style="color:#16a34a; font-weight:800;">초록색</span>: 완전 일치, <span style="color:#d97706; font-weight:800;">주황색</span>: 문법/단복수/근접발음 오독, <span style="color:#dc2626; font-weight:800;">빨간색</span>: 미인식/잘못된 단어
-                    </div>
                 </div>
 
                 <div class="speaking-two-btn-row">
-                    <button class="btn-light" onclick="startSpeakingRecording()">다시하기</button>
-                    <button class="btn-dark" style="background:#0f172a;" onclick="closeSpeakingModal()">확인 완료</button>
+                    <button class="btn-light" onclick="speakingStep=1; renderSpeakingModalUI(); speakTargetTextInModal();">다시 연습하기</button>
+                    <button class="btn-dark" onclick="closeSpeakingModal()">닫기 (ESC)</button>
                 </div>
             `;
         }
     }
 
-    // ⌨️ 단축키 키보드 이벤트
-    document.addEventListener('keydown', (event) => {
-        const dayModal = document.getElementById('day-modal');
-        const weakReviewModal = document.getElementById('weak-review-modal');
-        const autoplayModal = document.getElementById('autoplay-modal');
-        const voiceModal = document.getElementById('voice-modal');
-        const speakingModal = document.getElementById('speaking-modal');
-        const aiSettingsModal = document.getElementById('ai-settings-modal');
-        const aiModelSelectModal = document.getElementById('ai-model-select-modal');
-
-        const isDayOpen = dayModal && !dayModal.classList.contains('hidden');
-        const isWeakReviewOpen = weakReviewModal && !weakReviewModal.classList.contains('hidden');
-        const isAutoplayOpen = autoplayModal && !autoplayModal.classList.contains('hidden');
-        const isVoiceOpen = voiceModal && !voiceModal.classList.contains('hidden');
-        const isSpeakingOpen = speakingModal && !speakingModal.classList.contains('hidden');
-        const isAISettingsOpen = aiSettingsModal && !aiSettingsModal.classList.contains('hidden');
-        const isAIModelSelectOpen = aiModelSelectModal && !aiModelSelectModal.classList.contains('hidden');
-
-        if (isAIModelSelectOpen) {
-            if (event.key === 'Escape') closeModelSelectModal();
-            return;
-        }
-        
-        if (isAISettingsOpen) {
-            if (event.key === 'Escape') closeAISettingsModal();
+    document.addEventListener('keydown', (e) => {
+        // 🔥 ESC 강제 종료 처리를 최상단으로 끌어올림 (텍스트 입력 중에도 적용)
+        if (e.key === 'Escape') {
+            closeDayModal();
+            closeWeakReviewModal();
+            closeAutoplayModal();
+            closeVoiceModal();
+            closeSpeakingModal();
+            closeAISettingsModal();
+            closeModelSelectModal();
+            closeAIFeedbackModal();
             return;
         }
 
-        const aiModal = document.getElementById('ai-feedback-modal');
-        const isAIOpen = aiModal && !aiModal.classList.contains('hidden');
+        // 입력 폼 안에서 다른 단축키(스페이스, 좌우 화살표 등) 작동 방지
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
-        if (isAIOpen) {
-            if (event.key === 'Escape') {
-                closeAIFeedbackModal();
-            } else if (event.key.toLowerCase() === 'q' || event.key === 'ㅂ') {
-                event.preventDefault();
-                if (typeof window.stopAIComputation === 'function') {
-                    window.stopAIComputation();
-                }
-            } else if (event.key === 'Enter' && event.target.tagName !== 'TEXTAREA' && event.target.tagName !== 'BUTTON') {
-                closeAIFeedbackModal();
+        if (e.key === 'ArrowRight') {
+            const gameArea = document.getElementById('game-area');
+            if (gameArea && !gameArea.classList.contains('hidden') && document.getElementById('ai-feedback-modal').classList.contains('hidden')) {
+                e.preventDefault();
+                handlePrimaryAction();
             }
-            return;
         }
-
-        if (isDayOpen) {
-            if (event.key === 'Escape') closeDayModal();
-            return;
+        else if (e.key === 'ArrowDown') {
+            const gameArea = document.getElementById('game-area');
+            if (gameArea && !gameArea.classList.contains('hidden') && document.getElementById('ai-feedback-modal').classList.contains('hidden')) {
+                e.preventDefault();
+                handleVagueAction(currentStartIndex);
+            }
         }
-
-        if (isWeakReviewOpen) {
-            if (event.key === 'Escape') closeWeakReviewModal();
-            return;
+        else if (e.code === 'Space') {
+            const gameArea = document.getElementById('game-area');
+            if (gameArea && !gameArea.classList.contains('hidden') && document.getElementById('ai-feedback-modal').classList.contains('hidden')) {
+                e.preventDefault();
+                if (showAnswers) {
+                    speakCurrentWord();
+                }
+            }
         }
-
-        if (isAutoplayOpen) {
-            if (event.key === 'Escape') closeAutoplayModal();
-            if (event.key === 'Enter') { event.preventDefault(); confirmAutoplayModal(); }
-            return;
+        else if (e.key.toLowerCase() === 'a') {
+            const gameArea = document.getElementById('game-area');
+            if (gameArea && !gameArea.classList.contains('hidden')) {
+                e.preventDefault();
+                toggleAppMode();
+            }
         }
-
-        if (isVoiceOpen) {
-            if (event.key === 'Escape') closeVoiceModal();
-            return;
+        else if (e.key.toLowerCase() === 's') {
+            const gameArea = document.getElementById('game-area');
+            if (gameArea && !gameArea.classList.contains('hidden')) {
+                e.preventDefault();
+                handleAutoplayBtnClick();
+            }
         }
-
-        if (isSpeakingOpen) {
-            if (event.key === 'Escape') closeSpeakingModal();
-            return;
+        else if (e.key.toLowerCase() === 'd') {
+            const gameArea = document.getElementById('game-area');
+            if (gameArea && !gameArea.classList.contains('hidden')) {
+                e.preventDefault();
+                toggleMute();
+            }
         }
-
-        if (document.activeElement.tagName === 'INPUT') return;
-
-        if (event.code === 'Space' || event.key === ' ') {
-            event.preventDefault();
-            speakCurrentWord();
-            return;
+        else if (e.key.toLowerCase() === 'f') {
+            const gameArea = document.getElementById('game-area');
+            if (gameArea && !gameArea.classList.contains('hidden')) {
+                e.preventDefault();
+                openVoiceModal();
+            }
         }
-        
-        const key = event.key.toLowerCase();
-
-        if (event.key === 'ArrowRight') handlePrimaryAction();
-        else if (event.key === 'ArrowDown') { event.preventDefault(); handleVagueAction(currentStartIndex); }
-        else if (key === 'a' || event.key === 'ㅁ') toggleAppMode();
-        else if (key === 's' || event.key === 'ㄴ') handleAutoplayBtnClick();
-        else if (key === 'd' || event.key === 'ㅇ') toggleMute();
-        else if (key === 'f' || event.key === 'ㄹ') openVoiceModal();
-        else if (key === 't' || event.key === 'ㅅ') {
-            const isMobile = window.innerWidth <= 650;
-            if (!isMobile && wordList[currentStartIndex]) {
-                event.preventDefault();
+        else if (e.key.toLowerCase() === 'z') {
+            const gameArea = document.getElementById('game-area');
+            if (gameArea && !gameArea.classList.contains('hidden') && showAnswers && document.getElementById('ai-feedback-modal').classList.contains('hidden')) {
+                e.preventDefault();
+                const item = wordList[currentStartIndex];
+                if (item) {
+                    const spkType = (item.exEn && currentAppMode !== 'word') ? 'sentence' : 'word';
+                    const spkTarget = (item.exEn && currentAppMode !== 'word') ? item.exEn : item.en;
+                    openSpeakingModal(spkType, spkTarget);
+                }
+            }
+        }
+        else if (e.key.toLowerCase() === 't') {
+            const gameArea = document.getElementById('game-area');
+            if (gameArea && !gameArea.classList.contains('hidden') && document.getElementById('ai-feedback-modal').classList.contains('hidden')) {
+                e.preventDefault();
                 openWritingModalFromCard();
             }
         }
-        else if (key === 'z' || event.key === 'ㅋ') {
-            if (showAnswers && wordList[currentStartIndex]) {
-                const item = wordList[currentStartIndex];
-                const hasExample = (currentAppMode !== 'word') && (item.exEn || item.exKo);
-                const speakingTargetTextToUse = (hasExample && item.exEn) ? item.exEn : item.en;
-                const speakingTypeToUse = (hasExample && item.exEn) ? 'sentence' : 'word';
-                openSpeakingModal(speakingTypeToUse, speakingTargetTextToUse);
+        else if (e.key.toLowerCase() === 'q') {
+            const modal = document.getElementById('ai-feedback-modal');
+            if (modal && !modal.classList.contains('hidden')) {
+                if (window.stopAIComputation) {
+                    window.stopAIComputation();
+                }
             }
         }
     });
 
-    window.addEventListener('DOMContentLoaded', () => {
-        registerServiceWorker();
+    window.onload = () => {
+        const loadingModal = document.getElementById('loading-overlay');
+        if (loadingModal) loadingModal.classList.add('hidden');
+        
         requestPersistentStorage();
-        updatePWAReviewButtonUI();
+        registerServiceWorker();
         initVoiceEngine();
         loadSavedVoiceSettings();
+        updatePWAReviewButtonUI();
+        window.updateAIToggleUI();
+        window.updateAIChipUI();
         
-        if (typeof window.updateAIChipUI === 'function') {
-            window.updateAIChipUI();
-        }
-        
-        // 🔥 AI 토글 UI 초기 세팅 적용
-        if (typeof window.updateAIToggleUI === 'function') {
-            window.updateAIToggleUI();
-        }
-    });
+        // PWA DB 구조 마이그레이션 (동의어 및 예문 필드 패치)
+        setTimeout(() => { patchPWASavedWordsWithNewData(); }, 3000);
+    };
+
 </script>
 </body>
 </html>
