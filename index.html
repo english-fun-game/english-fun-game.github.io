@@ -634,6 +634,12 @@
             animation: badgePopIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
+        /* 💡 한글 예문 내 맥락 정보 괄호/대괄호 하이라이트 인라인 스타일 */
+        .context-bracket {
+            color: #8da3bd; /* 은은한 파스텔 톤 그레이-블루 */
+            font-weight: 600; /* 원본(900)에 비해 부드럽게 */
+        }
+
         .section-en {
             flex: 1;
             background-color: var(--card-back-bg);
@@ -661,7 +667,6 @@
             display: flex;
             align-items: flex-end; 
             justify-content: center;
-            /* padding-bottom 제거 */
             box-sizing: border-box;
             
             font-size: 60px !important;
@@ -829,7 +834,7 @@
         }
 
         .modal-card.tall-modal {
-            max-width: 520px;
+            max-width: 580px; 
             height: 92vh;
             max-height: 92vh;
             padding: 20px;
@@ -847,7 +852,7 @@
 
         .weak-col-container {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 8px;
             flex: 1;
             min-height: 0;
@@ -1603,29 +1608,36 @@
             /* 🔥 모바일 2.5:3.5 비율 및 내부 패딩/간격 100% 동일하게 강제 통일 */
             #game-area .card { flex-direction: column !important; height: 100% !important; flex: 1 !important; }
             
-            /* 🔥 모바일 스크롤 원천 차단 */
+            /* 🔥 모바일 스크롤 원천 차단 및 패딩 대칭 적용 */
             #game-area .card-section {
                 overflow: hidden !important; 
-                padding-bottom: 40px !important; /* 동의어 공간 확보 */
+                padding: 20px 16px !important; 
+                display: flex !important;
+                flex-direction: column !important;
             }
 
-            #game-area .section-ko { border-right: none !important; border-bottom: 1px solid var(--border-color) !important; flex: 2.5 !important; padding: 20px 16px !important; background-size: cover !important; z-index: 1 !important; position: relative !important; }
-            #game-area .section-en { flex: 3.5 !important; padding: 20px 16px !important; position: relative !important; z-index: 2 !important; }
+            #game-area .section-ko { border-right: none !important; border-bottom: 1px solid var(--border-color) !important; flex: 2.5 !important; background-size: cover !important; z-index: 1 !important; position: relative !important; }
+            #game-area .section-en { flex: 3.5 !important; position: relative !important; z-index: 2 !important; }
             
-            /* 🔥 모바일에서 가운데 정렬 복구 */
-            .card-content-center { 
+            /* 🔥 모바일에서 가운데 정렬 완벽 복구 (마법의 margin: auto) */
+            #game-area .card-content-center { 
                 gap: 12px !important; 
                 justify-content: center !important; 
-                margin: auto 0 !important; 
-                padding-bottom: 30px !important; /* 동의어랑 안 겹치게 여유 공간 */
-                flex: 1 !important; 
+                align-items: center !important; 
+                margin: auto !important; /* 🔥 card-section 내부 정중앙 안착 */
+                padding-bottom: 0 !important; 
+                flex: none !important; /* stretch 끄기 */
+                height: auto !important;
                 display: flex !important; 
                 flex-direction: column !important; 
-                height: 100%;
+                width: 100% !important;
             }
 
-            /* 🔥 모바일에서 한글/영어 단어 최대 볼드 처리 (font-weight: 900) */
+            /* 🔥 한글/영어 단어 볼드 및 줄바꿈 처리 */
+            /* 주의: display 속성은 전역 설정을 유지하여 영어 카드 숨김 로직을 해치지 않도록 함 */
             #game-area .card-word, #game-area .placeholder { 
+                align-items: center !important; /* 세로 중앙 정렬 */
+                justify-content: center !important;
                 flex: none !important; 
                 height: auto !important;
                 padding-bottom: 0 !important;
@@ -1635,31 +1647,33 @@
                 overflow-wrap: break-word !important; 
                 margin: 0 !important; 
                 max-width: 100% !important;
+                text-align: center !important;
             }
             #game-area .card-word.long-text { font-size: 22px !important; line-height: 1.4 !important; font-weight: 900 !important; word-break: break-word !important; }
             
-            .card-example { 
+            #game-area .card-example { 
+                align-items: center !important; /* 세로 중앙 정렬 */
+                justify-content: center !important;
                 flex: none !important; 
-                flex-direction: column !important;
                 height: auto !important;
                 padding-top: 0 !important;
                 margin-top: 0 !important; 
-                width: 100%; 
+                width: 100% !important; 
                 max-width: 100% !important;
             }
-            
-            /* 🔥 모바일 카드 오픈 전 영어 숨김 로직 완벽 제어 */
-            .section-en .card-word { display: none !important; }
-            .show-answers .section-en .card-word { display: flex !important; }
-            .show-answers .section-en .placeholder { display: none !important; }
-            .section-en .card-example { display: none !important; }
-            .show-answers .section-en .card-example { display: flex !important; }
 
-            .ex-en { font-size: 18px !important; line-height: 1.3 !important; font-weight: 400 !important; word-break: break-word !important; overflow-wrap: break-word !important; width: 100% !important; box-sizing: border-box !important; }
-            .ex-ko { font-size: 18px !important; line-height: 1.3 !important; font-weight: 400 !important; word-break: break-word !important; overflow-wrap: break-word !important; width: 100% !important; box-sizing: border-box !important; }
+            /* 🔥 영어 숨김/보임 완벽 제어 (기존 로직 유지 강화) */
+            #game-area .section-en .card-word { display: none !important; }
+            #game-area .show-answers .section-en .card-word { display: flex !important; }
+            
+            #game-area .section-en .placeholder { display: flex !important; }
+            #game-area .show-answers .section-en .placeholder { display: none !important; }
+            
+            #game-area .section-en .card-example { display: none !important; }
+            #game-area .show-answers .section-en .card-example { display: flex !important; }
             
             /* 동의어 영역 무조건 카드 맨 바닥에 고정 (가운데 정렬 안 깨짐) */
-            .card-synonyms { 
+            #game-area .card-synonyms { 
                 position: absolute !important;
                 bottom: 20px !important;
                 left: 16px !important;
@@ -1674,6 +1688,9 @@
                 text-align: center !important;
                 max-width: calc(100% - 32px) !important;
             }
+
+            .ex-en { font-size: 18px !important; line-height: 1.3 !important; font-weight: 400 !important; word-break: break-word !important; overflow-wrap: break-word !important; width: 100% !important; box-sizing: border-box !important; text-align: center !important; }
+            .ex-ko { font-size: 18px !important; line-height: 1.3 !important; font-weight: 400 !important; word-break: break-word !important; overflow-wrap: break-word !important; width: 100% !important; box-sizing: border-box !important; text-align: center !important; }
 
             .bottom-vague-btn, .bottom-primary-btn { height: 64px !important; font-size: 17px !important; padding: 0 4px; border-radius: 10px; }
             
@@ -1704,6 +1721,9 @@
             
             .step-title { font-size: 10.5px; }
             .step-desc { font-size: 9px; }
+            
+            /* 모바일에서 복습 칸이 2x2 형식으로 떨어지도록 수정 */
+            .weak-col-container { grid-template-columns: repeat(2, 1fr) !important; }
         }
     </style>
 </head>
@@ -1868,7 +1888,6 @@
             <!-- 1단계: 작성 단계 -->
             <div id="writing-input-view" style="display: flex; flex-direction: column; gap: 16px; flex: 1;">
                 <div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 8px;">
-                    <!-- 🔥 입력 뷰 폰트 시원시원하게 변경 -->
                     <div id="writing-modal-en-hint" style="font-size: 32px; font-weight: 700; color: var(--slack-blue); line-height: 1.3;"></div>
                     <div id="writing-modal-ko-text" style="font-size: 32px; font-weight: 900; color: var(--text-main); word-break: keep-all; line-height: 1.3;"></div>
                 </div>
@@ -1947,7 +1966,7 @@
 
         <div class="sec-select-area">
             <div id="fixed-notice-banner" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; padding:10px 12px; border-radius:10px; font-size:13px; font-weight:800; text-align:center;">
-                ⚡ 스피킹 30개 / 라이팅 40개 / 초록이 60개 고정 시험
+                ⚡ 스피킹 30 / 라이팅 40 / 초록이 60 / 라잎 15 고정 시험
             </div>
         </div>
 
@@ -1996,6 +2015,15 @@
                     전체 복습<br><span id="col-cnt-green" style="font-size:11px; opacity:0.8;">(0)</span>
                 </button>
                 <div class="weak-day-list" id="weak-day-list-green">
+                </div>
+            </div>
+
+            <div class="weak-col">
+                <div class="weak-col-header">🌿 라잎</div>
+                <button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '라잎')">
+                    전체 복습<br><span id="col-cnt-life" style="font-size:11px; opacity:0.8;">(0)</span>
+                </button>
+                <div class="weak-day-list" id="weak-day-list-life">
                 </div>
             </div>
         </div>
@@ -2099,6 +2127,7 @@
             <button class="quick-btn" onclick="loadShortcutUrl('https://docs.google.com/spreadsheets/d/1m7KXifCB6txkKEOHqApMWOR4MQwqb6Ji1Dm-hRJYzLc/edit?usp=sharing')">🗣️ 스피킹 단어 시험 바로가기</button>
             <button class="quick-btn" onclick="loadShortcutUrl('https://docs.google.com/spreadsheets/d/1UYTEv88wdKsSS2kkB-UylHAfQAlV6yrvjwVNecG6m64/edit?usp=sharing')">✍️ 라이팅 단어 시험 바로가기</button>
             <button class="quick-btn" onclick="loadShortcutUrl('https://docs.google.com/spreadsheets/d/1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U/edit?usp=sharing')">🍀 초록이 단어 시험 바로가기</button>
+            <button class="quick-btn" onclick="loadShortcutUrl('https://docs.google.com/spreadsheets/d/1ElLraPc80Uez8innH6RfXOBz36IV9ARXnkAiUembWH0/edit?usp=sharing')">🌿 라잎 단어 시험 바로가기</button>
             
             <button id="pwa-review-btn" class="pwa-review-btn hidden" onclick="openWeakReviewModal()">🔥 취약 단어 복습 (0개)</button>
 
@@ -2186,7 +2215,7 @@
 </div>
 
 <!-- 📌 좌측 하단 버전 표기 -->
-<div class="app-version">v5.7.0 (Fixed Mobile Layout & Keyboard Shortcuts)</div>
+<div class="app-version">v6.3.0 (Fixed Mobile Alignment & Pastel Context)</div>
 
 <!-- 🤖 AI 엔진 모듈 통합 스크립트 -->
 <script type="module">
@@ -2596,6 +2625,13 @@ When you finish the evaluation, STOP generating immediately.
         return text.replace(/<[^>]*>/g, '').replace(/#/g, '').replace(/[\s\W_]+/g, '').toLowerCase();
     }
 
+    // 🔥 한글 예문 및 단어 뜻 내 괄호 ( ) 또는 대괄호 [ ] 매칭하여 하이라이트 CSS 적용 함수
+    function formatContextInText(text) {
+        if (!text) return '';
+        // 정규식: ( ) 또는 [ ] 사이의 텍스트 매칭 (은은하게 처리)
+        return text.replace(/(\[.*?\]|\(.*?\))/g, '<span class="context-bracket">$1</span>');
+    }
+
     class ClientSpeakingEngine {
         constructor(minGreenConfidence = 0.82) {
             this.minGreenConfidence = minGreenConfidence;
@@ -2943,7 +2979,8 @@ When you finish the evaluation, STOP generating immediately.
         if (progressText) progressText.innerText = '';
 
         if (enHintEl) enHintEl.innerText = cleanEnHint;
-        if (koTextEl) koTextEl.innerText = cleanKo;
+        // 🔥 AI 모달창 한글 목표 문장에도 은은한 괄호 적용
+        if (koTextEl) koTextEl.innerHTML = formatContextInText(cleanKo);
         
         if (textareaEl) {
             textareaEl.value = '';
@@ -3069,6 +3106,7 @@ When you finish the evaluation, STOP generating immediately.
 
         try {
             if (window.requestLocalAIStreamingCorrection && userText) {
+                // html 태그가 섞여 들어가지 않게 cleanKo를 전달
                 await window.requestLocalAIStreamingCorrection(userText, cleanKo, (token) => {
                     if (streamingBody) {
                         streamingBody.innerText += token;
@@ -3437,7 +3475,7 @@ When you finish the evaluation, STOP generating immediately.
 
     async function restoreWeakWords() {
         if (!window.isAllDbLoaded) {
-            const confirmLoad = confirm("⚠️ 현재 브라우저 메모리에 전체 단어장 DB가 로드되어 있지 않습니다.\n(특정 시험만 본 상태에서 불러오면 스피킹 등의 예문이 누락될 수 있습니다.)\n\n완벽한 복원을 위해 기본 3종(스피킹, 라이팅, 초록이) 단어장을 모두 불러오시겠습니까?");
+            const confirmLoad = confirm("⚠️ 현재 브라우저 메모리에 전체 단어장 DB가 로드되어 있지 않습니다.\n(특정 시험만 본 상태에서 불러오면 스피킹 등의 예문이 누락될 수 있습니다.)\n\n완벽한 복원을 위해 기본 단어장(스피킹, 라이팅, 초록이, 라잎)을 모두 불러오시겠습니까?");
             
             if (!confirmLoad) return;
             
@@ -3452,7 +3490,8 @@ When you finish the evaluation, STOP generating immediately.
                 const urls = [
                     'https://docs.google.com/spreadsheets/d/1m7KXifCB6txkKEOHqApMWOR4MQwqb6Ji1Dm-hRJYzLc/edit?usp=sharing',
                     'https://docs.google.com/spreadsheets/d/1UYTEv88wdKsSS2kkB-UylHAfQAlV6yrvjwVNecG6m64/edit?usp=sharing',
-                    'https://docs.google.com/spreadsheets/d/1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U/edit?usp=sharing'
+                    'https://docs.google.com/spreadsheets/d/1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U/edit?usp=sharing',
+                    'https://docs.google.com/spreadsheets/d/1ElLraPc80Uez8innH6RfXOBz36IV9ARXnkAiUembWH0/edit?usp=sharing'
                 ];
                 
                 const results = await Promise.all(urls.map(url => fetchSheetData(url)));
@@ -4074,6 +4113,9 @@ When you finish the evaluation, STOP generating immediately.
         } else if (url.includes("1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U")) {
             currentCategory = "초록이";
             perDayCount = 60;
+        } else if (url.includes("1ElLraPc80Uez8innH6RfXOBz36IV9ARXnkAiUembWH0")) {
+            currentCategory = "라잎";
+            perDayCount = 15; // 🔥 15개로 변경
         } else {
             currentCategory = "단어암기";
             perDayCount = 30;
@@ -4214,14 +4256,17 @@ When you finish the evaluation, STOP generating immediately.
         const spkWords = savedList.filter(w => w.category === '스피킹');
         const wrtWords = savedList.filter(w => w.category === '라이팅');
         const grnWords = savedList.filter(w => w.category === '초록이');
+        const lifeWords = savedList.filter(w => w.category === '라잎');
 
         document.getElementById('col-cnt-speaking').innerText = `(${spkWords.length}개)`;
         document.getElementById('col-cnt-writing').innerText = `(${wrtWords.length}개)`;
         document.getElementById('col-cnt-green').innerText = `(${grnWords.length}개)`;
+        document.getElementById('col-cnt-life').innerText = `(${lifeWords.length}개)`;
 
         renderWeakDayList('speaking', '스피킹', spkWords);
         renderWeakDayList('writing', '라이팅', wrtWords);
         renderWeakDayList('green', '초록이', grnWords);
+        renderWeakDayList('life', '라잎', lifeWords);
     }
 
     function renderWeakDayList(elementIdSuffix, categoryName, wordList) {
@@ -4384,8 +4429,10 @@ When you finish the evaluation, STOP generating immediately.
             const isLongText = plainKoLength >= 45;
             const wordClass = isLongText ? 'card-word long-text' : 'card-word';
 
-            const exampleKoHtml = item.exKo ? `
-                <div class="ex-ko">${item.exKo}</div>
+            // 🔥 한글 예문 및 한글 뜻 괄호 처리 적용
+            const formattedExKo = formatContextInText(item.exKo);
+            const exampleKoHtml = formattedExKo ? `
+                <div class="ex-ko">${formattedExKo}</div>
             ` : '';
 
             const exampleEnHtml = item.exEn ? `
@@ -4404,7 +4451,9 @@ When you finish the evaluation, STOP generating immediately.
             const countVal = getCardCheckCount(item);
             const badgesHtml = `<div id="card-check-badges-container" class="vague-check-badges-wrap">${renderCheckBadgesHtml(countVal)}</div>`;
 
-            // 🔥 구조 변경: 예문과 동의어 모두 .card-example 블록 하위에 배치
+            // 🔥 한글 뜻 괄호 처리 적용
+            const displayKo = formatContextInText(item.ko);
+
             const cardHtml = `
                 <div class="card">
                     <div class="card-section section-ko">
@@ -4416,7 +4465,7 @@ When you finish the evaluation, STOP generating immediately.
                         </div>
                         
                         <div class="card-content-center">
-                            <div class="${wordClass}">${item.ko}</div>
+                            <div class="${wordClass}">${displayKo}</div>
                             <div class="card-example">
                                 ${exampleKoHtml}
                             </div>
@@ -4547,20 +4596,25 @@ When you finish the evaluation, STOP generating immediately.
             targetDisplayList.forEach(item => {
                 let enCellContent = `<div style="color: var(--slack-blue); font-weight: bold;">${item.en}</div>`;
                 if (item.exEn || item.exKo) {
+                    // 🔥 요약 표 안의 한글 예문 괄호에도 서식 적용
+                    const formattedSummaryExKo = formatContextInText(item.exKo);
                     enCellContent += `
                         <div style="font-size: 13px; color: #4b5563; font-weight: normal; margin-top: 4px; line-height: 1.4;">
                             ${item.exEn ? `<div>${item.exEn}</div>` : ''}
-                            ${item.exKo ? `<div style="color: #6b7280; font-size: 12px; margin-top: 2px;">${item.exKo}</div>` : ''}
+                            ${item.exKo ? `<div style="color: #6b7280; font-size: 12px; margin-top: 2px;">${formattedSummaryExKo}</div>` : ''}
                         </div>
                     `;
                 }
 
                 const matchedSaved = savedList.find(w => w.ko === item.ko && w.en === item.en);
                 const countVal = matchedSaved ? (matchedSaved.vagueCount || 0) : 0;
+                
+                // 🔥 요약 표 안의 한글 뜻 괄호에도 서식 적용
+                const displayKoForSummary = formatContextInText(item.ko);
 
                 const koCellContent = `
                     <div style="font-weight: 700; color: var(--text-main); display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap;">
-                        <span>${item.ko}</span>
+                        <span>${displayKoForSummary}</span>
                         ${countVal > 0 ? `
                         <span style="font-size: 11px; color: #16a34a; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 2px 6px; border-radius: 12px; font-weight: 800; white-space: nowrap;">
                             ⚠️ ${countVal}회 체크
