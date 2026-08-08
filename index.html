@@ -3473,47 +3473,8 @@ When you finish the evaluation, STOP generating immediately.
         URL.revokeObjectURL(url);
     }
 
-    async function restoreWeakWords() {
-        if (!window.isAllDbLoaded) {
-            const confirmLoad = confirm("⚠️ 현재 브라우저 메모리에 전체 단어장 DB가 로드되어 있지 않습니다.\n(특정 시험만 본 상태에서 불러오면 스피킹 등의 예문이 누락될 수 있습니다.)\n\n완벽한 복원을 위해 기본 단어장(스피킹, 라이팅, 초록이, 라잎)을 모두 불러오시겠습니까?");
-            
-            if (!confirmLoad) return;
-            
-            const loadingModal = document.getElementById('loading-overlay');
-            const loadingText = document.getElementById('loading-text');
-            if (loadingModal) {
-                if (loadingText) loadingText.innerText = "단어장 통합 데이터 로딩 중...";
-                loadingModal.classList.remove('hidden');
-            }
-
-            try {
-                const urls = [
-                    'https://docs.google.com/spreadsheets/d/1m7KXifCB6txkKEOHqApMWOR4MQwqb6Ji1Dm-hRJYzLc/edit?usp=sharing',
-                    'https://docs.google.com/spreadsheets/d/1UYTEv88wdKsSS2kkB-UylHAfQAlV6yrvjwVNecG6m64/edit?usp=sharing',
-                    'https://docs.google.com/spreadsheets/d/1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U/edit?usp=sharing',
-                    'https://docs.google.com/spreadsheets/d/1ElLraPc80Uez8innH6RfXOBz36IV9ARXnkAiUembWH0/edit?usp=sharing'
-                ];
-                
-                const results = await Promise.all(urls.map(url => fetchSheetData(url)));
-                loadedRawWordList = [];
-                results.forEach(res => {
-                    loadedRawWordList = loadedRawWordList.concat(res);
-                });
-                
-                window.isAllDbLoaded = true; 
-                
-            } catch (err) {
-                alert("통합 데이터를 불러오는데 실패했습니다: " + err.message);
-                if (loadingModal) loadingModal.classList.add('hidden');
-                return;
-            }
-            
-            if (loadingModal) loadingModal.classList.add('hidden');
-            if (loadingText) loadingText.innerText = "단어장 데이터를 가져오는 중...";
-            
-            alert("✅ 통합 DB 최신화가 완료되었습니다. 이제 백업 파일(.txt)을 선택해주세요.");
-        }
-        
+// 1. 클릭 즉시 파일 선택 창을 띄우도록 수정 (보안 정책 우회)
+    function restoreWeakWords() {
         const input = document.getElementById('restore-file-input');
         if (input) {
             input.value = ''; 
@@ -3521,18 +3482,60 @@ When you finish the evaluation, STOP generating immediately.
         }
     }
 
+    // 2. 파일을 선택한 이후에 DB를 로딩하고 병합하도록 흐름 변경
     function handleRestoreFile(event) {
         const file = event.target.files[0];
         if (!file) return;
 
         const reader = new FileReader();
-        reader.onload = function(e) {
+        // 비동기(async)로 변경하여 파일 로드 후 DB 갱신을 기다릴 수 있게 처리
+        reader.onload = async function(e) {
             try {
                 const importedList = JSON.parse(e.target.result);
                 if (!Array.isArray(importedList)) {
                     throw new Error("올바른 백업 파일 형식이 아닙니다.");
                 }
 
+                // 📌 백업 파일을 읽은 후, 전체 DB가 로드되지 않았다면 여기서 불러오기 수행
+                if (!window.isAllDbLoaded) {
+                    const confirmLoad = confirm("⚠️ 현재 브라우저 메모리에 전체 단어장 DB가 로드되어 있지 않습니다.\n(특정 시험만 본 상태에서 불러오면 스피킹 등의 예문이 누락될 수 있습니다.)\n\n완벽한 복원을 위해 기본 단어장(스피킹, 라이팅, 초록이, 라잎)을 모두 불러오시겠습니까?");
+                    
+                    if (confirmLoad) {
+                        const loadingModal = document.getElementById('loading-overlay');
+                        const loadingText = document.getElementById('loading-text');
+                        if (loadingModal) {
+                            if (loadingText) loadingText.innerText = "단어장 통합 데이터 로딩 중...";
+                            loadingModal.classList.remove('hidden');
+                        }
+
+                        try {
+                            const urls = [
+                                'https://docs.google.com/spreadsheets/d/1m7KXifCB6txkKEOHqApMWOR4MQwqb6Ji1Dm-hRJYzLc/edit?usp=sharing',
+                                'https://docs.google.com/spreadsheets/d/1UYTEv88wdKsSS2kkB-UylHAfQAlV6yrvjwVNecG6m64/edit?usp=sharing',
+                                'https://docs.google.com/spreadsheets/d/1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U/edit?usp=sharing',
+                                'https://docs.google.com/spreadsheets/d/1ElLraPc80Uez8innH6RfXOBz36IV9ARXnkAiUembWH0/edit?usp=sharing'
+                            ];
+                            
+                            const results = await Promise.all(urls.map(url => fetchSheetData(url)));
+                            loadedRawWordList = [];
+                            results.forEach(res => {
+                                loadedRawWordList = loadedRawWordList.concat(res);
+                            });
+                            
+                            window.isAllDbLoaded = true; 
+                            
+                        } catch (err) {
+                            alert("통합 데이터를 불러오는데 실패했습니다: " + err.message);
+                            if (loadingModal) loadingModal.classList.add('hidden');
+                            return; // 에러 발생 시 여기서 중단
+                        }
+                        
+                        if (loadingModal) loadingModal.classList.add('hidden');
+                        if (loadingText) loadingText.innerText = "단어장 데이터를 가져오는 중...";
+                    }
+                }
+
+                // 📌 로드가 끝난 후 병합 로직 정상 수행
                 let currentList = getPWASavedWords();
                 let addedCount = 0;
                 let updatedCount = 0;
