@@ -4116,20 +4116,34 @@ When you finish the evaluation, STOP generating immediately.
         }
     }
 
-    async function fetchSheetData(url, bypassCache = false) {
+async function fetchSheetData(url, bypassCache = false) {
         let exportUrl = url;
         if (exportUrl.includes("docs.google.com/spreadsheets")) {
             if (exportUrl.includes("/edit")) exportUrl = exportUrl.split('/edit')[0] + '/export?format=xlsx';
             else if (!exportUrl.includes("/export")) exportUrl = exportUrl + '/export?format=xlsx';
         }
 
-        if (bypassCache) {
-            exportUrl += '&t=' + new Date().getTime();
+        // 🛠️ [수정됨] &t= 타임스탬프를 없애고, Service Worker의 캐시를 직접 삭제합니다.
+        if (bypassCache && 'caches' in window) {
+            try {
+                // pongcrush 관련 모든 버전의 캐시에서 해당 엑셀 URL을 삭제
+                const cacheNames = await caches.keys();
+                for (const name of cacheNames) {
+                    if (name.startsWith('pongcrush')) {
+                        const cache = await caches.open(name);
+                        await cache.delete(exportUrl);
+                    }
+                }
+            } catch(e) {
+                console.warn("캐시 삭제 실패:", e);
+            }
         }
 
         let response;
         try {
-            response = await fetch(exportUrl, bypassCache ? { cache: 'no-store' } : {});
+            // 🛠️ [수정됨] 캐시 삭제 후 브라우저 네트워크를 강제로 새로고침(reload)하여 SW에 새 파일을 덮어씌움
+            const fetchOptions = bypassCache ? { cache: 'reload' } : {};
+            response = await fetch(exportUrl, fetchOptions);
         } catch (e) {
             console.warn(e);
         }
