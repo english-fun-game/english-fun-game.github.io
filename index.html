@@ -638,11 +638,22 @@
             transition: background-image 0.3s ease;
         }
 
-        /* 🔥 데스크탑 우측 버튼 크기에 맞춘 선명한 테스트 정보 뱃지 (작게 축소) */
-        .current-test-badge {
+        /* 💡 상단 좌측 뱃지들을 하나로 묶는 래퍼 (동일 Row 배치 및 간격 적용) */
+        .card-top-left-info {
             position: absolute;
             top: 14px;
             left: 14px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px; /* 두 UI 사이의 자연스러운 여백 패딩 */
+            z-index: 10;
+            pointer-events: none;
+            max-width: calc(100% - 140px); /* 우측 버튼 영역 침범 방지 */
+        }
+
+        /* 🔥 데스크탑 우측 버튼 크기에 맞춘 선명한 테스트 정보 뱃지 (작게 축소) */
+        .current-test-badge {
             font-size: 12px;
             font-weight: 800;
             color: #64748b;
@@ -650,26 +661,20 @@
             padding: 6px 12px;
             border-radius: 10px;
             border: 1px solid rgba(226, 232, 240, 0.6);
-            z-index: 10;
-            pointer-events: none;
             box-shadow: none;
             letter-spacing: -0.3px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
         }
 
-        /* 뱃지 위치 조정 (상단 뱃지가 작아짐에 따라 위로 올려 여백 정리) */
+        /* 체크 뱃지 그룹 속성 (부모의 flex 흐름을 따라감) */
         .vague-check-badges-wrap {
-            position: absolute;
-            top: 48px; 
-            left: 14px;
             display: flex;
+            align-items: center;
             flex-wrap: wrap;
             gap: 6px;
-            max-width: calc(100% - 28px);
-            z-index: 5;
-            pointer-events: none;
         }
 
         .check-icon-badge {
@@ -1770,13 +1775,28 @@
             
             .weak-col-container { grid-template-columns: repeat(2, 1fr) !important; }
 
-            .current-test-badge {
-                font-size: 11px;
-                padding: 4px 8px;
-                border-radius: 8px;
+            /* 모바일에서 동일 Row 간격 및 완전 상단 밀착 */
+            .card-top-left-info {
+                top: 6px !important;
+                left: 6px !important;
+                gap: 4px !important; 
+                max-width: calc(100% - 12px) !important;
             }
+            .current-test-badge {
+                font-size: 10px !important;
+                padding: 2px 6px !important;
+                border-radius: 6px !important;
+                letter-spacing: -0.5px !important;
+            }
+            /* 모바일용 체크 아이콘 축소 */
             .vague-check-badges-wrap {
-                top: 40px;
+                gap: 3px !important;
+            }
+            .check-icon-badge {
+                width: 16px !important;
+                height: 16px !important;
+                font-size: 9px !important;
+                border: 1px solid var(--check-green-border) !important;
             }
         }
     </style>
@@ -4116,17 +4136,16 @@ When you finish the evaluation, STOP generating immediately.
         }
     }
 
-async function fetchSheetData(url, bypassCache = false) {
+    async function fetchSheetData(url, bypassCache = false) {
         let exportUrl = url;
         if (exportUrl.includes("docs.google.com/spreadsheets")) {
             if (exportUrl.includes("/edit")) exportUrl = exportUrl.split('/edit')[0] + '/export?format=xlsx';
             else if (!exportUrl.includes("/export")) exportUrl = exportUrl + '/export?format=xlsx';
         }
 
-        // 🛠️ [수정됨] &t= 타임스탬프를 없애고, Service Worker의 캐시를 직접 삭제합니다.
+        // 🛠️ Service Worker의 캐시를 직접 삭제하여 강제 갱신 유도
         if (bypassCache && 'caches' in window) {
             try {
-                // pongcrush 관련 모든 버전의 캐시에서 해당 엑셀 URL을 삭제
                 const cacheNames = await caches.keys();
                 for (const name of cacheNames) {
                     if (name.startsWith('pongcrush')) {
@@ -4141,7 +4160,7 @@ async function fetchSheetData(url, bypassCache = false) {
 
         let response;
         try {
-            // 🛠️ [수정됨] 캐시 삭제 후 브라우저 네트워크를 강제로 새로고침(reload)하여 SW에 새 파일을 덮어씌움
+            // 🛠️ 캐시 삭제 후 브라우저 네트워크를 강제로 새로고침(reload)
             const fetchOptions = bypassCache ? { cache: 'reload' } : {};
             response = await fetch(exportUrl, fetchOptions);
         } catch (e) {
@@ -4550,8 +4569,11 @@ async function fetchSheetData(url, bypassCache = false) {
             const cardHtml = `
                 <div class="card">
                     <div class="card-section section-ko">
-                        ${testInfoHtml}
-                        ${badgesHtml}
+                        <!-- 💡 정보 뱃지와 체크 아이콘을 하나의 그룹(동일 줄)으로 묶음 -->
+                        <div class="card-top-left-info">
+                            ${testInfoHtml}
+                            ${badgesHtml}
+                        </div>
                         <div class="card-top-actions-ko">
                             <button type="button" class="writing-test-trigger-btn" title="영작 테스트 (T)" onclick="event.stopPropagation(); openWritingModalFromCard();">
                                 ✍️ 영작 테스트 <span class="desktop-shortcut">(T)</span>
