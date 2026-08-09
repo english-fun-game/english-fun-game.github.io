@@ -345,7 +345,7 @@
             gap: 8px;
         }
 
-        .study-btn, .mute-btn, .voice-btn, .autoplay-btn {
+        .mute-btn, .voice-btn, .autoplay-btn {
             height: 38px;
             line-height: 1;
             padding: 0 12px;
@@ -375,10 +375,9 @@
             width: 100%;
         }
 
-        /* 🔥 타이머 눈금선 관련 설정 (가상 요소 덧씌우기) */
         .nyan-track {
             position: relative;
-            flex: 1; /* 데스크탑에서는 남은 영역을 유연하게 차지 */
+            flex: 1; 
             height: 24px;
             background-color: #eef0f1;
             border-radius: 12px;
@@ -388,14 +387,13 @@
             transition: all 0.3s ease;
         }
 
-        /* 무지개 아래(z-index: 1)에 7등분 눈금선이 노출되도록 오버레이 처리 */
         .nyan-track::after {
             content: "";
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
             border-radius: 12px;
             pointer-events: none;
-            z-index: 1; /* 🔥 무지개(z-index:2) 아래로 확실하게 렌더링 */
+            z-index: 1; 
             background-image: repeating-linear-gradient(
                 to right,
                 transparent 0,
@@ -405,7 +403,6 @@
             );
         }
 
-        /* 🔥 타이머 및 진행률 데스크탑 큼직한 UI */
         .timer-text, .progress {
             padding: 0 16px;
             height: 28px;
@@ -440,22 +437,16 @@
             border: 1.5px solid #cbd5e1;
         }
 
-        .study-btn, .autoplay-btn, .mute-btn, .voice-btn {
+        .autoplay-btn, .mute-btn, .voice-btn {
             background-color: #f8f9fa;
             border: 1.5px solid #cbd5e1;
             color: #64748b;
             cursor: pointer;
         }
 
-        .study-btn:hover, .autoplay-btn:hover, .mute-btn:hover, .voice-btn:hover {
+        .autoplay-btn:hover, .mute-btn:hover, .voice-btn:hover {
             background-color: #f1f5f9;
             transform: translateY(-1px);
-        }
-
-        .study-btn.active {
-            background-color: #e0f2fe;
-            border-color: #0284c7;
-            color: #0369a1;
         }
 
         .autoplay-btn.active {
@@ -491,7 +482,7 @@
             background: linear-gradient(90deg, #ff4b4b, #ffb800, #20d070, #00b0ff, #9d4edd);
             border-radius: 12px;
             transition: width 1s linear; 
-            z-index: 2; /* 🔥 눈금선(1) 보다 위로 올라와 눈금을 덮음 */
+            z-index: 2; 
         }
 
         .nyan-cat {
@@ -516,9 +507,42 @@
             gap: 16px;
         }
 
+        .bottom-prev-btn {
+            flex: 0 0 auto;
+            width: 100px;
+            height: 80px;
+            padding: 0 8px;
+            background-color: #94a3b8;
+            color: white;
+            border: none;
+            border-radius: 18px;
+            font-size: 20px;
+            font-weight: 900;
+            cursor: pointer;
+            box-sizing: border-box;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .bottom-prev-btn:hover:not(:disabled) {
+            background-color: #64748b;
+            transform: translateY(-1px);
+        }
+        
+        .bottom-prev-btn:disabled {
+            background-color: #cbd5e1;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
         .bottom-vague-btn, .bottom-primary-btn {
             flex: 1;
-            width: 50%;
             height: 80px;
             padding: 0 16px;
             color: white;
@@ -606,9 +630,31 @@
             transition: background-image 0.3s ease;
         }
 
-        .vague-check-badges-wrap {
+        /* 🔥 데스크탑 우측 버튼 크기에 맞춘 선명한 테스트 정보 뱃지 */
+        .current-test-badge {
             position: absolute;
             top: 14px;
+            left: 14px;
+            font-size: 15px;
+            font-weight: 900;
+            color: #334155;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px 18px;
+            border-radius: 14px;
+            border: 1.5px solid #cbd5e1;
+            z-index: 10;
+            pointer-events: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            letter-spacing: -0.3px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 뱃지 위치 조정 (상단 뱃지가 커짐에 따라 아래로 위치 이동) */
+        .vague-check-badges-wrap {
+            position: absolute;
+            top: 64px; 
             left: 14px;
             display: flex;
             flex-wrap: wrap;
@@ -634,10 +680,9 @@
             animation: badgePopIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        /* 💡 한글 예문 내 맥락 정보 괄호/대괄호 하이라이트 인라인 스타일 */
         .context-bracket {
-            color: #8da3bd; /* 은은한 파스텔 톤 그레이-블루 */
-            font-weight: 600; /* 원본(900)에 비해 부드럽게 */
+            color: #8da3bd; 
+            font-weight: 600; 
         }
 
         .section-en {
@@ -648,7 +693,6 @@
             flex-direction: column;
         }
 
-        /* 🔥 [데스크탑] 50/50 비율 고정형 카드 컨텐츠 레이아웃 */
         .card-content-center {
             display: flex;
             flex-direction: column;
@@ -660,9 +704,8 @@
             gap: 0; 
         }
 
-        /* 상위 50% 구획 (메인 단어용) - 무조건 하단 기준 정렬 */
-        .card-word, .placeholder {
-            flex: 5; /* 50% 변경 */
+        .card-word {
+            flex: 5; 
             width: 100%;
             display: flex;
             align-items: flex-end; 
@@ -681,6 +724,19 @@
             margin: 0;
         }
 
+        .placeholder {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            font-size: 70px !important;
+            font-weight: 900 !important;
+            color: #cbd5e1;
+            margin: auto;
+        }
+
         .card-word.long-text {
             font-size: 60px !important; 
             line-height: 1.3;
@@ -692,21 +748,16 @@
             color: var(--slack-blue); 
         }
 
-        .placeholder {
-            color: #cbd5e1;
-        }
-
         .show-answers .section-en .card-word {
             display: flex; 
         }
         
         .show-answers .section-en .placeholder {
-            display: none;
+            display: none !important;
         }
 
-        /* 하위 50% 구획 (예문 및 동의어용) */
         .card-example {
-            flex: 5; /* 50% 변경 */
+            flex: 5; 
             display: flex; 
             flex-direction: column;
             align-items: center;
@@ -714,7 +765,7 @@
             text-align: center;
             width: 100%;
             margin: 0; 
-            padding-top: 24px; /* 단어 쪽에 있던 패딩을 예문 위로 이동 */
+            padding-top: 24px; 
             box-sizing: border-box;
         }
         
@@ -1598,17 +1649,14 @@
             .shortcut-text, .desktop-shortcut { display: none !important; }
             .card-top-actions-ko { display: none !important; } 
             
-            /* 반복버튼 모바일에서 삭제 */
             .card-repeat-btn { display: none !important; }
             
             .nyan-timer-header { font-size: 11px; gap: 3px; margin-bottom: 6px; }
-            .study-btn, .mute-btn, .voice-btn, .autoplay-btn { height: 32px; font-size: 11px; font-weight: 800; padding: 0 5px; }
+            .mute-btn, .voice-btn, .autoplay-btn { height: 32px; font-size: 11px; font-weight: 800; padding: 0 5px; }
             .cards-grid { margin-bottom: 8px !important; flex: 1 !important; height: 100% !important; }
             
-            /* 🔥 모바일 2.5:3.5 비율 및 내부 패딩/간격 100% 동일하게 강제 통일 */
             #game-area .card { flex-direction: column !important; height: 100% !important; flex: 1 !important; }
             
-            /* 🔥 모바일 스크롤 원천 차단 및 패딩 대칭 적용 */
             #game-area .card-section {
                 overflow: hidden !important; 
                 padding: 20px 16px !important; 
@@ -1619,24 +1667,21 @@
             #game-area .section-ko { border-right: none !important; border-bottom: 1px solid var(--border-color) !important; flex: 2.5 !important; background-size: cover !important; z-index: 1 !important; position: relative !important; }
             #game-area .section-en { flex: 3.5 !important; position: relative !important; z-index: 2 !important; }
             
-            /* 🔥 모바일에서 가운데 정렬 완벽 복구 (마법의 margin: auto) */
             #game-area .card-content-center { 
                 gap: 12px !important; 
                 justify-content: center !important; 
                 align-items: center !important; 
-                margin: auto !important; /* 🔥 card-section 내부 정중앙 안착 */
+                margin: auto !important; 
                 padding-bottom: 0 !important; 
-                flex: none !important; /* stretch 끄기 */
+                flex: none !important; 
                 height: auto !important;
                 display: flex !important; 
                 flex-direction: column !important; 
                 width: 100% !important;
             }
 
-            /* 🔥 한글/영어 단어 볼드 및 줄바꿈 처리 */
-            /* 주의: display 속성은 전역 설정을 유지하여 영어 카드 숨김 로직을 해치지 않도록 함 */
             #game-area .card-word, #game-area .placeholder { 
-                align-items: center !important; /* 세로 중앙 정렬 */
+                align-items: center !important; 
                 justify-content: center !important;
                 flex: none !important; 
                 height: auto !important;
@@ -1652,7 +1697,7 @@
             #game-area .card-word.long-text { font-size: 22px !important; line-height: 1.4 !important; font-weight: 900 !important; word-break: break-word !important; }
             
             #game-area .card-example { 
-                align-items: center !important; /* 세로 중앙 정렬 */
+                align-items: center !important; 
                 justify-content: center !important;
                 flex: none !important; 
                 height: auto !important;
@@ -1662,7 +1707,6 @@
                 max-width: 100% !important;
             }
 
-            /* 🔥 영어 숨김/보임 완벽 제어 (기존 로직 유지 강화) */
             #game-area .section-en .card-word { display: none !important; }
             #game-area .show-answers .section-en .card-word { display: flex !important; }
             
@@ -1672,7 +1716,6 @@
             #game-area .section-en .card-example { display: none !important; }
             #game-area .show-answers .section-en .card-example { display: flex !important; }
             
-            /* 동의어 영역 무조건 카드 맨 바닥에 고정 (가운데 정렬 안 깨짐) */
             #game-area .card-synonyms { 
                 position: absolute !important;
                 bottom: 20px !important;
@@ -1692,9 +1735,10 @@
             .ex-en { font-size: 18px !important; line-height: 1.3 !important; font-weight: 400 !important; word-break: break-word !important; overflow-wrap: break-word !important; width: 100% !important; box-sizing: border-box !important; text-align: center !important; }
             .ex-ko { font-size: 18px !important; line-height: 1.3 !important; font-weight: 400 !important; word-break: break-word !important; overflow-wrap: break-word !important; width: 100% !important; box-sizing: border-box !important; text-align: center !important; }
 
-            .bottom-vague-btn, .bottom-primary-btn { height: 64px !important; font-size: 17px !important; padding: 0 4px; border-radius: 10px; }
+            .bottom-vague-btn, .bottom-primary-btn, .bottom-prev-btn { height: 64px !important; border-radius: 10px; }
+            .bottom-vague-btn, .bottom-primary-btn { font-size: 17px !important; padding: 0 4px; }
+            .bottom-prev-btn { width: 60px !important; font-size: 15px !important; padding: 0 2px; }
             
-            /* 🔥 영어 카드 액션 버튼을 영어 카드 내부에 안전하게 배치 (겹침 방지) */
             .show-answers .section-en .card-top-actions { 
                 display: flex; 
                 position: absolute; 
@@ -1709,7 +1753,6 @@
                 border: 1px solid #cbd5e1 !important;
             }
 
-            /* 🔥 하단 타이머 UI 모바일 전용 6:2:2 분할 비율 */
             .nyan-controls-row { gap: 6px !important; }
             .nyan-track { flex: 6 !important; }
             .timer-text { flex: 2 !important; padding: 0 !important; font-size: 11px !important; width: 100%; }
@@ -1722,8 +1765,17 @@
             .step-title { font-size: 10.5px; }
             .step-desc { font-size: 9px; }
             
-            /* 모바일에서 복습 칸이 2x2 형식으로 떨어지도록 수정 */
             .weak-col-container { grid-template-columns: repeat(2, 1fr) !important; }
+
+            /* 모바일에서 뱃지 반응형 조정 */
+            .current-test-badge {
+                font-size: 11.5px;
+                padding: 5px 10px;
+                border-radius: 8px;
+            }
+            .vague-check-badges-wrap {
+                top: 48px;
+            }
         }
     </style>
 </head>
@@ -1873,7 +1925,6 @@
                 </div>
             </div>
             
-            <!-- ⚡ 옅은 빨간색 통합 중단 버튼 / 우측 컨트롤 -->
             <div style="display: flex; align-items: center; gap: 10px;">
                 <button id="ai-combined-stop-btn" class="ai-combined-stop-btn hidden" onclick="window.stopAIComputation && window.stopAIComputation()">
                     <span id="ai-loader-text" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">🛑 AI 상시 강제 중단 (Q)</span>
@@ -1891,7 +1942,6 @@
                     <div id="writing-modal-en-hint" style="font-size: 32px; font-weight: 700; color: var(--slack-blue); line-height: 1.3;"></div>
                     <div id="writing-modal-ko-text" style="font-size: 32px; font-weight: 900; color: var(--text-main); word-break: keep-all; line-height: 1.3;"></div>
                 </div>
-                <!-- 🔥 맞춤법 검사기(빨간줄) 끄기 속성 추가 및 폰트 -->
                 <textarea id="modal-sentence-textarea" class="sentence-test-textarea" placeholder="영문장을 작성하세요 (Shift+Enter 줄바꿈, Enter 제출)" style="flex: 1; min-height: 120px; font-size: 32px; padding: 24px; line-height: 1.4;" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
                 
                 <button type="button" class="base-btn" style="background: var(--slack-purple); padding: 18px; font-size: 18px; flex-shrink: 0;" onclick="submitModalWritingTest()">
@@ -1902,27 +1952,20 @@
             <!-- 2단계: 결과 단계 -->
             <div id="writing-result-view" class="hidden" style="display: flex; flex-direction: column; gap: 16px; flex: 1; min-height: 0;">
 
-                <!-- 🔥 [1] 제출답 & 정답 섹션 -->
                 <div style="display: flex; flex-direction: column; gap: 20px; flex-shrink: 0; background: white; padding: 24px 28px; border-radius: 16px; border: 2px solid #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
-                    <!-- 제출한 답 (검정) -->
                     <div id="ai-modal-user-text" style="font-size: clamp(24px, 2.5vw, 36px); font-weight: 900; color: #0f172a; line-height: 1.4; word-break: keep-all;"></div>
                     
-                    <!-- 시각적 구분선 -->
                     <div style="width: 100%; height: 1.5px; border-top: 1.5px dashed #cbd5e1;"></div>
 
-                    <!-- 정답 예문 (초록) -->
                     <div id="ai-modal-target-text" style="font-size: clamp(24px, 2.5vw, 36px); font-weight: 900; color: #15803d; line-height: 1.4; word-break: keep-all;"></div>
                 </div>
 
-                <!-- [3] AI 피드백 영역 -->
                 <div class="ai-feedback-container" id="ai-feedback-container" style="flex: 1; background: white; border: 1.5px solid #cbd5e1; border-radius: 16px; padding: 20px 24px; overflow-y: auto; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); display: flex; flex-direction: column; min-height: 0; position: relative;">
                     
-                    <!-- 🚨 최상단 동적 수치비교 안내문 -->
                     <div id="ai-disclaimer-text" style="font-size: 12px; color: #94a3b8; text-align: left; margin-bottom: 12px; line-height: 1.3; flex-shrink: 0; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; word-break: keep-all;">
                         ※ 현재 구동 중인 로컬 모델은 수백억 개 이상의 신경망을 가진 거대 AI(Gemini 등)에 비해 체급이 작아, 복잡한 문맥 추론에 한계가 있을 수 있습니다.
                     </div>
 
-                    <!-- 🚀 파이프라인 (기본 중앙 로딩 UI 역할 수행) -->
                     <div class="ai-pipeline-stepper" id="ai-pipeline">
                         <div class="ai-step" id="step-1">
                             <div class="step-title">1. 가중치 로드</div>
@@ -1942,10 +1985,8 @@
                         </div>
                     </div>
 
-                    <!-- 중앙 로딩 텍스트 -->
                     <div id="ai-center-progress-text" style="font-size: 15px; font-weight: 700; color: var(--slack-blue); text-align: center; margin-top: 16px;"></div>
 
-                    <!-- 피드백 텍스트 스트리밍 영역 (데이터 도착 시 노출) -->
                     <div id="streaming-grammar-body" style="display: none; font-size: 16.5px; font-weight: 600; line-height: 1.75; color: #334155; white-space: pre-wrap; flex: 1;"></div>
                     
                 </div>
@@ -2051,9 +2092,9 @@
         </div>
 
         <div class="sec-select-area" style="margin-top: 4px;">
-            <div class="sec-select-title">🗣️ 한글 뜻 음성 먼저 읽기 (기본: OFF)</div>
-            <button id="ko-read-btn" class="sec-btn" onclick="toggleAutoplayReadKorean()" style="width:100%; padding:12px; font-weight:800; text-align:center;">
-                🔇 한글 뜻 읽지 않음 (OFF)
+            <div class="sec-select-title">🗣️ 한글 뜻 음성 먼저 읽기 (기본: ON)</div>
+            <button id="ko-read-btn" class="sec-btn selected" onclick="toggleAutoplayReadKorean()" style="width:100%; padding:12px; font-weight:800; text-align:center;">
+                🔊 한글 뜻 읽기 (ON)
             </button>
         </div>
 
@@ -2116,14 +2157,12 @@
             이 단어장은 수시로 업데이트됩니다.<br>기본적으로 빠르게 접속 가능한 <b>저장된 데이터</b>를 권장합니다.
         </div>
         
-        <!-- Primary Action -->
         <button class="base-btn" style="background: var(--slack-purple); padding: 18px; font-size: 17px; font-weight: 900; margin-bottom: 24px;" onclick="loadCachedLifeData()">
             ⚡ 기존 데이터로 바로 시작
         </button>
         
         <div style="width: 100%; height: 1px; background: var(--border-color); margin-bottom: 16px;"></div>
 
-        <!-- Secondary Action (Effort required) -->
         <div style="font-size: 11px; color: #94a3b8; margin-bottom: 8px;">새로운 단어가 추가되었다는 연락을 받았을 때만 이용하세요</div>
         <button style="background: none; color: #64748b; border: 1px solid #cbd5e1; padding: 8px 12px; font-size: 12px; font-weight: 800; border-radius: 8px; cursor: pointer; transition: all 0.15s;" onclick="loadFreshLifeData()">
             🔄 캐시 삭제 후 최신 엑셀 받아오기
@@ -2169,6 +2208,9 @@
         </div>
 
         <div class="bottom-action-area">
+            <button id="prev-btn" class="bottom-prev-btn" onclick="handlePrevAction()" title="이전 단어 (←)">
+                이전<span class="shortcut-text" style="margin-left: 2px;">(←)</span>
+            </button>
             <button id="vague-btn" class="bottom-vague-btn" onclick="handleVagueAction(currentStartIndex)">
                 <span id="vague-btn-text">몰라요 ❓</span> <span class="shortcut-text">(↓)</span>
             </button>
@@ -2180,9 +2222,6 @@
         <div id="nyan-timer-container" class="nyan-timer-box">
             <div class="nyan-timer-header">
                 <div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
-                    <button id="mode-btn" class="study-btn active" onclick="toggleAppMode()">
-                        <span id="mode-btn-label">📖 문장</span> <span class="shortcut-text">(A)</span>
-                    </button>
                     <button id="autoplay-btn" class="autoplay-btn" onclick="handleAutoplayBtnClick()">
                         <span id="autoplay-btn-label">🖐️ 수동</span> <span class="shortcut-text">(S)</span>
                     </button>
@@ -2239,7 +2278,7 @@
 </div>
 
 <!-- 📌 좌측 하단 버전 표기 -->
-<div class="app-version">v6.4.3 (Life Force Cache Bypass & UI)</div>
+<div class="app-version">v6.4.5 (Auto-Read & Speaking Flow)</div>
 
 <!-- 🤖 AI 엔진 모듈 통합 스크립트 -->
 <script type="module">
@@ -2257,7 +2296,6 @@
     
     window.isAIEnabledForWriting = localStorage.getItem('pongcrush_ai_toggle') !== 'false';
 
-    // 🔥 통합 단어장 캐싱 상태 확인용 전역 변수
     window.isAllDbLoaded = false;
 
     function getAISettings() {
@@ -2287,8 +2325,6 @@
     let isAiCancelled = false;
     window.isFirstTokenForUI = true;
     window.fullAiResponse = "";
-    
-    // ---------------- AI UI 로직 ----------------
     
     window.toggleAIEnabled = function() {
         window.isAIEnabledForWriting = !window.isAIEnabledForWriting;
@@ -2640,19 +2676,21 @@ When you finish the evaluation, STOP generating immediately.
     window.requestLocalAIStreamingCorrection = requestLocalAIStreamingCorrection;
     window.getAISettings = getAISettings;
     window.updateAIPipelineStep = updateAIPipelineStep;
+    
+    window.closeSpeakingModalAndNext = function() {
+        closeSpeakingModal();
+        handlePrimaryAction();
+    }
 </script>
 
 <script>
-    // 💡 문자열에서 모든 띄어쓰기, 특수기호, HTML 태그를 없애고 비교 가능한 가장 원초적인 소문자 문자열로 만드는 강력 보정 함수
     function sanitizeForMatch(text) {
         if (!text) return '';
         return text.replace(/<[^>]*>/g, '').replace(/#/g, '').replace(/[\s\W_]+/g, '').toLowerCase();
     }
 
-    // 🔥 한글 예문 내 괄호 ( ) 또는 대괄호 [ ] 매칭하여 하이라이트 CSS 적용 함수
     function formatContextInText(text) {
         if (!text) return '';
-        // 정규식: ( ) 또는 [ ] 사이의 텍스트 매칭 (은은하게 처리)
         return text.replace(/(\[.*?\]|\(.*?\))/g, '<span class="context-bracket">$1</span>');
     }
 
@@ -2859,8 +2897,6 @@ When you finish the evaluation, STOP generating immediately.
     let vagueWords = [];       
     let currentStartIndex = 0; 
     let showAnswers = false;    
-    
-    let currentAppMode = 'sentence';
 
     let currentCategory = '단어암기'; 
     let isWeakReviewMode = false; 
@@ -2868,7 +2904,6 @@ When you finish the evaluation, STOP generating immediately.
     let isCurrentCardChecked = false; 
     let cardsPerPage = 1; 
     
-    // 🔥 고양이 이미지 관련 변수 복구
     let currentImageType = 'type1'; 
     let currentImgNum = 1;
 
@@ -2876,9 +2911,8 @@ When you finish the evaluation, STOP generating immediately.
     let autoplayIntervalSec = 2.0; 
     let tempAutoplaySec = 2.0;
     let autoplayTimer = null;
-    let isAutoplayReadKorean = false; 
+    let isAutoplayReadKorean = true; 
 
-    // 🔥 학습 시간 타이머 변수
     let sessionStartTimeMs = 0;
     let sessionTimerInterval = null;
 
@@ -2907,7 +2941,7 @@ When you finish the evaluation, STOP generating immediately.
     let micAnalyser = null;
     let micAnimFrameId = null;
 
-    let pendingLifeUrl = ''; // 🔥 라잎 단어장 임시 저장용
+    let pendingLifeUrl = ''; 
 
     const PWA_VAGUE_STORAGE_KEY = 'pwa_vague_words_list_v2';
     const SELECTED_VOICE_STORAGE_KEY = 'selected_tts_voice_uri_v4';
@@ -2985,7 +3019,6 @@ When you finish the evaluation, STOP generating immediately.
             disclaimerEl.innerHTML = `※ 현재 구동 중인 로컬 모델은 ${compareText}, 복잡한 문맥 추론에 한계가 있을 수 있습니다.`;
         }
 
-        // 파이프라인 초기화
         document.querySelectorAll('.ai-step').forEach(el => el.classList.remove('active', 'done', 'error'));
         const pipeline = document.getElementById('ai-pipeline');
         if (pipeline) {
@@ -3005,7 +3038,6 @@ When you finish the evaluation, STOP generating immediately.
         if (progressText) progressText.innerText = '';
 
         if (enHintEl) enHintEl.innerText = cleanEnHint;
-        // 🔥 AI 모달창 한글 목표 문장에도 은은한 괄호 적용
         if (koTextEl) koTextEl.innerHTML = formatContextInText(cleanKo);
         
         if (textareaEl) {
@@ -3025,7 +3057,6 @@ When you finish the evaluation, STOP generating immediately.
                 textareaEl.onkeydown = (e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
-                        e.stopPropagation();
                         e.stopPropagation();
                         submitModalWritingTest();
                     }
@@ -3133,7 +3164,6 @@ When you finish the evaluation, STOP generating immediately.
 
         try {
             if (window.requestLocalAIStreamingCorrection && userText) {
-                // html 태그가 섞여 들어가지 않게 cleanKo를 전달
                 await window.requestLocalAIStreamingCorrection(userText, cleanKo, (token) => {
                     if (streamingBody) {
                         streamingBody.innerText += token;
@@ -3500,7 +3530,6 @@ When you finish the evaluation, STOP generating immediately.
         URL.revokeObjectURL(url);
     }
 
-    // 1. 클릭 즉시 파일 선택 창 띄우기 (보안 정책 우회)
     function restoreWeakWords() {
         const input = document.getElementById('restore-file-input');
         if (input) {
@@ -3509,7 +3538,6 @@ When you finish the evaluation, STOP generating immediately.
         }
     }
 
-    // 2. 파일 선택 후 DB 로딩 및 병합 흐름
     function handleRestoreFile(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -3522,7 +3550,6 @@ When you finish the evaluation, STOP generating immediately.
                     throw new Error("올바른 백업 파일 형식이 아닙니다.");
                 }
 
-                // 📌 백업 파일을 읽은 후, 전체 DB가 로드되지 않았다면 여기서 불러오기 수행
                 if (!window.isAllDbLoaded) {
                     const confirmLoad = confirm("⚠️ 현재 브라우저 메모리에 전체 단어장 DB가 로드되어 있지 않습니다.\n(특정 시험만 본 상태에서 불러오면 스피킹 등의 예문이 누락될 수 있습니다.)\n\n완벽한 복원을 위해 기본 단어장(스피킹, 라이팅, 초록이, 라잎)을 모두 불러오시겠습니까?");
                     
@@ -3561,7 +3588,6 @@ When you finish the evaluation, STOP generating immediately.
                     }
                 }
 
-                // 📌 로드가 끝난 후 병합 로직 정상 수행
                 let currentList = getPWASavedWords();
                 let addedCount = 0;
                 let updatedCount = 0;
@@ -3769,9 +3795,6 @@ When you finish the evaluation, STOP generating immediately.
     }
 
     function resetDefaultSessionSettings() {
-        currentAppMode = 'sentence';
-        updateModeBtnUI();
-
         isAutoplay = false;
         clearAutoplayTimer();
         const autoBtn = document.getElementById('autoplay-btn');
@@ -3794,33 +3817,6 @@ When you finish the evaluation, STOP generating immediately.
         updateVoiceModeTagUI();
     }
 
-    function toggleAppMode() {
-        if (currentAppMode === 'sentence') {
-            currentAppMode = 'word';
-        } else {
-            currentAppMode = 'sentence';
-        }
-
-        updateModeBtnUI();
-        if (wordList.length > 0 && !document.getElementById('game-area').classList.contains('hidden')) {
-            renderCards();
-        }
-    }
-
-    function updateModeBtnUI() {
-        const btn = document.getElementById('mode-btn');
-        const label = document.getElementById('mode-btn-label');
-        if (!btn || !label) return;
-
-        if (currentAppMode === 'sentence') {
-            label.innerText = "📖 문장";
-            btn.classList.add('active');
-        } else {
-            label.innerText = "📝 단어";
-            btn.classList.remove('active');
-        }
-    }
-
     function stopTTS() {
         if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel();
@@ -3841,7 +3837,7 @@ When you finish the evaluation, STOP generating immediately.
         }
 
         const cleanWord = item.en ? item.en.replace(/<[^>]*>/g, '').replace(/#/g, ' ').trim() : '';
-        const cleanExEn = (currentAppMode !== 'word' && item.exEn) ? item.exEn.replace(/<[^>]*>/g, '').replace(/#/g, ' ').trim() : '';
+        const cleanExEn = item.exEn ? item.exEn.replace(/<[^>]*>/g, '').replace(/#/g, ' ').trim() : '';
 
         if (!cleanWord) {
             if (onCompleteCallback) onCompleteCallback();
@@ -3861,7 +3857,7 @@ When you finish the evaluation, STOP generating immediately.
                 wordUtterance.lang = 'en-US';
             }
 
-            if (currentAppMode !== 'word' && cleanExEn) {
+            if (cleanExEn) {
                 const exUtterance = new SpeechSynthesisUtterance(cleanExEn);
                 exUtterance.pitch = currentPitch;
                 exUtterance.rate = currentRate;
@@ -4057,7 +4053,6 @@ When you finish the evaluation, STOP generating immediately.
                 }
             }
 
-            // 7분 타이머 경과에 따라 고양이 배경 이미지 4등분 변경
             let newImgNum = 1;
             if (pct >= 75) newImgNum = 4;
             else if (pct >= 50) newImgNum = 3;
@@ -4084,31 +4079,25 @@ When you finish the evaluation, STOP generating immediately.
         if (cardProgEl) cardProgEl.innerText = `${currentStartIndex + 1} / ${wordList.length}`;
     }
 
-    // 🔥 라잎 단어장 연동 모달 기능 (기존/최신 선택 분리)
     function loadShortcutUrl(url) {
-        // 라잎 단어장 고유 ID가 포함된 URL인지 확인하여 모달 띄우기
         if (url.includes("1ElLraPc80Uez8innH6RfXOBz36IV9ARXnkAiUembWH0")) {
             const modal = document.getElementById('life-notice-modal');
             if (modal) {
                 pendingLifeUrl = url;
                 modal.classList.remove('hidden');
-                return; // 함수를 여기서 중단시키고, 모달의 버튼 선택을 기다림
+                return;
             }
         }
-        
-        // 라잎이 아니거나, 라잎이라도 위 분기를 타지 않았다면 바로 실행
         window.isAllDbLoaded = false; 
         loadExcelFromUrl(url);
     }
 
-    // 모달 닫기
     function closeLifeNoticeModal() {
         const modal = document.getElementById('life-notice-modal');
         if (modal) modal.classList.add('hidden');
         pendingLifeUrl = '';
     }
 
-    // 기존 데이터(캐시)로 빠르게 로드
     function loadCachedLifeData() {
         if (pendingLifeUrl) {
             window.isAllDbLoaded = false; 
@@ -4117,11 +4106,10 @@ When you finish the evaluation, STOP generating immediately.
         }
     }
 
-    // 캐시를 무력화하고 최신 데이터로 로드
     function loadFreshLifeData() {
         if (pendingLifeUrl) {
             window.isAllDbLoaded = false; 
-            loadExcelFromUrl(pendingLifeUrl, true); // true = bypass cache
+            loadExcelFromUrl(pendingLifeUrl, true);
             closeLifeNoticeModal();
         }
     }
@@ -4133,14 +4121,12 @@ When you finish the evaluation, STOP generating immediately.
             else if (!exportUrl.includes("/export")) exportUrl = exportUrl + '/export?format=xlsx';
         }
 
-        // 💥 변환된 export URL 뒤에 타임스탬프를 붙여야 sw.js에서 다른 요청으로 완벽히 인식하여 우회됨
         if (bypassCache) {
             exportUrl += '&t=' + new Date().getTime();
         }
 
         let response;
         try {
-            // 브라우저 자체 캐시까지 완전히 무시하도록 강제
             response = await fetch(exportUrl, bypassCache ? { cache: 'no-store' } : {});
         } catch (e) {
             console.warn(e);
@@ -4187,7 +4173,7 @@ When you finish the evaluation, STOP generating immediately.
             perDayCount = 60;
         } else if (url.includes("1ElLraPc80Uez8innH6RfXOBz36IV9ARXnkAiUembWH0")) {
             currentCategory = "라잎";
-            perDayCount = 15; // 🔥 15개로 변경
+            perDayCount = 15; 
         } else {
             currentCategory = "단어암기";
             perDayCount = 30;
@@ -4299,7 +4285,6 @@ When you finish the evaluation, STOP generating immediately.
         currentImageType = types[Math.floor(Math.random() * types.length)];
         currentImgNum = 1;
 
-        // 🔥 타이머 시작
         startStudyTimer();
         playRandomBgSound();
 
@@ -4409,7 +4394,6 @@ When you finish the evaluation, STOP generating immediately.
         currentImageType = types[Math.floor(Math.random() * types.length)];
         currentImgNum = 1;
 
-        // 🔥 타이머 시작
         startStudyTimer();
         playRandomBgSound();
 
@@ -4457,6 +4441,19 @@ When you finish the evaluation, STOP generating immediately.
         } else {
             if (actionTextEl) actionTextEl.innerText = "다음 단어 ▶";
         }
+        
+        const prevBtn = document.getElementById('prev-btn');
+        if (prevBtn) {
+            if (currentStartIndex === 0) {
+                prevBtn.disabled = true;
+                prevBtn.style.opacity = '0.4';
+                prevBtn.style.cursor = 'not-allowed';
+            } else {
+                prevBtn.disabled = false;
+                prevBtn.style.opacity = '1';
+                prevBtn.style.cursor = 'pointer';
+            }
+        }
     }
 
     function getCardCheckCount(item) {
@@ -4501,7 +4498,6 @@ When you finish the evaluation, STOP generating immediately.
             const isLongText = plainKoLength >= 45;
             const wordClass = isLongText ? 'card-word long-text' : 'card-word';
 
-            // 🔥 한글 예문 괄호 처리 적용
             const formattedExKo = formatContextInText(item.exKo);
             const exampleKoHtml = formattedExKo ? `
                 <div class="ex-ko">${formattedExKo}</div>
@@ -4517,18 +4513,28 @@ When you finish the evaluation, STOP generating immediately.
                 </div>
             ` : '';
 
-            const speakingTargetTextToUse = (item.exEn && currentAppMode !== 'word') ? item.exEn : item.en;
-            const speakingTypeToUse = (item.exEn && currentAppMode !== 'word') ? 'sentence' : 'word';
+            const speakingTargetTextToUse = item.exEn ? item.exEn : item.en;
+            const speakingTypeToUse = item.exEn ? 'sentence' : 'word';
 
             const countVal = getCardCheckCount(item);
             const badgesHtml = `<div id="card-check-badges-container" class="vague-check-badges-wrap">${renderCheckBadgesHtml(countVal)}</div>`;
 
-            // 🔥 한글 뜻은 괄호 처리 없이 그대로 출력
+            let testInfoText = "";
+            if (isWeakReviewMode) {
+                testInfoText = "🔥 취약 단어 복습";
+            } else if (currentDayIndex === -1) {
+                testInfoText = `${currentCategory} 전체 복습`;
+            } else {
+                testInfoText = `${currentCategory} Day ${currentDayIndex + 1}`;
+            }
+            const testInfoHtml = `<div class="current-test-badge">${testInfoText}</div>`;
+
             const displayKo = item.ko;
 
             const cardHtml = `
                 <div class="card">
                     <div class="card-section section-ko">
+                        ${testInfoHtml}
                         ${badgesHtml}
                         <div class="card-top-actions-ko">
                             <button type="button" class="writing-test-trigger-btn" title="영작 테스트 (T)" onclick="event.stopPropagation(); openWritingModalFromCard();">
@@ -4545,8 +4551,8 @@ When you finish the evaluation, STOP generating immediately.
                     </div>
                     <div class="card-section section-en" onclick="if(showAnswers) speakCurrentWord();">
                         <div class="card-top-actions">
-                            <button type="button" class="card-action-btn card-repeat-btn" title="다시 듣기 (Space)" onclick="event.stopPropagation(); speakCurrentWord();">
-                                🔁<span class="desktop-shortcut">(Space)</span>
+                            <button type="button" class="card-action-btn card-repeat-btn" title="다시 듣기 (Space, ↑)" onclick="event.stopPropagation(); speakCurrentWord();">
+                                🔁<span class="desktop-shortcut">(Space, ↑)</span>
                             </button>
                             <button type="button" class="card-action-btn card-speaking-btn" title="스피킹 연습 (Z)" onclick="event.stopPropagation(); openSpeakingModal('${speakingTypeToUse}', '${speakingTargetTextToUse.replace(/'/g, "\\'")}');">
                                 🎙️<span class="desktop-shortcut">(Z)</span>
@@ -4571,9 +4577,19 @@ When you finish the evaluation, STOP generating immediately.
 
         updateProgressUI();
         updateButtonsUI();
-        updateKoCardBackground(); // 🔥 고양이 배경 이미지 렌더링 호출
+        updateKoCardBackground(); 
 
         if (isAutoplay) startAutoplayLoopForCurrentCard();
+    }
+
+    function handlePrevAction() {
+        clearAutoplayTimer();
+        if (wordList.length === 0) return;
+        
+        if (currentStartIndex > 0) {
+            currentStartIndex -= cardsPerPage;
+            renderCards();
+        }
     }
 
     function handleVagueAction(targetIndex) {
@@ -4630,7 +4646,7 @@ When you finish the evaluation, STOP generating immediately.
     function showSummaryNotes() {
         stopTTS();
         stopBgSound(); 
-        stopStudyTimer(); // 🔥 요약화면 진입시 타이머 중지
+        stopStudyTimer(); 
         playFanfareSound(); 
 
         document.getElementById('game-area').classList.add('hidden');
@@ -4668,7 +4684,6 @@ When you finish the evaluation, STOP generating immediately.
             targetDisplayList.forEach(item => {
                 let enCellContent = `<div style="color: var(--slack-blue); font-weight: bold;">${item.en}</div>`;
                 if (item.exEn || item.exKo) {
-                    // 🔥 요약 표 안의 한글 예문 괄호에도 서식 적용
                     const formattedSummaryExKo = formatContextInText(item.exKo);
                     enCellContent += `
                         <div style="font-size: 13px; color: #4b5563; font-weight: normal; margin-top: 4px; line-height: 1.4;">
@@ -4681,7 +4696,6 @@ When you finish the evaluation, STOP generating immediately.
                 const matchedSaved = savedList.find(w => w.ko === item.ko && w.en === item.en);
                 const countVal = matchedSaved ? (matchedSaved.vagueCount || 0) : 0;
                 
-                // 🔥 요약 표 안의 한글 뜻은 괄호 처리 없이 그대로 출력
                 const displayKoForSummary = item.ko;
 
                 const koCellContent = `
@@ -4733,7 +4747,7 @@ When you finish the evaluation, STOP generating immediately.
     function goToHome() {
         stopTTS();
         stopBgSound();
-        stopStudyTimer(); // 🔥 홈으로 갈 때 타이머 중지
+        stopStudyTimer(); 
         document.getElementById('game-area').classList.add('hidden');
         document.getElementById('summary-area').classList.add('hidden');
         document.getElementById('setup-area').classList.remove('hidden');
@@ -4752,9 +4766,7 @@ When you finish the evaluation, STOP generating immediately.
         document.getElementById('summary-area').classList.add('hidden');
         document.getElementById('game-area').classList.remove('hidden');
 
-        // 🔥 다시 복습 시작 시 타이머 리셋
         startStudyTimer();
-
         renderCards();
     }
 
@@ -4766,9 +4778,7 @@ When you finish the evaluation, STOP generating immediately.
         document.getElementById('summary-area').classList.add('hidden');
         document.getElementById('game-area').classList.remove('hidden');
 
-        // 🔥 재시작 시 타이머 리셋
         startStudyTimer();
-
         renderCards();
     }
 
@@ -5052,11 +5062,19 @@ When you finish the evaluation, STOP generating immediately.
                     ${displayText}
                 </div>
 
-                <button class="speaking-bottom-btn" style="background:#ffffff; color:#1d4ed8;" onclick="startSpeakingRecording()">🎙️ 마이크 켜고 말하기 (시작)</button>
+                <button class="speaking-bottom-btn" style="background:#ffffff; color:#1d4ed8;" onclick="startSpeakingRecording()">🎙️ 마이크 켜고 말하기 (Enter)</button>
             `;
         } else if (speakingStep === 2) {
             card.className = 'speaking-modal-card white-theme';
             
+            const mins = String(Math.floor(speakingSeconds / 60)).padStart(2, '0');
+            const secs = String(speakingSeconds % 60).padStart(2, '0');
+            const currentTimeStr = `${mins}:${secs}`;
+
+            const textContentHtml = isSpeakingTextVisible 
+                ? `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed #fcd34d; font-size: 17px; font-weight: 800; color: #713f12; line-height: 1.4; word-break: keep-all;">${speakingTargetText}</div>` 
+                : '';
+
             card.innerHTML = `
                 <div class="speaking-top-bar" style="color: #1e293b;">
                     <div style="display:flex; align-items:center; gap:8px;">
@@ -5065,8 +5083,8 @@ When you finish the evaluation, STOP generating immediately.
                     </div>
                 </div>
 
-                <div class="speaking-content-area" style="color: #1e293b;">
-                    <div id="speaking-rec-timer" class="speaking-timer-text">00:00</div>
+                <div class="speaking-content-area" style="color: #1e293b; padding-bottom: 0;">
+                    <div id="speaking-rec-timer" class="speaking-timer-text">${currentTimeStr}</div>
                     
                     <div class="speaking-waveform-box">
                         <div class="speaking-wave-bar"></div>
@@ -5076,10 +5094,14 @@ When you finish the evaluation, STOP generating immediately.
                         <div class="speaking-wave-bar"></div>
                     </div>
 
-                    <div style="font-size: 15px; font-weight: 700; color: #64748b; margin-top: 20px;">자신 있게 말해보세요!</div>
+                    <div style="background: #fef9c3; border: 1px solid #fde047; padding: 14px; border-radius: 14px; width: 100%; box-sizing: border-box; text-align: center; margin-top: auto; margin-bottom: 10px;">
+                        <div style="font-size: 12.5px; font-weight: 800; color: #854d0e; margin-bottom: 8px;">💡 가장 좋은 건 원어민의 소리를 들은 대로 말해보는 것입니다!</div>
+                        <button class="speaking-pill-btn" style="background: #ffffff; color: #a16207; border: 1px solid #fde047; font-size: 12px; padding: 6px 14px; box-shadow: none;" onclick="toggleSpeakingTextVisibility()">${isSpeakingTextVisible ? '🙈 원문 숨기기' : '👁️ 원문 참고하기'}</button>
+                        ${textContentHtml}
+                    </div>
                 </div>
 
-                <button class="speaking-bottom-btn" style="background:#ef4444; color:#ffffff;" onclick="finishSpeakingRecording()">⏹️ 녹음 완료 및 평가 받기</button>
+                <button class="speaking-bottom-btn" style="background:#ef4444; color:#ffffff;" onclick="finishSpeakingRecording()">⏹️ 녹음 완료 및 평가 받기 (Enter)</button>
             `;
         } else if (speakingStep === 3) {
             card.className = 'speaking-modal-card white-theme';
@@ -5129,14 +5151,13 @@ When you finish the evaluation, STOP generating immediately.
 
                 <div class="speaking-two-btn-row">
                     <button class="btn-light" onclick="speakingStep=1; renderSpeakingModalUI(); speakTargetTextInModal();">다시 연습하기</button>
-                    <button class="btn-dark" onclick="closeSpeakingModal()">닫기 (ESC)</button>
+                    <button class="btn-dark" onclick="window.closeSpeakingModalAndNext()">닫기 및 다음 단어 (Enter)</button>
                 </div>
             `;
         }
     }
 
     document.addEventListener('keydown', (e) => {
-        // 🔥 ESC 강제 종료 처리를 최상단으로 끌어올림 (텍스트 입력 중에도 적용)
         if (e.key === 'Escape') {
             closeDayModal();
             closeWeakReviewModal();
@@ -5146,14 +5167,42 @@ When you finish the evaluation, STOP generating immediately.
             closeAISettingsModal();
             closeModelSelectModal();
             closeAIFeedbackModal();
-            closeLifeNoticeModal(); // <-- 추가된 라잎 안내 모달 닫기
+            closeLifeNoticeModal(); 
             return;
         }
 
-        // 입력 폼 안에서 다른 단축키(스페이스, 좌우 화살표 등) 작동 방지
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
-        if (e.key === 'ArrowRight') {
+        const autoplayModal = document.getElementById('autoplay-modal');
+        if (autoplayModal && !autoplayModal.classList.contains('hidden')) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                confirmAutoplayModal();
+            }
+            return; 
+        }
+
+        const speakingModal = document.getElementById('speaking-modal');
+        if (speakingModal && !speakingModal.classList.contains('hidden')) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (speakingStep === 1) startSpeakingRecording();
+                else if (speakingStep === 2) finishSpeakingRecording();
+                else if (speakingStep === 3) window.closeSpeakingModalAndNext();
+            }
+            return; 
+        }
+
+        if (e.key === 'ArrowUp') {
+            const gameArea = document.getElementById('game-area');
+            if (gameArea && !gameArea.classList.contains('hidden') && document.getElementById('ai-feedback-modal').classList.contains('hidden')) {
+                e.preventDefault();
+                if (showAnswers) {
+                    speakCurrentWord();
+                }
+            }
+        }
+        else if (e.key === 'ArrowRight') {
             const gameArea = document.getElementById('game-area');
             if (gameArea && !gameArea.classList.contains('hidden') && document.getElementById('ai-feedback-modal').classList.contains('hidden')) {
                 e.preventDefault();
@@ -5167,6 +5216,13 @@ When you finish the evaluation, STOP generating immediately.
                 handleVagueAction(currentStartIndex);
             }
         }
+        else if (e.key === 'ArrowLeft') {
+            const gameArea = document.getElementById('game-area');
+            if (gameArea && !gameArea.classList.contains('hidden') && document.getElementById('ai-feedback-modal').classList.contains('hidden')) {
+                e.preventDefault();
+                handlePrevAction();
+            }
+        }
         else if (e.code === 'Space') {
             const gameArea = document.getElementById('game-area');
             if (gameArea && !gameArea.classList.contains('hidden') && document.getElementById('ai-feedback-modal').classList.contains('hidden')) {
@@ -5174,13 +5230,6 @@ When you finish the evaluation, STOP generating immediately.
                 if (showAnswers) {
                     speakCurrentWord();
                 }
-            }
-        }
-        else if (e.key.toLowerCase() === 'a') {
-            const gameArea = document.getElementById('game-area');
-            if (gameArea && !gameArea.classList.contains('hidden')) {
-                e.preventDefault();
-                toggleAppMode();
             }
         }
         else if (e.key.toLowerCase() === 's') {
@@ -5210,8 +5259,8 @@ When you finish the evaluation, STOP generating immediately.
                 e.preventDefault();
                 const item = wordList[currentStartIndex];
                 if (item) {
-                    const spkType = (item.exEn && currentAppMode !== 'word') ? 'sentence' : 'word';
-                    const spkTarget = (item.exEn && currentAppMode !== 'word') ? item.exEn : item.en;
+                    const spkType = item.exEn ? 'sentence' : 'word';
+                    const spkTarget = item.exEn ? item.exEn : item.en;
                     openSpeakingModal(spkType, spkTarget);
                 }
             }
@@ -5245,7 +5294,6 @@ When you finish the evaluation, STOP generating immediately.
         window.updateAIToggleUI();
         window.updateAIChipUI();
         
-        // PWA DB 구조 마이그레이션 (동의어 및 예문 필드 패치)
         setTimeout(() => { patchPWASavedWordsWithNewData(); }, 3000);
     };
 
