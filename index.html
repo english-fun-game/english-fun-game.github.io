@@ -2649,7 +2649,7 @@ When you finish the evaluation, STOP generating immediately.
         return text.replace(/<[^>]*>/g, '').replace(/#/g, '').replace(/[\s\W_]+/g, '').toLowerCase();
     }
 
-    // 🔥 한글 예문 및 단어 뜻 내 괄호 ( ) 또는 대괄호 [ ] 매칭하여 하이라이트 CSS 적용 함수
+    // 🔥 한글 예문 내 괄호 ( ) 또는 대괄호 [ ] 매칭하여 하이라이트 CSS 적용 함수
     function formatContextInText(text) {
         if (!text) return '';
         // 정규식: ( ) 또는 [ ] 사이의 텍스트 매칭 (은은하게 처리)
@@ -3025,6 +3025,7 @@ When you finish the evaluation, STOP generating immediately.
                 textareaEl.onkeydown = (e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
+                        e.stopPropagation();
                         e.stopPropagation();
                         submitModalWritingTest();
                     }
@@ -4500,7 +4501,7 @@ When you finish the evaluation, STOP generating immediately.
             const isLongText = plainKoLength >= 45;
             const wordClass = isLongText ? 'card-word long-text' : 'card-word';
 
-            // 🔥 한글 예문 및 한글 뜻 괄호 처리 적용
+            // 🔥 한글 예문 괄호 처리 적용
             const formattedExKo = formatContextInText(item.exKo);
             const exampleKoHtml = formattedExKo ? `
                 <div class="ex-ko">${formattedExKo}</div>
@@ -4522,8 +4523,8 @@ When you finish the evaluation, STOP generating immediately.
             const countVal = getCardCheckCount(item);
             const badgesHtml = `<div id="card-check-badges-container" class="vague-check-badges-wrap">${renderCheckBadgesHtml(countVal)}</div>`;
 
-            // 🔥 한글 뜻 괄호 처리 적용
-            const displayKo = formatContextInText(item.ko);
+            // 🔥 한글 뜻은 괄호 처리 없이 그대로 출력
+            const displayKo = item.ko;
 
             const cardHtml = `
                 <div class="card">
@@ -4680,8 +4681,8 @@ When you finish the evaluation, STOP generating immediately.
                 const matchedSaved = savedList.find(w => w.ko === item.ko && w.en === item.en);
                 const countVal = matchedSaved ? (matchedSaved.vagueCount || 0) : 0;
                 
-                // 🔥 요약 표 안의 한글 뜻 괄호에도 서식 적용
-                const displayKoForSummary = formatContextInText(item.ko);
+                // 🔥 요약 표 안의 한글 뜻은 괄호 처리 없이 그대로 출력
+                const displayKoForSummary = item.ko;
 
                 const koCellContent = `
                     <div style="font-weight: 700; color: var(--text-main); display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap;">
