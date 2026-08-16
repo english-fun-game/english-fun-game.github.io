@@ -2925,6 +2925,8 @@ When you finish the evaluation, STOP generating immediately.
     let testedWeakWordsInSession = []; 
     let isCurrentCardChecked = false; 
     let cardsPerPage = 1; 
+    let currentWeakReviewTitle = ''; 
+    window.ttsUtterances = []; 
     
     let currentImageType = 'type1'; 
     let currentImgNum = 1;
@@ -3016,6 +3018,19 @@ When you finish the evaluation, STOP generating immediately.
     function openWritingModalFromCard() {
         const isMobile = window.innerWidth <= 650;
         if (isMobile) return;
+
+        // --- 자동재생 중이었다면 수동으로 해제 ---
+        if (isAutoplay) {
+            isAutoplay = false;
+            clearAutoplayTimer();
+            const btn = document.getElementById('autoplay-btn');
+            const btnLabel = document.getElementById('autoplay-btn-label');
+            if (btn && btnLabel) {
+                btn.classList.remove('active');
+                btnLabel.innerText = "🖐️ 수동";
+            }
+        }
+        // ------------------------------------------
 
         const modal = document.getElementById('ai-feedback-modal');
         const inputView = document.getElementById('writing-input-view');
@@ -3768,12 +3783,28 @@ When you finish the evaluation, STOP generating immediately.
             if (onCompleteCallback) onCompleteCallback();
             return;
         }
+
+        let isFired = false;
+        const safeCallback = () => {
+            if (!isFired) {
+                isFired = true;
+                if (onCompleteCallback) onCompleteCallback();
+            }
+        };
+
         const cleanText = text.replace(/<[^>]*>/g, '').replace(/#/g, ' ').replace(/<br>/g, ' ').trim();
         const utter = new SpeechSynthesisUtterance(cleanText);
         utter.lang = 'ko-KR';
         utter.rate = 1.0;
-        utter.onend = () => { if (onCompleteCallback) onCompleteCallback(); };
-        utter.onerror = () => { if (onCompleteCallback) onCompleteCallback(); };
+        
+        utter.onend = safeCallback;
+        utter.onerror = safeCallback;
+        
+        setTimeout(safeCallback, 3500); 
+
+        window.ttsUtterances.push(utter); 
+        if (window.ttsUtterances.length > 10) window.ttsUtterances.shift();
+
         window.speechSynthesis.speak(utter);
     }
 
@@ -3867,6 +3898,14 @@ When you finish the evaluation, STOP generating immediately.
         }
 
         try {
+            let isFired = false;
+            const safeCallback = () => {
+                if (!isFired) {
+                    isFired = true;
+                    if (onCompleteCallback) onCompleteCallback();
+                }
+            };
+
             const wordUtterance = new SpeechSynthesisUtterance(cleanWord);
             wordUtterance.pitch = currentPitch;
             wordUtterance.rate = currentRate;
@@ -3894,17 +3933,21 @@ When you finish the evaluation, STOP generating immediately.
                 wordUtterance.onend = () => {
                     window.speechSynthesis.speak(exUtterance);
                 };
-                exUtterance.onend = () => {
-                    if (onCompleteCallback) onCompleteCallback();
-                };
-                exUtterance.onerror = () => { if (onCompleteCallback) onCompleteCallback(); };
+                exUtterance.onend = safeCallback;
+                exUtterance.onerror = safeCallback;
+                
+                setTimeout(safeCallback, 6000); 
+
+                window.ttsUtterances.push(wordUtterance, exUtterance);
             } else {
-                wordUtterance.onend = () => {
-                    if (onCompleteCallback) onCompleteCallback();
-                };
-                wordUtterance.onerror = () => { if (onCompleteCallback) onCompleteCallback(); };
+                wordUtterance.onend = safeCallback;
+                wordUtterance.onerror = safeCallback;
+                setTimeout(safeCallback, 3500); 
+
+                window.ttsUtterances.push(wordUtterance);
             }
 
+            if (window.ttsUtterances.length > 10) window.ttsUtterances.splice(0, window.ttsUtterances.length - 10);
             window.speechSynthesis.speak(wordUtterance);
         } catch (e) {
             console.warn("TTS 발음 재생 실패:", e);
@@ -4400,10 +4443,14 @@ When you finish the evaluation, STOP generating immediately.
 
         if (type === 'ALL') {
             targetWords = [...savedList];
+            currentWeakReviewTitle = '전체 영역';
         } else if (type === 'CAT') {
             targetWords = savedList.filter(w => w.category === category);
+            currentWeakReviewTitle = `${category} 전체`;
         } else if (type === 'DAY') {
             targetWords = savedList.filter(w => w.category === category && w.dayIndex === dayIndex);
+            const dayText = dayIndex >= 0 ? `D${dayIndex + 1}` : '자율';
+            currentWeakReviewTitle = `${category} ${dayText}`;
         }
 
         if (targetWords.length === 0) return;
@@ -4556,7 +4603,7 @@ When you finish the evaluation, STOP generating immediately.
 
             let testInfoText = "";
             if (isWeakReviewMode) {
-                testInfoText = "🔥 취약 단어 복습";
+                testInfoText = `🔥 취약 복습 (${currentWeakReviewTitle})`;
             } else if (currentDayIndex === -1) {
                 testInfoText = `${currentCategory} 전체 복습`;
             } else {
