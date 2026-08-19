@@ -2307,7 +2307,7 @@
 </div>
 
 <!-- 📌 좌측 하단 버전 표기 -->
-<div class="app-version">v6.4.9 (Infinite Loop Feature Added)</div>
+<div class="app-version">v6.5.0 (Playback Tangling Fixed)</div>
 
 <!-- 🤖 AI 엔진 모듈 통합 스크립트 -->
 <script type="module">
@@ -2623,7 +2623,7 @@ When you finish the evaluation, STOP generating immediately.
 
 [Example Output]
 1. 문법 오류
-✅ 감정을 나타낼 때는 과거분사형태를 써야 하며, 전치사(in)와 동명사(-ing)가 연결되어야 합니다.
+✅ 감정을 나타낼 때는 과거분사형태를 써야 매며, 전치사(in)와 동명사(-ing)가 연결되어야 합니다.
 전 : interesting to learn
 후 : interested in learning
 ✅ 주어가 3인칭 단수이므로 동사에 -s가 붙어야 하며, abroad는 부사이므로 전치사 to가 필요 없습니다.
@@ -2939,7 +2939,7 @@ When you finish the evaluation, STOP generating immediately.
     let currentImgNum = 1;
 
     let isAutoplay = false;
-    let isInfiniteLoop = false; // ♾️ 무한 반복 상태 변수 추가
+    let isInfiniteLoop = false; // ♾️ 무한 반복 상태 변수
     let autoplayIntervalSec = 2.0; 
     let tempAutoplaySec = 2.0;
     let autoplayTimer = null;
@@ -4646,9 +4646,9 @@ When you finish the evaluation, STOP generating immediately.
     }
 
     function renderCards() {
-        stopTTS();
-        clearAutoplayTimer();
-        isInfiniteLoop = false; // 카드가 넘어갈 때 무한 반복 초기화
+        // 기존 렌더링 시 무한 반복만 해제하던 부분을 유지합니다.
+        // 강제 종료는 handlePrevAction이나 handlePrimaryAction 등 버튼 액션단에서 처리됩니다.
+        isInfiniteLoop = false; 
         
         if (wordList.length === 0) return; 
         
@@ -4756,10 +4756,32 @@ When you finish the evaluation, STOP generating immediately.
         if (isAutoplay) startAutoplayLoopForCurrentCard();
     }
 
+    // 💡 이전 버튼(Prev) 동작 수정 💡
     function handlePrevAction() {
+        // 1. 모든 오디오 및 타이머 강제 종료
+        stopTTS();
         clearAutoplayTimer();
+
+        // 2. 무한 반복 모드 강제 해제
+        if (isInfiniteLoop) {
+            isInfiniteLoop = false;
+            updateInfiniteButtonUI();
+        }
+
+        // 3. 자동재생 모드 강제 해제 (수동 모드 전환)
+        if (isAutoplay) {
+            isAutoplay = false;
+            const btn = document.getElementById('autoplay-btn');
+            const btnLabel = document.getElementById('autoplay-btn-label');
+            if (btn && btnLabel) {
+                btn.classList.remove('active');
+                btnLabel.innerText = "🖐️ 수동";
+            }
+        }
+
         if (wordList.length === 0) return;
         
+        // 4. 이전 카드로 이동 및 렌더링
         if (currentStartIndex > 0) {
             currentStartIndex -= cardsPerPage;
             renderCards();
@@ -4795,11 +4817,14 @@ When you finish the evaluation, STOP generating immediately.
         updateButtonsUI();
     }
 
+    // 💡 정답 확인 / 다음 버튼 동작 분리 수정 💡
     function handlePrimaryAction() {
         clearAutoplayTimer();
         if (wordList.length === 0) return;
 
         if (!showAnswers) {
+            // [1] "정답 확인" 액션
+            // 오디오를 끄지 않고 정상적으로 해당 단어의 영문을 읽어줌
             showAnswers = true;
             wrapperEl.classList.add('show-answers');
             updateButtonsUI();
@@ -4808,6 +4833,17 @@ When you finish the evaluation, STOP generating immediately.
                 if (isAutoplay) handlePrimaryAction();
             });
         } else {
+            // [2] "다음 단어" 액션
+            // 이전 단어의 오디오가 아직 재생 중이라면 즉시 강제 종료
+            stopTTS();
+            
+            // 무한 반복 모드 해제
+            if (isInfiniteLoop) {
+                isInfiniteLoop = false;
+                updateInfiniteButtonUI();
+            }
+
+            // 다음 카드로 이동
             if (currentStartIndex + cardsPerPage < wordList.length) {
                 currentStartIndex += cardsPerPage;
                 renderCards();
