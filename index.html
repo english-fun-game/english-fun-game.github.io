@@ -840,7 +840,7 @@
             align-items: center;
         }
 
-        /* 🔥 영어 카드 액션 버튼 (다시 듣기, 스피킹) 파스텔톤 및 크기 통일 */
+        /* 🔥 영어 카드 액션 버튼 (다시 듣기, 스피킹, 무한 반복) 파스텔톤 및 크기 통일 */
         .card-action-btn {
             padding: 6px 12px;
             border-radius: 10px;
@@ -862,6 +862,12 @@
             border-color: #e2e8f0;
             color: #475569;
             transform: translateY(-1px);
+        }
+        
+        .card-infinite-btn.active {
+            background-color: #dcfce7 !important;
+            border-color: #16a34a !important;
+            color: #15803d !important;
         }
 
         .desktop-shortcut {
@@ -1656,6 +1662,7 @@
             .card-top-actions-ko { display: none !important; } 
             
             .card-repeat-btn { display: none !important; }
+            .card-infinite-btn { display: none !important; }
             
             .nyan-timer-header { font-size: 11px; gap: 3px; margin-bottom: 6px; }
             .mute-btn, .voice-btn, .autoplay-btn { height: 32px; font-size: 11px; font-weight: 800; padding: 0 5px; }
@@ -2300,7 +2307,7 @@
 </div>
 
 <!-- 📌 좌측 하단 버전 표기 -->
-<div class="app-version">v6.4.8 (Button Ratio & Color Adjustments)</div>
+<div class="app-version">v6.4.9 (Infinite Loop Feature Added)</div>
 
 <!-- 🤖 AI 엔진 모듈 통합 스크립트 -->
 <script type="module">
@@ -2932,6 +2939,7 @@ When you finish the evaluation, STOP generating immediately.
     let currentImgNum = 1;
 
     let isAutoplay = false;
+    let isInfiniteLoop = false; // ♾️ 무한 반복 상태 변수 추가
     let autoplayIntervalSec = 2.0; 
     let tempAutoplaySec = 2.0;
     let autoplayTimer = null;
@@ -3029,6 +3037,11 @@ When you finish the evaluation, STOP generating immediately.
                 btn.classList.remove('active');
                 btnLabel.innerText = "🖐️ 수동";
             }
+        }
+        // --- 무한루프 중이었다면 해제 ---
+        if (isInfiniteLoop) {
+            isInfiniteLoop = false;
+            updateInfiniteButtonUI();
         }
         // ------------------------------------------
 
@@ -3704,6 +3717,68 @@ When you finish the evaluation, STOP generating immediately.
         }
     }
 
+    // ♾️ 무한 반복 토글 함수
+    function toggleInfiniteLoop() {
+        if (wordList.length === 0) return;
+
+        if (isInfiniteLoop) {
+            // 이미 실행 중이면 끄기
+            isInfiniteLoop = false;
+            stopTTS();
+            updateInfiniteButtonUI();
+        } else {
+            // 무한 반복 켜기
+            isInfiniteLoop = true;
+            
+            // 정답이 안 보여진 상태라면 보이게 처리 (선택)
+            if (!showAnswers) {
+                showAnswers = true;
+                wrapperEl.classList.add('show-answers');
+                updateButtonsUI();
+            }
+            
+            // 🚨 자동재생 중일 경우 수동 모드로 즉시 전환
+            if (isAutoplay) {
+                isAutoplay = false;
+                clearAutoplayTimer();
+                const btn = document.getElementById('autoplay-btn');
+                const btnLabel = document.getElementById('autoplay-btn-label');
+                if (btn && btnLabel) {
+                    btn.classList.remove('active');
+                    btnLabel.innerText = "🖐️ 수동";
+                }
+            }
+            
+            updateInfiniteButtonUI();
+            playInfiniteSpeech();
+        }
+    }
+
+    // ♾️ 무한 반복 재생 로직
+    function playInfiniteSpeech() {
+        if (!isInfiniteLoop) return;
+        
+        speakCurrentWord(() => {
+            // 발음이 완전히 끝나고 나서도 무한 반복 상태라면 0.5초 대기 후 다시 재생
+            if (isInfiniteLoop) {
+                setTimeout(() => {
+                    if (isInfiniteLoop) playInfiniteSpeech();
+                }, 500); 
+            }
+        });
+    }
+
+    // ♾️ 무한 반복 버튼 UI 업데이트
+    function updateInfiniteButtonUI() {
+        const btn = document.getElementById('infinite-loop-btn');
+        if (!btn) return;
+        if (isInfiniteLoop) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    }
+
     function openAutoplayModal() {
         tempAutoplaySec = autoplayIntervalSec || 2.0;
         const modal = document.getElementById('autoplay-modal');
@@ -3766,6 +3841,12 @@ When you finish the evaluation, STOP generating immediately.
             btnLabel.innerText = "🤖 자동";
         }
         
+        // 자동재생 진입 시 무한반복은 해제
+        if (isInfiniteLoop) {
+            isInfiniteLoop = false;
+            updateInfiniteButtonUI();
+        }
+
         closeAutoplayModal();
         startAutoplayLoopForCurrentCard();
     }
@@ -3849,6 +3930,9 @@ When you finish the evaluation, STOP generating immediately.
 
     function resetDefaultSessionSettings() {
         isAutoplay = false;
+        isInfiniteLoop = false;
+        updateInfiniteButtonUI();
+        
         clearAutoplayTimer();
         const autoBtn = document.getElementById('autoplay-btn');
         const autoLabel = document.getElementById('autoplay-btn-label');
@@ -4564,6 +4648,8 @@ When you finish the evaluation, STOP generating immediately.
     function renderCards() {
         stopTTS();
         clearAutoplayTimer();
+        isInfiniteLoop = false; // 카드가 넘어갈 때 무한 반복 초기화
+        
         if (wordList.length === 0) return; 
         
         wrapperEl.innerHTML = '';
@@ -4636,6 +4722,9 @@ When you finish the evaluation, STOP generating immediately.
                     </div>
                     <div class="card-section section-en" onclick="if(showAnswers) speakCurrentWord();">
                         <div class="card-top-actions">
+                            <button type="button" id="infinite-loop-btn" class="card-action-btn card-infinite-btn" title="무한 반복 (Shift)" onclick="event.stopPropagation(); toggleInfiniteLoop();">
+                                ♾️ <span class="desktop-shortcut">(Shift)</span>
+                            </button>
                             <button type="button" class="card-action-btn card-repeat-btn" title="다시 듣기 (Space, ↑)" onclick="event.stopPropagation(); speakCurrentWord();">
                                 🔁 <span class="desktop-shortcut">(Space, ↑)</span>
                             </button>
@@ -4877,6 +4966,11 @@ When you finish the evaluation, STOP generating immediately.
                 btn.classList.remove('active');
                 btnLabel.innerText = "🖐️ 수동";
             }
+        }
+        
+        if (isInfiniteLoop) {
+            isInfiniteLoop = false;
+            updateInfiniteButtonUI();
         }
 
         speakingType = type;
@@ -5306,6 +5400,14 @@ When you finish the evaluation, STOP generating immediately.
             if (gameArea && !gameArea.classList.contains('hidden') && document.getElementById('ai-feedback-modal').classList.contains('hidden')) {
                 e.preventDefault();
                 handlePrevAction();
+            }
+        }
+        // 👇 무한 반복 (Shift 키) 👇
+        else if (e.key === 'Shift') {
+            const gameArea = document.getElementById('game-area');
+            if (gameArea && !gameArea.classList.contains('hidden') && document.getElementById('ai-feedback-modal').classList.contains('hidden')) {
+                e.preventDefault();
+                toggleInfiniteLoop();
             }
         }
         else if (e.code === 'Space') {
