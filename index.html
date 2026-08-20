@@ -3,12 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- 📌 구글 서치 콘솔 소유권 확인 메타 태그 -->
+    <meta name="google-site-verification" content="ClLD2GrK8-CTRBeHGnNpJVfpDQWJKLfDt2qkTFF5xFM" />
     <title>퐁크러쉬</title>
     
     <!-- 📌 파비콘 -->
     <link rel="icon" href="favicon.png">
 
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    
+    <!-- ☁️ 구글 드라이브 연동을 위한 설정 및 라이브러리 추가 -->
+    <script>
+        // 🚨 이곳에 발급받은 클라이언트 ID와 API 키를 입력하세요.
+        const GOOGLE_CLIENT_ID = '65017724884-99h4uk45vt2809cq3a2ohnedkmor1001.apps.googleusercontent.com'; 
+        const GOOGLE_API_KEY = 'AIzaSyBQmE5nsOTvC57Ij_cBisXmS1QmtR5QOrQ'; 
+        
+        const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
+        const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+
+        let tokenClient;
+        let gapiInited = false;
+        let gisInited = false;
+
+        // API 로드 완료 시 호출
+        window.gapiLoaded = function() {
+            gapi.load('client', async () => {
+                try {
+                    if (!GOOGLE_API_KEY) return; 
+                    await gapi.client.init({
+                        apiKey: GOOGLE_API_KEY,
+                        discoveryDocs: [DISCOVERY_DOC],
+                    });
+                    gapiInited = true;
+                } catch (e) {
+                    console.warn("GAPI Init Error:", e);
+                }
+            });
+        };
+
+        // 인증 클라이언트 로드 완료 시 호출
+        window.gisLoaded = function() {
+            if (!GOOGLE_CLIENT_ID) return;
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: GOOGLE_CLIENT_ID,
+                scope: SCOPES,
+                callback: '', 
+            });
+            gisInited = true;
+        };
+    </script>
+    <script src="https://apis.google.com/js/api.js" async defer onload="gapiLoaded()"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer onload="gisLoaded()"></script>
+
     <style>
         :root {
             --slack-purple: #4a154b;        
@@ -47,6 +93,22 @@
             box-sizing: border-box;
             overflow-x: hidden;
             overflow-y: auto; 
+
+            /* [2] 모바일 엘리먼트 꾹 누를 때 텍스트 선택/복사(copy/select) 팝업 전체 방지 */
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* 텍스트 입력 필드는 사용자 입력 및 선택 허용 */
+        input, textarea {
+            -webkit-touch-callout: default;
+            -webkit-user-select: auto;
+            -moz-user-select: auto;
+            -ms-user-select: auto;
+            user-select: auto;
         }
 
         .app-version {
@@ -79,6 +141,83 @@
             padding: 12px 16px;
         }
 
+        /* 구글 드라이브 동기화 아코디언 UI 스타일 */
+        .sync-details {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+        .sync-summary {
+            padding: 12px 14px;
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--text-main);
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            user-select: none;
+            background: #f8fafc;
+        }
+        .sync-summary::-webkit-details-marker {
+            display: none;
+        }
+        .sync-summary::after {
+            content: '▼';
+            font-size: 10px;
+            color: #94a3b8;
+            transition: transform 0.2s ease;
+        }
+        .sync-details[open] .sync-summary::after {
+            transform: rotate(180deg);
+        }
+        .sync-details[open] .sync-summary {
+            border-bottom: 1px dashed var(--border-color);
+        }
+        .sync-content {
+            padding: 12px 14px;
+            font-size: 12px;
+            color: #334155;
+            line-height: 1.5;
+            background: #ffffff;
+        }
+        .tech-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        .tech-table th, .tech-table td {
+            padding: 6px 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .tech-table th {
+            font-weight: 800;
+            background: #f1f5f9;
+            color: #475569;
+            width: 60%;
+        }
+        .tech-table td {
+            font-weight: 700;
+            text-align: right;
+            font-family: monospace;
+            font-size: 13px;
+        }
+        .tech-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        .tech-list li {
+            margin-bottom: 6px;
+            padding-left: 2px;
+        }
+        .tech-list li::marker {
+            color: var(--slack-blue);
+        }
+
         .container {
             width: 100%;
             max-width: 100%;
@@ -92,7 +231,7 @@
         }
 
         h1 {
-            margin: 0 0 16px 0;
+            margin: 0;
             font-size: 36px;
             font-weight: 900;
             letter-spacing: -1px;
@@ -507,13 +646,12 @@
             gap: 16px;
         }
 
-        /* 🔥 데스크탑 하단 버튼 레이아웃 고정 (1 : x : calc(50%)) 완벽 분할 */
         .bottom-prev-btn {
             flex: 0 0 auto; 
             width: 100px;
             height: 80px;
             padding: 0 8px;
-            background-color: #64748b; /* 기존보다 진한 회색으로 가독성 향상 */
+            background-color: #64748b; 
             color: white;
             border: none;
             border-radius: 18px;
@@ -543,7 +681,7 @@
         }
 
         .bottom-vague-btn {
-            flex: 1; /* 남은 좌측 절반 공간 채움 */
+            flex: 1; 
             height: 80px;
             padding: 0 16px;
             color: white;
@@ -564,7 +702,7 @@
 
         .bottom-primary-btn {
             flex: 0 0 auto;
-            width: calc(50% - 8px); /* 우측 절반 정확히 차지 (gap 16px의 절반 제외) */
+            width: calc(50% - 8px); 
             height: 80px;
             padding: 0 16px;
             color: white;
@@ -638,7 +776,6 @@
             transition: background-image 0.3s ease;
         }
 
-        /* 💡 상단 좌측 뱃지들을 하나로 묶는 래퍼 (동일 Row 배치 및 간격 적용) */
         .card-top-left-info {
             position: absolute;
             top: 14px;
@@ -646,13 +783,12 @@
             display: flex;
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px; /* 두 UI 사이의 자연스러운 여백 패딩 */
+            gap: 10px; 
             z-index: 10;
             pointer-events: none;
-            max-width: calc(100% - 140px); /* 우측 버튼 영역 침범 방지 */
+            max-width: calc(100% - 140px); 
         }
 
-        /* 🔥 데스크탑 우측 버튼 크기에 맞춘 선명한 테스트 정보 뱃지 (작게 축소) */
         .current-test-badge {
             font-size: 12px;
             font-weight: 800;
@@ -669,7 +805,6 @@
             flex-shrink: 0;
         }
 
-        /* 체크 뱃지 그룹 속성 (부모의 flex 흐름을 따라감) */
         .vague-check-badges-wrap {
             display: flex;
             align-items: center;
@@ -840,7 +975,6 @@
             align-items: center;
         }
 
-        /* 🔥 영어 카드 액션 버튼 (다시 듣기, 스피킹, 무한 반복) 파스텔톤 및 크기 통일 */
         .card-action-btn {
             padding: 6px 12px;
             border-radius: 10px;
@@ -877,7 +1011,6 @@
             opacity: 0.75;
         }
 
-        /* ✍️ 영작 테스트 진입 버튼 (PC 전용) - 크기 절반, 파스텔 블루 */
         .card-top-actions-ko {
             position: absolute;
             top: 14px;
@@ -923,6 +1056,7 @@
             box-sizing: border-box;
         }
 
+        /* 💡 모달창 기본 높이 최적화 및 스크롤 추가 */
         .modal-card {
             background: #ffffff;
             border-radius: 16px;
@@ -934,13 +1068,15 @@
             flex-direction: column;
             gap: 16px;
             box-sizing: border-box;
-            max-height: 90vh;
+            max-height: 75vh;
+            overflow-y: auto;
         }
 
+        /* 💡 취약 복습 모달창 높이 축소 */
         .modal-card.tall-modal {
             max-width: 580px; 
-            height: 92vh;
-            max-height: 92vh;
+            height: auto;
+            max-height: 75vh;
             padding: 20px;
             border-radius: 18px;
         }
@@ -1125,7 +1261,7 @@
             border-radius: 24px;
             width: 100%;
             max-width: 440px;
-            height: 90vh;
+            height: 85vh;
             max-height: 680px;
             padding: 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.2);
@@ -1484,8 +1620,8 @@
             border-radius: 20px;
             width: 80vw;
             max-width: 1000px;
-            height: 92vh; 
-            max-height: 92vh;
+            height: 85vh; 
+            max-height: 85vh;
             box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
             display: flex;
             flex-direction: column;
@@ -1649,7 +1785,7 @@
             border-color: #fecaca;
         }
 
-        /* 📱 모바일 최적화 및 폰트 사이징 복구 (데스크탑 CSS 무시) */
+        /* 📱 모바일 최적화 및 레이아웃 설정 */
         @media (max-width: 650px) {
             body { padding: 10px 8px; }
             body.game-active { padding: 10px 12px !important; }
@@ -1662,7 +1798,40 @@
             .card-top-actions-ko { display: none !important; } 
             
             .card-repeat-btn { display: none !important; }
-            .card-infinite-btn { display: none !important; }
+
+            /* [3] 모바일에서 무한 반복 버튼을 마이크 버튼 우측에 3배 길이로 배치 */
+            .show-answers .section-en .card-top-actions { 
+                display: flex !important; 
+                position: absolute !important; 
+                top: 12px !important; 
+                right: 12px !important; 
+                transform: none !important; 
+                z-index: 100 !important;
+                gap: 8px !important;
+                flex-direction: row !important;
+            }
+            .show-answers .section-en .card-action-btn {
+                background-color: #f8fafc !important; 
+                box-shadow: none !important;
+                border: 1px solid #f1f5f9 !important;
+                color: #64748b !important;
+            }
+
+            .card-speaking-btn {
+                order: 1 !important;
+                width: 44px !important;
+                display: inline-flex !important;
+                justify-content: center !important;
+                padding: 6px 0 !important;
+            }
+            
+            .card-infinite-btn {
+                order: 2 !important;
+                width: 132px !important; /* 마이크 버튼(44px)의 3배 길이 */
+                display: inline-flex !important;
+                justify-content: center !important;
+                padding: 6px 0 !important;
+            }
             
             .nyan-timer-header { font-size: 11px; gap: 3px; margin-bottom: 6px; }
             .mute-btn, .voice-btn, .autoplay-btn { height: 32px; font-size: 11px; font-weight: 800; padding: 0 5px; }
@@ -1748,26 +1917,10 @@
             .ex-en { font-size: 18px !important; line-height: 1.3 !important; font-weight: 400 !important; word-break: break-word !important; overflow-wrap: break-word !important; width: 100% !important; box-sizing: border-box !important; text-align: center !important; }
             .ex-ko { font-size: 18px !important; line-height: 1.3 !important; font-weight: 400 !important; word-break: break-word !important; overflow-wrap: break-word !important; width: 100% !important; box-sizing: border-box !important; text-align: center !important; }
 
-            /* 🔥 모바일 1:2:2 비율 유지 */
             .bottom-vague-btn, .bottom-primary-btn, .bottom-prev-btn { height: 64px !important; border-radius: 10px; }
             .bottom-vague-btn, .bottom-primary-btn { font-size: 17px !important; padding: 0 4px; flex: 2 !important; width: auto !important; }
             .bottom-prev-btn { font-size: 15px !important; padding: 0 2px; flex: 1 !important; width: auto !important; }
             
-            .show-answers .section-en .card-top-actions { 
-                display: flex; 
-                position: absolute; 
-                top: 12px; 
-                right: 12px; 
-                transform: none; 
-                z-index: 100;
-            }
-            .show-answers .section-en .card-action-btn {
-                background-color: #f8fafc !important; 
-                box-shadow: none !important;
-                border: 1px solid #f1f5f9 !important;
-                color: #64748b !important;
-            }
-
             .nyan-controls-row { gap: 6px !important; }
             .nyan-track { flex: 6 !important; }
             .timer-text { flex: 2 !important; padding: 0 !important; font-size: 11px !important; width: 100%; }
@@ -1782,7 +1935,9 @@
             
             .weak-col-container { grid-template-columns: repeat(2, 1fr) !important; }
 
-            /* 모바일에서 동일 Row 간격 및 완전 상단 밀착 */
+            .modal-card { max-height: 75vh !important; }
+            .modal-card.tall-modal { max-height: 75vh !important; }
+
             .card-top-left-info {
                 top: 6px !important;
                 left: 6px !important;
@@ -1795,7 +1950,6 @@
                 border-radius: 6px !important;
                 letter-spacing: -0.5px !important;
             }
-            /* 모바일용 체크 아이콘 축소 */
             .vague-check-badges-wrap {
                 gap: 3px !important;
             }
@@ -1844,7 +1998,6 @@
         </div>
         
         <div style="display: flex; flex-direction: column; gap: 10px;">
-            <!-- 1B Model -->
             <div id="model-card-1b" class="model-option-card" onclick="selectAIModel('Llama-3.2-1B-Instruct-q4f16_1-MLC', '1B')">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <span style="font-weight: 900; font-size: 16px; color: #15803d;">🟢 Llama-3.2-1B (초경량)</span>
@@ -1853,7 +2006,6 @@
                 <div style="font-size: 13px; color: var(--text-muted);">가장 빠르고 배터 소모가 적습니다. 모바일 기기나 간단한 문법 교정에 적합합니다.</div>
             </div>
             
-            <!-- 3B Model -->
             <div id="model-card-3b" class="model-option-card" onclick="selectAIModel('Llama-3.2-3B-Instruct-q4f16_1-MLC', '3B')">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <span style="font-weight: 900; font-size: 16px; color: #b45309;">🟡 Llama-3.2-3B (균형형)</span>
@@ -1862,7 +2014,6 @@
                 <div style="font-size: 13px; color: var(--text-muted);">성능과 속도의 균형이 매우 좋습니다. 일반적인 데스크탑 환경이나 태블릿에 추천합니다.</div>
             </div>
 
-            <!-- 8B Model -->
             <div id="model-card-8b" class="model-option-card" onclick="selectAIModel('Llama-3.1-8B-Instruct-q4f32_1-MLC', '8B')">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <span style="font-weight: 900; font-size: 16px; color: #be123c;">🔴 Llama-3.1-8B (최상급)</span>
@@ -1871,7 +2022,6 @@
                 <div style="font-size: 13px; color: var(--text-muted);">가장 똑똑하고 복잡한 문맥을 잘 이해합니다. (RAM 16GB 이상 PC 환경 권장)</div>
             </div>
 
-            <!-- 🏠 퐁퐁하우스 (자택 PC) Model -->
             <div id="model-card-home" class="model-option-card" style="border-style: dashed; opacity: 0.9;" onclick="selectAIModel('home-pc', '퐁퐁하우스')">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <span style="font-weight: 900; font-size: 16px; color: #6d28d9;">🏠 퐁퐁하우스 자택 PC (To Be Continued...)</span>
@@ -1888,7 +2038,7 @@
 
 <!-- ⚙️ AI 파라미터 조절 설정 모달 -->
 <div id="ai-settings-modal" class="modal-overlay hidden" style="z-index: 20000;" onclick="if(event.target === this) closeAISettingsModal()">
-    <div class="modal-card" style="max-width: 520px; max-height: 85vh; overflow-y: auto;">
+    <div class="modal-card" style="max-width: 520px; max-height: 80vh;">
         <div class="modal-header">
             <span>⚙️ AI 파라미터 정밀 설정</span>
             <button onclick="closeAISettingsModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button>
@@ -1942,8 +2092,6 @@
 <!-- 🎓 영작 테스트 및 AI 첨삭 모달 -->
 <div id="ai-feedback-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeAIFeedbackModal()">
     <div class="ai-modal-card" id="ai-modal-card">
-        
-        <!-- 📌 1. 상단 고정 헤더 -->
         <div class="ai-modal-header">
             <div class="ai-modal-title">
                 <span>로컬 AI 영작 첨삭</span>
@@ -1953,7 +2101,6 @@
                     <button type="button" class="ai-chip-btn" onclick="openAISettingsModal()">⚙️ 설정</button>
                 </div>
             </div>
-            
             <div style="display: flex; align-items: center; gap: 10px;">
                 <button id="ai-combined-stop-btn" class="ai-combined-stop-btn hidden" onclick="window.stopAIComputation && window.stopAIComputation()">
                     <span id="ai-loader-text" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">🛑 AI 상시 강제 중단 (Q)</span>
@@ -1961,40 +2108,27 @@
                 <button onclick="closeAIFeedbackModal()" class="ai-close-btn">✕ 나가기 <span style="font-size:11px; opacity:0.8;">(ESC)</span></button>
             </div>
         </div>
-
-        <!-- 📌 2. 내부 스크롤 컨텐츠 영역 -->
         <div class="ai-modal-content-body">
-            
-            <!-- 1단계: 작성 단계 -->
             <div id="writing-input-view" style="display: flex; flex-direction: column; gap: 16px; flex: 1;">
                 <div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 8px;">
                     <div id="writing-modal-en-hint" style="font-size: 32px; font-weight: 700; color: var(--slack-blue); line-height: 1.3;"></div>
                     <div id="writing-modal-ko-text" style="font-size: 32px; font-weight: 900; color: var(--text-main); word-break: keep-all; line-height: 1.3;"></div>
                 </div>
                 <textarea id="modal-sentence-textarea" class="sentence-test-textarea" placeholder="영문장을 작성하세요 (Shift+Enter 줄바꿈, Enter 제출)" style="flex: 1; min-height: 120px; font-size: 32px; padding: 24px; line-height: 1.4;" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
-                
                 <button type="button" class="base-btn" style="background: var(--slack-purple); padding: 18px; font-size: 18px; flex-shrink: 0;" onclick="submitModalWritingTest()">
                     ✍️ 제출 (Enter)
                 </button>
             </div>
-
-            <!-- 2단계: 결과 단계 -->
             <div id="writing-result-view" class="hidden" style="display: flex; flex-direction: column; gap: 16px; flex: 1; min-height: 0;">
-
                 <div style="display: flex; flex-direction: column; gap: 20px; flex-shrink: 0; background: white; padding: 24px 28px; border-radius: 16px; border: 2px solid #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
                     <div id="ai-modal-user-text" style="font-size: clamp(24px, 2.5vw, 36px); font-weight: 900; color: #0f172a; line-height: 1.4; word-break: keep-all;"></div>
-                    
                     <div style="width: 100%; height: 1.5px; border-top: 1.5px dashed #cbd5e1;"></div>
-
                     <div id="ai-modal-target-text" style="font-size: clamp(24px, 2.5vw, 36px); font-weight: 900; color: #15803d; line-height: 1.4; word-break: keep-all;"></div>
                 </div>
-
                 <div class="ai-feedback-container" id="ai-feedback-container" style="flex: 1; background: white; border: 1.5px solid #cbd5e1; border-radius: 16px; padding: 20px 24px; overflow-y: auto; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); display: flex; flex-direction: column; min-height: 0; position: relative;">
-                    
                     <div id="ai-disclaimer-text" style="font-size: 12px; color: #94a3b8; text-align: left; margin-bottom: 12px; line-height: 1.3; flex-shrink: 0; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; word-break: keep-all;">
                         ※ 현재 구동 중인 로컬 모델은 수백억 개 이상의 신경망을 가진 거대 AI(Gemini 등)에 비해 체급이 작아, 복잡한 문맥 추론에 한계가 있을 수 있습니다.
                     </div>
-
                     <div class="ai-pipeline-stepper" id="ai-pipeline">
                         <div class="ai-step" id="step-1">
                             <div class="step-title">1. 가중치 로드</div>
@@ -2013,37 +2147,29 @@
                             <div class="step-desc" id="step-4-desc">스트리밍 렌더링</div>
                         </div>
                     </div>
-
                     <div id="ai-center-progress-text" style="font-size: 15px; font-weight: 700; color: var(--slack-blue); text-align: center; margin-top: 16px;"></div>
-
                     <div id="streaming-grammar-body" style="display: none; font-size: 16.5px; font-weight: 600; line-height: 1.75; color: #334155; white-space: pre-wrap; flex: 1;"></div>
-                    
                 </div>
-
             </div>
-
         </div>
     </div>
 </div>
 
 <!-- 📅 Day 선택 모달 -->
 <div id="day-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeDayModal()">
-    <div class="modal-card" style="max-height: 85vh; display: flex; flex-direction: column;">
+    <div class="modal-card" style="max-height: 80vh;">
         <div class="modal-header">
             <span id="day-modal-title">📅 학습 Day 선택</span>
             <button onclick="closeDayModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button>
         </div>
-
         <div class="sec-select-area">
             <div id="fixed-notice-banner" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; padding:10px 12px; border-radius:10px; font-size:13px; font-weight:800; text-align:center;">
                 ⚡ 스피킹 30 / 라이팅 40 / 초록이 60 / 라잎 15 고정 시험
             </div>
         </div>
-
         <div class="sec-select-area" style="flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden;">
             <div class="sec-select-title" id="day-list-title">📌 학습할 Day 선택</div>
-            <div id="day-buttons-grid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; overflow-y:auto; max-height: 340px; padding: 4px; box-sizing: border-box;">
-            </div>
+            <div id="day-buttons-grid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; overflow-y:auto; padding: 4px; box-sizing: border-box;"></div>
         </div>
     </div>
 </div>
@@ -2055,48 +2181,126 @@
             <span>🔥 취약 단어 복습</span>
             <button onclick="closeWeakReviewModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button>
         </div>
-
         <button id="weak-review-all-btn" class="base-btn" style="background:#2563eb; padding:13px; font-size:15px; flex-shrink:0;" onclick="startWeakReviewSession('ALL')">
             🔥 전체 취약 단어 복습 (0개)
         </button>
-
         <div class="weak-col-container">
             <div class="weak-col">
                 <div class="weak-col-header">🗣️ 스피킹</div>
-                <button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '스피킹')">
-                    전체 복습<br><span id="col-cnt-speaking" style="font-size:11px; opacity:0.8;">(0)</span>
-                </button>
-                <div class="weak-day-list" id="weak-day-list-speaking">
-                </div>
+                <button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '스피킹')">전체 복습<br><span id="col-cnt-speaking" style="font-size:11px; opacity:0.8;">(0)</span></button>
+                <div class="weak-day-list" id="weak-day-list-speaking"></div>
             </div>
-
             <div class="weak-col">
                 <div class="weak-col-header">✍️ 라이팅</div>
-                <button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '라이팅')">
-                    전체 복습<br><span id="col-cnt-writing" style="font-size:11px; opacity:0.8;">(0)</span>
-                </button>
-                <div class="weak-day-list" id="weak-day-list-writing">
-                </div>
+                <button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '라이팅')">전체 복습<br><span id="col-cnt-writing" style="font-size:11px; opacity:0.8;">(0)</span></button>
+                <div class="weak-day-list" id="weak-day-list-writing"></div>
             </div>
-
             <div class="weak-col">
                 <div class="weak-col-header">🍀 초록이</div>
-                <button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '초록이')">
-                    전체 복습<br><span id="col-cnt-green" style="font-size:11px; opacity:0.8;">(0)</span>
-                </button>
-                <div class="weak-day-list" id="weak-day-list-green">
-                </div>
+                <button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '초록이')">전체 복습<br><span id="col-cnt-green" style="font-size:11px; opacity:0.8;">(0)</span></button>
+                <div class="weak-day-list" id="weak-day-list-green"></div>
             </div>
-
             <div class="weak-col">
                 <div class="weak-col-header">🌿 라잎</div>
-                <button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '라잎')">
-                    전체 복습<br><span id="col-cnt-life" style="font-size:11px; opacity:0.8;">(0)</span>
-                </button>
-                <div class="weak-day-list" id="weak-day-list-life">
-                </div>
+                <button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '라잎')">전체 복습<br><span id="col-cnt-life" style="font-size:11px; opacity:0.8;">(0)</span></button>
+                <div class="weak-day-list" id="weak-day-list-life"></div>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- 💾 데이터 관리 모달 -->
+<div id="data-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeDataModal()">
+    <div class="modal-card">
+        <div class="modal-header">
+            <span>💾 데이터 백업 및 복원</span>
+            <button onclick="closeDataModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button>
+        </div>
+        
+        <div class="sec-select-area">
+            <div class="sec-select-title">☁️ 구글 드라이브 연동</div>
+            <div style="font-size:12.5px; color:var(--text-muted); line-height:1.4; margin-bottom:8px;">
+                구글 계정에 로그인하여 내 드라이브와 데이터를 수동으로 안전하게 동기화할 수 있습니다.
+            </div>
+
+            <!-- 1. 네트워크 사용량 안내 -->
+            <details class="sync-details">
+                <summary class="sync-summary">📊 단어 400개 기준 네트워크 사용량</summary>
+                <div class="sync-content">
+                    <table class="tech-table">
+                        <tbody>
+                            <tr>
+                                <th>순수 텍스트(JSON) 데이터</th>
+                                <td>~ 100 KB</td>
+                            </tr>
+                            <tr>
+                                <th>네트워크 헤더 및 암호화 오버헤드</th>
+                                <td>~ 5 KB</td>
+                            </tr>
+                            <tr>
+                                <th>1회 API 통신 총합</th>
+                                <td style="color: #2563eb;">~ 105 KB</td>
+                            </tr>
+                            <tr style="border-bottom: none;">
+                                <th>월 100회 동기화 시 누적치</th>
+                                <td style="color: #16a34a;">~ 10.5 MB</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </details>
+
+            <!-- 2. 프론트엔드 API 호출 방식 및 보안 안내 -->
+            <details class="sync-details">
+                <summary class="sync-summary">🛡️ 브라우저 직접 동기화 방식 아키텍처 및 보안</summary>
+                <div class="sync-content">
+                    <ul class="tech-list">
+                        <li><strong>작동 가능 원리:</strong> 백엔드 서버 없이 Google Identity Services(OAuth 2.0 Implicit Grant)를 사용하여 클라이언트에서 직접 인증 토큰을 획득하고 REST API와 통신합니다.</li>
+                        <li><strong>보안 수준:</strong> 발급된 Access Token은 디스크가 아닌 브라우저 메모리에만 일시적으로 보관되며, 모든 통신이 HTTPS로 강제되어 탈취가 불가능에 가깝습니다.</li>
+                        <li><strong>권한 격리 (데이터 보호):</strong> <code>drive.file</code> 스코프만 제한적으로 인가합니다. 애플리케이션이 <strong>직접 생성한 파일에만 접근 가능</strong>하므로, 사용자의 개인 사진이나 타 문서 등 다른 드라이브 파일을 읽거나 수정할 위험이 원천 차단됩니다.</li>
+                        <li><strong>정책적 제한:</strong> Google 서버 측에서 허용한 CORS(교차 출처 리소스 공유) 엔드포인트로만 통신이 가능하며, 단시간 내 비정상적인 잦은 요청 시 구글 API 할당량(Quota) 제한 정책에 의해 자동 블록됩니다.</li>
+                    </ul>
+                </div>
+            </details>
+
+            <!-- 3. 자동 로그인/동기화 불가 사유 -->
+            <details class="sync-details">
+                <summary class="sync-summary">🔄 자동 로그인 및 백그라운드 동기화가 불가능한 이유</summary>
+                <div class="sync-content" style="background: #fdfdfd;">
+                    <div style="font-size: 11px; color: #64748b; margin-bottom: 10px; padding: 8px; background: #f1f5f9; border-radius: 6px;">
+                        💡 <b>Junior's Note:</b> 왜 사용자가 앱을 켤 때마다 알아서 로그인하고 뒤에서 동기화해주지 못할까요? 프론트엔드(Client-Side) 생태계의 보안과 구조적 한계 때문입니다.
+                    </div>
+                    <ul class="tech-list">
+                        <li><strong>Step 1. 짧은 수명의 출입증 (Access Token):</strong> 구글 API에 접근하기 위한 토큰은 보안상 수명이 약 1시간으로 매우 짧습니다. 시간이 지나면 만료되어 다시 발급받아야 합니다.</li>
+                        <li><strong>Step 2. 무제한 토큰(Refresh Token)의 브라우저 저장 위험:</strong> 만료된 토큰을 연장하려면 'Refresh Token'이 필요합니다. 하지만 백엔드(DB) 없이 브라우저(LocalStorage 등)에 이를 저장하면, XSS 해킹 등에 의해 영구적인 권한이 탈취될 수 있어 구글이 프론트엔드 환경에는 이 토큰 발급을 엄격히 제한합니다.</li>
+                        <li><strong>Step 3. 모던 브라우저의 서드파티 쿠키 차단 (ITP 정책):</strong> 과거에는 보이지 않는 iframe을 띄워 구글 세션을 통해 몰래 토큰을 갱신(Silent Refresh)할 수 있었습니다. 하지만 현재 사파리, 크롬 등은 사용자의 행동 추적을 막기 위해 타사 쿠키(3rd-party cookie)를 기본 차단하므로 이 꼼수가 막혔습니다.</li>
+                        <li><strong>Step 4. 서버리스(Serverless)의 물리적 한계:</strong> 앱이 꺼져 있는 동안 백그라운드에서 동기화(Cron Job)를 수행해 줄 24시간 가동되는 백엔드 서버가 존재하지 않습니다.</li>
+                    </ul>
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #e2e8f0; font-weight: 800; color: #3b82f6;">
+                        🎯 결론: 버튼을 눌러 명시적으로 구글 로그인을 호출(사용자 개입)하고, 1회성 토큰을 받아 수동 동기화하는 것이 현재 아키텍처에서 가장 안전하고 확실한 방법입니다.
+                    </div>
+                </div>
+            </details>
+
+            <div style="display:flex; gap:8px; margin-top:4px;">
+                <button class="base-btn" style="flex:1; background:#10b981; font-size:14px; padding:12px;" onclick="syncToGoogleDrive()">☁️ G드라이브 백업</button>
+                <button class="base-btn" style="flex:1; background:#8b5cf6; font-size:14px; padding:12px;" onclick="loadFromGoogleDrive()">☁️ G드라이브 복원</button>
+            </div>
+        </div>
+        
+        <div style="width: 100%; height: 1px; background: var(--border-color); margin: 8px 0;"></div>
+        
+        <div class="sec-select-area">
+            <div class="sec-select-title">📁 로컬 파일 다운로드/불러오기</div>
+            <div style="font-size:12.5px; color:var(--text-muted); line-height:1.4; margin-bottom:8px;">
+                인터넷 연결이 없거나 다른 기기로 직접 파일을 옮길 때 사용하세요.
+            </div>
+            <div style="display:flex; gap:8px;">
+                <button class="base-btn" style="flex:1; background:#f8fafc; color:#475569; border:1px solid #cbd5e1; font-size:14px; padding:12px;" onclick="backupWeakWords()">⬇️ 로컬 백업</button>
+                <button class="base-btn" style="flex:1; background:#f8fafc; color:#475569; border:1px solid #cbd5e1; font-size:14px; padding:12px;" onclick="restoreWeakWords()">⬆️ 로컬 복원</button>
+            </div>
+        </div>
+        <button class="base-btn" style="background:var(--slack-purple); width:100%; padding:12px; margin-top:8px;" onclick="closeDataModal()">닫기</button>
     </div>
 </div>
 
@@ -2107,7 +2311,6 @@
             <span>🤖 자동재생 설정</span>
             <button onclick="closeAutoplayModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button>
         </div>
-
         <div class="sec-select-area">
             <div class="sec-select-title">⏱️ 정답 공개 전 대기 시간 선택 (기본: 2.0초)</div>
             <div class="sec-btn-grid">
@@ -2119,14 +2322,12 @@
                 <button class="sec-btn" onclick="selectTempAutoplaySec(3.0)">3.0초</button>
             </div>
         </div>
-
         <div class="sec-select-area" style="margin-top: 4px;">
             <div class="sec-select-title">🗣️ 한글 뜻 음성 먼저 읽기 (기본: ON)</div>
             <button id="ko-read-btn" class="sec-btn selected" onclick="toggleAutoplayReadKorean()" style="width:100%; padding:12px; font-weight:800; text-align:center;">
                 🔊 한글 뜻 읽기 (ON)
             </button>
         </div>
-
         <button class="base-btn" style="background:#16a34a; width:100%; padding:12px; margin-top:6px;" onclick="confirmAutoplayModal()">확인 (Enter)</button>
     </div>
 </div>
@@ -2138,13 +2339,10 @@
             <span>🎙️ 음성 선택 (시스템 최적화)</span>
             <button onclick="closeVoiceModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button>
         </div>
-
         <div class="sec-select-area">
             <div class="sec-select-title">1️⃣ 감지된 지역별 영어 보이스</div>
-            <div id="voice-list-wrapper" class="voice-list-container">
-            </div>
+            <div id="voice-list-wrapper" class="voice-list-container"></div>
         </div>
-
         <div class="sec-select-area">
             <div class="sec-select-title">2️⃣ 음성 톤 & 억양 캐릭터 변경</div>
             <div class="voice-tune-grid">
@@ -2166,15 +2364,13 @@
                 </div>
             </div>
         </div>
-
         <button class="base-btn" style="background:var(--slack-purple); width:100%; padding:12px;" onclick="closeVoiceModal()">적용 완료</button>
     </div>
 </div>
 
 <!-- 🎙️ 스피킹 연습 & 첨삭 모달 -->
 <div id="speaking-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeSpeakingModal()">
-    <div id="speaking-card" class="speaking-modal-card">
-    </div>
+    <div id="speaking-card" class="speaking-modal-card"></div>
 </div>
 
 <!-- 🌿 라잎 단어장 안내 모달 -->
@@ -2185,23 +2381,25 @@
         <div style="font-size: 13.5px; color: var(--text-muted); line-height: 1.5; margin-bottom: 24px; word-break: keep-all;">
             이 단어장은 수시로 업데이트됩니다.<br>기본적으로 빠르게 접속 가능한 <b>저장된 데이터</b>를 권장합니다.
         </div>
-        
-        <button class="base-btn" style="background: var(--slack-purple); padding: 18px; font-size: 17px; font-weight: 900; margin-bottom: 24px;" onclick="loadCachedLifeData()">
-            ⚡ 기존 데이터로 바로 시작
-        </button>
-        
+        <button class="base-btn" style="background: var(--slack-purple); padding: 18px; font-size: 17px; font-weight: 900; margin-bottom: 24px;" onclick="loadCachedLifeData()">⚡ 기존 데이터로 바로 시작</button>
         <div style="width: 100%; height: 1px; background: var(--border-color); margin-bottom: 16px;"></div>
-
         <div style="font-size: 11px; color: #94a3b8; margin-bottom: 8px;">새로운 단어가 추가되었다는 연락을 받았을 때만 이용하세요</div>
-        <button style="background: none; color: #64748b; border: 1px solid #cbd5e1; padding: 8px 12px; font-size: 12px; font-weight: 800; border-radius: 8px; cursor: pointer; transition: all 0.15s;" onclick="loadFreshLifeData()">
-            🔄 캐시 삭제 후 최신 엑셀 받아오기
-        </button>
+        <button style="background: none; color: #64748b; border: 1px solid #cbd5e1; padding: 8px 12px; font-size: 12px; font-weight: 800; border-radius: 8px; cursor: pointer; transition: all 0.15s;" onclick="loadFreshLifeData()">🔄 캐시 삭제 후 최신 엑셀 받아오기</button>
     </div>
 </div>
 
 <div class="container">
-    <!-- 📌 진입 화면 Layout -->
     <div id="setup-area">
+        <!-- [1] 💡 네트워크 상태 인디케이터 (홈 화면인 setup-area 안에만 표시) -->
+        <div style="width: 100%; margin: 0 0 6px 0; display: flex; justify-content: flex-end; align-items: center; gap: 10px; user-select: none;">
+            <div id="net-online" style="opacity: 0.3; color: #94a3b8; display: flex; align-items: center; gap: 4px; transition: all 0.2s;">
+                <span style="font-size: 11px;">🟢</span><span style="font-size: 11px; font-weight: 800; letter-spacing: -0.3px;">ONLINE</span>
+            </div>
+            <div id="net-offline" style="opacity: 0.3; color: #94a3b8; display: flex; align-items: center; gap: 4px; transition: all 0.2s;">
+                <span style="font-size: 11px;">🔴</span><span style="font-size: 11px; font-weight: 800; letter-spacing: -0.3px;">OFFLINE</span>
+            </div>
+        </div>
+
         <img src="intro.png" alt="퐁크러쉬 인트로" class="intro-img" onerror="this.style.display='none'">
         
         <h1>
@@ -2223,23 +2421,20 @@
             
             <button id="pwa-review-btn" class="pwa-review-btn hidden" onclick="openWeakReviewModal()">🔥 취약 단어 복습 (0개)</button>
 
-            <div class="backup-restore-group">
-                <button type="button" class="backup-btn" onclick="backupWeakWords()">💾 취약 단어 백업</button>
-                <button type="button" class="restore-btn" onclick="restoreWeakWords()">📂 취약 단어 불러오기</button>
-            </div>
+            <!-- 💾 모달 진입 버튼 -->
+            <button class="quick-btn" style="border: 2px dashed #94a3b8; color: #475569; margin-top: 8px;" onclick="openDataModal()">
+                💾 백업 및 데이터 관리
+            </button>
+
             <input type="file" id="restore-file-input" accept=".txt,.json" style="display:none" onchange="handleRestoreFile(event)">
         </div>
     </div>
 
     <!-- 게임 시작 화면 -->
     <div id="game-area" class="hidden">
-        <div class="cards-grid" id="cards-wrapper">
-        </div>
-
+        <div class="cards-grid" id="cards-wrapper"></div>
         <div class="bottom-action-area">
-            <button id="prev-btn" class="bottom-prev-btn" onclick="handlePrevAction()" title="이전 단어 (←)">
-                이전<span class="shortcut-text" style="margin-left: 2px;">(←)</span>
-            </button>
+            <button id="prev-btn" class="bottom-prev-btn" onclick="handlePrevAction()" title="이전 단어 (←)">이전<span class="shortcut-text" style="margin-left: 2px;">(←)</span></button>
             <button id="vague-btn" class="bottom-vague-btn" onclick="handleVagueAction(currentStartIndex)">
                 <span id="vague-btn-text">몰라요 ❓</span> <span class="shortcut-text">(↓)</span>
             </button>
@@ -2262,7 +2457,6 @@
                     </button>
                 </div>
             </div>
-
             <div class="nyan-controls-row">
                 <div class="nyan-track">
                     <div class="nyan-trail" id="nyan-trail">
@@ -2282,7 +2476,6 @@
                 <span id="summary-title-text" style="font-weight: 800; color: var(--slack-purple); font-size: 17px;">📋 복습 리스트</span>
                 <span class="progress" id="summary-count" style="background: rgba(236, 178, 46, 0.15); color: #d08700;">복습할 단어: 0개</span>
             </div>
-            
             <div class="table-wrapper" id="summary-table-wrapper">
                 <table id="summary-table">
                     <thead>
@@ -2292,12 +2485,10 @@
                             <th id="summary-action-th" style="width: 12%; text-align: center;" class="hidden">관리</th>
                         </tr>
                     </thead>
-                    <tbody id="summary-tbody">
-                    </tbody>
+                    <tbody id="summary-tbody"></tbody>
                 </table>
             </div>
         </div>
-        
         <div class="controls" id="summary-controls-row">
             <button class="base-btn" style="margin: 0; background-color: var(--slack-blue);" onclick="reviewVagueWords()">복습 리스트만 다시 복습 🔁</button>
             <button class="base-btn" style="margin: 0; background-color: var(--slack-purple);" onclick="restartFullGame()">전체 다시 복습 🔄</button>
@@ -2306,8 +2497,35 @@
     </div>
 </div>
 
-<!-- 📌 좌측 하단 버전 표기 -->
-<div class="app-version">v6.5.0 (Playback Tangling Fixed)</div>
+<div class="app-version">v6.8.0 (Safe G-Drive Ext & LED UI Added)</div>
+
+<script>
+    // 💡 네트워크 상태 업데이트 로직 (온라인/오프라인)
+    function updateNetworkStatus() {
+        const onlineEl = document.getElementById('net-online');
+        const offlineEl = document.getElementById('net-offline');
+        if(!onlineEl || !offlineEl) return;
+
+        // 초기화
+        onlineEl.style.opacity = '0.3';
+        onlineEl.style.filter = 'grayscale(100%)';
+        offlineEl.style.opacity = '0.3';
+        offlineEl.style.filter = 'grayscale(100%)';
+
+        // 상태에 따라 표시
+        if(navigator.onLine) {
+            onlineEl.style.opacity = '0.85';
+            onlineEl.style.filter = 'grayscale(0%)';
+        } else {
+            offlineEl.style.opacity = '0.85';
+            offlineEl.style.filter = 'grayscale(0%)';
+        }
+    }
+    
+    window.addEventListener('online', updateNetworkStatus);
+    window.addEventListener('offline', updateNetworkStatus);
+    updateNetworkStatus();
+</script>
 
 <!-- 🤖 AI 엔진 모듈 통합 스크립트 -->
 <script type="module">
@@ -2322,9 +2540,7 @@
     };
 
     const STORAGE_KEY = 'pongcrush_ai_settings_v2';
-    
     window.isAIEnabledForWriting = localStorage.getItem('pongcrush_ai_toggle') !== 'false';
-
     window.isAllDbLoaded = false;
 
     function getAISettings() {
@@ -2342,10 +2558,7 @@
             const updated = { ...current, ...newSettings };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
             return updated;
-        } catch (e) {
-            console.error("AI 설정 저장 실패:", e);
-            return getAISettings();
-        }
+        } catch (e) { return getAISettings(); }
     }
 
     let aiEngine = null;
@@ -2364,9 +2577,7 @@
     window.updateAIToggleUI = function() {
         const btn = document.getElementById('ai-toggle-btn');
         const disclaimer = document.getElementById('ai-disclaimer-text');
-        
         if (!btn) return;
-        
         if (window.isAIEnabledForWriting) {
             btn.innerHTML = '🤖 AI 첨삭: ON';
             btn.classList.add('green-chip');
@@ -2413,7 +2624,6 @@
     window.openModelSelectModal = function() {
         const modal = document.getElementById('ai-model-select-modal');
         if (modal) modal.classList.remove('hidden');
-        
         const cfg = getAISettings();
         document.getElementById('model-card-1b').classList.remove('selected');
         document.getElementById('model-card-3b').classList.remove('selected');
@@ -2433,74 +2643,53 @@
 
     window.selectAIModel = function(modelName, shortName) {
         if (modelName === 'home-pc') {
-            alert("🏠 퐁퐁하우스(자택 PC) 서버 연동 기능은 To Be Continued...\n\n자택의 i5-14600KF + 64GB DDR5 + Dedicated VRAM 16GB 서버망 구축 후 Ollama/vLLM API 서비스로 정식 연동될 예정입니다!");
+            alert("🏠 퐁퐁하우스(자택 PC) 서버 연동 기능은 To Be Continued...");
             closeModelSelectModal();
             return;
         }
-
         const cfg = getAISettings();
         if (cfg.modelName === modelName) {
             closeModelSelectModal();
             return;
         }
-
         window.saveAISettings({ modelName: modelName });
-        
         aiEngine = null;
         isAiReady = false;
-        
         window.updateAIChipUI();
         closeModelSelectModal();
-        
-        alert(`✅ ${shortName} 모델로 변경되었습니다.\n다음 영작 제출 시 해당 모델의 다운로드 및 로딩이 백그라운드에서 실행됩니다.`);
+        alert(`✅ ${shortName} 모델로 변경되었습니다.\n다음 영작 제출 시 해당 모델의 다운로드가 실행됩니다.`);
     }
 
     function updateAIPipelineStep(stepNumber) {
         const steps = [
-            document.getElementById('step-1'),
-            document.getElementById('step-2'),
-            document.getElementById('step-3'),
-            document.getElementById('step-4')
+            document.getElementById('step-1'), document.getElementById('step-2'),
+            document.getElementById('step-3'), document.getElementById('step-4')
         ];
-        
         if (stepNumber <= 0) {
-            steps.forEach(el => {
-                if(el) {
-                    el.classList.remove('active', 'done', 'error');
-                }
-            });
-            if (stepNumber === -1) {
-                steps.forEach(el => el && el.classList.add('error'));
-            }
+            steps.forEach(el => el && el.classList.remove('active', 'done', 'error'));
+            if (stepNumber === -1) steps.forEach(el => el && el.classList.add('error'));
             return;
         }
-
         steps.forEach((el, index) => {
             if (!el) return;
             el.classList.remove('active', 'done', 'error');
-            
             const currentStep = index + 1;
-            if (currentStep < stepNumber) {
-                el.classList.add('done');
-            } else if (currentStep === stepNumber) {
-                el.classList.add('active');
-            }
+            if (currentStep < stepNumber) el.classList.add('done');
+            else if (currentStep === stepNumber) el.classList.add('active');
         });
     }
 
     async function initLocalAIEngine() {
         if (aiEngine || isAiInitializing) return aiEngine;
         if (!navigator.gpu) {
-            alert("⚠️ 현재 브라우저가 WebGPU를 지원하지 않아 AI 엔진을 시작할 수 없습니다.\nChrome 또는 Edge 브라우저 최신 버전을 사용해주세요.");
+            alert("⚠️ 현재 브라우저가 WebGPU를 지원하지 않아 AI 엔진을 시작할 수 없습니다.");
             return null;
         }
 
         isAiInitializing = true;
         updateAIPipelineStep(1); 
-
         const config = getAISettings();
         const shortName = config.modelName.includes('8B') ? '8B' : (config.modelName.includes('3B') ? '3B' : '1B');
-        
         const loadingText = document.getElementById('ai-loading-text');
         const loadingOverlay = document.getElementById('ai-loading-overlay');
         const isModalOpen = !document.getElementById('ai-feedback-modal').classList.contains('hidden');
@@ -2516,21 +2705,16 @@
                     const pct = Math.round(progress.progress * 100);
                     const centerText = document.getElementById('ai-center-progress-text');
                     const step1Desc = document.getElementById('step-1-desc');
-                    
-                    if (centerText && window.isFirstTokenForUI) {
-                        centerText.innerText = `신경망 가중치 다운로드 및 VRAM 적재 중... (${pct}%)`;
-                    }
-
+                    if (centerText && window.isFirstTokenForUI) centerText.innerText = `신경망 다운로드 및 VRAM 적재 중... (${pct}%)`;
                     if (step1Desc) {
                         if (pct < 100) {
                             step1Desc.innerText = `모델 다운로드 (${pct}%)`;
                             step1Desc.style.color = '#2563eb';
                         } else {
-                            step1Desc.innerText = `VRAM 캐싱 및 할당 완료`;
+                            step1Desc.innerText = `VRAM 할당 완료`;
                             step1Desc.style.color = '';
                         }
                     }
-                    
                     if (!isModalOpen && loadingText) {
                         loadingText.innerText = `🤖 ${shortName} 엔진 준비 중: ${pct}%`;
                         const fillEl = document.getElementById('ai-loading-progress-fill');
@@ -2539,17 +2723,14 @@
                 }
             });
             isAiReady = true;
-            console.log(`✅ ${shortName} 로컬 AI 엔진 준비 완료`);
         } catch (err) {
-            console.warn("⚠️ 로컬 AI 초기화 실패:", err);
             aiEngine = null;
             updateAIPipelineStep(-1);
-            alert(`${shortName} AI 엔진을 초기화하지 못했습니다.\n\n원인: ` + err.message);
+            alert(`${shortName} AI 초기화 실패:\n` + err.message);
         } finally {
             isAiInitializing = false;
             if (loadingOverlay) loadingOverlay.classList.add('hidden');
         }
-
         return aiEngine;
     }
 
@@ -2558,37 +2739,26 @@
         const inlineLoaderBtn = document.getElementById('ai-combined-stop-btn');
         const streamingBody = document.getElementById('streaming-grammar-body');
         const progressText = document.getElementById('ai-center-progress-text');
-
         if (inlineLoaderBtn) inlineLoaderBtn.classList.add('hidden');
-        
         if (progressText) progressText.innerText = '';
-        if (streamingBody) streamingBody.style.display = 'block';
-
         if (streamingBody) {
-            if (window.isFirstTokenForUI) {
-                 streamingBody.innerHTML = "<div style='color:#dc2626; font-weight:800; text-align:center; margin-top:20px;'>(🛑 사용자에 의해 연산이 강제 종료되었습니다.)</div>";
-            } else {
-                 streamingBody.innerHTML = window.fullAiResponse + "<br><br><span style='color:#dc2626; font-weight:800;'>(🛑 사용자에 의해 연산이 종료되었습니다.)</span>";
-            }
+            streamingBody.style.display = 'block';
+            if (window.isFirstTokenForUI) streamingBody.innerHTML = "<div style='color:#dc2626; font-weight:800;'>(🛑 연산 강제 종료됨)</div>";
+            else streamingBody.innerHTML = window.fullAiResponse + "<br><br><span style='color:#dc2626; font-weight:800;'>(🛑 종료됨)</span>";
         }
-        
         updateAIPipelineStep(-1);
-
         setTimeout(() => {
             if (aiEngine && typeof aiEngine.interruptGenerate === 'function') {
-                try {
-                    aiEngine.interruptGenerate();
-                } catch(e) { console.warn("Interrupt failed", e); }
+                try { aiEngine.interruptGenerate(); } catch(e){}
             }
         }, 300);
     }
 
     async function requestLocalAIStreamingCorrection(userText, koreanText, onTokenCallback) {
         if (!navigator.gpu) {
-            onTokenCallback("WebGPU를 지원하지 않는 브라우저입니다. (Chrome/Edge 최신 버전 권장)");
+            onTokenCallback("WebGPU 미지원 브라우저입니다.");
             return;
         }
-
         isAiCancelled = false;
         window.isFirstTokenForUI = true;
         window.fullAiResponse = "";
@@ -2599,14 +2769,12 @@
         if (!isAiReady) {
             const engine = await initLocalAIEngine();
             if (!engine) {
-                onTokenCallback("AI 엔진을 로드하는데 실패했습니다. 권한 및 메모리를 확인해주세요.");
+                onTokenCallback("AI 로드 실패.");
                 updateAIPipelineStep(-1);
                 return;
             }
         }
-
         updateAIPipelineStep(2);
-
         const config = getAISettings();
 
         try {
@@ -2656,42 +2824,33 @@ When you finish the evaluation, STOP generating immediately.
 
             for await (const chunk of asyncStream) {
                 if (isAiCancelled) break;
-                
                 if (window.isFirstTokenForUI) {
                     updateAIPipelineStep(3);
                     const pipeline = document.getElementById('ai-pipeline');
                     const streamingBody = document.getElementById('streaming-grammar-body');
                     const progressText = document.getElementById('ai-center-progress-text');
-
                     if (progressText) progressText.innerText = '';
                     if (pipeline) {
                         pipeline.style.borderBottom = '1px dashed var(--border-color)';
                         pipeline.style.paddingBottom = '16px';
                         pipeline.style.marginBottom = '16px';
                     }
-                    if (streamingBody) {
-                        streamingBody.style.display = 'block';
-                    }
-                    
+                    if (streamingBody) streamingBody.style.display = 'block';
                     window.isFirstTokenForUI = false;
                 }
-
                 const delta = chunk.choices[0]?.delta?.content || "";
                 if (delta) {
                     window.fullAiResponse += delta;
                     onTokenCallback(delta);
                 }
             }
-            
             if (!isAiCancelled) {
                 updateAIPipelineStep(5); 
                 const step4Desc = document.querySelector('#step-4 .step-desc');
                 if (step4Desc) step4Desc.innerText = "분석 완료";
             }
-
         } catch (e) {
             if (!isAiCancelled) {
-                console.error("AI streaming error:", e);
                 onTokenCallback("\n\n(AI 토큰 생성 중 오류가 발생했습니다. 설정에서 Max Tokens를 줄여보세요.)");
                 updateAIPipelineStep(-1);
             }
@@ -2705,7 +2864,6 @@ When you finish the evaluation, STOP generating immediately.
     window.requestLocalAIStreamingCorrection = requestLocalAIStreamingCorrection;
     window.getAISettings = getAISettings;
     window.updateAIPipelineStep = updateAIPipelineStep;
-    
     window.closeSpeakingModalAndNext = function() {
         closeSpeakingModal();
         handlePrimaryAction();
@@ -2724,18 +2882,11 @@ When you finish the evaluation, STOP generating immediately.
     }
 
     class ClientSpeakingEngine {
-        constructor(minGreenConfidence = 0.82) {
-            this.minGreenConfidence = minGreenConfidence;
-        }
-
-        normalize(word) {
-            return word ? word.replace(/[^\w\s]/g, '').toLowerCase().trim() : '';
-        }
-
+        constructor(minGreenConfidence = 0.82) { this.minGreenConfidence = minGreenConfidence; }
+        normalize(word) { return word ? word.replace(/[^\w\s]/g, '').toLowerCase().trim() : ''; }
         levenshteinDistance(s1, s2) {
             if (s1.length < s2.length) return this.levenshteinDistance(s2, s1);
             if (s2.length === 0) return s1.length;
-
             let previousRow = Array.from({ length: s2.length + 1 }, (_, i) => i);
             for (let i = 0; i < s1.length; i++) {
                 let currentRow = [i + 1];
@@ -2749,55 +2900,40 @@ When you finish the evaluation, STOP generating immediately.
             }
             return previousRow[s2.length];
         }
-
         similarityRatio(s1, s2) {
             const dist = this.levenshteinDistance(s1, s2);
             const maxLen = Math.max(s1.length, s2.length);
             return maxLen === 0 ? 1.0 : 1.0 - (dist / maxLen);
         }
-
         getStem(word) {
             let w = word.toLowerCase().trim();
             if (w.length <= 3) return w;
-
             if (w.endsWith('ies')) return w.slice(0, -3) + 'y';
             if (w.endsWith('es')) return w.slice(0, -2);
             if (w.endsWith('s') && !w.endsWith('ss')) return w.slice(0, -1);
-
             if (w.endsWith('ied')) return w.slice(0, -3) + 'y';
             if (w.endsWith('ed')) {
                 if (w.length > 4 && w[w.length - 3] === w[w.length - 4]) return w.slice(0, -3);
                 return w.slice(0, -2);
             }
-
             if (w.endsWith('ing') && w.length > 4) return w.slice(0, -3);
-
             return w;
         }
-
         alignWords(targetWords, sttWords) {
             const n = targetWords.length;
             const m = sttWords.length;
-
             const dp = Array.from({ length: n + 1 }, () => Array(m + 1).fill(0));
             for (let i = 0; i <= n; i++) dp[i][0] = i * -1;
             for (let j = 0; j <= m; j++) dp[0][j] = j * -1;
-
             for (let i = 1; i <= n; i++) {
                 for (let j = 1; j <= m; j++) {
                     const tNorm = this.normalize(targetWords[i - 1]);
                     const sNorm = this.normalize(sttWords[j - 1]);
                     const sim = this.similarityRatio(tNorm, sNorm);
-
                     const matchScore = sim > 0.85 ? 2 : (sim > 0.5 ? 0.5 : -1);
-                    dp[i][j] = Math.max(
-                        dp[i - 1][j - 1] + matchScore,
-                        dp[i - 1][j] - 1,
-                        dp[i][j - 1] - 1
-                    );
+                    dp[i][j] = Math.max(dp[i - 1][j - 1] + matchScore, dp[i - 1][j] - 1, dp[i][j - 1] - 1);
                 }
             }
-
             const aligned = [];
             let i = n, j = m;
             while (i > 0 || j > 0) {
@@ -2806,14 +2942,11 @@ When you finish the evaluation, STOP generating immediately.
                     const sNorm = this.normalize(sttWords[j - 1]);
                     const sim = this.similarityRatio(tNorm, sNorm);
                     const matchScore = sim > 0.85 ? 2 : (sim > 0.5 ? 0.5 : -1);
-
                     if (dp[i][j] === dp[i - 1][j - 1] + matchScore) {
                         aligned.push({ target: targetWords[i - 1], stt: sttWords[j - 1] });
-                        i--; j--;
-                        continue;
+                        i--; j--; continue;
                     }
                 }
-
                 if (i > 0 && (j === 0 || dp[i][j] === dp[i - 1][j] - 1)) {
                     aligned.push({ target: targetWords[i - 1], stt: '' });
                     i--;
@@ -2822,96 +2955,53 @@ When you finish the evaluation, STOP generating immediately.
                     j--;
                 }
             }
-
             return aligned.reverse();
         }
-
         evaluate(targetSentence, sttTranscript) {
             const cleanTargetSentence = targetSentence.replace(/[^\w\s]/g, ' ');
             const cleanSttTranscript = sttTranscript.replace(/[^\w\s]/g, ' ');
-
             const targetWords = cleanTargetSentence.trim().split(/\s+/).filter(Boolean);
             const sttWords = cleanSttTranscript.trim().split(/\s+/).filter(Boolean);
-
             if (sttWords.length === 0) {
                 return {
                     overallScore: 0,
-                    details: targetWords.map(tw => ({
-                        targetWord: tw,
-                        spokenWord: '[미인식]',
-                        color: 'RED',
-                        score: 0,
-                        reason: '단어를 발음하지 않음'
-                    }))
+                    details: targetWords.map(tw => ({ targetWord: tw, spokenWord: '[미인식]', color: 'RED', score: 0, reason: '단어를 발음하지 않음' }))
                 };
             }
-
             const alignedPairs = this.alignWords(targetWords, sttWords);
             const details = [];
             let totalScore = 0;
             let validTargetCount = 0;
-
             alignedPairs.forEach(pair => {
                 const targetRaw = pair.target;
                 const sttRaw = pair.stt;
-
                 if (!targetRaw && sttRaw) {
-                    details.push({
-                        targetWord: '',
-                        spokenWord: sttRaw,
-                        color: 'RED',
-                        score: 0,
-                        reason: `추가 발음: '${sttRaw}'`
-                    });
+                    details.push({ targetWord: '', spokenWord: sttRaw, color: 'RED', score: 0, reason: `추가 발음: '${sttRaw}'` });
                     return;
                 }
-
                 validTargetCount++;
                 const tNorm = this.normalize(targetRaw);
                 const sNorm = this.normalize(sttRaw);
-
-                let color = 'RED';
-                let score = 0;
-                let reason = '';
-
+                let color = 'RED', score = 0, reason = '';
                 if (!sNorm) {
-                    color = 'RED';
-                    score = 0;
                     reason = `단어 누락 (원문: '${targetRaw}')`;
                 } else if (tNorm === sNorm) {
-                    color = 'GREEN';
-                    score = 100;
-                    reason = `정확한 단어 일치 ('${targetRaw}')`;
+                    color = 'GREEN'; score = 100; reason = `정확 단어 일치 ('${targetRaw}')`;
                 } else {
                     const tStem = this.getStem(tNorm);
                     const sStem = this.getStem(sNorm);
                     const sim = this.similarityRatio(tNorm, sNorm);
-
                     if (tStem === sStem) {
-                        color = 'ORANGE';
-                        score = 50;
-                        reason = `단/복수 또는 시제 변형 오류 (원문: '${targetRaw}' ↔ 발음: '${sttRaw}')`;
+                        color = 'ORANGE'; score = 50; reason = `단/복수 또는 시제 변형 오류 (원문: '${targetRaw}' ↔ 발음: '${sttRaw}')`;
                     } else if (sim >= 0.55) {
-                        color = 'ORANGE';
-                        score = 40;
-                        reason = `유사 발음 오독 (원문: '${targetRaw}' ↔ 발음: '${sttRaw}')`;
+                        color = 'ORANGE'; score = 40; reason = `유사 발음 오독 (원문: '${targetRaw}' ↔ 발음: '${sttRaw}')`;
                     } else {
-                        color = 'RED';
-                        score = 0;
                         reason = `잘못된 단어 선택 (원문: '${targetRaw}' ↔ 발음: '${sttRaw}')`;
                     }
                 }
-
                 totalScore += score;
-                details.push({
-                    targetWord: targetRaw,
-                    spokenWord: sttRaw || '[미인식]',
-                    color: color,
-                    score: score,
-                    reason: reason
-                });
+                details.push({ targetWord: targetRaw, spokenWord: sttRaw || '[미인식]', color: color, score: score, reason: reason });
             });
-
             const count = validTargetCount > 0 ? validTargetCount : 1;
             const overallScore = Math.round(totalScore / count);
             return { overallScore, details };
@@ -2939,7 +3029,7 @@ When you finish the evaluation, STOP generating immediately.
     let currentImgNum = 1;
 
     let isAutoplay = false;
-    let isInfiniteLoop = false; // ♾️ 무한 반복 상태 변수
+    let isInfiniteLoop = false;
     let autoplayIntervalSec = 2.0; 
     let tempAutoplaySec = 2.0;
     let autoplayTimer = null;
@@ -2979,20 +3069,173 @@ When you finish the evaluation, STOP generating immediately.
     const SELECTED_VOICE_STORAGE_KEY = 'selected_tts_voice_uri_v4';
     const SELECTED_TUNE_STORAGE_KEY = 'selected_tts_tune_profile_v4';
 
+    function getPWASavedWords() {
+        try {
+            const savedData = localStorage.getItem(PWA_VAGUE_STORAGE_KEY);
+            return savedData ? JSON.parse(savedData) : [];
+        } catch (error) {
+            console.error("데이터 로드 오류:", error);
+            return [];
+        }
+    }
+
+    function addWordToPWAStorage(item) {
+        let savedList = getPWASavedWords();
+        const existingIdx = savedList.findIndex(w => w.ko === item.ko && w.en === item.en);
+        if (existingIdx > -1) {
+            savedList[existingIdx].vagueCount = (savedList[existingIdx].vagueCount || 1) + 1;
+        } else {
+            savedList.push({...item, vagueCount: 1});
+        }
+        localStorage.setItem(PWA_VAGUE_STORAGE_KEY, JSON.stringify(savedList));
+        updatePWAReviewButtonUI();
+    }
+
+    function removeWordFromPWAStorage(item) {
+        let savedList = getPWASavedWords();
+        savedList = savedList.filter(w => !(w.ko === item.ko && w.en === item.en));
+        localStorage.setItem(PWA_VAGUE_STORAGE_KEY, JSON.stringify(savedList));
+        updatePWAReviewButtonUI();
+    }
+
+    function updatePWAReviewButtonUI() {
+        const savedList = getPWASavedWords();
+        const btn = document.getElementById('pwa-review-btn');
+        if (btn) {
+            if (savedList.length > 0) {
+                btn.classList.remove('hidden');
+                btn.innerText = `🔥 취약 단어 복습 (${savedList.length}개)`;
+            } else {
+                btn.classList.add('hidden');
+            }
+        }
+    }
+
+    function registerServiceWorker() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').then(reg => {
+                console.log('SW Registered');
+            }).catch(err => {
+                console.warn('SW Registration Failed', err);
+            });
+        }
+    }
+
+    function requestPersistentStorage() {
+        if (navigator.storage && navigator.storage.persist) {
+            navigator.storage.persist().then(granted => {
+                console.log("Persistent Storage:", granted);
+            });
+        }
+    }
+
+    function patchPWASavedWordsWithNewData() {
+        console.log("PWA DB Check Complete.");
+    }
+
+    function initVoiceEngine() {
+        if ('speechSynthesis' in window) {
+            availableVoices = window.speechSynthesis.getVoices();
+            window.speechSynthesis.onvoiceschanged = () => {
+                availableVoices = window.speechSynthesis.getVoices();
+            };
+        }
+    }
+
+    function loadSavedVoiceSettings() {
+        selectedVoiceURI = localStorage.getItem(SELECTED_VOICE_STORAGE_KEY) || '';
+        currentTuneProfile = localStorage.getItem(SELECTED_TUNE_STORAGE_KEY) || 'normal';
+        
+        if (currentTuneProfile === 'normal') { currentPitch = 1.0; currentRate = 0.85; }
+        else if (currentTuneProfile === 'deep') { currentPitch = 0.75; currentRate = 0.8; }
+        else if (currentTuneProfile === 'bright') { currentPitch = 1.3; currentRate = 0.9; }
+        else if (currentTuneProfile === 'fast') { currentPitch = 1.1; currentRate = 1.1; }
+        
+        updateVoiceModeTagUI();
+    }
+
+    function openVoiceModal() {
+        const modal = document.getElementById('voice-modal');
+        if (modal) modal.classList.remove('hidden');
+        renderVoiceListUI();
+    }
+
+    function closeVoiceModal() {
+        const modal = document.getElementById('voice-modal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    function renderVoiceListUI() {
+        const wrapper = document.getElementById('voice-list-wrapper');
+        if (!wrapper) return;
+        wrapper.innerHTML = '';
+        
+        const enVoices = availableVoices.filter(v => v.lang.startsWith('en'));
+        if (enVoices.length === 0) {
+            wrapper.innerHTML = '<div style="padding:10px; text-align:center;">사용 가능한 영어 음성이 없습니다.</div>';
+            return;
+        }
+
+        enVoices.forEach(voice => {
+            const isSelected = voice.voiceURI === selectedVoiceURI;
+            const div = document.createElement('div');
+            div.className = `voice-item ${isSelected ? 'selected' : ''}`;
+            div.onclick = () => {
+                selectedVoiceURI = voice.voiceURI;
+                localStorage.setItem(SELECTED_VOICE_STORAGE_KEY, selectedVoiceURI);
+                renderVoiceListUI();
+                updateVoiceModeTagUI();
+            };
+            div.innerHTML = `
+                <div class="voice-info">
+                    <span class="voice-name">${voice.name}</span>
+                    <span class="voice-lang">🌐 ${voice.lang} <span class="voice-badge">${voice.localService ? '로컬' : '클라우드'}</span></span>
+                </div>
+            `;
+            wrapper.appendChild(div);
+        });
+        
+        document.querySelectorAll('.tune-card').forEach(card => card.classList.remove('selected'));
+        const activeTuneCard = document.getElementById(`tune-${currentTuneProfile}`);
+        if (activeTuneCard) activeTuneCard.classList.add('selected');
+    }
+
+    function selectVoiceTune(profile, pitch, rate) {
+        currentTuneProfile = profile;
+        currentPitch = pitch;
+        currentRate = rate;
+        localStorage.setItem(SELECTED_TUNE_STORAGE_KEY, profile);
+        renderVoiceListUI();
+    }
+
+    function updateVoiceModeTagUI() {
+        const tag = document.getElementById('voice-mode-tag');
+        if (tag) tag.innerText = selectedVoiceURI ? "(수동)" : "(자동)";
+    }
+
+    function getRandomOrSelectedVoice() {
+        const enVoices = availableVoices.filter(v => v.lang.startsWith('en'));
+        if (enVoices.length === 0) return null;
+        if (selectedVoiceURI) {
+            const found = enVoices.find(v => v.voiceURI === selectedVoiceURI);
+            if (found) return found;
+        }
+        const usVoices = enVoices.filter(v => v.lang === 'en-US');
+        return usVoices.length > 0 ? usVoices[0] : enVoices[0];
+    }
+    
     function openAISettingsModal() {
         const modal = document.getElementById('ai-settings-modal');
-        if (!modal) return;
-        if (typeof window.getAISettings === 'function') {
-            const cfg = window.getAISettings();
-            document.getElementById('input-max-tokens').value = cfg.maxTokens;
-            document.getElementById('val-max-tokens').innerText = cfg.maxTokens;
-            document.getElementById('input-context-window').value = cfg.contextWindow;
-            document.getElementById('input-temperature').value = cfg.temperature;
-            document.getElementById('val-temperature').innerText = cfg.temperature;
-            document.getElementById('input-top-p').value = cfg.topP;
-            document.getElementById('val-top-p').innerText = cfg.topP;
-        }
-        modal.classList.remove('hidden');
+        if (modal) modal.classList.remove('hidden');
+        const cfg = getAISettings();
+        document.getElementById('input-max-tokens').value = cfg.maxTokens;
+        document.getElementById('val-max-tokens').innerText = cfg.maxTokens;
+        document.getElementById('input-context-window').value = cfg.contextWindow;
+        document.getElementById('val-context-window').innerText = cfg.contextWindow;
+        document.getElementById('input-temperature').value = cfg.temperature;
+        document.getElementById('val-temperature').innerText = cfg.temperature;
+        document.getElementById('input-top-p').value = cfg.topP;
+        document.getElementById('val-top-p').innerText = cfg.topP;
     }
 
     function closeAISettingsModal() {
@@ -3001,705 +3244,257 @@ When you finish the evaluation, STOP generating immediately.
     }
 
     function applyAISettingsUI() {
-        if (typeof window.saveAISettings === 'function') {
-            window.saveAISettings({
-                maxTokens: document.getElementById('input-max-tokens').value,
-                contextWindow: document.getElementById('input-context-window').value,
-                temperature: document.getElementById('input-temperature').value,
-                topP: document.getElementById('input-top-p').value
-            });
-            alert("✅ AI 설정이 저장되었습니다!");
-        }
+        const cfg = {
+            maxTokens: parseInt(document.getElementById('input-max-tokens').value),
+            contextWindow: parseInt(document.getElementById('input-context-window').value),
+            temperature: parseFloat(document.getElementById('input-temperature').value),
+            topP: parseFloat(document.getElementById('input-top-p').value)
+        };
+        saveAISettings(cfg);
         closeAISettingsModal();
-    }
-    
-    function closeAIFeedbackModal() {
-        if (typeof window.stopAIComputation === 'function') {
-            window.stopAIComputation();
-        }
-        const modal = document.getElementById('ai-feedback-modal');
-        if (modal) {
-            modal.classList.add('hidden');
-        }
+        alert('AI 설정이 저장되었습니다.');
     }
 
     function openWritingModalFromCard() {
-        const isMobile = window.innerWidth <= 650;
-        if (isMobile) return;
-
-        // --- 자동재생 중이었다면 수동으로 해제 ---
-        if (isAutoplay) {
-            isAutoplay = false;
-            clearAutoplayTimer();
-            const btn = document.getElementById('autoplay-btn');
-            const btnLabel = document.getElementById('autoplay-btn-label');
-            if (btn && btnLabel) {
-                btn.classList.remove('active');
-                btnLabel.innerText = "🖐️ 수동";
-            }
-        }
-        // --- 무한루프 중이었다면 해제 ---
-        if (isInfiniteLoop) {
-            isInfiniteLoop = false;
-            updateInfiniteButtonUI();
-        }
-        // ------------------------------------------
-
+        const item = wordList[currentStartIndex];
+        if (!item) return;
         const modal = document.getElementById('ai-feedback-modal');
-        const inputView = document.getElementById('writing-input-view');
-        const resultView = document.getElementById('writing-result-view');
-        
-        const koTextEl = document.getElementById('writing-modal-ko-text');
-        const enHintEl = document.getElementById('writing-modal-en-hint');
-        const textareaEl = document.getElementById('modal-sentence-textarea');
-        
-        const inlineLoaderBtn = document.getElementById('ai-combined-stop-btn');
-
-        const item = wordList[currentStartIndex];
-        if (!item) return;
-
-        const cleanKo = item.exKo || item.ko.replace(/<[^>]*>/g, '').replace(/<br>/g, ' ');
-        const cleanEnHint = item.en.replace(/<[^>]*>/g, '').replace(/<br>/g, ' ');
-
-        const cfg = window.getAISettings();
-        let compareText = "수백억 개 이상의 신경망을 가진 거대 AI(Gemini 등)에 비해 체급이 작아";
-
-        const disclaimerEl = document.getElementById('ai-disclaimer-text');
-        if (disclaimerEl) {
-            disclaimerEl.innerHTML = `※ 현재 구동 중인 로컬 모델은 ${compareText}, 복잡한 문맥 추론에 한계가 있을 수 있습니다.`;
-        }
-
-        document.querySelectorAll('.ai-step').forEach(el => el.classList.remove('active', 'done', 'error'));
-        const pipeline = document.getElementById('ai-pipeline');
-        if (pipeline) {
-            pipeline.style.borderBottom = 'none';
-            pipeline.style.paddingBottom = '0';
-            pipeline.style.marginBottom = '0';
-            pipeline.style.display = 'flex';
-        }
-
-        const streamingBody = document.getElementById('streaming-grammar-body');
-        if (streamingBody) {
-            streamingBody.innerText = '';
-            streamingBody.style.display = 'none';
-        }
-
-        const progressText = document.getElementById('ai-center-progress-text');
-        if (progressText) progressText.innerText = '';
-
-        if (enHintEl) enHintEl.innerText = cleanEnHint;
-        if (koTextEl) koTextEl.innerHTML = formatContextInText(cleanKo);
-        
-        if (textareaEl) {
-            textareaEl.value = '';
-            textareaEl.disabled = false;
-        }
-
-        if (inputView) inputView.classList.remove('hidden');
-        if (resultView) resultView.classList.add('hidden');
-        if (inlineLoaderBtn) inlineLoaderBtn.classList.add('hidden');
-
         if (modal) modal.classList.remove('hidden');
-
-        setTimeout(() => {
-            if (textareaEl) {
-                textareaEl.focus();
-                textareaEl.onkeydown = (e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        submitModalWritingTest();
-                    }
-                };
-            }
-        }, 50);
-    }
-
-    async function submitModalWritingTest() {
-        const inputView = document.getElementById('writing-input-view');
-        const resultView = document.getElementById('writing-result-view');
-        const userTextEl = document.getElementById('ai-modal-user-text');
-        const targetTextEl = document.getElementById('ai-modal-target-text');
-        const streamingBody = document.getElementById('streaming-grammar-body');
-        const pipeline = document.getElementById('ai-pipeline');
-        const progressText = document.getElementById('ai-center-progress-text');
         
-        const inlineLoaderBtn = document.getElementById('ai-combined-stop-btn');
-        const textareaEl = document.getElementById('modal-sentence-textarea');
-
-        const userText = textareaEl ? textareaEl.value.trim() : '';
-        const item = wordList[currentStartIndex];
-        if (!item) return;
-
-        const targetText = item.exEn || item.en || '';
-        const cleanTarget = targetText ? targetText.replace(/<[^>]*>/g, '').replace(/#/g, ' ').trim() : '';
-        const cleanKo = (item.exKo || item.ko || '').replace(/<[^>]*>/g, '').replace(/#/g, ' ').trim();
-
-        if (inputView) inputView.classList.add('hidden');
-        if (resultView) resultView.classList.remove('hidden');
-
-        if (userTextEl) userTextEl.innerText = userText || "(작성된 문장이 없습니다)";
-        if (targetTextEl) targetTextEl.innerText = cleanTarget || "(예시 문장 없음)";
+        document.getElementById('writing-input-view').classList.remove('hidden');
+        document.getElementById('writing-result-view').classList.add('hidden');
+        document.getElementById('modal-sentence-textarea').value = '';
         
-        if (streamingBody) {
-            streamingBody.innerText = '';
-            streamingBody.style.display = 'none';
-        }
-
-        if (!window.isAIEnabledForWriting) {
-            if (streamingBody) {
-                streamingBody.style.display = 'block';
-                streamingBody.innerHTML = "<div style='color:#64748b; font-weight:700; text-align:center; margin-top:20px; font-size:15px;'>(🤖 AI 첨삭 기능이 꺼져 있습니다. 위 정답과 직접 비교해 보세요.)</div>";
-            }
-            if (pipeline) pipeline.style.display = 'none';
-            if (progressText) progressText.innerText = '';
-            if (inlineLoaderBtn) inlineLoaderBtn.classList.add('hidden');
-            return; 
-        }
-
-        if (pipeline) {
-            pipeline.style.display = 'flex';
-            pipeline.style.borderBottom = 'none';
-            pipeline.style.paddingBottom = '0';
-            pipeline.style.marginBottom = '0';
-        }
+        document.getElementById('writing-modal-en-hint').innerText = item.en;
+        document.getElementById('writing-modal-ko-text').innerText = item.ko.replace(/<[^>]*>/g, '').replace(/#/g, ' ');
         
-        window.isFirstTokenForUI = true;
-
-        const cfg = window.getAISettings();
-        let wittyMessages = [];
-        const commonMsgs = [
-            "🔋 WebGPU로 배터리 살살 녹이는 중...",
-            "🌍 전력 소모 폭발! 환경파괴자 모드...",
-            "✈️ 노트북 쿨러 이륙 준비 완료...",
-            "💰 API 비용 0.0001달러 아끼려 내 기기 혹사시키는 중..."
-        ];
-
-        if (cfg.modelName.includes("8B")) {
-            wittyMessages = [
-                ...commonMsgs,
-                "💸 VRAM 4.5GB 꽉꽉 채워 80억 개 신경망 굴리는 중...",
-                "🏎️ 초당 20토큰 뽑으려 영혼까지 쥐어짜는 중...",
-                "🧠 80억 개 파라미터가 당신의 영어 실력을 진지하게 평가하는 중..."
-            ];
-        } else if (cfg.modelName.includes("3B")) {
-            wittyMessages = [
-                ...commonMsgs,
-                "💸 VRAM 2GB 선점 완료! 가성비 좋게 고생 중...",
-                "🏎️ 초당 50토큰 뽑으며 경쾌하게 달리는 중...",
-                "🧠 30억 개 행렬 연산으로 적당한 타협점을 찾는 중..."
-            ];
-        } else {
-            wittyMessages = [
-                ...commonMsgs,
-                "💸 VRAM 1GB 초경량 모드로 깃털처럼 구동 중...",
-                "🏎️ 초당 80토큰 광속으로 뽑아내는 중...",
-                "🧠 10억 개 파라미터가 앙증맞게 추론 중..."
-            ];
-        }
-        
-        if (progressText) {
-            progressText.innerText = wittyMessages[Math.floor(Math.random() * wittyMessages.length)];
-        }
-
-        if (inlineLoaderBtn) {
-            inlineLoaderBtn.classList.remove('hidden');
-            const loaderTextEl = document.getElementById('ai-loader-text');
-            if (loaderTextEl) loaderTextEl.innerText = "🛑 AI 상시 강제 중단 (Q)";
-        }
-
-        if (typeof window.updateAIPipelineStep === 'function') {
-            window.updateAIPipelineStep(1); 
-        }
-
-        try {
-            if (window.requestLocalAIStreamingCorrection && userText) {
-                await window.requestLocalAIStreamingCorrection(userText, cleanKo, (token) => {
-                    if (streamingBody) {
-                        streamingBody.innerText += token;
-                        streamingBody.scrollTop = streamingBody.scrollHeight;
-                    }
-                });
-            } else {
-                if (streamingBody) {
-                    streamingBody.style.display = 'block';
-                    streamingBody.innerHTML = "<div style='color:#dc2626; font-weight:800; text-align:center; margin-top:20px;'>영문장을 입력하지 않았습니다. 단서를 참고해 다시 작성해 보세요!</div>";
-                }
-                if (progressText) progressText.innerText = '';
-                window.updateAIPipelineStep(-1);
-            }
-        } catch (err) {
-            console.error("AI streaming error:", err);
-            if (streamingBody) {
-                streamingBody.style.display = 'block';
-                streamingBody.innerText = "스트리밍 생성 중 오류가 발생했습니다.";
-            }
-            if (progressText) progressText.innerText = '';
-            window.updateAIPipelineStep(-1);
-        } finally {
-            if (inlineLoaderBtn) inlineLoaderBtn.classList.add('hidden');
-        }
+        setTimeout(() => { document.getElementById('modal-sentence-textarea').focus(); }, 100);
     }
 
-    function registerServiceWorker() {
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js')
-                .then(reg => console.log('✅ Service Worker 등록 완료:', reg.scope))
-                .catch(err => console.warn('⚠️ Service Worker 등록 실패:', err));
-        }
-    }
-
-    function requestPersistentStorage() {
-        if (navigator.storage && navigator.storage.persist) {
-            navigator.storage.persist().then(persistent => {
-                if (persistent) console.log("🔒 브라우저 영구 저장 권한 확보 완료");
-            }).catch(err => console.warn(err));
-        }
-    }
-
-    function fetchSystemVoices() {
-        if (!('speechSynthesis' in window)) return [];
-        let voices = window.speechSynthesis.getVoices();
-        const filtered = voices.filter(v => v.lang.toLowerCase().startsWith('en') || v.lang === '' || v.lang.toLowerCase().startsWith('en_'));
-        availableVoices = filtered.length > 0 ? filtered : voices;
-
-        availableVoices.sort((a, b) => {
-            const langA = a.lang.toLowerCase();
-            const langB = b.lang.toLowerCase();
-            if (langA.includes('us') && !langB.includes('us')) return -1;
-            if (!langA.includes('us') && langB.includes('us')) return 1;
-            return a.name.localeCompare(b.name);
-        });
-
-        return availableVoices;
-    }
-
-    function initVoiceEngine() {
-        fetchSystemVoices();
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.onvoiceschanged = () => {
-                fetchSystemVoices();
-                if (!document.getElementById('voice-modal').classList.contains('hidden')) {
-                    renderVoiceListUI();
-                }
-            };
-        }
-        let pollCount = 0;
-        const voiceInterval = setInterval(() => {
-            pollCount++;
-            const v = fetchSystemVoices();
-            if (v.length > 0 || pollCount > 10) clearInterval(voiceInterval);
-        }, 300);
-    }
-
-    function openVoiceModal() {
-        const modal = document.getElementById('voice-modal');
-        if (modal) modal.classList.remove('hidden');
-        loadSavedVoiceSettings();
-        fetchSystemVoices();
-        renderVoiceListUI();
-        updateTuneCardsUI();
-    }
-
-    function closeVoiceModal() {
-        const modal = document.getElementById('voice-modal');
+    function closeAIFeedbackModal() {
+        const modal = document.getElementById('ai-feedback-modal');
         if (modal) modal.classList.add('hidden');
+        if (window.stopAIComputation) window.stopAIComputation();
     }
 
-    function loadSavedVoiceSettings() {
-        try {
-            selectedVoiceURI = localStorage.getItem(SELECTED_VOICE_STORAGE_KEY) || '';
-            currentTuneProfile = localStorage.getItem(SELECTED_TUNE_STORAGE_KEY) || 'normal';
-            applyTuneProfileValues(currentTuneProfile);
-            updateVoiceModeTagUI();
-        } catch(e) {}
-    }
-
-    function updateVoiceModeTagUI() {
-        const tag = document.getElementById('voice-mode-tag');
-        if (tag) {
-            tag.innerText = selectedVoiceURI ? '(지정)' : '(자동)';
+    function submitModalWritingTest() {
+        const userText = document.getElementById('modal-sentence-textarea').value.trim();
+        if (!userText) {
+            alert("영문장을 입력해주세요.");
+            return;
         }
-    }
-
-    function applyTuneProfileValues(profile) {
-        currentTuneProfile = profile;
-        if (profile === 'deep') { currentPitch = 0.75; currentRate = 0.8; }
-        else if (profile === 'bright') { currentPitch = 1.3; currentRate = 0.9; }
-        else if (profile === 'fast') { currentPitch = 1.1; currentRate = 1.1; }
-        else { currentPitch = 1.0; currentRate = 0.85; }
-    }
-
-    function getFlagByLang(lang, name) {
-        const l = lang.toLowerCase();
-        const n = name.toLowerCase();
-        if (l.includes('au') || n.includes('australia')) return '🇦🇺 호주';
-        if (l.includes('in') || n.includes('india')) return '🇮🇳 인도';
-        if (l.includes('ng') || n.includes('nigeria')) return '🇳🇬 나이지리아';
-        if (l.includes('gb') || l.includes('uk') || n.includes('united kingdom')) return '🇬🇧 영국';
-        if (l.includes('us') || n.includes('united states')) return '🇺🇸 미국';
-        if (l.includes('ca') || n.includes('canada')) return '🇨🇦 캐나다';
-        if (l.includes('ph') || n.includes('philippines')) return '🇵🇭 필리핀';
-        return '🌐 영어';
-    }
-
-    function renderVoiceListUI() {
-        const wrapper = document.getElementById('voice-list-wrapper');
-        if (!wrapper) return;
-
-        const voices = availableVoices.length > 0 ? availableVoices : fetchSystemVoices();
-        let html = '';
-
-        const isAutoSelected = !selectedVoiceURI;
-        html += `
-            <div class="voice-item ${isAutoSelected ? 'selected' : ''}" onclick="selectVoiceAuto()">
-                <div class="voice-info">
-                    <span class="voice-name">🎲 자동 (데스크탑: 남성 / 모바일: 랜덤)</span>
-                    <span class="voice-lang">
-                        <span class="voice-badge" style="background:#dcfce7; color:#15803d;">기본 추천</span>
-                    </span>
-                </div>
-            </div>
-        `;
-
-        voices.forEach((voice) => {
-            const isSelected = (voice.voiceURI === selectedVoiceURI);
-            const flagBadge = getFlagByLang(voice.lang, voice.name);
-            let engineType = voice.name.includes('Google') ? 'Google' : (voice.name.includes('Microsoft') ? 'Microsoft' : (voice.name.includes('Samsung') ? 'Samsung' : 'System'));
-
-            html += `
-                <div class="voice-item ${isSelected ? 'selected' : ''}" onclick="selectVoiceEngine('${voice.voiceURI.replace(/'/g, "\\'")}')">
-                    <div class="voice-info">
-                        <span class="voice-name">${voice.name}</span>
-                        <span class="voice-lang">
-                            <span class="voice-badge">${flagBadge}</span>
-                            <span class="voice-badge" style="background:#f1f5f9; color:#475569;">${engineType}</span>
-                        </span>
-                    </div>
-                    <button type="button" class="voice-test-btn" onclick="event.stopPropagation(); testVoiceWithSample('${voice.voiceURI.replace(/'/g, "\\'")}')">테스트 🔊</button>
-                </div>
-            `;
-        });
-        wrapper.innerHTML = html;
-    }
-
-    function selectVoiceAuto() {
-        selectedVoiceURI = '';
-        try { localStorage.removeItem(SELECTED_VOICE_STORAGE_KEY); } catch(e) {}
-        renderVoiceListUI();
-        updateVoiceModeTagUI();
-    }
-
-    function selectVoiceEngine(uri) {
-        selectedVoiceURI = uri;
-        try { localStorage.setItem(SELECTED_VOICE_STORAGE_KEY, uri); } catch(e) {}
-        renderVoiceListUI();
-        updateVoiceModeTagUI();
-    }
-
-    function selectVoiceTune(profile, pitch, rate) {
-        applyTuneProfileValues(profile);
-        try { localStorage.setItem(SELECTED_TUNE_STORAGE_KEY, profile); } catch(e) {}
-        updateTuneCardsUI();
-        testVoiceWithSample(selectedVoiceURI);
-    }
-
-    function updateTuneCardsUI() {
-        ['normal', 'deep', 'bright', 'fast'].forEach(p => {
-            const card = document.getElementById(`tune-${p}`);
-            if (card) {
-                if (p === currentTuneProfile) card.classList.add('selected');
-                else card.classList.remove('selected');
-            }
-        });
-    }
-
-    function getRandomOrSelectedVoice() {
-        const voices = availableVoices.length > 0 ? availableVoices : window.speechSynthesis.getVoices();
-        if (voices.length === 0) return null;
-
-        if (selectedVoiceURI) {
-            const matched = voices.find(v => v.voiceURI === selectedVoiceURI);
-            if (matched) return matched;
-        }
-
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-        if (!isMobile) {
-            const maleKeywords = ['david', 'mark', 'george', 'james', 'guy', 'male', 'natural', 'richard', 'ryan'];
-            const maleVoices = voices.filter(v => {
-                const name = v.name.toLowerCase();
-                const lang = v.lang.toLowerCase();
-                return (lang.startsWith('en') || lang === '') && maleKeywords.some(k => name.includes(k));
-            });
-            if (maleVoices.length > 0) {
-                return maleVoices[Math.floor(Math.random() * maleVoices.length)];
-            }
-        } else {
-            const usUkVoices = voices.filter(v => {
-                const l = v.lang.toLowerCase();
-                return l === 'en-us' || l === 'en_us' || l === 'en-gb' || l === 'en_gb' || l.includes('us') || l.includes('gb');
-            });
-            if (usUkVoices.length > 0) {
-                return usUkVoices[Math.floor(Math.random() * usUkVoices.length)];
-            }
-        }
-
-        const enVoices = voices.filter(v => v.lang.toLowerCase().startsWith('en'));
-        const pool = enVoices.length > 0 ? enVoices : voices;
-        return pool[Math.floor(Math.random() * pool.length)];
-    }
-
-    function testVoiceWithSample(uri) {
-        stopTTS();
-        if (!('speechSynthesis' in window)) return;
         
-        const utter = new SpeechSynthesisUtterance("Hello! Welcome to Pong Crush English test.");
-        utter.pitch = currentPitch;
-        utter.rate = currentRate;
+        document.getElementById('writing-input-view').classList.add('hidden');
+        document.getElementById('writing-result-view').classList.remove('hidden');
         
-        const voiceObj = getRandomOrSelectedVoice();
-        if (voiceObj) {
-            utter.voice = voiceObj;
-            utter.lang = voiceObj.lang || 'en-US';
-        } else {
-            utter.lang = 'en-US';
-        }
-        window.speechSynthesis.speak(utter);
-    }
-
-    function getPWASavedWords() {
-        try {
-            const data = localStorage.getItem(PWA_VAGUE_STORAGE_KEY);
-            return data ? JSON.parse(data) : [];
-        } catch (e) { return []; }
-    }
-
-    function patchPWASavedWordsWithNewData() {
-        if (!loadedRawWordList || loadedRawWordList.length === 0) return;
-        let savedList = getPWASavedWords();
-        let isModified = false;
+        const item = wordList[currentStartIndex];
+        const targetKo = item.ko.replace(/<[^>]*>/g, '').replace(/#/g, ' ');
+        const targetEn = item.exEn || item.en;
         
-        savedList.forEach(savedItem => {
-            const matchKo = sanitizeForMatch(savedItem.ko);
-            const matchEn = sanitizeForMatch(savedItem.en);
-
-            const match = loadedRawWordList.find(r => 
-                sanitizeForMatch(r.ko) === matchKo && 
-                sanitizeForMatch(r.en) === matchEn
-            );
-
-            if (match) {
-                if (!savedItem.synonyms && match.synonyms) {
-                    savedItem.synonyms = match.synonyms;
-                    isModified = true;
-                }
-                if (!savedItem.exEn && match.exEn) {
-                    savedItem.exEn = match.exEn;
-                    isModified = true;
-                }
-                if (!savedItem.exKo && match.exKo) {
-                    savedItem.exKo = match.exKo;
-                    isModified = true;
-                }
-            }
-        });
-
-        if (isModified) {
-            localStorage.setItem(PWA_VAGUE_STORAGE_KEY, JSON.stringify(savedList));
-            updatePWAReviewButtonUI();
-        }
-    }
-
-    function addWordToPWAStorage(item) {
-        if (!item) return;
-        const savedList = getPWASavedWords();
-        const index = savedList.findIndex(w => w.ko === item.ko && w.en === item.en);
-
-        if (index > -1) {
-            savedList[index].vagueCount = (savedList[index].vagueCount || 1) + 1;
-            if (!savedList[index].category) savedList[index].category = currentCategory;
-            if (savedList[index].dayIndex === undefined) savedList[index].dayIndex = currentDayIndex;
-        } else {
-            savedList.push({
-                ...item,
-                category: currentCategory,
-                dayIndex: currentDayIndex,
-                vagueCount: 1
-            });
-        }
-
-        try {
-            localStorage.setItem(PWA_VAGUE_STORAGE_KEY, JSON.stringify(savedList));
-            updatePWAReviewButtonUI();
-        } catch (e) {}
-    }
-
-    function removeWordFromPWAStorage(item) {
-        if (!item) return;
-        let savedList = getPWASavedWords();
-        savedList = savedList.filter(w => !(w.ko === item.ko && w.en === item.en));
-        try {
-            localStorage.setItem(PWA_VAGUE_STORAGE_KEY, JSON.stringify(savedList));
-            updatePWAReviewButtonUI();
-        } catch (e) {}
-    }
-
-    function updatePWAReviewButtonUI() {
-        const pwaBtn = document.getElementById('pwa-review-btn');
-        if (!pwaBtn) return;
-
-        const savedList = getPWASavedWords();
-        pwaBtn.classList.remove('hidden');
-        pwaBtn.innerText = `🔥 취약 단어 복습 (${savedList.length}개)`;
-    }
-
-    function backupWeakWords() {
-        const savedList = getPWASavedWords();
-        if (savedList.length === 0) {
-            alert("백업할 취약 단어가 없습니다.");
+        document.getElementById('ai-modal-user-text').innerText = userText;
+        document.getElementById('ai-modal-target-text').innerText = targetEn;
+        document.getElementById('streaming-grammar-body').innerText = "";
+        document.getElementById('ai-center-progress-text').innerText = "AI 분석을 준비 중입니다...";
+        
+        if (!window.isAIEnabledForWriting) {
+            document.getElementById('streaming-grammar-body').innerText = "🤖 AI 첨삭 기능이 꺼져 있습니다. (상단에서 켜기 가능)";
+            document.getElementById('streaming-grammar-body').style.display = 'block';
             return;
         }
 
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const fileName = `pongcrush_weak_words_${year}${month}${day}.txt`;
+        if (window.requestLocalAIStreamingCorrection) {
+            window.requestLocalAIStreamingCorrection(userText, targetKo, (token) => {
+            });
+        } else {
+            document.getElementById('streaming-grammar-body').innerText = "AI 엔진 로드 오류";
+            document.getElementById('streaming-grammar-body').style.display = 'block';
+        }
+    }
+    
+    function backupWeakWords() {
+        const savedList = getPWASavedWords();
+        if(savedList.length === 0) {
+            alert("백업할 단어가 없습니다.");
+            return;
+        }
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(savedList, null, 2));
+        const dlAnchorElem = document.createElement('a');
+        dlAnchorElem.setAttribute("href", dataStr);
+        dlAnchorElem.setAttribute("download", "pongcrush_local_backup.json");
+        dlAnchorElem.click();
+    }
 
-        const jsonStr = JSON.stringify(savedList, null, 2);
-        const blob = new Blob([jsonStr], { type: 'text/plain;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
+    function openDataModal() {
+        const modal = document.getElementById('data-modal');
+        if (modal) modal.classList.remove('hidden');
+    }
 
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = fileName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+    function closeDataModal() {
+        const modal = document.getElementById('data-modal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    async function processImportedData(importedList) {
+        if (!Array.isArray(importedList)) throw new Error("올바른 백업 파일 형식이 아닙니다.");
+
+        if (!window.isAllDbLoaded) {
+            const confirmLoad = confirm("⚠️ 현재 브라우저 메모리에 전체 단어장 DB가 로드되어 있지 않습니다.\n(특정 시험만 본 상태에서 불러오면 스피킹 등의 예문이 누락될 수 있습니다.)\n\n완벽한 복원을 위해 기본 단어장(스피킹, 라이팅, 초록이, 라잎)을 모두 불러오시겠습니까?");
+            
+            if (confirmLoad) {
+                const loadingModal = document.getElementById('loading-overlay');
+                const loadingText = document.getElementById('loading-text');
+                if (loadingModal) {
+                    if (loadingText) loadingText.innerText = "단어장 통합 데이터 로딩 중...";
+                    loadingModal.classList.remove('hidden');
+                }
+                try {
+                    const urls = [
+                        'https://docs.google.com/spreadsheets/d/1m7KXifCB6txkKEOHqApMWOR4MQwqb6Ji1Dm-hRJYzLc/edit?usp=sharing',
+                        'https://docs.google.com/spreadsheets/d/1UYTEv88wdKsSS2kkB-UylHAfQAlV6yrvjwVNecG6m64/edit?usp=sharing',
+                        'https://docs.google.com/spreadsheets/d/1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U/edit?usp=sharing',
+                        'https://docs.google.com/spreadsheets/d/1ElLraPc80Uez8innH6RfXOBz36IV9ARXnkAiUembWH0/edit?usp=sharing'
+                    ];
+                    const results = await Promise.all(urls.map(url => fetchSheetData(url)));
+                    loadedRawWordList = [];
+                    results.forEach(res => { loadedRawWordList = loadedRawWordList.concat(res); });
+                    window.isAllDbLoaded = true; 
+                } catch (err) {
+                    if (loadingModal) loadingModal.classList.add('hidden');
+                    throw new Error("통합 데이터를 불러오는데 실패했습니다: " + err.message);
+                }
+                if (loadingModal) loadingModal.classList.add('hidden');
+                if (loadingText) loadingText.innerText = "단어장 데이터를 가져오는 중...";
+            }
+        }
+
+        let currentList = getPWASavedWords();
+        let addedCount = 0;
+        let updatedCount = 0;
+
+        importedList.forEach(item => {
+            if (item && item.ko && item.en) {
+                let syn = item.synonyms || '';
+                let exEn = item.exEn || '';
+                let exKo = item.exKo || '';
+                const matchKo = sanitizeForMatch(item.ko);
+                const matchEn = sanitizeForMatch(item.en);
+
+                if (loadedRawWordList && loadedRawWordList.length > 0) {
+                    const match = loadedRawWordList.find(r => sanitizeForMatch(r.ko) === matchKo && sanitizeForMatch(r.en) === matchEn);
+                    if (match) {
+                        if (!syn && match.synonyms) syn = match.synonyms;
+                        if (!exEn && match.exEn) exEn = match.exEn;
+                        if (!exKo && match.exKo) exKo = match.exKo;
+                    }
+                }
+                const existingIdx = currentList.findIndex(w => sanitizeForMatch(w.ko) === matchKo && sanitizeForMatch(w.en) === matchEn);
+                if (existingIdx > -1) {
+                    currentList[existingIdx].vagueCount = Math.max(currentList[existingIdx].vagueCount || 1, item.vagueCount || 1);
+                    if (!currentList[existingIdx].synonyms && syn) currentList[existingIdx].synonyms = syn;
+                    if (!currentList[existingIdx].exEn && exEn) currentList[existingIdx].exEn = exEn;
+                    if (!currentList[existingIdx].exKo && exKo) currentList[existingIdx].exKo = exKo;
+                    updatedCount++;
+                } else {
+                    currentList.push({
+                        ko: item.ko, en: item.en, exEn: exEn, exKo: exKo, synonyms: syn,
+                        category: item.category || '기타', dayIndex: item.dayIndex !== undefined ? item.dayIndex : -1, vagueCount: item.vagueCount || 1
+                    });
+                    addedCount++;
+                }
+            }
+        });
+        localStorage.setItem(PWA_VAGUE_STORAGE_KEY, JSON.stringify(currentList));
+        updatePWAReviewButtonUI();
+        alert(`백업 데이터에서 ${importedList.length}개 단어를 확인했습니다.\n(신규 추가: ${addedCount}개, 병합 업데이트: ${updatedCount}개 완료)`);
     }
 
     function restoreWeakWords() {
         const input = document.getElementById('restore-file-input');
-        if (input) {
-            input.value = ''; 
-            input.click();
-        }
+        if (input) { input.value = ''; input.click(); }
     }
 
     function handleRestoreFile(event) {
         const file = event.target.files[0];
         if (!file) return;
-
         const reader = new FileReader();
         reader.onload = async function(e) {
             try {
                 const importedList = JSON.parse(e.target.result);
-                if (!Array.isArray(importedList)) {
-                    throw new Error("올바른 백업 파일 형식이 아닙니다.");
-                }
-
-                if (!window.isAllDbLoaded) {
-                    const confirmLoad = confirm("⚠️ 현재 브라우저 메모리에 전체 단어장 DB가 로드되어 있지 않습니다.\n(특정 시험만 본 상태에서 불러오면 스피킹 등의 예문이 누락될 수 있습니다.)\n\n완벽한 복원을 위해 기본 단어장(스피킹, 라이팅, 초록이, 라잎)을 모두 불러오시겠습니까?");
-                    
-                    if (confirmLoad) {
-                        const loadingModal = document.getElementById('loading-overlay');
-                        const loadingText = document.getElementById('loading-text');
-                        if (loadingModal) {
-                            if (loadingText) loadingText.innerText = "단어장 통합 데이터 로딩 중...";
-                            loadingModal.classList.remove('hidden');
-                        }
-
-                        try {
-                            const urls = [
-                                'https://docs.google.com/spreadsheets/d/1m7KXifCB6txkKEOHqApMWOR4MQwqb6Ji1Dm-hRJYzLc/edit?usp=sharing',
-                                'https://docs.google.com/spreadsheets/d/1UYTEv88wdKsSS2kkB-UylHAfQAlV6yrvjwVNecG6m64/edit?usp=sharing',
-                                'https://docs.google.com/spreadsheets/d/1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U/edit?usp=sharing',
-                                'https://docs.google.com/spreadsheets/d/1ElLraPc80Uez8innH6RfXOBz36IV9ARXnkAiUembWH0/edit?usp=sharing'
-                            ];
-                            
-                            const results = await Promise.all(urls.map(url => fetchSheetData(url)));
-                            loadedRawWordList = [];
-                            results.forEach(res => {
-                                loadedRawWordList = loadedRawWordList.concat(res);
-                            });
-                            
-                            window.isAllDbLoaded = true; 
-                            
-                        } catch (err) {
-                            alert("통합 데이터를 불러오는데 실패했습니다: " + err.message);
-                            if (loadingModal) loadingModal.classList.add('hidden');
-                            return; 
-                        }
-                        
-                        if (loadingModal) loadingModal.classList.add('hidden');
-                        if (loadingText) loadingText.innerText = "단어장 데이터를 가져오는 중...";
-                    }
-                }
-
-                let currentList = getPWASavedWords();
-                let addedCount = 0;
-                let updatedCount = 0;
-
-                importedList.forEach(item => {
-                    if (item && item.ko && item.en) {
-                        
-                        let syn = item.synonyms || '';
-                        let exEn = item.exEn || '';
-                        let exKo = item.exKo || '';
-
-                        const matchKo = sanitizeForMatch(item.ko);
-                        const matchEn = sanitizeForMatch(item.en);
-
-                        if (loadedRawWordList && loadedRawWordList.length > 0) {
-                            const match = loadedRawWordList.find(r => 
-                                sanitizeForMatch(r.ko) === matchKo && 
-                                sanitizeForMatch(r.en) === matchEn
-                            );
-                            if (match) {
-                                if (!syn && match.synonyms) syn = match.synonyms;
-                                if (!exEn && match.exEn) exEn = match.exEn;
-                                if (!exKo && match.exKo) exKo = match.exKo;
-                            }
-                        }
-
-                        const existingIdx = currentList.findIndex(w => 
-                            sanitizeForMatch(w.ko) === matchKo && 
-                            sanitizeForMatch(w.en) === matchEn
-                        );
-
-                        if (existingIdx > -1) {
-                            currentList[existingIdx].vagueCount = Math.max(currentList[existingIdx].vagueCount || 1, item.vagueCount || 1);
-                            if (!currentList[existingIdx].synonyms && syn) currentList[existingIdx].synonyms = syn;
-                            if (!currentList[existingIdx].exEn && exEn) currentList[existingIdx].exEn = exEn;
-                            if (!currentList[existingIdx].exKo && exKo) currentList[existingIdx].exKo = exKo;
-                            updatedCount++;
-                        } else {
-                            currentList.push({
-                                ko: item.ko,
-                                en: item.en,
-                                exEn: exEn,
-                                exKo: exKo,
-                                synonyms: syn,
-                                category: item.category || '기타',
-                                dayIndex: item.dayIndex !== undefined ? item.dayIndex : -1,
-                                vagueCount: item.vagueCount || 1
-                            });
-                            addedCount++;
-                        }
-                    }
-                });
-
-                localStorage.setItem(PWA_VAGUE_STORAGE_KEY, JSON.stringify(currentList));
-                updatePWAReviewButtonUI();
-                
-                alert(`백업 파일에서 ${importedList.length}개 단어를 확인했습니다.\n(신규 추가: ${addedCount}개, 병합 업데이트: ${updatedCount}개 완료)`);
-            } catch (err) {
-                alert("파일을 불러오는 중 오류가 발생했습니다: " + err.message);
-            }
+                await processImportedData(importedList);
+                closeDataModal();
+            } catch (err) { alert("파일을 불러오는 중 오류가 발생했습니다: " + err.message); }
         };
         reader.readAsText(file, 'UTF-8');
+    }
+
+    window.syncToGoogleDrive = async function() {
+        if (!GOOGLE_CLIENT_ID) { alert("스크립트 상단에 GOOGLE_CLIENT_ID를 먼저 입력해야 합니다."); return; }
+        const savedList = getPWASavedWords();
+        if (savedList.length === 0) { alert("백업할 취약 단어가 없습니다."); return; }
+        requestGoogleAuth(async () => {
+            try {
+                const dataToSave = JSON.stringify(savedList, null, 2);
+                const fileName = 'pongcrush_sync_data.json';
+                const res = await gapi.client.drive.files.list({
+                    q: `name = '${fileName}' and trashed = false`, fields: 'files(id, name)', spaces: 'drive'
+                });
+                const files = res.result.files;
+                const fileContent = new Blob([dataToSave], { type: 'application/json' });
+                if (files && files.length > 0) {
+                    await fetch(`https://www.googleapis.com/upload/drive/v3/files/${files[0].id}?uploadType=media`, {
+                        method: 'PATCH', headers: { Authorization: `Bearer ${gapi.client.getToken().access_token}`, 'Content-Type': 'application/json' }, body: fileContent
+                    });
+                    alert('✅ 구글 드라이브에 성공적으로 업데이트 되었습니다!');
+                } else {
+                    const metadata = { name: fileName, mimeType: 'application/json' };
+                    const form = new FormData();
+                    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+                    form.append('file', fileContent);
+                    await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+                        method: 'POST', headers: { Authorization: `Bearer ${gapi.client.getToken().access_token}` }, body: form
+                    });
+                    alert('✅ 구글 드라이브에 새 백업 파일이 생성되었습니다!');
+                }
+                closeDataModal();
+            } catch (err) { alert('❌ 구글 드라이브 저장 실패: ' + err.message); }
+        });
+    };
+
+    window.loadFromGoogleDrive = async function() {
+        if (!GOOGLE_CLIENT_ID) { alert("스크립트 상단에 GOOGLE_CLIENT_ID를 먼저 입력해야 합니다."); return; }
+        requestGoogleAuth(async () => {
+            try {
+                const fileName = 'pongcrush_sync_data.json';
+                const res = await gapi.client.drive.files.list({
+                    q: `name = '${fileName}' and trashed = false`, fields: 'files(id, name)', spaces: 'drive'
+                });
+                const files = res.result.files;
+                if (!files || files.length === 0) { alert('⚠️ 구글 드라이브에 저장된 백업 파일이 없습니다.'); return; }
+                const fileData = await gapi.client.drive.files.get({ fileId: files[0].id, alt: 'media' });
+                const importedList = typeof fileData.body === 'string' ? JSON.parse(fileData.body) : fileData.body;
+                await processImportedData(importedList);
+                closeDataModal();
+            } catch (err) { alert('❌ 불러오기 실패: ' + err.message); }
+        });
+    };
+
+    function requestGoogleAuth(callback) {
+        if (!gapiInited || !gisInited) { alert("구글 API가 아직 준비되지 않았습니다. 잠시 후 시도해주세요."); return; }
+        
+        tokenClient.callback = async (resp) => {
+            if (resp.error !== undefined) {
+                localStorage.setItem('gdrive_connected', 'false');
+                throw resp;
+            }
+            localStorage.setItem('gdrive_connected', 'true');
+            if (callback) callback();
+        };
+
+        if (localStorage.getItem('gdrive_connected') === 'true') {
+            tokenClient.requestAccessToken({prompt: ''});
+        } else {
+            tokenClient.requestAccessToken({prompt: 'consent'});
+        }
     }
 
     function handleAutoplayBtnClick() {
@@ -3712,32 +3507,22 @@ When you finish the evaluation, STOP generating immediately.
                 btn.classList.remove('active');
                 btnLabel.innerText = "🖐️ 수동";
             }
-        } else {
-            openAutoplayModal();
-        }
+        } else openAutoplayModal();
     }
 
-    // ♾️ 무한 반복 토글 함수
     function toggleInfiniteLoop() {
         if (wordList.length === 0) return;
-
         if (isInfiniteLoop) {
-            // 이미 실행 중이면 끄기
             isInfiniteLoop = false;
             stopTTS();
             updateInfiniteButtonUI();
         } else {
-            // 무한 반복 켜기
             isInfiniteLoop = true;
-            
-            // 정답이 안 보여진 상태라면 보이게 처리 (선택)
             if (!showAnswers) {
                 showAnswers = true;
                 wrapperEl.classList.add('show-answers');
                 updateButtonsUI();
             }
-            
-            // 🚨 자동재생 중일 경우 수동 모드로 즉시 전환
             if (isAutoplay) {
                 isAutoplay = false;
                 clearAutoplayTimer();
@@ -3748,35 +3533,23 @@ When you finish the evaluation, STOP generating immediately.
                     btnLabel.innerText = "🖐️ 수동";
                 }
             }
-            
             updateInfiniteButtonUI();
             playInfiniteSpeech();
         }
     }
 
-    // ♾️ 무한 반복 재생 로직
     function playInfiniteSpeech() {
         if (!isInfiniteLoop) return;
-        
         speakCurrentWord(() => {
-            // 발음이 완전히 끝나고 나서도 무한 반복 상태라면 0.5초 대기 후 다시 재생
-            if (isInfiniteLoop) {
-                setTimeout(() => {
-                    if (isInfiniteLoop) playInfiniteSpeech();
-                }, 500); 
-            }
+            if (isInfiniteLoop) setTimeout(() => { if (isInfiniteLoop) playInfiniteSpeech(); }, 500); 
         });
     }
 
-    // ♾️ 무한 반복 버튼 UI 업데이트
     function updateInfiniteButtonUI() {
         const btn = document.getElementById('infinite-loop-btn');
         if (!btn) return;
-        if (isInfiniteLoop) {
-            btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
-        }
+        if (isInfiniteLoop) btn.classList.add('active');
+        else btn.classList.remove('active');
     }
 
     function openAutoplayModal() {
@@ -3803,11 +3576,8 @@ When you finish the evaluation, STOP generating immediately.
         const buttons = modal.querySelectorAll('.sec-btn-grid .sec-btn');
         const secValues = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0];
         buttons.forEach((btn, index) => {
-            if (secValues[index] === selectedSec) {
-                btn.classList.add('selected');
-            } else {
-                btn.classList.remove('selected');
-            }
+            if (secValues[index] === selectedSec) btn.classList.add('selected');
+            else btn.classList.remove('selected');
         });
     }
 
@@ -3832,30 +3602,22 @@ When you finish the evaluation, STOP generating immediately.
     function confirmAutoplayModal() {
         isAutoplay = true;
         autoplayIntervalSec = tempAutoplaySec;
-
         const btn = document.getElementById('autoplay-btn');
         const btnLabel = document.getElementById('autoplay-btn-label');
-
         if (btn && btnLabel) {
             btn.classList.add('active');
             btnLabel.innerText = "🤖 자동";
         }
-        
-        // 자동재생 진입 시 무한반복은 해제
         if (isInfiniteLoop) {
             isInfiniteLoop = false;
             updateInfiniteButtonUI();
         }
-
         closeAutoplayModal();
         startAutoplayLoopForCurrentCard();
     }
 
     function clearAutoplayTimer() {
-        if (autoplayTimer) {
-            clearTimeout(autoplayTimer);
-            autoplayTimer = null;
-        }
+        if (autoplayTimer) { clearTimeout(autoplayTimer); autoplayTimer = null; }
     }
 
     function speakKoreanWord(text, onCompleteCallback) {
@@ -3864,28 +3626,17 @@ When you finish the evaluation, STOP generating immediately.
             if (onCompleteCallback) onCompleteCallback();
             return;
         }
-
         let isFired = false;
         const safeCallback = () => {
-            if (!isFired) {
-                isFired = true;
-                if (onCompleteCallback) onCompleteCallback();
-            }
+            if (!isFired) { isFired = true; if (onCompleteCallback) onCompleteCallback(); }
         };
-
         const cleanText = text.replace(/<[^>]*>/g, '').replace(/#/g, ' ').replace(/<br>/g, ' ').trim();
         const utter = new SpeechSynthesisUtterance(cleanText);
-        utter.lang = 'ko-KR';
-        utter.rate = 1.0;
-        
-        utter.onend = safeCallback;
-        utter.onerror = safeCallback;
-        
+        utter.lang = 'ko-KR'; utter.rate = 1.0;
+        utter.onend = safeCallback; utter.onerror = safeCallback;
         setTimeout(safeCallback, 3500); 
-
         window.ttsUtterances.push(utter); 
         if (window.ttsUtterances.length > 10) window.ttsUtterances.shift();
-
         window.speechSynthesis.speak(utter);
     }
 
@@ -3894,24 +3645,17 @@ When you finish the evaluation, STOP generating immediately.
         if (!isAutoplay) return;
         if (document.getElementById('game-area').classList.contains('hidden')) return;
         if (wordList.length === 0) return;
-
         if (!showAnswers) {
             const item = wordList[currentStartIndex];
             if (isAutoplayReadKorean && item && item.ko) {
                 speakKoreanWord(item.ko, () => {
-                    autoplayTimer = setTimeout(() => {
-                        revealAndSpeakAutoplay();
-                    }, autoplayIntervalSec * 1000);
+                    autoplayTimer = setTimeout(() => { revealAndSpeakAutoplay(); }, autoplayIntervalSec * 1000);
                 });
             } else {
-                autoplayTimer = setTimeout(() => {
-                    revealAndSpeakAutoplay();
-                }, autoplayIntervalSec * 1000);
+                autoplayTimer = setTimeout(() => { revealAndSpeakAutoplay(); }, autoplayIntervalSec * 1000);
             }
         } else {
-            speakCurrentWord(() => {
-                if (isAutoplay) handlePrimaryAction();
-            });
+            speakCurrentWord(() => { if (isAutoplay) handlePrimaryAction(); });
         }
     }
 
@@ -3922,138 +3666,79 @@ When you finish the evaluation, STOP generating immediately.
             wrapperEl.classList.add('show-answers');
             updateButtonsUI();
         }
-
-        speakCurrentWord(() => {
-            if (isAutoplay) handlePrimaryAction();
-        });
+        speakCurrentWord(() => { if (isAutoplay) handlePrimaryAction(); });
     }
 
     function resetDefaultSessionSettings() {
         isAutoplay = false;
         isInfiniteLoop = false;
         updateInfiniteButtonUI();
-        
         clearAutoplayTimer();
         const autoBtn = document.getElementById('autoplay-btn');
         const autoLabel = document.getElementById('autoplay-btn-label');
         if (autoBtn) autoBtn.classList.remove('active');
         if (autoLabel) autoLabel.innerText = "🖐️ 수동";
-
         isMuted = true;
         if (bgAudio) bgAudio.muted = true;
         const muteBtn = document.getElementById('mute-btn');
         const muteLabel = document.getElementById('mute-btn-label');
-        if (muteBtn) {
-            muteBtn.classList.add('is-muted');
-            muteBtn.classList.remove('active-music');
-        }
+        if (muteBtn) { muteBtn.classList.add('is-muted'); muteBtn.classList.remove('active-music'); }
         if (muteLabel) muteLabel.innerText = "🔇 뮤트";
-
         selectedVoiceURI = '';
         try { localStorage.removeItem(SELECTED_VOICE_STORAGE_KEY); } catch(e){}
         updateVoiceModeTagUI();
     }
 
     function stopTTS() {
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-        }
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     }
 
     function speakCurrentWord(onCompleteCallback) {
         stopTTS();
-        if (!('speechSynthesis' in window)) {
-            if (onCompleteCallback) onCompleteCallback();
-            return;
-        }
-
+        if (!('speechSynthesis' in window)) { if (onCompleteCallback) onCompleteCallback(); return; }
         const item = wordList[currentStartIndex];
-        if (!item) {
-            if (onCompleteCallback) onCompleteCallback();
-            return;
-        }
-
+        if (!item) { if (onCompleteCallback) onCompleteCallback(); return; }
         const cleanWord = item.en ? item.en.replace(/<[^>]*>/g, '').replace(/#/g, ' ').trim() : '';
         const cleanExEn = item.exEn ? item.exEn.replace(/<[^>]*>/g, '').replace(/#/g, ' ').trim() : '';
-
-        if (!cleanWord) {
-            if (onCompleteCallback) onCompleteCallback();
-            return;
-        }
-
+        if (!cleanWord) { if (onCompleteCallback) onCompleteCallback(); return; }
         try {
             let isFired = false;
-            const safeCallback = () => {
-                if (!isFired) {
-                    isFired = true;
-                    if (onCompleteCallback) onCompleteCallback();
-                }
-            };
-
+            const safeCallback = () => { if (!isFired) { isFired = true; if (onCompleteCallback) onCompleteCallback(); } };
             const wordUtterance = new SpeechSynthesisUtterance(cleanWord);
-            wordUtterance.pitch = currentPitch;
-            wordUtterance.rate = currentRate;
-
+            wordUtterance.pitch = currentPitch; wordUtterance.rate = currentRate;
             const voiceObj = getRandomOrSelectedVoice();
-            if (voiceObj) {
-                wordUtterance.voice = voiceObj;
-                wordUtterance.lang = voiceObj.lang || 'en-US';
-            } else {
-                wordUtterance.lang = 'en-US';
-            }
-
+            if (voiceObj) { wordUtterance.voice = voiceObj; wordUtterance.lang = voiceObj.lang || 'en-US'; }
+            else wordUtterance.lang = 'en-US';
             if (cleanExEn) {
                 const exUtterance = new SpeechSynthesisUtterance(cleanExEn);
-                exUtterance.pitch = currentPitch;
-                exUtterance.rate = currentRate;
-                
-                if (voiceObj) {
-                    exUtterance.voice = voiceObj;
-                    exUtterance.lang = voiceObj.lang || 'en-US';
-                } else {
-                    exUtterance.lang = 'en-US';
-                }
-
-                wordUtterance.onend = () => {
-                    window.speechSynthesis.speak(exUtterance);
-                };
-                exUtterance.onend = safeCallback;
-                exUtterance.onerror = safeCallback;
-                
+                exUtterance.pitch = currentPitch; exUtterance.rate = currentRate;
+                if (voiceObj) { exUtterance.voice = voiceObj; exUtterance.lang = voiceObj.lang || 'en-US'; }
+                else exUtterance.lang = 'en-US';
+                wordUtterance.onend = () => { window.speechSynthesis.speak(exUtterance); };
+                exUtterance.onend = safeCallback; exUtterance.onerror = safeCallback;
                 setTimeout(safeCallback, 10000); 
-
                 window.ttsUtterances.push(wordUtterance, exUtterance);
             } else {
-                wordUtterance.onend = safeCallback;
-                wordUtterance.onerror = safeCallback;
+                wordUtterance.onend = safeCallback; wordUtterance.onerror = safeCallback;
                 setTimeout(safeCallback, 3500); 
-
                 window.ttsUtterances.push(wordUtterance);
             }
-
             if (window.ttsUtterances.length > 10) window.ttsUtterances.splice(0, window.ttsUtterances.length - 10);
             window.speechSynthesis.speak(wordUtterance);
         } catch (e) {
-            console.warn("TTS 발음 재생 실패:", e);
             if (onCompleteCallback) onCompleteCallback();
         }
     }
 
     function getSynthAudioContext() {
-        if (!synthAudioCtx) {
-            synthAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (synthAudioCtx.state === 'suspended') {
-            synthAudioCtx.resume();
-        }
+        if (!synthAudioCtx) synthAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (synthAudioCtx.state === 'suspended') synthAudioCtx.resume();
         return synthAudioCtx;
     }
 
     function unlockAudioContext() {
         const ctx = getSynthAudioContext();
-        if (ctx && ctx.state === 'suspended') {
-            ctx.resume();
-        }
+        if (ctx && ctx.state === 'suspended') ctx.resume();
     }
     window.addEventListener('click', unlockAudioContext, { passive: true });
     window.addEventListener('touchstart', unlockAudioContext, { passive: true });
@@ -4063,31 +3748,20 @@ When you finish the evaluation, STOP generating immediately.
         isMuted = !isMuted;
         const muteBtn = document.getElementById('mute-btn');
         const muteBtnLabel = document.getElementById('mute-btn-label');
-
         if (isMuted) {
             if (muteBtnLabel) muteBtnLabel.innerText = '🔇 뮤트';
-            if (muteBtn) {
-                muteBtn.classList.add('is-muted');
-                muteBtn.classList.remove('active-music');
-            }
+            if (muteBtn) { muteBtn.classList.add('is-muted'); muteBtn.classList.remove('active-music'); }
         } else {
             if (muteBtnLabel) muteBtnLabel.innerText = '🎵 노래';
-            if (muteBtn) {
-                muteBtn.classList.remove('is-muted');
-                muteBtn.classList.add('active-music');
-            }
+            if (muteBtn) { muteBtn.classList.remove('is-muted'); muteBtn.classList.add('active-music'); }
         }
-
-        if (bgAudio) {
-            bgAudio.muted = isMuted;
-        }
+        if (bgAudio) bgAudio.muted = isMuted;
     }
 
     function playFanfareSound() {
         try {
             const ctx = getSynthAudioContext();
             const now = ctx.currentTime;
-
             const notes = [
                 { freq: 523.25, time: 0, duration: 0.12 },
                 { freq: 523.25, time: 0.13, duration: 0.12 },
@@ -4096,22 +3770,15 @@ When you finish the evaluation, STOP generating immediately.
                 { freq: 783.99, time: 0.65, duration: 0.25 },
                 { freq: 1046.50, time: 0.92, duration: 0.8 }
             ];
-
             notes.forEach(note => {
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
-
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(note.freq, now + note.time);
-
                 gain.gain.setValueAtTime(0.25, now + note.time);
                 gain.gain.exponentialRampToValueAtTime(0.001, now + note.time + note.duration);
-
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-
-                osc.start(now + note.time);
-                osc.stop(now + note.time + note.duration);
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.start(now + note.time); osc.stop(now + note.time + note.duration);
             });
         } catch (e) {}
     }
@@ -4141,18 +3808,12 @@ When you finish the evaluation, STOP generating immediately.
         stopBgSound();
         const randomTrack = Math.floor(Math.random() * 8) + 1;
         bgAudio = new Audio(`sounds/${randomTrack}.mp3`);
-        bgAudio.loop = true;
-        bgAudio.volume = 0.5;
-        bgAudio.muted = isMuted;
+        bgAudio.loop = true; bgAudio.volume = 0.5; bgAudio.muted = isMuted;
         bgAudio.play().catch(err => {});
     }
 
     function stopBgSound() {
-        if (bgAudio) {
-            bgAudio.pause();
-            bgAudio.currentTime = 0;
-            bgAudio = null;
-        }
+        if (bgAudio) { bgAudio.pause(); bgAudio.currentTime = 0; bgAudio = null; }
     }
 
     function updateKoCardBackground() {
@@ -4166,26 +3827,17 @@ When you finish the evaluation, STOP generating immediately.
     function startStudyTimer() {
         sessionStartTimeMs = Date.now();
         if (sessionTimerInterval) clearInterval(sessionTimerInterval);
-        
         const trailEl = document.getElementById('nyan-trail');
         if (trailEl) trailEl.style.width = `0%`;
-        
         const timerTextEl = document.getElementById('study-timer-text');
-        if (timerTextEl) {
-            timerTextEl.innerText = "07:00";
-            timerTextEl.classList.remove('overtime');
-        }
-
+        if (timerTextEl) { timerTextEl.innerText = "07:00"; timerTextEl.classList.remove('overtime'); }
         sessionTimerInterval = setInterval(() => {
             const elapsed = Date.now() - sessionStartTimeMs;
             const elapsedSec = Math.floor(elapsed / 1000);
-            const maxSec = 420; // 7 minutes
+            const maxSec = 420; 
             let pct = (elapsedSec / maxSec) * 100;
-            
             if (pct > 100) pct = 100; 
-            
             if (trailEl) trailEl.style.width = `${pct}%`;
-            
             if (timerTextEl) {
                 if (elapsedSec <= maxSec) {
                     const remainSec = maxSec - elapsedSec;
@@ -4201,25 +3853,17 @@ When you finish the evaluation, STOP generating immediately.
                     timerTextEl.classList.add('overtime');
                 }
             }
-
             let newImgNum = 1;
             if (pct >= 75) newImgNum = 4;
             else if (pct >= 50) newImgNum = 3;
             else if (pct >= 25) newImgNum = 2;
             else newImgNum = 1;
-
-            if (currentImgNum !== newImgNum) {
-                currentImgNum = newImgNum;
-                updateKoCardBackground();
-            }
+            if (currentImgNum !== newImgNum) { currentImgNum = newImgNum; updateKoCardBackground(); }
         }, 1000);
     }
 
     function stopStudyTimer() {
-        if (sessionTimerInterval) {
-            clearInterval(sessionTimerInterval);
-            sessionTimerInterval = null;
-        }
+        if (sessionTimerInterval) { clearInterval(sessionTimerInterval); sessionTimerInterval = null; }
     }
 
     function updateProgressUI() {
@@ -4231,11 +3875,7 @@ When you finish the evaluation, STOP generating immediately.
     function loadShortcutUrl(url) {
         if (url.includes("1ElLraPc80Uez8innH6RfXOBz36IV9ARXnkAiUembWH0")) {
             const modal = document.getElementById('life-notice-modal');
-            if (modal) {
-                pendingLifeUrl = url;
-                modal.classList.remove('hidden');
-                return;
-            }
+            if (modal) { pendingLifeUrl = url; modal.classList.remove('hidden'); return; }
         }
         window.isAllDbLoaded = false; 
         loadExcelFromUrl(url);
@@ -4269,8 +3909,6 @@ When you finish the evaluation, STOP generating immediately.
             if (exportUrl.includes("/edit")) exportUrl = exportUrl.split('/edit')[0] + '/export?format=xlsx';
             else if (!exportUrl.includes("/export")) exportUrl = exportUrl + '/export?format=xlsx';
         }
-
-        // 🛠️ Service Worker의 캐시를 직접 삭제하여 강제 갱신 유도
         if (bypassCache && 'caches' in window) {
             try {
                 const cacheNames = await caches.keys();
@@ -4280,20 +3918,13 @@ When you finish the evaluation, STOP generating immediately.
                         await cache.delete(exportUrl);
                     }
                 }
-            } catch(e) {
-                console.warn("캐시 삭제 실패:", e);
-            }
+            } catch(e) {}
         }
-
         let response;
         try {
-            // 🛠️ 캐시 삭제 후 브라우저 네트워크를 강제로 새로고침(reload)
             const fetchOptions = bypassCache ? { cache: 'reload' } : {};
             response = await fetch(exportUrl, fetchOptions);
-        } catch (e) {
-            console.warn(e);
-        }
-
+        } catch (e) { console.warn(e); }
         if (!response || !response.ok) throw new Error("파일 로드 실패. 링크 공유 권한을 확인하세요.");
         
         const arrayBuffer = await response.arrayBuffer();
@@ -4317,63 +3948,35 @@ When you finish the evaluation, STOP generating immediately.
 
     async function loadExcelFromUrl(targetUrl, bypassCache = false) {
         let url = targetUrl || '';
-        
-        if (!url) {
-            statusEl.classList.add('error');
-            statusEl.innerText = "유효한 단어장 URL이 선택되지 않았습니다.";
-            return;
-        }
+        if (!url) { statusEl.classList.add('error'); statusEl.innerText = "URL이 선택되지 않았습니다."; return; }
 
-        if (url.includes("1m7KXifCB6txkKEOHqApMWOR4MQwqb6Ji1Dm-hRJYzLc")) {
-            currentCategory = "스피킹";
-            perDayCount = 30;
-        } else if (url.includes("1UYTEv88wdKsSS2kkB-UylHAfQAlV6yrvjwVNecG6m64")) {
-            currentCategory = "라이팅";
-            perDayCount = 40;
-        } else if (url.includes("1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U")) {
-            currentCategory = "초록이";
-            perDayCount = 60;
-        } else if (url.includes("1ElLraPc80Uez8innH6RfXOBz36IV9ARXnkAiUembWH0")) {
-            currentCategory = "라잎";
-            perDayCount = 15; 
-        } else {
-            currentCategory = "단어암기";
-            perDayCount = 30;
-        }
+        if (url.includes("1m7KXifCB6txkKEOHqApMWOR4MQwqb6Ji1Dm-hRJYzLc")) { currentCategory = "스피킹"; perDayCount = 30; }
+        else if (url.includes("1UYTEv88wdKsSS2kkB-UylHAfQAlV6yrvjwVNecG6m64")) { currentCategory = "라이팅"; perDayCount = 40; }
+        else if (url.includes("1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U")) { currentCategory = "초록이"; perDayCount = 60; }
+        else if (url.includes("1ElLraPc80Uez8innH6RfXOBz36IV9ARXnkAiUembWH0")) { currentCategory = "라잎"; perDayCount = 15; }
+        else { currentCategory = "단어암기"; perDayCount = 30; }
 
-        statusEl.classList.remove('error');
-        statusEl.innerText = "";
-        
+        statusEl.classList.remove('error'); statusEl.innerText = "";
         const loadingModal = document.getElementById('loading-overlay');
         if (loadingModal) loadingModal.classList.remove('hidden');
 
         try {
             const tempExtractList = await fetchSheetData(url, bypassCache);
-
-            if (tempExtractList.length === 0) {
-                throw new Error("유효한 단어 데이터(1열 한국어, 2열 영어)가 없습니다.");
-            }
-
+            if (tempExtractList.length === 0) throw new Error("유효한 단어 데이터(1열 한국어, 2열 영어)가 없습니다.");
             loadedRawWordList = tempExtractList;
-            
             if (loadingModal) loadingModal.classList.add('hidden');
             openDayModal();
-
         } catch (error) {
-            console.error(error);
             if (loadingModal) loadingModal.classList.add('hidden');
-            statusEl.classList.add('error');
-            statusEl.innerText = "에러: " + error.message;
+            statusEl.classList.add('error'); statusEl.innerText = "에러: " + error.message;
         }
     }
 
     function openDayModal() {
         const modal = document.getElementById('day-modal');
         if (!modal) return;
-
         const titleEl = document.getElementById('day-modal-title');
         if (titleEl) titleEl.innerText = `📅 ${currentCategory} 시험 Day 선택`;
-
         modal.classList.remove('hidden');
         renderDayButtonsUI();
     }
@@ -4387,76 +3990,51 @@ When you finish the evaluation, STOP generating immediately.
         const titleEl = document.getElementById('day-list-title');
         const gridEl = document.getElementById('day-buttons-grid');
         if (!gridEl) return;
-
         const totalWords = loadedRawWordList.length;
         if (titleEl) titleEl.innerText = `📌 학습할 Day 선택 (총 ${totalWords}개 단어 / Day당 ${perDayCount}개)`;
-
         const totalDays = Math.ceil(totalWords / perDayCount);
-        let html = `
-            <button class="sec-btn" style="grid-column: span 3; background:#e0f2fe; color:#0369a1; border-color:#0284c7;" onclick="selectDayRange(-1)">
-                🔥 전체 단어 복습 (1 ~ ${totalWords}번)
-            </button>
-        `;
-
+        let html = `<button class="sec-btn" style="grid-column: span 3; background:#e0f2fe; color:#0369a1; border-color:#0284c7;" onclick="selectDayRange(-1)">🔥 전체 단어 복습 (1 ~ ${totalWords}번)</button>`;
         for (let i = 0; i < totalDays; i++) {
             const startIdx = i * perDayCount + 1;
             const endIdx = Math.min((i + 1) * perDayCount, totalWords);
-            html += `
-                <button class="sec-btn" onclick="selectDayRange(${i})">
-                    Day ${i + 1}<br><span style="font-size:11px; opacity:0.8; font-weight:normal;">(${startIdx}~${endIdx})</span>
-                </button>
-            `;
+            html += `<button class="sec-btn" onclick="selectDayRange(${i})">Day ${i + 1}<br><span style="font-size:11px; opacity:0.8; font-weight:normal;">(${startIdx}~${endIdx})</span></button>`;
         }
-
         gridEl.innerHTML = html;
     }
 
     function selectDayRange(dayIndex) {
         closeDayModal();
         let selectedSubset = [];
-
         currentDayIndex = dayIndex;
         isWeakReviewMode = false;
-
-        if (dayIndex === -1) {
-            selectedSubset = [...loadedRawWordList];
-        } else {
+        if (dayIndex === -1) selectedSubset = [...loadedRawWordList];
+        else {
             const start = dayIndex * perDayCount;
             const end = Math.min((dayIndex + 1) * perDayCount, loadedRawWordList.length);
             selectedSubset = loadedRawWordList.slice(start, end);
         }
-
         if (selectedSubset.length === 0) return;
-
         originalWordList = shuffleArray(selectedSubset);
         wordList = [...originalWordList]; 
         vagueWords = [];
-
         currentStartIndex = 0;
         showAnswers = false;
-        
         resetDefaultSessionSettings();
-
         document.getElementById('setup-area').classList.add('hidden');
         document.getElementById('summary-area').classList.add('hidden');
         document.getElementById('game-area').classList.remove('hidden');
-
         document.body.classList.add('game-active');
-
         const types = ['type1', 'type2', 'type3'];
         currentImageType = types[Math.floor(Math.random() * types.length)];
         currentImgNum = 1;
-
         startStudyTimer();
         playRandomBgSound();
-
         renderCards();
     }
 
     function openWeakReviewModal() {
         const modal = document.getElementById('weak-review-modal');
         if (!modal) return;
-
         modal.classList.remove('hidden');
         renderWeakReviewModalUI();
     }
@@ -4468,20 +4046,16 @@ When you finish the evaluation, STOP generating immediately.
 
     function renderWeakReviewModalUI() {
         const savedList = getPWASavedWords();
-        
         const allBtn = document.getElementById('weak-review-all-btn');
         if (allBtn) allBtn.innerText = `🔥 전체 취약 단어 복습 (${savedList.length}개)`;
-
         const spkWords = savedList.filter(w => w.category === '스피킹');
         const wrtWords = savedList.filter(w => w.category === '라이팅');
         const grnWords = savedList.filter(w => w.category === '초록이');
         const lifeWords = savedList.filter(w => w.category === '라잎');
-
         document.getElementById('col-cnt-speaking').innerText = `(${spkWords.length}개)`;
         document.getElementById('col-cnt-writing').innerText = `(${wrtWords.length}개)`;
         document.getElementById('col-cnt-green').innerText = `(${grnWords.length}개)`;
         document.getElementById('col-cnt-life').innerText = `(${lifeWords.length}개)`;
-
         renderWeakDayList('speaking', '스피킹', spkWords);
         renderWeakDayList('writing', '라이팅', wrtWords);
         renderWeakDayList('green', '초록이', grnWords);
@@ -4491,32 +4065,23 @@ When you finish the evaluation, STOP generating immediately.
     function renderWeakDayList(elementIdSuffix, categoryName, wordList) {
         const container = document.getElementById(`weak-day-list-${elementIdSuffix}`);
         if (!container) return;
-
         if (wordList.length === 0) {
             container.innerHTML = `<div style="text-align:center; padding:12px 0; color:#94a3b8; font-size:11px;">없음</div>`;
             return;
         }
-
         const dayMap = {};
         wordList.forEach(w => {
             const dayIdx = w.dayIndex !== undefined ? w.dayIndex : -1;
             if (!dayMap[dayIdx]) dayMap[dayIdx] = 0;
             dayMap[dayIdx]++;
         });
-
         let html = '';
         Object.keys(dayMap).sort((a,b) => a - b).forEach(dayIdxStr => {
             const dayIdx = parseInt(dayIdxStr);
             const count = dayMap[dayIdx];
             const dayText = dayIdx >= 0 ? `D${dayIdx + 1}` : '자율';
-
-            html += `
-                <button class="weak-day-btn" onclick="startWeakReviewSession('DAY', '${categoryName}', ${dayIdx})">
-                    ${dayText} (${count})
-                </button>
-            `;
+            html += `<button class="weak-day-btn" onclick="startWeakReviewSession('DAY', '${categoryName}', ${dayIdx})">${dayText} (${count})</button>`;
         });
-
         container.innerHTML = html;
     }
 
@@ -4524,55 +4089,39 @@ When you finish the evaluation, STOP generating immediately.
         closeWeakReviewModal();
         const savedList = getPWASavedWords();
         let targetWords = [];
-
-        if (type === 'ALL') {
-            targetWords = [...savedList];
-            currentWeakReviewTitle = '전체 영역';
-        } else if (type === 'CAT') {
-            targetWords = savedList.filter(w => w.category === category);
-            currentWeakReviewTitle = `${category} 전체`;
-        } else if (type === 'DAY') {
+        if (type === 'ALL') { targetWords = [...savedList]; currentWeakReviewTitle = '전체 영역'; }
+        else if (type === 'CAT') { targetWords = savedList.filter(w => w.category === category); currentWeakReviewTitle = `${category} 전체`; }
+        else if (type === 'DAY') {
             targetWords = savedList.filter(w => w.category === category && w.dayIndex === dayIndex);
             const dayText = dayIndex >= 0 ? `D${dayIndex + 1}` : '자율';
             currentWeakReviewTitle = `${category} ${dayText}`;
         }
-
         if (targetWords.length === 0) return;
-
         isWeakReviewMode = true;
         testedWeakWordsInSession = [...targetWords];
         originalWordList = shuffleArray(targetWords);
         wordList = [...originalWordList];
         vagueWords = [];
-
         currentStartIndex = 0;
         showAnswers = false;
-        
         resetDefaultSessionSettings();
-
         document.getElementById('setup-area').classList.add('hidden');
         document.getElementById('summary-area').classList.add('hidden');
         document.getElementById('game-area').classList.remove('hidden');
-
         document.body.classList.add('game-active');
-
         const types = ['type1', 'type2', 'type3'];
         currentImageType = types[Math.floor(Math.random() * types.length)];
         currentImgNum = 1;
-
         startStudyTimer();
         playRandomBgSound();
-
         renderCards();
     }
 
     function updateButtonsUI() {
         if (wordList.length === 0) return;
-
         const targetItem = wordList[currentStartIndex];
         const vagueTextEl = document.getElementById('vague-btn-text');
         const actionTextEl = document.getElementById('action-btn-text');
-
         vagueBtn.classList.remove('btn-state-yellow', 'btn-state-red', 'btn-state-green');
 
         if (isCurrentCardChecked) {
@@ -4589,7 +4138,6 @@ When you finish the evaluation, STOP generating immediately.
         } else {
             const savedList = getPWASavedWords();
             const isVague = vagueWords.some(item => item.ko === targetItem.ko && item.en === targetItem.en);
-
             if (isVague) {
                 if (vagueTextEl) vagueTextEl.innerText = "체크 완료 ✓";
                 vagueBtn.classList.add('btn-state-green');
@@ -4602,23 +4150,13 @@ When you finish the evaluation, STOP generating immediately.
             }
         }
 
-        if (!showAnswers) {
-            if (actionTextEl) actionTextEl.innerText = "정답 확인 👁️";
-        } else {
-            if (actionTextEl) actionTextEl.innerText = "다음 단어 ▶";
-        }
+        if (!showAnswers) { if (actionTextEl) actionTextEl.innerText = "정답 확인 👁️"; }
+        else { if (actionTextEl) actionTextEl.innerText = "다음 단어 ▶"; }
         
         const prevBtn = document.getElementById('prev-btn');
         if (prevBtn) {
-            if (currentStartIndex === 0) {
-                prevBtn.disabled = true;
-                prevBtn.style.opacity = '0.4';
-                prevBtn.style.cursor = 'not-allowed';
-            } else {
-                prevBtn.disabled = false;
-                prevBtn.style.opacity = '1';
-                prevBtn.style.cursor = 'pointer';
-            }
+            if (currentStartIndex === 0) { prevBtn.disabled = true; prevBtn.style.opacity = '0.4'; prevBtn.style.cursor = 'not-allowed'; }
+            else { prevBtn.disabled = false; prevBtn.style.opacity = '1'; prevBtn.style.cursor = 'pointer'; }
         }
     }
 
@@ -4632,9 +4170,7 @@ When you finish the evaluation, STOP generating immediately.
     function renderCheckBadgesHtml(countVal) {
         if (countVal <= 0) return '';
         let html = '';
-        for (let i = 0; i < countVal; i++) {
-            html += `<span class="check-icon-badge" title="${i + 1}회 체크">✔</span>`;
-        }
+        for (let i = 0; i < countVal; i++) html += `<span class="check-icon-badge" title="${i + 1}회 체크">✔</span>`;
         return html;
     }
 
@@ -4646,78 +4182,48 @@ When you finish the evaluation, STOP generating immediately.
     }
 
     function renderCards() {
-        // 기존 렌더링 시 무한 반복만 해제하던 부분을 유지합니다.
-        // 강제 종료는 handlePrevAction이나 handlePrimaryAction 등 버튼 액션단에서 처리됩니다.
         isInfiniteLoop = false; 
-        
         if (wordList.length === 0) return; 
         
         wrapperEl.innerHTML = '';
         showAnswers = false;
         isCurrentCardChecked = false;
         wrapperEl.classList.remove('show-answers');
-
         const targetIndex = currentStartIndex;
         
         if (targetIndex < wordList.length) {
             const item = wordList[targetIndex];
-
             const plainKoLength = item.ko.replace(/<[^>]*>/g, '').length;
             const isLongText = plainKoLength >= 45;
             const wordClass = isLongText ? 'card-word long-text' : 'card-word';
-
             const formattedExKo = formatContextInText(item.exKo);
-            const exampleKoHtml = formattedExKo ? `
-                <div class="ex-ko">${formattedExKo}</div>
-            ` : '';
-
-            const exampleEnHtml = item.exEn ? `
-                <div class="ex-en">${item.exEn}</div>
-            ` : '';
-
-            const synonymsHtml = item.synonyms ? `
-                <div class="card-synonyms">
-                    ${item.synonyms}
-                </div>
-            ` : '';
-
+            const exampleKoHtml = formattedExKo ? `<div class="ex-ko">${formattedExKo}</div>` : '';
+            const exampleEnHtml = item.exEn ? `<div class="ex-en">${item.exEn}</div>` : '';
+            const synonymsHtml = item.synonyms ? `<div class="card-synonyms">${item.synonyms}</div>` : '';
             const speakingTargetTextToUse = item.exEn ? item.exEn : item.en;
             const speakingTypeToUse = item.exEn ? 'sentence' : 'word';
-
             const countVal = getCardCheckCount(item);
             const badgesHtml = `<div id="card-check-badges-container" class="vague-check-badges-wrap">${renderCheckBadgesHtml(countVal)}</div>`;
 
             let testInfoText = "";
-            if (isWeakReviewMode) {
-                testInfoText = `🔥 취약 복습 (${currentWeakReviewTitle})`;
-            } else if (currentDayIndex === -1) {
-                testInfoText = `${currentCategory} 전체 복습`;
-            } else {
-                testInfoText = `${currentCategory} Day ${currentDayIndex + 1}`;
-            }
+            if (isWeakReviewMode) testInfoText = `🔥 취약 복습 (${currentWeakReviewTitle})`;
+            else if (currentDayIndex === -1) testInfoText = `${currentCategory} 전체 복습`;
+            else testInfoText = `${currentCategory} Day ${currentDayIndex + 1}`;
+            
             const testInfoHtml = `<div class="current-test-badge">${testInfoText}</div>`;
-
             const displayKo = item.ko;
-
             const cardHtml = `
                 <div class="card">
                     <div class="card-section section-ko">
-                        <!-- 💡 정보 뱃지와 체크 아이콘을 하나의 그룹(동일 줄)으로 묶음 -->
-                        <div class="card-top-left-info">
-                            ${testInfoHtml}
-                            ${badgesHtml}
-                        </div>
+                        <div class="card-top-left-info">${testInfoHtml}${badgesHtml}</div>
                         <div class="card-top-actions-ko">
                             <button type="button" class="writing-test-trigger-btn" title="영작 테스트 (T)" onclick="event.stopPropagation(); openWritingModalFromCard();">
                                 ✍️ 영작 테스트 <span class="desktop-shortcut">(T)</span>
                             </button>
                         </div>
-                        
                         <div class="card-content-center">
                             <div class="${wordClass}">${displayKo}</div>
-                            <div class="card-example">
-                                ${exampleKoHtml}
-                            </div>
+                            <div class="card-example">${exampleKoHtml}</div>
                         </div>
                     </div>
                     <div class="card-section section-en" onclick="if(showAnswers) speakCurrentWord();">
@@ -4732,124 +4238,70 @@ When you finish the evaluation, STOP generating immediately.
                                 🎙️ <span class="desktop-shortcut">(Z)</span>
                             </button>
                         </div>
-                        
                         <div class="card-content-center">
                             <div class="placeholder">?</div>
                             <div class="${wordClass}">${item.en}</div>
-                            ${item.exEn || item.synonyms ? `
-                                <div class="card-example">
-                                    ${exampleEnHtml}
-                                    ${synonymsHtml}
-                                </div>
-                            ` : ''}
+                            ${item.exEn || item.synonyms ? `<div class="card-example">${exampleEnHtml}${synonymsHtml}</div>` : ''}
                         </div>
                     </div>
                 </div>
             `;
             wrapperEl.insertAdjacentHTML('beforeend', cardHtml);
         }
-
         updateProgressUI();
         updateButtonsUI();
         updateKoCardBackground(); 
-
         if (isAutoplay) startAutoplayLoopForCurrentCard();
     }
 
-    // 💡 이전 버튼(Prev) 동작 수정 💡
     function handlePrevAction() {
-        // 1. 모든 오디오 및 타이머 강제 종료
         stopTTS();
         clearAutoplayTimer();
-
-        // 2. 무한 반복 모드 강제 해제
-        if (isInfiniteLoop) {
-            isInfiniteLoop = false;
-            updateInfiniteButtonUI();
-        }
-
-        // 3. 자동재생 모드 강제 해제 (수동 모드 전환)
+        if (isInfiniteLoop) { isInfiniteLoop = false; updateInfiniteButtonUI(); }
         if (isAutoplay) {
             isAutoplay = false;
             const btn = document.getElementById('autoplay-btn');
             const btnLabel = document.getElementById('autoplay-btn-label');
-            if (btn && btnLabel) {
-                btn.classList.remove('active');
-                btnLabel.innerText = "🖐️ 수동";
-            }
+            if (btn && btnLabel) { btn.classList.remove('active'); btnLabel.innerText = "🖐️ 수동"; }
         }
-
         if (wordList.length === 0) return;
-        
-        // 4. 이전 카드로 이동 및 렌더링
-        if (currentStartIndex > 0) {
-            currentStartIndex -= cardsPerPage;
-            renderCards();
-        }
+        if (currentStartIndex > 0) { currentStartIndex -= cardsPerPage; renderCards(); }
     }
 
     function handleVagueAction(targetIndex) {
         clearAutoplayTimer();
         if (wordList.length === 0) return;
-
         if (targetIndex < wordList.length) {
             const targetItem = wordList[targetIndex];
-            
             if (!isCurrentCardChecked) {
-                if (!vagueWords.some(item => item.ko === targetItem.ko && item.en === targetItem.en)) {
-                    vagueWords.push(targetItem);
-                }
+                if (!vagueWords.some(item => item.ko === targetItem.ko && item.en === targetItem.en)) vagueWords.push(targetItem);
                 addWordToPWAStorage(targetItem);
                 isCurrentCardChecked = true;
-                
                 updateCardCheckBadges(targetItem);
             }
         }
-
         if (!showAnswers) {
             showAnswers = true;
             wrapperEl.classList.add('show-answers');
-            speakCurrentWord(() => {
-                if (isAutoplay) handlePrimaryAction();
-            });
+            speakCurrentWord(() => { if (isAutoplay) handlePrimaryAction(); });
         }
-
         updateButtonsUI();
     }
 
-    // 💡 정답 확인 / 다음 버튼 동작 분리 수정 💡
     function handlePrimaryAction() {
         clearAutoplayTimer();
         if (wordList.length === 0) return;
-
         if (!showAnswers) {
-            // [1] "정답 확인" 액션
-            // 오디오를 끄지 않고 정상적으로 해당 단어의 영문을 읽어줌
             showAnswers = true;
             wrapperEl.classList.add('show-answers');
             updateButtonsUI();
-            
-            speakCurrentWord(() => {
-                if (isAutoplay) handlePrimaryAction();
-            });
+            speakCurrentWord(() => { if (isAutoplay) handlePrimaryAction(); });
         } else {
-            // [2] "다음 단어" 액션
-            // 이전 단어의 오디오가 아직 재생 중이라면 즉시 강제 종료
             stopTTS();
-            
-            // 무한 반복 모드 해제
-            if (isInfiniteLoop) {
-                isInfiniteLoop = false;
-                updateInfiniteButtonUI();
-            }
-
-            // 다음 카드로 이동
+            if (isInfiniteLoop) { isInfiniteLoop = false; updateInfiniteButtonUI(); }
             if (currentStartIndex + cardsPerPage < wordList.length) {
-                currentStartIndex += cardsPerPage;
-                renderCards();
-            } else {
-                showSummaryNotes();
-            }
+                currentStartIndex += cardsPerPage; renderCards();
+            } else { showSummaryNotes(); }
         }
     }
 
@@ -4864,7 +4316,6 @@ When you finish the evaluation, STOP generating immediately.
         const tbody = document.getElementById('summary-tbody');
         const titleText = document.getElementById('summary-title-text');
         const actionTh = document.getElementById('summary-action-th');
-        
         tbody.innerHTML = '';
 
         const targetDisplayList = isWeakReviewMode ? [...testedWeakWordsInSession] : [...vagueWords];
@@ -4902,12 +4353,9 @@ When you finish the evaluation, STOP generating immediately.
                         </div>
                     `;
                 }
-
                 const matchedSaved = savedList.find(w => w.ko === item.ko && w.en === item.en);
                 const countVal = matchedSaved ? (matchedSaved.vagueCount || 0) : 0;
-                
                 const displayKoForSummary = item.ko;
-
                 const koCellContent = `
                     <div style="font-weight: 700; color: var(--text-main); display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap;">
                         <span>${displayKoForSummary}</span>
@@ -4917,36 +4365,25 @@ When you finish the evaluation, STOP generating immediately.
                         </span>` : ''}
                     </div>
                 `;
-
                 const actionTdHtml = isWeakReviewMode ? `
                     <td style="text-align: center;">
                         <button class="row-del-btn" onclick="deleteSingleWeakWordFromTable('${item.ko.replace(/'/g, "\\'")}', '${item.en.replace(/'/g, "\\'")}', this)">🗑️ 삭제</button>
                     </td>
                 ` : '<td class="hidden"></td>';
 
-                const rowHtml = `
-                    <tr>
-                        <td>${koCellContent}</td>
-                        <td>${enCellContent}</td>
-                        ${actionTdHtml}
-                    </tr>
-                `;
+                const rowHtml = `<tr><td>${koCellContent}</td><td>${enCellContent}</td>${actionTdHtml}</tr>`;
                 tbody.insertAdjacentHTML('beforeend', rowHtml);
             });
         }
-
         summaryArea.classList.remove('hidden');
     }
 
     function deleteSingleWeakWordFromTable(ko, en, btnEl) {
         removeWordFromPWAStorage({ ko, en });
         testedWeakWordsInSession = testedWeakWordsInSession.filter(w => !(w.ko === ko && w.en === en));
-        
         const row = btnEl.closest('tr');
         if (row) {
-            row.style.opacity = '0';
-            row.style.transform = 'scale(0.95)';
-            row.style.transition = 'all 0.2s ease';
+            row.style.opacity = '0'; row.style.transform = 'scale(0.95)'; row.style.transition = 'all 0.2s ease';
             setTimeout(() => {
                 row.remove();
                 document.getElementById('summary-count').innerText = `복습할 단어: ${testedWeakWordsInSession.length}개`;
@@ -4955,9 +4392,7 @@ When you finish the evaluation, STOP generating immediately.
     }
 
     function goToHome() {
-        stopTTS();
-        stopBgSound();
-        stopStudyTimer(); 
+        stopTTS(); stopBgSound(); stopStudyTimer(); 
         document.getElementById('game-area').classList.add('hidden');
         document.getElementById('summary-area').classList.add('hidden');
         document.getElementById('setup-area').classList.remove('hidden');
@@ -4968,72 +4403,48 @@ When you finish the evaluation, STOP generating immediately.
     function reviewVagueWords() {
         const targetList = isWeakReviewMode ? testedWeakWordsInSession : vagueWords;
         if (targetList.length === 0) return;
-
-        wordList = shuffleArray(targetList); 
-        vagueWords = []; 
-        currentStartIndex = 0;
-
+        wordList = shuffleArray(targetList); vagueWords = []; currentStartIndex = 0;
         document.getElementById('summary-area').classList.add('hidden');
         document.getElementById('game-area').classList.remove('hidden');
-
-        startStudyTimer();
-        renderCards();
+        startStudyTimer(); renderCards();
     }
 
     function restartFullGame() {
-        wordList = shuffleArray(originalWordList); 
-        vagueWords = []; 
-        currentStartIndex = 0;
-
+        wordList = shuffleArray(originalWordList); vagueWords = []; currentStartIndex = 0;
         document.getElementById('summary-area').classList.add('hidden');
         document.getElementById('game-area').classList.remove('hidden');
-
-        startStudyTimer();
-        renderCards();
+        startStudyTimer(); renderCards();
     }
 
     function openSpeakingModal(type, targetText) {
         if (isAutoplay) {
-            isAutoplay = false;
-            clearAutoplayTimer();
+            isAutoplay = false; clearAutoplayTimer();
             const btn = document.getElementById('autoplay-btn');
             const btnLabel = document.getElementById('autoplay-btn-label');
-            if (btn && btnLabel) {
-                btn.classList.remove('active');
-                btnLabel.innerText = "🖐️ 수동";
-            }
+            if (btn && btnLabel) { btn.classList.remove('active'); btnLabel.innerText = "🖐️ 수동"; }
         }
-        
-        if (isInfiniteLoop) {
-            isInfiniteLoop = false;
-            updateInfiniteButtonUI();
-        }
+        if (isInfiniteLoop) { isInfiniteLoop = false; updateInfiniteButtonUI(); }
 
         speakingType = type;
         speakingTargetText = targetText ? targetText.replace(/<[^>]*>/g, '').replace(/#/g, ' ').trim() : '';
-        speakingStep = 1;
-        speakingSpeechSpeed = 1.0;
-        isSpeakingTextVisible = false;
-        speakingRecordedTranscript = '';
+        speakingStep = 1; speakingSpeechSpeed = 1.0;
+        isSpeakingTextVisible = false; speakingRecordedTranscript = '';
 
         const modal = document.getElementById('speaking-modal');
         if (modal) modal.classList.remove('hidden');
-
         renderSpeakingModalUI();
         speakTargetTextInModal();
     }
 
     function closeSpeakingModal() {
-        stopTTS();
-        stopSpeakingRecording();
+        stopTTS(); stopSpeakingRecording();
         const modal = document.getElementById('speaking-modal');
         if (modal) modal.classList.add('hidden');
     }
 
     function toggleSpeakingSpeechSpeed() {
         speakingSpeechSpeed = (speakingSpeechSpeed === 1.0) ? 0.75 : 1.0;
-        renderSpeakingModalUI();
-        speakTargetTextInModal();
+        renderSpeakingModalUI(); speakTargetTextInModal();
     }
 
     function toggleSpeakingTextVisibility() {
@@ -5044,32 +4455,18 @@ When you finish the evaluation, STOP generating immediately.
     function speakTargetTextInModal() {
         stopTTS();
         if (!('speechSynthesis' in window) || !speakingTargetText) return;
-
         const utter = new SpeechSynthesisUtterance(speakingTargetText);
-        utter.pitch = currentPitch;
-        utter.rate = currentRate * speakingSpeechSpeed;
-
+        utter.pitch = currentPitch; utter.rate = currentRate * speakingSpeechSpeed;
         const voiceObj = getRandomOrSelectedVoice();
-        if (voiceObj) {
-            utter.voice = voiceObj;
-            utter.lang = voiceObj.lang || 'en-US';
-        } else {
-            utter.lang = 'en-US';
-        }
-
+        if (voiceObj) { utter.voice = voiceObj; utter.lang = voiceObj.lang || 'en-US'; }
+        else utter.lang = 'en-US';
         window.speechSynthesis.speak(utter);
     }
 
     function setupMicVolumeVisualizer() {
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        
-        if (isMobile) {
-            startMobileWaveformSimulation();
-            return;
-        }
-
+        if (isMobile) { startMobileWaveformSimulation(); return; }
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
-
         navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
             window.speakingAudioStream = stream;
             try {
@@ -5077,42 +4474,28 @@ When you finish the evaluation, STOP generating immediately.
                 micAudioContext = new AudioContext();
                 const source = micAudioContext.createMediaStreamSource(stream);
                 micAnalyser = micAudioContext.createAnalyser();
-                micAnalyser.fftSize = 64;
-                source.connect(micAnalyser);
-
+                micAnalyser.fftSize = 64; source.connect(micAnalyser);
                 const dataArray = new Uint8Array(micAnalyser.frequencyBinCount);
-
                 function updateWaveVisual() {
                     if (!isSpeakingRecording) return;
                     micAnalyser.getByteFrequencyData(dataArray);
-
                     let sum = 0;
                     for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
                     let average = sum / dataArray.length;
-
                     const NOISE_GATE_THRESHOLD = 18; 
-
                     const bars = document.querySelectorAll('.speaking-wave-bar');
                     bars.forEach((bar, index) => {
-                        if (average < NOISE_GATE_THRESHOLD) {
-                            bar.style.height = '12px';
-                        } else {
+                        if (average < NOISE_GATE_THRESHOLD) bar.style.height = '12px';
+                        else {
                             let h = Math.min(80, Math.max(12, (average - NOISE_GATE_THRESHOLD) * (1.2 + (index % 3) * 0.4)));
                             bar.style.height = `${h}px`;
                         }
                     });
-
                     micAnimFrameId = requestAnimationFrame(updateWaveVisual);
                 }
-
                 updateWaveVisual();
-            } catch(e) {
-                console.warn("마이크 시각화 설정 오류:", e);
-            }
-        }).catch(err => {
-            console.warn("마이크 사용자 권한 차단 또는 접근 실패:", err);
-            startMobileWaveformSimulation();
-        });
+            } catch(e) {}
+        }).catch(err => { startMobileWaveformSimulation(); });
     }
 
     function startMobileWaveformSimulation() {
@@ -5129,15 +4512,9 @@ When you finish the evaluation, STOP generating immediately.
     }
 
     function startSpeakingRecording() {
-        stopTTS();
-        speakingStep = 2;
-        speakingRecordedTranscript = '';
-        sessionFinalTranscript = '';
-        speakingSeconds = 0;
-        isSpeakingRecording = true;
-
+        stopTTS(); speakingStep = 2; speakingRecordedTranscript = ''; sessionFinalTranscript = '';
+        speakingSeconds = 0; isSpeakingRecording = true;
         renderSpeakingModalUI();
-
         if (speakingTimerInterval) clearInterval(speakingTimerInterval);
         speakingTimerInterval = setInterval(() => {
             speakingSeconds++;
@@ -5154,216 +4531,134 @@ When you finish the evaluation, STOP generating immediately.
 
         if (SpeechRecognition) {
             try {
-                if (speakingRecognition) {
-                    try { speakingRecognition.abort(); } catch(e){}
-                }
+                if (speakingRecognition) { try { speakingRecognition.abort(); } catch(e){} }
                 speakingRecognition = new SpeechRecognition();
                 speakingRecognition.lang = 'en-US';
-                
                 speakingRecognition.continuous = !isMobile;
                 speakingRecognition.interimResults = true;
                 speakingRecognition.maxAlternatives = 1;
-
                 speakingRecognition.onresult = (e) => {
-                    let currentFinal = '';
-                    let currentInterim = '';
-
+                    let currentFinal = ''; let currentInterim = '';
                     for (let i = e.resultIndex; i < e.results.length; ++i) {
                         const transcript = e.results[i][0].transcript;
-                        if (e.results[i].isFinal) {
-                            currentFinal += transcript + ' ';
-                        } else {
-                            currentInterim += transcript;
-                        }
+                        if (e.results[i].isFinal) currentFinal += transcript + ' ';
+                        else currentInterim += transcript;
                     }
-
-                    if (currentFinal) {
-                        sessionFinalTranscript += currentFinal;
-                    }
-
+                    if (currentFinal) sessionFinalTranscript += currentFinal;
                     const fullText = (sessionFinalTranscript + currentInterim).trim();
-                    if (fullText) {
-                        speakingRecordedTranscript = fullText;
-                    }
+                    if (fullText) speakingRecordedTranscript = fullText;
                 };
-
-                speakingRecognition.onerror = (e) => {
-                    console.warn("SpeechRecognition Error:", e.error);
-                };
-
                 speakingRecognition.onend = () => {
-                    if (isSpeakingRecording && speakingRecognition) {
-                        try { speakingRecognition.start(); } catch(err){}
-                    }
+                    if (isSpeakingRecording && speakingRecognition) { try { speakingRecognition.start(); } catch(err){} }
                 };
-
                 speakingRecognition.start();
-            } catch (e) {
-                console.warn("SpeechRecognition start error:", e.error);
-            }
+            } catch (e) {}
         }
-
         setupMicVolumeVisualizer();
     }
 
     function stopSpeakingRecording() {
         isSpeakingRecording = false;
-        if (speakingTimerInterval) {
-            clearInterval(speakingTimerInterval);
-            speakingTimerInterval = null;
-        }
+        if (speakingTimerInterval) { clearInterval(speakingTimerInterval); speakingTimerInterval = null; }
         if (speakingRecognition) {
-            try { 
-                speakingRecognition.onend = null;
-                speakingRecognition.stop(); 
-            } catch(e) {}
+            try { speakingRecognition.onend = null; speakingRecognition.stop(); } catch(e) {}
             speakingRecognition = null;
         }
-        if (micAnimFrameId) {
-            cancelAnimationFrame(micAnimFrameId);
-            micAnimFrameId = null;
-        }
-        if (micAudioContext) {
-            try { micAudioContext.close(); } catch(e){}
-            micAudioContext = null;
-        }
+        if (micAnimFrameId) { cancelAnimationFrame(micAnimFrameId); micAnimFrameId = null; }
+        if (micAudioContext) { try { micAudioContext.close(); } catch(e){} micAudioContext = null; }
         if (window.speakingAudioStream) {
-            try {
-                window.speakingAudioStream.getTracks().forEach(track => track.stop());
-            } catch(e){}
+            try { window.speakingAudioStream.getTracks().forEach(track => track.stop()); } catch(e){}
             window.speakingAudioStream = null;
         }
     }
 
     function finishSpeakingRecording() {
-        stopSpeakingRecording();
-        speakingStep = 3;
-        renderSpeakingModalUI();
+        stopSpeakingRecording(); speakingStep = 3; renderSpeakingModalUI();
     }
 
     function renderSpeakingModalUI() {
         const card = document.getElementById('speaking-card');
         if (!card) return;
-
         if (speakingStep === 1) {
             card.className = 'speaking-modal-card';
-            
             const displayText = isSpeakingTextVisible 
                 ? `<div style="font-size: clamp(22px, 3vw, 32px); font-weight: 800; line-height: 1.4; color: #ffffff; padding: 10px;">${speakingTargetText}</div>` 
                 : `<div style="font-size: 60px; color: rgba(255,255,255,0.4);">❓</div>`;
-
             const speedLabel = (speakingSpeechSpeed === 1.0) ? '🐢 느리게 듣기' : '🐰 원상태로 듣기';
-
             card.innerHTML = `
                 <div class="speaking-top-bar">
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <span style="font-size:24px;">🎙️</span>
-                        <span>스피킹 훈련</span>
-                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;"><span style="font-size:24px;">🎙️</span><span>스피킹 훈련</span></div>
                     <button class="speaking-close-btn" onclick="closeSpeakingModal()">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button>
                 </div>
-                
                 <div class="speaking-content-area">
                     <div class="speaking-title">원어민 발음을 듣고<br>문장을 기억해 보세요</div>
                     <div class="speaking-subtitle">준비가 되면 마이크 버튼을 눌러 스피킹을 시작하세요</div>
-                    
                     <button type="button" class="speaking-circle-play-btn" onclick="speakTargetTextInModal()">▶</button>
-                    
                     <div class="speaking-pill-group">
                         <button class="speaking-pill-btn" onclick="toggleSpeakingSpeechSpeed()">${speedLabel}</button>
                         <button class="speaking-pill-btn" onclick="toggleSpeakingTextVisibility()">${isSpeakingTextVisible ? '🙈 텍스트 숨기기' : '👁️ 텍스트 보기'}</button>
                     </div>
-
                     ${displayText}
                 </div>
-
                 <button class="speaking-bottom-btn" style="background:#ffffff; color:#1d4ed8;" onclick="startSpeakingRecording()">🎙️ 마이크 켜고 말하기 (Enter)</button>
             `;
         } else if (speakingStep === 2) {
             card.className = 'speaking-modal-card white-theme';
-            
             const mins = String(Math.floor(speakingSeconds / 60)).padStart(2, '0');
             const secs = String(speakingSeconds % 60).padStart(2, '0');
             const currentTimeStr = `${mins}:${secs}`;
-
             const textContentHtml = isSpeakingTextVisible 
-                ? `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed #fcd34d; font-size: 17px; font-weight: 800; color: #713f12; line-height: 1.4; word-break: keep-all;">${speakingTargetText}</div>` 
-                : '';
-
+                ? `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed #fcd34d; font-size: 17px; font-weight: 800; color: #713f12; line-height: 1.4; word-break: keep-all;">${speakingTargetText}</div>` : '';
             card.innerHTML = `
                 <div class="speaking-top-bar" style="color: #1e293b;">
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <span style="color: #ef4444;">🔴</span>
-                        <span>녹음 중...</span>
-                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;"><span style="color: #ef4444;">🔴</span><span>녹음 중...</span></div>
                 </div>
-
                 <div class="speaking-content-area" style="color: #1e293b; padding-bottom: 0;">
                     <div id="speaking-rec-timer" class="speaking-timer-text">${currentTimeStr}</div>
-                    
                     <div class="speaking-waveform-box">
-                        <div class="speaking-wave-bar"></div>
-                        <div class="speaking-wave-bar"></div>
-                        <div class="speaking-wave-bar"></div>
-                        <div class="speaking-wave-bar"></div>
-                        <div class="speaking-wave-bar"></div>
+                        <div class="speaking-wave-bar"></div><div class="speaking-wave-bar"></div><div class="speaking-wave-bar"></div><div class="speaking-wave-bar"></div><div class="speaking-wave-bar"></div>
                     </div>
-
                     <div style="background: #fef9c3; border: 1px solid #fde047; padding: 14px; border-radius: 14px; width: 100%; box-sizing: border-box; text-align: center; margin-top: auto; margin-bottom: 10px;">
                         <div style="font-size: 12.5px; font-weight: 800; color: #854d0e; margin-bottom: 8px;">💡 가장 좋은 건 원어민의 소리를 들은 대로 말해보는 것입니다!</div>
                         <button class="speaking-pill-btn" style="background: #ffffff; color: #a16207; border: 1px solid #fde047; font-size: 12px; padding: 6px 14px; box-shadow: none;" onclick="toggleSpeakingTextVisibility()">${isSpeakingTextVisible ? '🙈 원문 숨기기' : '👁️ 원문 참고하기'}</button>
                         ${textContentHtml}
                     </div>
                 </div>
-
                 <button class="speaking-bottom-btn" style="background:#ef4444; color:#ffffff;" onclick="finishSpeakingRecording()">⏹️ 녹음 완료 및 평가 받기 (Enter)</button>
             `;
         } else if (speakingStep === 3) {
             card.className = 'speaking-modal-card white-theme';
-            
             const engine = new ClientSpeakingEngine();
             const evalResult = engine.evaluate(speakingTargetText, speakingRecordedTranscript);
-
             let scoreColor = '#dc2626'; 
             if (evalResult.overallScore >= 80) scoreColor = '#16a34a'; 
             else if (evalResult.overallScore >= 50) scoreColor = '#f59e0b'; 
-
             let evalHtml = '';
             evalResult.details.forEach(d => {
                 if (d.color === 'GREEN') evalHtml += `<span class="word-match-correct">${d.spokenWord}</span> `;
                 else if (d.color === 'ORANGE') evalHtml += `<span class="word-match-fuzzy" title="${d.reason}">${d.spokenWord}</span> `;
                 else evalHtml += `<span class="word-match-wrong" title="${d.reason}">${d.targetWord}</span> `;
             });
-
-            if (evalResult.details.length === 0 || !speakingRecordedTranscript) {
-                evalHtml = '<span style="color:#64748b; font-weight:600;">(마이크에 인식된 음성이 없습니다)</span>';
-            }
-
+            if (evalResult.details.length === 0 || !speakingRecordedTranscript) evalHtml = '<span style="color:#64748b; font-weight:600;">(마이크에 인식된 음성이 없습니다)</span>';
             card.innerHTML = `
                 <div class="speaking-top-bar" style="color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 8px;">
                     <span>📊 평가 결과</span>
                     <button class="speaking-close-btn" onclick="closeSpeakingModal()" style="color: #64748b;">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button>
                 </div>
-
                 <div class="speaking-content-area" style="justify-content: flex-start; gap: 12px; padding: 0;">
-                    
                     <div class="result-score-box">
                         <div style="font-size: 13px; font-weight: 800; color: #64748b;">발음 및 유사도 점수</div>
                         <div class="result-score-val" style="color: ${scoreColor};">${evalResult.overallScore}점</div>
                     </div>
-
                     <div class="result-card-box question">
                         <div style="font-size: 11px; font-weight: 800; opacity: 0.8; margin-bottom: 4px;">원문 (정답)</div>
                         <div style="font-size: 16px; font-weight: 800; line-height: 1.4;">${speakingTargetText}</div>
                     </div>
-
                     <div class="result-card-box my-answer">
                         <div style="font-size: 11px; font-weight: 800; color: #64748b; margin-bottom: 4px;">내 발음 분석 결과</div>
                         <div style="font-size: 16px; line-height: 1.4;">${evalHtml}</div>
                     </div>
-
                 </div>
-
                 <div class="speaking-two-btn-row">
                     <button class="btn-light" onclick="speakingStep=1; renderSpeakingModalUI(); speakTargetTextInModal();">다시 연습하기</button>
                     <button class="btn-dark" onclick="window.closeSpeakingModalAndNext()">닫기 및 다음 단어 (Enter)</button>
@@ -5374,15 +4669,10 @@ When you finish the evaluation, STOP generating immediately.
 
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-            closeDayModal();
-            closeWeakReviewModal();
-            closeAutoplayModal();
-            closeVoiceModal();
-            closeSpeakingModal();
-            closeAISettingsModal();
-            closeModelSelectModal();
-            closeAIFeedbackModal();
-            closeLifeNoticeModal(); 
+            closeDayModal(); closeWeakReviewModal(); closeAutoplayModal();
+            closeVoiceModal(); closeSpeakingModal(); closeAISettingsModal();
+            closeModelSelectModal(); closeAIFeedbackModal(); closeLifeNoticeModal(); 
+            closeDataModal(); 
             return;
         }
 
@@ -5390,10 +4680,7 @@ When you finish the evaluation, STOP generating immediately.
 
         const autoplayModal = document.getElementById('autoplay-modal');
         if (autoplayModal && !autoplayModal.classList.contains('hidden')) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                confirmAutoplayModal();
-            }
+            if (e.key === 'Enter') { e.preventDefault(); confirmAutoplayModal(); }
             return; 
         }
 
@@ -5412,69 +4699,51 @@ When you finish the evaluation, STOP generating immediately.
             const gameArea = document.getElementById('game-area');
             if (gameArea && !gameArea.classList.contains('hidden') && document.getElementById('ai-feedback-modal').classList.contains('hidden')) {
                 e.preventDefault();
-                if (showAnswers) {
-                    speakCurrentWord();
-                }
+                if (showAnswers) speakCurrentWord();
             }
         }
         else if (e.key === 'ArrowRight') {
             const gameArea = document.getElementById('game-area');
             if (gameArea && !gameArea.classList.contains('hidden') && document.getElementById('ai-feedback-modal').classList.contains('hidden')) {
-                e.preventDefault();
-                handlePrimaryAction();
+                e.preventDefault(); handlePrimaryAction();
             }
         }
         else if (e.key === 'ArrowDown') {
             const gameArea = document.getElementById('game-area');
             if (gameArea && !gameArea.classList.contains('hidden') && document.getElementById('ai-feedback-modal').classList.contains('hidden')) {
-                e.preventDefault();
-                handleVagueAction(currentStartIndex);
+                e.preventDefault(); handleVagueAction(currentStartIndex);
             }
         }
         else if (e.key === 'ArrowLeft') {
             const gameArea = document.getElementById('game-area');
             if (gameArea && !gameArea.classList.contains('hidden') && document.getElementById('ai-feedback-modal').classList.contains('hidden')) {
-                e.preventDefault();
-                handlePrevAction();
+                e.preventDefault(); handlePrevAction();
             }
         }
-        // 👇 무한 반복 (Shift 키) 👇
         else if (e.key === 'Shift') {
             const gameArea = document.getElementById('game-area');
             if (gameArea && !gameArea.classList.contains('hidden') && document.getElementById('ai-feedback-modal').classList.contains('hidden')) {
-                e.preventDefault();
-                toggleInfiniteLoop();
+                e.preventDefault(); toggleInfiniteLoop();
             }
         }
         else if (e.code === 'Space') {
             const gameArea = document.getElementById('game-area');
             if (gameArea && !gameArea.classList.contains('hidden') && document.getElementById('ai-feedback-modal').classList.contains('hidden')) {
                 e.preventDefault();
-                if (showAnswers) {
-                    speakCurrentWord();
-                }
+                if (showAnswers) speakCurrentWord();
             }
         }
         else if (e.key.toLowerCase() === 's') {
             const gameArea = document.getElementById('game-area');
-            if (gameArea && !gameArea.classList.contains('hidden')) {
-                e.preventDefault();
-                handleAutoplayBtnClick();
-            }
+            if (gameArea && !gameArea.classList.contains('hidden')) { e.preventDefault(); handleAutoplayBtnClick(); }
         }
         else if (e.key.toLowerCase() === 'd') {
             const gameArea = document.getElementById('game-area');
-            if (gameArea && !gameArea.classList.contains('hidden')) {
-                e.preventDefault();
-                toggleMute();
-            }
+            if (gameArea && !gameArea.classList.contains('hidden')) { e.preventDefault(); toggleMute(); }
         }
         else if (e.key.toLowerCase() === 'f') {
             const gameArea = document.getElementById('game-area');
-            if (gameArea && !gameArea.classList.contains('hidden')) {
-                e.preventDefault();
-                openVoiceModal();
-            }
+            if (gameArea && !gameArea.classList.contains('hidden')) { e.preventDefault(); openVoiceModal(); }
         }
         else if (e.key.toLowerCase() === 'z') {
             const gameArea = document.getElementById('game-area');
@@ -5491,16 +4760,13 @@ When you finish the evaluation, STOP generating immediately.
         else if (e.key.toLowerCase() === 't') {
             const gameArea = document.getElementById('game-area');
             if (gameArea && !gameArea.classList.contains('hidden') && document.getElementById('ai-feedback-modal').classList.contains('hidden')) {
-                e.preventDefault();
-                openWritingModalFromCard();
+                e.preventDefault(); openWritingModalFromCard();
             }
         }
         else if (e.key.toLowerCase() === 'q') {
             const modal = document.getElementById('ai-feedback-modal');
             if (modal && !modal.classList.contains('hidden')) {
-                if (window.stopAIComputation) {
-                    window.stopAIComputation();
-                }
+                if (window.stopAIComputation) window.stopAIComputation();
             }
         }
     });

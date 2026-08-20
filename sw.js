@@ -8,11 +8,11 @@ const ASSETS_TO_CACHE = [
     'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',
     'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',
     
-    // 📌 고정 단어장 엑셀 파일 URL 캐싱 (라잎 단어장 추가됨)
+    // 📌 고정 단어장 엑셀 파일 URL 캐싱 (라잎 단어장 포함)
     'https://docs.google.com/spreadsheets/d/1m7KXifCB6txkKEOHqApMWOR4MQwqb6Ji1Dm-hRJYzLc/export?format=xlsx',
     'https://docs.google.com/spreadsheets/d/1UYTEv88wdKsSS2kkB-UylHAfQAlV6yrvjwVNecG6m64/export?format=xlsx',
     'https://docs.google.com/spreadsheets/d/1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U/export?format=xlsx',
-    'https://docs.google.com/spreadsheets/d/1ElLraPc80Uez8innH6RfXOBz36IV9ARXnkAiUembWH0/export?format=xlsx', // 라잎 추가
+    'https://docs.google.com/spreadsheets/d/1ElLraPc80Uez8innH6RfXOBz36IV9ARXnkAiUembWH0/export?format=xlsx',
 
     // 오디오 파일 (1~8.mp3)
     ...Array.from({ length: 8 }, (_, i) => `./sounds/${i + 1}.mp3`),
