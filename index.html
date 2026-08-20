@@ -94,7 +94,7 @@
             overflow-x: hidden;
             overflow-y: auto; 
 
-            /* [2] 모바일 엘리먼트 꾹 누를 때 텍스트 선택/복사(copy/select) 팝업 전체 방지 */
+            /* 모바일 엘리먼트 꾹 누를 때 텍스트 선택/복사(copy/select) 팝업 전체 방지 */
             -webkit-touch-callout: none;
             -webkit-user-select: none;
             -moz-user-select: none;
@@ -267,6 +267,31 @@
             padding: 24px;
             border-radius: 24px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);
+        }
+
+        /* 💡 홈 화면 하단 안내문 푸터 스타일 */
+        .home-footer {
+            width: 100%;
+            max-width: 480px;
+            margin: 16px auto 0 auto;
+            text-align: center;
+            opacity: 0.35;
+            transition: opacity 0.2s ease;
+        }
+        .home-footer:hover {
+            opacity: 0.8;
+        }
+        .home-footer p {
+            font-size: 11px;
+            color: #64748b;
+            margin: 0 0 4px 0;
+            line-height: 1.4;
+        }
+        .home-footer a {
+            font-size: 11px;
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 700;
         }
 
         .intro-img {
@@ -1798,23 +1823,35 @@
             .card-top-actions-ko { display: none !important; } 
             
             .card-repeat-btn { display: none !important; }
+            
+            /* 모바일에서 자동재생 버튼 크기를 절반으로 줄이고 아이콘을 명확히 표시 */
+            .hide-on-mobile {
+                display: none !important;
+            }
+            .autoplay-btn {
+                width: 36px !important;
+                padding: 0 !important;
+                font-size: 16px !important;
+                display: inline-flex !important;
+                justify-content: center !important;
+            }
 
-            /* [3] 모바일에서 무한 반복 버튼을 마이크 버튼 우측에 3배 길이로 배치 */
+            /* 모바일에서 스피킹 버튼은 왼쪽 끝으로, 무한반복 버튼은 오른쪽 끝으로 정렬 */
             .show-answers .section-en .card-top-actions { 
                 display: flex !important; 
                 position: absolute !important; 
                 top: 12px !important; 
+                left: 12px !important;
                 right: 12px !important; 
                 transform: none !important; 
                 z-index: 100 !important;
                 gap: 8px !important;
                 flex-direction: row !important;
+                justify-content: space-between !important;
             }
+            
             .show-answers .section-en .card-action-btn {
-                background-color: #f8fafc !important; 
                 box-shadow: none !important;
-                border: 1px solid #f1f5f9 !important;
-                color: #64748b !important;
             }
 
             .card-speaking-btn {
@@ -1827,14 +1864,15 @@
             
             .card-infinite-btn {
                 order: 2 !important;
-                width: 132px !important; /* 마이크 버튼(44px)의 3배 길이 */
+                width: 66px !important; 
                 display: inline-flex !important;
                 justify-content: center !important;
                 padding: 6px 0 !important;
             }
             
             .nyan-timer-header { font-size: 11px; gap: 3px; margin-bottom: 6px; }
-            .mute-btn, .voice-btn, .autoplay-btn { height: 32px; font-size: 11px; font-weight: 800; padding: 0 5px; }
+            .mute-btn, .voice-btn { height: 32px; font-size: 11px; font-weight: 800; padding: 0 5px; }
+            .autoplay-btn { height: 32px; font-weight: 800; } 
             .cards-grid { margin-bottom: 8px !important; flex: 1 !important; height: 100% !important; }
             
             #game-area .card { flex-direction: column !important; height: 100% !important; flex: 1 !important; }
@@ -2389,20 +2427,20 @@
 </div>
 
 <div class="container">
-    <div id="setup-area">
-        <!-- [1] 💡 네트워크 상태 인디케이터 (홈 화면인 setup-area 안에만 표시) -->
-        <div style="width: 100%; margin: 0 0 6px 0; display: flex; justify-content: flex-end; align-items: center; gap: 10px; user-select: none;">
-            <div id="net-online" style="opacity: 0.3; color: #94a3b8; display: flex; align-items: center; gap: 4px; transition: all 0.2s;">
-                <span style="font-size: 11px;">🟢</span><span style="font-size: 11px; font-weight: 800; letter-spacing: -0.3px;">ONLINE</span>
-            </div>
-            <div id="net-offline" style="opacity: 0.3; color: #94a3b8; display: flex; align-items: center; gap: 4px; transition: all 0.2s;">
-                <span style="font-size: 11px;">🔴</span><span style="font-size: 11px; font-weight: 800; letter-spacing: -0.3px;">OFFLINE</span>
-            </div>
+    <!-- [1], [2] 네트워크 상태 인디케이터 (setup-area 바깥 바로 위) -->
+    <div id="network-status-container" style="width: 100%; max-width: 480px; margin: 0 auto 8px auto; display: flex; justify-content: flex-end; align-items: center; gap: 10px; user-select: none; box-sizing: border-box; padding: 0 4px;">
+        <div id="net-online" style="opacity: 0.3; color: #94a3b8; display: flex; align-items: center; gap: 4px; transition: all 0.2s;">
+            <span style="font-size: 11px;">🟢</span><span style="font-size: 11px; font-weight: 800; letter-spacing: -0.3px;">ONLINE</span>
         </div>
+        <div id="net-offline" style="opacity: 0.3; color: #94a3b8; display: flex; align-items: center; gap: 4px; transition: all 0.2s;">
+            <span style="font-size: 11px;">🔴</span><span style="font-size: 11px; font-weight: 800; letter-spacing: -0.3px;">OFFLINE</span>
+        </div>
+    </div>
 
+    <div id="setup-area">
         <img src="intro.png" alt="퐁크러쉬 인트로" class="intro-img" onerror="this.style.display='none'">
         
-        <h1>
+        <h1 aria-label="퐁크러쉬">
             <span class="bounce-char" style="animation-delay: 0.0s;">🎮</span>
             <span class="bounce-char" style="animation-delay: 0.1s;"> </span>
             <span class="bounce-char" style="animation-delay: 0.2s;">퐁</span>
@@ -2429,6 +2467,14 @@
             <input type="file" id="restore-file-input" accept=".txt,.json" style="display:none" onchange="handleRestoreFile(event)">
         </div>
     </div>
+    
+    <!-- [3] 푸터 형태의 앱 설명 및 개인정보처리방침 -->
+    <footer id="app-footer" class="home-footer">
+        <p> 퐁크러쉬는 영어 단어·스피킹·라이팅 학습을 지원하는 웹 서비스입니다</p>
+        <a href="https://docs.google.com/document/d/1zCu3RpHB_MpvXEAAovc74U3IfXQLQjb1nQthYYwTA6c/edit?usp=sharing" target="_blank">
+            개인정보처리방침 (Privacy Policy)
+        </a>
+    </footer>
 
     <!-- 게임 시작 화면 -->
     <div id="game-area" class="hidden">
@@ -2447,7 +2493,7 @@
             <div class="nyan-timer-header">
                 <div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
                     <button id="autoplay-btn" class="autoplay-btn" onclick="handleAutoplayBtnClick()">
-                        <span id="autoplay-btn-label">🖐️ 수동</span> <span class="shortcut-text">(S)</span>
+                        <span id="autoplay-btn-label">🖐️<span class="hide-on-mobile"> 수동</span></span> <span class="shortcut-text">(S)</span>
                     </button>
                     <button id="mute-btn" class="mute-btn is-muted" onclick="toggleMute()">
                         <span id="mute-btn-label">🔇 뮤트</span> <span class="shortcut-text">(D)</span>
@@ -3505,7 +3551,7 @@ When you finish the evaluation, STOP generating immediately.
             const btnLabel = document.getElementById('autoplay-btn-label');
             if (btn && btnLabel) {
                 btn.classList.remove('active');
-                btnLabel.innerText = "🖐️ 수동";
+                btnLabel.innerHTML = "🖐️<span class='hide-on-mobile'> 수동</span>";
             }
         } else openAutoplayModal();
     }
@@ -3530,7 +3576,7 @@ When you finish the evaluation, STOP generating immediately.
                 const btnLabel = document.getElementById('autoplay-btn-label');
                 if (btn && btnLabel) {
                     btn.classList.remove('active');
-                    btnLabel.innerText = "🖐️ 수동";
+                    btnLabel.innerHTML = "🖐️<span class='hide-on-mobile'> 수동</span>";
                 }
             }
             updateInfiniteButtonUI();
@@ -3606,7 +3652,7 @@ When you finish the evaluation, STOP generating immediately.
         const btnLabel = document.getElementById('autoplay-btn-label');
         if (btn && btnLabel) {
             btn.classList.add('active');
-            btnLabel.innerText = "🤖 자동";
+            btnLabel.innerHTML = "🤖<span class='hide-on-mobile'> 자동</span>";
         }
         if (isInfiniteLoop) {
             isInfiniteLoop = false;
@@ -3677,7 +3723,7 @@ When you finish the evaluation, STOP generating immediately.
         const autoBtn = document.getElementById('autoplay-btn');
         const autoLabel = document.getElementById('autoplay-btn-label');
         if (autoBtn) autoBtn.classList.remove('active');
-        if (autoLabel) autoLabel.innerText = "🖐️ 수동";
+        if (autoLabel) autoLabel.innerHTML = "🖐️<span class='hide-on-mobile'> 수동</span>";
         isMuted = true;
         if (bgAudio) bgAudio.muted = true;
         const muteBtn = document.getElementById('mute-btn');
@@ -4022,6 +4068,8 @@ When you finish the evaluation, STOP generating immediately.
         resetDefaultSessionSettings();
         document.getElementById('setup-area').classList.add('hidden');
         document.getElementById('summary-area').classList.add('hidden');
+        document.getElementById('network-status-container').classList.add('hidden');
+        document.getElementById('app-footer').classList.add('hidden');
         document.getElementById('game-area').classList.remove('hidden');
         document.body.classList.add('game-active');
         const types = ['type1', 'type2', 'type3'];
@@ -4107,6 +4155,8 @@ When you finish the evaluation, STOP generating immediately.
         resetDefaultSessionSettings();
         document.getElementById('setup-area').classList.add('hidden');
         document.getElementById('summary-area').classList.add('hidden');
+        document.getElementById('network-status-container').classList.add('hidden');
+        document.getElementById('app-footer').classList.add('hidden');
         document.getElementById('game-area').classList.remove('hidden');
         document.body.classList.add('game-active');
         const types = ['type1', 'type2', 'type3'];
@@ -4262,7 +4312,7 @@ When you finish the evaluation, STOP generating immediately.
             isAutoplay = false;
             const btn = document.getElementById('autoplay-btn');
             const btnLabel = document.getElementById('autoplay-btn-label');
-            if (btn && btnLabel) { btn.classList.remove('active'); btnLabel.innerText = "🖐️ 수동"; }
+            if (btn && btnLabel) { btn.classList.remove('active'); btnLabel.innerHTML = "🖐️<span class='hide-on-mobile'> 수동</span>"; }
         }
         if (wordList.length === 0) return;
         if (currentStartIndex > 0) { currentStartIndex -= cardsPerPage; renderCards(); }
@@ -4396,6 +4446,8 @@ When you finish the evaluation, STOP generating immediately.
         document.getElementById('game-area').classList.add('hidden');
         document.getElementById('summary-area').classList.add('hidden');
         document.getElementById('setup-area').classList.remove('hidden');
+        document.getElementById('network-status-container').classList.remove('hidden');
+        document.getElementById('app-footer').classList.remove('hidden');
         document.body.classList.remove('game-active');
         updatePWAReviewButtonUI();
     }
@@ -4421,7 +4473,7 @@ When you finish the evaluation, STOP generating immediately.
             isAutoplay = false; clearAutoplayTimer();
             const btn = document.getElementById('autoplay-btn');
             const btnLabel = document.getElementById('autoplay-btn-label');
-            if (btn && btnLabel) { btn.classList.remove('active'); btnLabel.innerText = "🖐️ 수동"; }
+            if (btn && btnLabel) { btn.classList.remove('active'); btnLabel.innerHTML = "🖐️<span class='hide-on-mobile'> 수동</span>"; }
         }
         if (isInfiniteLoop) { isInfiniteLoop = false; updateInfiniteButtonUI(); }
 
