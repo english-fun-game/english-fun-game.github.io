@@ -853,7 +853,14 @@
             <!-- JS 렌더링 영역 -->
         </div>
 
-        <button class="base-btn" style="background:var(--slack-purple); width:100%; padding:12px; margin-top:16px; flex-shrink: 0;" onclick="closeReleaseNoteModal()">닫기 (Enter)</button>
+        <!-- 하단 버튼 및 다시보지 않기 체크박스 영역 -->
+        <div style="margin-top: 16px; flex-shrink: 0; display: flex; flex-direction: column; gap: 12px;">
+            <label style="display: flex; align-items: center; justify-content: flex-end; gap: 8px; font-size: 13px; font-weight: 700; color: var(--text-muted); cursor: pointer; user-select: none;">
+                <input type="checkbox" id="release-hide-checkbox" style="width: 16px; height: 16px; cursor: pointer;">
+                현재 최신 버전 다시 보지 않기
+            </label>
+            <button class="base-btn" style="background:var(--slack-purple); width:100%; padding:12px; margin: 0;" onclick="closeReleaseNoteModal()">닫기 (Enter)</button>
+        </div>
     </div>
 </div>
 
@@ -1349,16 +1356,14 @@
             
             if (Array.isArray(data) && data.length > 0) {
                 globalReleaseNotes = data;
-                const currentVersion = localStorage.getItem('pongcrush_version');
+                const hideVersion = localStorage.getItem('pongcrush_hide_version');
                 const latestVersion = data[0].version;
 
-                if (forceOpen || currentVersion !== latestVersion) {
+                if (forceOpen || hideVersion !== latestVersion) {
                     renderReleaseNotes(data);
+                    const checkbox = document.getElementById('release-hide-checkbox');
+                    if (checkbox) checkbox.checked = false; // 열 때마다 체크 해제
                     document.getElementById('release-note-modal').classList.remove('hidden');
-                    
-                    if (currentVersion !== latestVersion) {
-                        localStorage.setItem('pongcrush_version', latestVersion);
-                    }
                 }
             }
         } catch (err) {
@@ -1369,6 +1374,8 @@
     function openReleaseNoteModal() {
         if (globalReleaseNotes.length > 0) {
             renderReleaseNotes(globalReleaseNotes);
+            const checkbox = document.getElementById('release-hide-checkbox');
+            if (checkbox) checkbox.checked = false;
             document.getElementById('release-note-modal').classList.remove('hidden');
         } else {
             checkReleaseNotes(true);
@@ -1378,6 +1385,12 @@
     function closeReleaseNoteModal() {
         const modal = document.getElementById('release-note-modal');
         if (modal) modal.classList.add('hidden');
+        
+        // 닫을 때 '다시 보지 않기'가 체크되어 있다면 현재 최신 버전을 저장
+        const checkbox = document.getElementById('release-hide-checkbox');
+        if (checkbox && checkbox.checked && globalReleaseNotes.length > 0) {
+            localStorage.setItem('pongcrush_hide_version', globalReleaseNotes[0].version);
+        }
     }
 
     function renderReleaseNotes(releases) {
