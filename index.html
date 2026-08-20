@@ -112,20 +112,26 @@
             bottom: 8px;
             left: 8px;
             font-size: 12px;
-            font-weight: 400; 
-            color: #94a3b8;
-            opacity: 0.6;
+            font-weight: 700; 
+            color: var(--slack-blue);
+            background: #e0f2fe;
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid #bae6fd;
             z-index: 100;
-            pointer-events: none;
+            cursor: pointer;
             user-select: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(2, 132, 199, 0.1);
         }
+        .app-version:hover { background: #bae6fd; transform: translateY(-1px); }
 
         @media (max-width: 650px) {
             .app-version {
-                font-size: 9px; 
-                bottom: 4px;
+                font-size: 10px; 
+                bottom: 6px;
                 left: 6px;
-                opacity: 0.5;
+                padding: 4px 6px;
             }
         }
 
@@ -164,9 +170,10 @@
             font-size: 10px;
             color: #94a3b8;
             transition: transform 0.2s ease;
+            flex-shrink: 0;
         }
         .sync-details[open] .sync-summary::after { transform: rotate(180deg); }
-        .sync-details[open] .sync-summary { border-bottom: 1px dashed var(--border-color); }
+        .sync-details[open] .sync-summary { border-bottom: 1px solid var(--border-color); }
         .sync-content {
             padding: 12px 14px;
             font-size: 12px;
@@ -174,13 +181,13 @@
             line-height: 1.5;
             background: #ffffff;
         }
-        .tech-table { width: 100%; border-collapse: collapse; text-align: left; }
-        .tech-table th, .tech-table td { padding: 6px 8px; border-bottom: 1px solid var(--border-color); }
-        .tech-table th { font-weight: 800; background: #f1f5f9; color: #475569; width: 60%; }
-        .tech-table td { font-weight: 700; text-align: right; font-family: monospace; font-size: 13px; }
+        .tech-table { width: 100%; border-collapse: collapse; text-align: left; background: #ffffff; }
+        .tech-table th, .tech-table td { padding: 8px 10px; border-bottom: 1px solid var(--border-color); }
+        .tech-table th { font-weight: 800; background: #f1f5f9; color: #475569; width: 45%; }
+        .tech-table td { font-weight: 700; text-align: right; color: var(--slack-blue); font-size: 12.5px; }
         .tech-list { margin: 0; padding-left: 18px; }
         .tech-list li { margin-bottom: 6px; padding-left: 2px; }
-        .tech-list li::marker { color: var(--slack-blue); }
+        .tech-list li::marker { color: var(--slack-blue); font-size: 14px; }
 
         .container {
             width: 100%;
@@ -833,6 +840,23 @@
     </div>
 </div>
 
+<!-- 📢 릴리즈 노트 & 테크 블로그 모달 -->
+<div id="release-note-modal" class="modal-overlay hidden" style="z-index: 30000;" onclick="if(event.target === this) closeReleaseNoteModal()">
+    <div class="modal-card" style="max-width: 600px; max-height: 85vh; display: flex; flex-direction: column; padding: 20px;">
+        <div class="modal-header" style="flex-shrink: 0; padding-bottom: 12px; border-bottom: 2px solid var(--border-color);">
+            <span>🎉 릴리즈 노트 & 테크 블로그</span>
+            <button onclick="closeReleaseNoteModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button>
+        </div>
+        
+        <!-- 내역이 쌓이는 메인 스크롤 영역 -->
+        <div id="release-note-content" style="flex: 1; overflow-y: auto; padding-right: 4px; margin-top: 12px; display: flex; flex-direction: column; gap: 16px;">
+            <!-- JS 렌더링 영역 -->
+        </div>
+
+        <button class="base-btn" style="background:var(--slack-purple); width:100%; padding:12px; margin-top:16px; flex-shrink: 0;" onclick="closeReleaseNoteModal()">닫기 (Enter)</button>
+    </div>
+</div>
+
 <!-- 🤖 AI 모델 선택 모달 -->
 <div id="ai-model-select-modal" class="modal-overlay hidden" style="z-index: 20000;" onclick="if(event.target === this) closeModelSelectModal()">
     <div class="modal-card" style="max-width: 580px;">
@@ -1040,7 +1064,6 @@
                 구글 계정에 로그인하여 내 드라이브와 데이터를 수동으로 안전하게 동기화할 수 있습니다.
             </div>
 
-            <!-- [요청 1] 원본 백업 모달 지식 섹션 3개 모두 복원 -->
             <details class="sync-details">
                 <summary class="sync-summary">📊 단어 400개 기준 네트워크 사용량</summary>
                 <div class="sync-content">
@@ -1086,12 +1109,11 @@
             </details>
 
             <div style="display:flex; gap:8px; margin-top:2px;">
-                <button class="base-btn" style="flex:1; background:#10b981; font-size:14px; padding:12px;" onclick="syncToGoogleDrive()">☁️ G드라이브 백업</button>
-                <button class="base-btn" style="flex:1; background:#8b5cf6; font-size:14px; padding:12px;" onclick="loadFromGoogleDrive()">☁️ G드라이브 복원</button>
+                <button class="base-btn" style="flex:1; background:#10b981; font-size:14px; padding:12px;" onclick="syncToGoogleDrive()">☁️ G드라이브 병합 저장</button>
+                <button class="base-btn" style="flex:1; background:#8b5cf6; font-size:14px; padding:12px;" onclick="loadFromGoogleDrive()">☁️ G드라이브 불러오기</button>
             </div>
         </div>
         
-        <!-- [요청 3] 섹션간 간격 축소 -->
         <div style="width: 100%; height: 1px; background: var(--border-color); margin: 2px 0;"></div>
         
         <div class="sec-select-area">
@@ -1203,16 +1225,14 @@
             <button class="quick-btn" style="border: 2px dashed #94a3b8; color: #475569; margin-top: 8px;" onclick="openDataModal()">
                 💾 백업 및 데이터 관리
             </button>
-            <input type="file" id="restore-file-input" accept=".txt,.json" style="display:none" onchange="handleRestoreFile(event)">
+            <input type="file" id="restore-file-input" accept=".json,application/json" style="display:none" onchange="handleRestoreFile(event)">
         </div>
     </div>
     
     <footer id="app-footer" class="home-footer">
         <p><strong>앱 명칭: 퐁크러쉬 (PongCrush)</strong></p>
         <p>앱 목적: 영어 단어, 스피킹, 라이팅 학습을 지원하는 웹 서비스입니다.</p>
-        <a href="/privacy.html" target="_blank">
-            개인정보처리방침 (Privacy Policy)
-        </a>
+        <a href="/privacy.html" target="_blank">개인정보처리방침 (Privacy Policy)</a>
     </footer>
 
     <!-- 게임 시작 화면 -->
@@ -1229,7 +1249,6 @@
         </div>
 
         <div id="nyan-timer-container" class="nyan-timer-box">
-            <!-- [요청 4] 모바일 무한재생 버튼을 row 우측 끝에 배치 -->
             <div class="nyan-timer-header">
                 <div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap; width: 100%;">
                     <button id="autoplay-btn" class="autoplay-btn" onclick="handleAutoplayBtnClick()">
@@ -1287,7 +1306,8 @@
     </div>
 </div>
 
-<div class="app-version">v6.9.1 (Modal Heights & Mobile Infinite Btn Fixed)</div>
+<!-- 💡 앱 버전을 클릭하면 수동으로 릴리즈 노트를 열 수 있습니다 -->
+<div class="app-version" onclick="openReleaseNoteModal()" title="릴리즈 노트 보기">v6.9.2 (Update Log)</div>
 
 <script>
     let wakeLock = null;
@@ -1317,6 +1337,123 @@
     window.addEventListener('online', updateNetworkStatus);
     window.addEventListener('offline', updateNetworkStatus);
     updateNetworkStatus();
+
+    // 📢 릴리즈 노트 확인 및 렌더링 로직 (Tech Note 고급 지원)
+    let globalReleaseNotes = [];
+
+    async function checkReleaseNotes(forceOpen = false) {
+        try {
+            const response = await fetch('release_notes.json', { cache: 'no-cache' });
+            if (!response.ok) return;
+            const data = await response.json();
+            
+            if (Array.isArray(data) && data.length > 0) {
+                globalReleaseNotes = data;
+                const currentVersion = localStorage.getItem('pongcrush_version');
+                const latestVersion = data[0].version;
+
+                if (forceOpen || currentVersion !== latestVersion) {
+                    renderReleaseNotes(data);
+                    document.getElementById('release-note-modal').classList.remove('hidden');
+                    
+                    if (currentVersion !== latestVersion) {
+                        localStorage.setItem('pongcrush_version', latestVersion);
+                    }
+                }
+            }
+        } catch (err) {
+            console.warn("릴리즈 노트를 불러오는데 실패했습니다.", err);
+        }
+    }
+
+    function openReleaseNoteModal() {
+        if (globalReleaseNotes.length > 0) {
+            renderReleaseNotes(globalReleaseNotes);
+            document.getElementById('release-note-modal').classList.remove('hidden');
+        } else {
+            checkReleaseNotes(true);
+        }
+    }
+    
+    function closeReleaseNoteModal() {
+        const modal = document.getElementById('release-note-modal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    function renderReleaseNotes(releases) {
+        const container = document.getElementById('release-note-content');
+        let html = '';
+        
+        releases.forEach((release, index) => {
+            const isLatest = index === 0;
+            html += `<div style="border: 1px solid var(--border-color); border-radius: 12px; background: #ffffff; overflow: hidden; margin-bottom: 12px; display: flex; flex-direction: column;">`;
+            
+            // 헤더 영역
+            html += `<div style="padding: 12px 16px; background: ${isLatest ? '#f0f9ff' : '#f8fafc'}; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">`;
+            html += `<span style="font-weight: 900; color: ${isLatest ? '#0284c7' : 'var(--text-main)'}; font-size: 15px;">${release.version} ${isLatest ? '<span style="font-size:10px; background:#bae6fd; color:#0369a1; padding:2px 6px; border-radius:6px; margin-left:4px;">LATEST</span>' : ''}</span>`;
+            html += `<span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">${release.date}</span>`;
+            html += `</div>`;
+            
+            // 내용 스크롤 영역 (버전별 내부 스크롤)
+            html += `<div style="max-height: 280px; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px;">`;
+            
+            release.changes.forEach(change => {
+                const badgeColor = change.categoryColor || '#64748b';
+                
+                // 항목 기본적으로 닫혀있음 (collapse)
+                html += `<details class="sync-details" style="margin-bottom: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">`;
+                html += `<summary class="sync-summary" style="padding: 10px 12px; display: flex; align-items: center; gap: 8px;">`;
+                html += `<span style="font-size: 11px; font-weight: 800; color: ${badgeColor}; background: ${badgeColor}15; padding: 2px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0;">${change.category}</span>`;
+                html += `<span style="font-size: 13px; font-weight: 600; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; text-align: left;">${change.title}</span>`;
+                html += `</summary>`;
+                
+                // 열렸을 때 나오는 상세 영역
+                html += `<div class="sync-content" style="background: #f8fafc; padding: 12px; border-top: 1px solid var(--border-color); font-size: 13px; color: #475569;">`;
+                
+                if (change.description) {
+                    html += `<div style="line-height: 1.5; margin-bottom: ${change.techNotes ? '16px' : '0'}; color: var(--text-main); font-weight: 500;">${change.description}</div>`;
+                }
+                
+                // 테크 노트 배열 렌더링 (다양한 타입 지원)
+                if (change.techNotes && change.techNotes.length > 0) {
+                    html += `<div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden;">`;
+                    html += `<div style="padding: 8px 12px; background: #f1f5f9; border-bottom: 1px dashed #cbd5e1; font-size: 12px; font-weight: 800; color: var(--slack-blue); display: flex; align-items: center; gap: 6px;">👨‍💻 Junior's Tech Note</div>`;
+                    html += `<div style="padding: 12px; display: flex; flex-direction: column; gap: 12px;">`;
+                    
+                    change.techNotes.forEach(note => {
+                        html += `<div>`;
+                        if (note.title) {
+                            html += `<div style="font-weight: 800; font-size: 13px; color: var(--text-main); margin-bottom: 6px;">${note.title}</div>`;
+                        }
+                        
+                        // 타입별 렌더링
+                        if (note.type === 'table' && note.rows) {
+                            html += `<table class="tech-table" style="margin-top: 4px;"><tbody>`;
+                            note.rows.forEach(row => {
+                                html += `<tr><th>${row.key}</th><td>${row.val}</td></tr>`;
+                            });
+                            html += `</tbody></table>`;
+                        } else if (note.type === 'list' && note.items) {
+                            html += `<ul class="tech-list" style="margin: 0; padding-left: 16px; color: #475569; line-height: 1.5; font-size: 12.5px;">`;
+                            note.items.forEach(item => { html += `<li style="margin-bottom: 4px;">${item}</li>`; });
+                            html += `</ul>`;
+                        } else if (note.type === 'note' && note.content) {
+                            html += `<div style="font-size: 12px; color: #0369a1; line-height: 1.5; padding: 10px; background: #e0f2fe; border-radius: 6px; border: 1px solid #bae6fd;">💡 ${note.content}</div>`;
+                        }
+                        html += `</div>`;
+                    });
+                    
+                    html += `</div></div>`; // 테크노트 바디 & 래퍼 끝
+                }
+                
+                html += `</div></details>`;
+            });
+            
+            html += `</div></div>`; // 버전별 래퍼 끝
+        });
+        
+        container.innerHTML = html;
+    }
 </script>
 
 <script type="module">
@@ -1696,7 +1833,7 @@ When you finish the evaluation, STOP generating immediately.
                 const tNorm = this.normalize(targetRaw); const sNorm = this.normalize(sttRaw);
                 let color = 'RED', score = 0, reason = '';
                 if (!sNorm) { reason = `단어 누락 (원문: '${targetRaw}')`; }
-                else if (tNorm === sNorm) { color = 'GREEN'; score = 100; reason = `정확 단어 일치 ('${targetRaw}')`; }
+                else if (tNorm === sNorm) { color = 'GREEN'; score = 100; reason = `정확 단 일치 ('${targetRaw}')`; }
                 else {
                     const tStem = this.getStem(tNorm); const sStem = this.getStem(sNorm);
                     const sim = this.similarityRatio(tNorm, sNorm);
@@ -1974,11 +2111,19 @@ When you finish the evaluation, STOP generating immediately.
     function backupWeakWords() {
         const savedList = getPWASavedWords();
         if(savedList.length === 0) { alert("백업할 단어가 없습니다."); return; }
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(savedList, null, 2));
+        
+        const blob = new Blob([JSON.stringify(savedList, null, 2)], { type: 'application/json;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        
         const dlAnchorElem = document.createElement('a');
-        dlAnchorElem.setAttribute("href", dataStr);
-        dlAnchorElem.setAttribute("download", "pongcrush_local_backup.json");
+        dlAnchorElem.href = url;
+        dlAnchorElem.download = "pongcrush_local_backup.json";
+        
+        document.body.appendChild(dlAnchorElem);
         dlAnchorElem.click();
+        
+        document.body.removeChild(dlAnchorElem);
+        URL.revokeObjectURL(url);
     }
 
     function openDataModal() {
@@ -2082,27 +2227,54 @@ When you finish the evaluation, STOP generating immediately.
 
     window.syncToGoogleDrive = async function() {
         if (!GOOGLE_CLIENT_ID) { alert("스크립트 상단에 GOOGLE_CLIENT_ID를 먼저 입력해야 합니다."); return; }
-        const savedList = getPWASavedWords();
-        if (savedList.length === 0) { alert("백업할 취약 단어가 없습니다."); return; }
+        
+        let localList = getPWASavedWords();
+        if (localList.length === 0) { alert("백업할 취약 단어가 없습니다."); return; }
         
         requestGoogleAuth(async () => {
             const loadingOverlay = document.getElementById('loading-overlay');
             const loadingText = document.getElementById('loading-text');
-            loadingText.innerText = "구글 드라이브에 동기화 중...";
+            loadingText.innerText = "구글 드라이브와 병합(Merge) 중...";
             loadingOverlay.classList.remove('hidden');
 
             try {
-                const dataToSave = JSON.stringify(savedList, null, 2);
                 const fileName = 'pongcrush_sync_data.json';
                 const res = await gapi.client.drive.files.list({ q: `name = '${fileName}' and trashed = false`, fields: 'files(id, name)', spaces: 'drive' });
                 const files = res.result.files;
-                const fileContent = new Blob([dataToSave], { type: 'application/json' });
+                
+                let mergedList = [...localList];
+                let addedCount = 0;
+
                 if (files && files.length > 0) {
+                    const fileData = await gapi.client.drive.files.get({ fileId: files[0].id, alt: 'media' });
+                    const existingList = typeof fileData.body === 'string' ? JSON.parse(fileData.body) : fileData.body;
+                    
+                    if (Array.isArray(existingList)) {
+                        existingList.forEach(existingItem => {
+                            const matchKo = sanitizeForMatch(existingItem.ko);
+                            const matchEn = sanitizeForMatch(existingItem.en);
+                            const localIndex = mergedList.findIndex(w => sanitizeForMatch(w.ko) === matchKo && sanitizeForMatch(w.en) === matchEn);
+                            
+                            if (localIndex > -1) {
+                                mergedList[localIndex].vagueCount = Math.max(mergedList[localIndex].vagueCount || 1, existingItem.vagueCount || 1);
+                            } else {
+                                mergedList.push(existingItem);
+                                addedCount++;
+                            }
+                        });
+                    }
+
+                    const fileContent = new Blob([JSON.stringify(mergedList, null, 2)], { type: 'application/json' });
                     await fetch(`https://www.googleapis.com/upload/drive/v3/files/${files[0].id}?uploadType=media`, {
                         method: 'PATCH', headers: { Authorization: `Bearer ${gapi.client.getToken().access_token}`, 'Content-Type': 'application/json' }, body: fileContent
                     });
-                    alert('✅ 구글 드라이브에 성공적으로 업데이트 되었습니다!');
+                    
+                    localStorage.setItem(PWA_VAGUE_STORAGE_KEY, JSON.stringify(mergedList));
+                    updatePWAReviewButtonUI();
+                    
+                    alert(`✅ 구글 드라이브와 기존 데이터 병합 완료!\n(기존 파일에서 로컬로 추가로 가져온 단어: ${addedCount}개)`);
                 } else {
+                    const fileContent = new Blob([JSON.stringify(mergedList, null, 2)], { type: 'application/json' });
                     const metadata = { name: fileName, mimeType: 'application/json' };
                     const form = new FormData();
                     form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
@@ -2114,7 +2286,7 @@ When you finish the evaluation, STOP generating immediately.
                 }
                 closeDataModal();
             } catch (err) { 
-                alert('❌ 구글 드라이브 저장 실패: ' + err.message); 
+                alert('❌ 구글 드라이브 동기화 실패: ' + err.message); 
             } finally {
                 loadingOverlay.classList.add('hidden');
                 loadingText.innerText = "단어장 데이터를 가져오는 중...";
@@ -2207,7 +2379,6 @@ When you finish the evaluation, STOP generating immediately.
         });
     }
 
-    // [요청 4] 무한 버튼 UI 토글 최적화
     function updateInfiniteButtonUI() {
         const btn = document.getElementById('infinite-loop-btn');
         const mobileBtn = document.getElementById('mobile-infinite-btn');
@@ -3092,7 +3263,7 @@ When you finish the evaluation, STOP generating immediately.
             closeDayModal(); closeWeakReviewModal(); closeAutoplayModal();
             closeVoiceModal(); closeSpeakingModal(); closeAISettingsModal();
             closeModelSelectModal(); closeAIFeedbackModal(); closeLifeNoticeModal(); 
-            closeDataModal(); return;
+            closeDataModal(); closeReleaseNoteModal(); return;
         }
 
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
@@ -3145,6 +3316,9 @@ When you finish the evaluation, STOP generating immediately.
         loadSavedVoiceSettings(); updatePWAReviewButtonUI();
         window.updateAIToggleUI(); window.updateAIChipUI();
         
+        // 📢 초기 로딩 시 릴리즈 노트 확인 실행
+        checkReleaseNotes();
+
         setTimeout(() => { patchPWASavedWordsWithNewData(); }, 3000);
     };
 

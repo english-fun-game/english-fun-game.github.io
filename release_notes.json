@@ -1,0 +1,97 @@
+[
+  {
+    "version": "v6.9.2",
+    "date": "2026-08-20",
+    "changes": [
+      {
+        "category": "Architecture",
+        "categoryColor": "#10b981",
+        "title": "구글 드라이브 연동 기능 개선 (안전한 병합 동기화)",
+        "description": "기존 저장된 데이터를 덮어쓰지 않고, 양쪽 데이터를 비교하여 없는 단어만 추가하는 방식으로 구글 드라이브 동기화 기능이 개편되었습니다.",
+        "techNotes": [
+          {
+            "type": "table",
+            "title": "📊 기존 덮어쓰기 vs 신규 병합 방식 비교",
+            "rows": [
+              {"key": "기존 방식 (Overwrite)", "val": "서버 데이터를 무조건 로컬 데이터로 대체"},
+              {"key": "발생 문제점", "val": "태블릿 등 타 기기에서 학습한 데이터 증발"},
+              {"key": "신규 방식 (Merge)", "val": "복합 식별키(ko+en)를 통한 교집합/차집합 분류"},
+              {"key": "충돌 해결 (Conflict Resolution)", "val": "vagueCount 값이 더 큰 데이터를 승자로 채택"}
+            ]
+          },
+          {
+            "type": "note",
+            "title": "멱등성 (Idempotency) 확보",
+            "content": "API를 여러 번 호출하거나, 동기화 버튼을 연속으로 여러 번 누르더라도 데이터가 중복 생성되지 않고 '항상 동일하고 안전한 결과'를 보장하도록 설계되었습니다. 분산 시스템 환경에서 동기화 로직을 짤 때 가장 중요한 개념입니다."
+          }
+        ]
+      },
+      {
+        "category": "Performance",
+        "categoryColor": "#8b5cf6",
+        "title": "로컬 단어 백업 기능 대용량 처리 안정성 강화",
+        "description": "단어 수가 많아졌을 때 브라우저 한계로 인해 다운로드가 먹통이 되던 현상을 해결했습니다.",
+        "techNotes": [
+          {
+            "type": "table",
+            "title": "🛠️ Data URI vs Blob 방식 스펙 비교",
+            "rows": [
+              {"key": "기존 (Data URI)", "val": "데이터를 Base64 텍스트로 변환하여 주소창에 삽입"},
+              {"key": "기존 한계점", "val": "URI 최대 길이 제한(약 2MB) 초과 시 크래시"},
+              {"key": "신규 (Blob 객체)", "val": "이진 데이터(Binary) 형태로 브라우저 메모리에 직접 할당"},
+              {"key": "신규 장점", "val": "메모리가 허용하는 한 무제한 용량 고속 다운로드 가능"}
+            ]
+          },
+          {
+            "type": "list",
+            "title": "🧹 메모리 누수(Memory Leak) 방지 원칙",
+            "items": [
+              "Blob을 생성하고 URL.createObjectURL()을 호출하면 브라우저 메모리의 특정 영역을 영구 점유하게 됩니다.",
+              "가비지 컬렉터(GC)는 이 주소가 언제 다시 쓰일지 모르기 때문에 마음대로 메모리를 회수하지 못합니다.",
+              "따라서 다운로드 클릭 이벤트가 끝난 직후, 반드시 URL.revokeObjectURL()을 호출하여 명시적으로 메모리 할당을 해제해주어야 좀비 메모리가 쌓이지 않습니다."
+            ]
+          }
+        ]
+      },
+      {
+        "category": "UX",
+        "categoryColor": "#f59e0b",
+        "title": "모바일 환경 무한 반복 버튼 위치 접근성 개선",
+        "techNotes": [
+          {
+            "type": "note",
+            "title": "피츠의 법칙 (Fitts's Law) 적용",
+            "content": "사용자가 버튼에 도달하는 데 걸리는 시간은 대상의 '크기'와 '거리'에 의해 결정됩니다. 모바일에서 가장 자주 쓰이는 무한 반복 버튼을 오른손 엄지가 가장 쉽게 닿는 우측 하단 엣지 영역으로 재배치하여 조작 피로도를 낮췄습니다."
+          }
+        ]
+      },
+      {
+        "category": "Bugfix",
+        "categoryColor": "#ef4444",
+        "title": "이전 버튼 클릭 시 발생하던 재생 관련 버그 수정",
+        "description": "자동 재생 모드 중에 이전 단어 버튼을 누를 경우, 타이머 스레드가 꼬이면서 오디오가 겹쳐 들리던 Race Condition 문제를 해결했습니다."
+      }
+    ]
+  },
+  {
+    "version": "v6.9.1",
+    "date": "2026-08-15",
+    "changes": [
+      {
+        "category": "UI/UX",
+        "categoryColor": "#0284c7",
+        "title": "모달 최대 높이 제한 및 스크롤바 디자인 최적화",
+        "techNotes": [
+          {
+            "type": "list",
+            "title": "📱 CSS Viewport Height(vh)를 활용한 레이아웃",
+            "items": [
+              "모달 컨테이너에 max-height: 90vh 속성을 부여하여 디바이스 창 크기를 절대 넘지 않도록 제한했습니다.",
+              "내부 콘텐츠 영역에 overflow-y: auto를 설정하여, 모달의 헤더와 푸터는 화면에 고정시킨 채 본문 내용만 스크롤 되도록 모바일 사용성을 개선했습니다."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
