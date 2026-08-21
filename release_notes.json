@@ -1,4 +1,72 @@
 [
+  {
+  "version": "v6.9.5",
+  "date": "2026-08-21",
+  "changes": [
+    {
+      "category": "Architecture",
+      "categoryColor": "#3b82f6",
+      "title": "PWA 로컬 알림 파이프라인 구축 및 상용 Web Push 아키텍처 비교 분석",
+      "description": "서버리스 환경에서 Service Worker와 Web Notification API를 결합한 로컬 알림 시스템을 구현하고, 상용 푸시 아키텍처로의 확장 시 고려해야 할 엔지니어링 한계와 핵심 원리를 정립했습니다.",
+      "techNotes": [
+        {
+          "type": "table",
+          "title": "📊 의사결정: 클라이언트 로컬 스케줄링 vs 상용 Web Push (VAPID/Web Push Protocol)",
+          "rows": [
+            {
+              "key": "트리거 주체 및 인프라",
+              "val": "현재: 메인 스레드 타이머 기반(서버 비용 0원) / 상용: 백엔드 스케줄러 + 브라우저 벤더 Push Service(APNs/FCM) 연계"
+            },
+            {
+              "key": "프로세스 라이프사이클 한계",
+              "val": "현재: 탭/브라우저 완전 종료 시 발송 불가 / 상용: OS 푸시 데몬이 브라우저 백그라운드 프로세스를 깨워(Wake-up) 100% 수신 보장"
+            },
+            {
+              "key": "상용화 결정 요건",
+              "val": "유저 이탈 방지 및 정시 수신율이 핵심 비즈니스 지표일 경우 VAPID 키 교환 기반의 Push Subscription DB 인프라 구축 필수"
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "title": "💡 핵심 CS 개념: 브라우저 타이머 스로틀링(Throttling)과 W3C Push API 원리",
+          "content": "모던 브라우저는 배터리 절약 및 CPU 점유율 최적화를 위해 비활성(Background) 탭의 타이머를 최소 1초~수 분 단위로 강제 지연(Timer Clamping)하거나 일시 정지합니다. 따라서 브라우저 내부 타이머(`setInterval`)는 신뢰성 높은 스케줄러가 될 수 없으며, 상용 환경에서는 비대칭 암호화(ECDSA/P-256) 기반 VAPID 프로토콜로 서명된 페이로드를 Push Service가 Service Worker의 `push` 이벤트로 전달해 워커 스레드를 즉각 깨우는 방식으로 동작해야 합니다."
+        }
+      ]
+    },
+    {
+      "category": "Performance",
+      "categoryColor": "#10b981",
+      "title": "Service Worker Client IPC 기반 탭 재활용 및 History 멱등성(Idempotency) 보장",
+      "description": "알림 클릭 인터랙션 시 불필요한 OS 인스턴스 중복 생성을 억제하고 기존 창을 재활용하며, 딥링크 상태 소비 후 URL 정규화를 통해 새로고침 부수 효과를 차단했습니다.",
+      "techNotes": [
+        {
+          "type": "list",
+          "title": "🛠️ 상용 PWA 푸시 파이프라인 구현을 위한 3단계 핵심 원칙",
+          "items": [
+            "구독 라이프사이클 격리: PushManager를 통해 엔드포인트/암호화 키(p256dh, auth)를 발급받고 백엔드 DB와 트랜잭션 동기화",
+            "워커 컨텍스트 제어: `notificationclick` 이벤트 발생 시 `clients.matchAll()`을 순회하여 중복 탭 방지 및 활성 윈도우 포커싱(Focus Delegation)",
+            "딥링크 상태 정제(Sanitization): URL 파라미터로 주입된 실행 인텐트는 1회성으로 처리 후 `history.replaceState`로 즉시 클리어하여 멱등성 보장"
+          ]
+        },
+        {
+          "type": "table",
+          "title": "📊 의사결정: history.pushState vs history.replaceState",
+          "rows": [
+            {
+              "key": "히스토리 스택 오염 방지",
+              "val": "새 세션 엔트리를 적재하지 않고 현재 주소만 교체하여 유저의 뒤로가기(Back) 내비게이션 일관성 유지"
+            },
+            {
+              "key": "상태 주입의 멱등성 확보",
+              "val": "알림 진입 파라미터(?action=...)를 1회 소비 후 즉시 삭제함으로써 사용자의 새로고침(F5) 시 중복 모달 트리거 원천 차단"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+},
 {
   "version": "v6.9.4",
   "date": "2026-08-21",
