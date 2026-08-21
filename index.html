@@ -295,7 +295,111 @@
 <div id="ai-feedback-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeAIFeedbackModal()"><div class="ai-modal-card" id="ai-modal-card"><div class="ai-modal-header"><div class="ai-modal-title"><span>로컬 AI 영작 첨삭</span><div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;"><button type="button" id="ai-toggle-btn" class="ai-chip-btn green-chip" onclick="toggleAIEnabled()">🤖 AI 첨삭: ON</button><button type="button" id="ai-model-chip-btn" class="ai-chip-btn green-chip" onclick="openModelSelectModal()">🟢 Llama-1B</button><button type="button" class="ai-chip-btn" onclick="openAISettingsModal()">⚙️ 설정</button></div></div><div style="display: flex; align-items: center; gap: 10px;"><button id="ai-combined-stop-btn" class="ai-combined-stop-btn hidden" onclick="window.stopAIComputation && window.stopAIComputation()"><span id="ai-loader-text" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">🛑 AI 상시 강제 중단 (Q)</span></button><button onclick="closeAIFeedbackModal()" class="ai-close-btn">✕ 나가기 <span style="font-size:11px; opacity:0.8;">(ESC)</span></button></div></div><div class="ai-modal-content-body"><div id="writing-input-view" style="display: flex; flex-direction: column; gap: 16px; flex: 1;"><div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 8px;"><div id="writing-modal-en-hint" style="font-size: 32px; font-weight: 700; color: var(--slack-blue); line-height: 1.3;"></div><div id="writing-modal-ko-text" style="font-size: 32px; font-weight: 900; color: var(--text-main); word-break: keep-all; line-height: 1.3;"></div></div><textarea id="modal-sentence-textarea" class="sentence-test-textarea" placeholder="영문장을 작성하세요 (Shift+Enter 줄바꿈, Enter 제출)" style="flex: 1; min-height: 120px; font-size: 32px; padding: 24px; line-height: 1.4;" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); submitModalWritingTest(); }"></textarea><button type="button" class="base-btn" style="background: var(--slack-purple); padding: 18px; font-size: 18px; flex-shrink: 0;" onclick="submitModalWritingTest()">✍️ 제출 (Enter)</button></div><div id="writing-result-view" class="hidden" style="display: flex; flex-direction: column; gap: 16px; flex: 1; min-height: 0;"><div style="display: flex; flex-direction: column; gap: 20px; flex-shrink: 0; background: white; padding: 24px 28px; border-radius: 16px; border: 2px solid #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.03);"><div id="ai-modal-user-text" style="font-size: clamp(24px, 2.5vw, 36px); font-weight: 900; color: #0f172a; line-height: 1.4; word-break: keep-all;"></div><div style="width: 100%; height: 1.5px; border-top: 1.5px dashed #cbd5e1;"></div><div id="ai-modal-target-text" style="font-size: clamp(24px, 2.5vw, 36px); font-weight: 900; color: #15803d; line-height: 1.4; word-break: keep-all;"></div></div><div class="ai-feedback-container" id="ai-feedback-container" style="flex: 1; background: white; border: 1.5px solid #cbd5e1; border-radius: 16px; padding: 20px 24px; overflow-y: auto; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); display: flex; flex-direction: column; min-height: 0; position: relative;"><div id="ai-disclaimer-text" style="font-size: 12px; color: #94a3b8; text-align: left; margin-bottom: 12px; line-height: 1.3; flex-shrink: 0; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; word-break: keep-all;">※ 현재 구동 중인 로컬 모델은 수백억 개 이상의 신경망을 가진 거대 AI(Gemini 등)에 비해 체급이 작아, 복잡한 문맥 추론에 한계가 있을 수 있습니다.</div><div class="ai-pipeline-stepper" id="ai-pipeline"><div class="ai-step" id="step-1"><div class="step-title">1. 가중치 로드</div><div class="step-desc" id="step-1-desc">VRAM 할당</div></div><div class="ai-step" id="step-2"><div class="step-title">2. 토크나이징</div><div class="step-desc">시퀀스 인코딩</div></div><div class="ai-step" id="step-3"><div class="step-title">3. 신경망 추론</div><div class="step-desc">순전파 연산</div></div><div class="ai-step" id="step-4"><div class="step-title">4. 디코딩</div><div class="step-desc" id="step-4-desc">렌더링</div></div></div><div id="ai-center-progress-text" style="font-size: 15px; font-weight: 700; color: var(--slack-blue); text-align: center; margin-top: 16px;"></div><div id="streaming-grammar-body" style="display: none; font-size: 16.5px; font-weight: 600; line-height: 1.75; color: #334155; white-space: pre-wrap; flex: 1;"></div></div></div></div></div></div>
 <div id="day-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeDayModal()"><div class="modal-card"><div class="modal-header"><span id="day-modal-title">📅 학습 Day 선택</span><button onclick="closeDayModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button></div><div class="sec-select-area"><div id="fixed-notice-banner" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; padding:10px 12px; border-radius:10px; font-size:13px; font-weight:800; text-align:center;">⚡ 스피킹 30 / 라이팅 40 / 초록이 60 / 라잎 15 고정 시험</div></div><div class="sec-select-area" style="flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden;"><div class="sec-select-title" id="day-list-title">📌 학습할 Day 선택</div><div id="day-buttons-grid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; overflow-y:auto; padding: 4px; box-sizing: border-box;"></div></div></div></div>
 <div id="weak-review-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeWeakReviewModal()"><div class="modal-card tall-modal"><div class="modal-header"><span>🔥 취약 단어 복습</span><button onclick="closeWeakReviewModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button></div><button id="weak-review-all-btn" class="base-btn" style="background:#2563eb; padding:13px; font-size:15px; flex-shrink:0;" onclick="startWeakReviewSession('ALL')">🔥 전체 취약 단어 복습 (0개)</button><div class="weak-col-container"><div class="weak-col"><div class="weak-col-header">🗣️ 스피킹</div><button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '스피킹')">전체 복습<br><span id="col-cnt-speaking" style="font-size:11px; opacity:0.8;">(0)</span></button><div class="weak-day-list" id="weak-day-list-speaking"></div></div><div class="weak-col"><div class="weak-col-header">✍️ 라이팅</div><button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '라이팅')">전체 복습<br><span id="col-cnt-writing" style="font-size:11px; opacity:0.8;">(0)</span></button><div class="weak-day-list" id="weak-day-list-writing"></div></div><div class="weak-col"><div class="weak-col-header">🍀 초록이</div><button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '초록이')">전체 복습<br><span id="col-cnt-green" style="font-size:11px; opacity:0.8;">(0)</span></button><div class="weak-day-list" id="weak-day-list-green"></div></div><div class="weak-col"><div class="weak-col-header">🌿 라잎</div><button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '라잎')">전체 복습<br><span id="col-cnt-life" style="font-size:11px; opacity:0.8;">(0)</span></button><div class="weak-day-list" id="weak-day-list-life"></div></div></div></div></div>
-<div id="data-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeDataModal()"><div class="modal-card"><div class="modal-header"><span>💾 데이터 백업 및 복원</span><button onclick="closeDataModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button></div><div class="sec-select-area"><div class="sec-select-title">☁️ 구글 드라이브 연동</div><div style="font-size:12.5px; color:var(--text-muted); line-height:1.4; margin-bottom:4px;">구글 계정에 로그인하여 내 드라이브와 데이터를 수동으로 안전하게 동기화할 수 있습니다.</div><div style="display:flex; gap:8px; margin-top:2px;"><button class="base-btn" style="flex:1; background:#10b981; font-size:14px; padding:12px;" onclick="syncToGoogleDrive()">☁️ G드라이브 병합 저장</button><button class="base-btn" style="flex:1; background:#8b5cf6; font-size:14px; padding:12px;" onclick="loadFromGoogleDrive()">☁️ G드라이브 불러오기</button></div></div><div style="width: 100%; height: 1px; background: var(--border-color); margin: 2px 0;"></div><div class="sec-select-area"><div class="sec-select-title">📁 로컬 파일 다운로드/불러오기</div><div style="display:flex; gap:8px;"><button class="base-btn" style="flex:1; background:#f8fafc; color:#475569; border:1px solid #cbd5e1; font-size:14px; padding:12px;" onclick="backupWeakWords()">⬇️ 로컬 백업</button><button class="base-btn" style="flex:1; background:#f8fafc; color:#475569; border:1px solid #cbd5e1; font-size:14px; padding:12px;" onclick="restoreWeakWords()">⬆️ 로컬 복원</button></div></div><button class="base-btn" style="background:var(--slack-purple); width:100%; padding:12px; margin-top:4px;" onclick="closeDataModal()">닫기</button></div></div>
+
+<!-- 💾 데이터 관리 모달 -->
+<div id="data-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeDataModal()">
+    <div class="modal-card">
+        <div class="modal-header">
+            <span>💾 데이터 백업 및 복원</span>
+            <button onclick="closeDataModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button>
+        </div>
+        
+        <!-- ☁️ 구글 드라이브 연동 섹션 -->
+        <div class="sec-select-area">
+            <div class="sec-select-title">☁️ 구글 드라이브 연동</div>
+            <div style="font-size:12.5px; color:var(--text-muted); line-height:1.4; margin-bottom:4px;">
+                구글 계정에 로그인하여 내 드라이브와 데이터를 수동으로 안전하게 동기화할 수 있습니다.
+            </div>
+
+            <details class="sync-details">
+                <summary class="sync-summary">📊 단어 400개 기준 네트워크 사용량</summary>
+                <div class="sync-content">
+                    <table class="tech-table">
+                        <tbody>
+                            <tr><th>순수 텍스트(JSON) 데이터</th><td>~ 100 KB</td></tr>
+                            <tr><th>네트워크 헤더 및 암호화 오버헤드</th><td>~ 5 KB</td></tr>
+                            <tr><th>1회 API 통신 총합</th><td style="color: #2563eb;">~ 105 KB</td></tr>
+                            <tr style="border-bottom: none;"><th>월 100회 동기화 시 누적치</th><td style="color: #16a34a;">~ 10.5 MB</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </details>
+
+            <details class="sync-details">
+                <summary class="sync-summary">🛡️ 브라우저 직접 동기화 방식 아키텍처 및 보안</summary>
+                <div class="sync-content">
+                    <ul class="tech-list">
+                        <li><strong>작동 가능 원리:</strong> 백엔드 서버 없이 Google Identity Services(OAuth 2.0 Implicit Grant)를 사용하여 클라이언트에서 직접 인증 토큰을 획득하고 REST API와 통신합니다.</li>
+                        <li><strong>보안 수준:</strong> 발급된 Access Token은 디스크가 아닌 브라우저 메모리에만 일시적으로 보관되며, 모든 통신이 HTTPS로 강제되어 탈취가 불가능에 가깝습니다.</li>
+                        <li><strong>권한 격리 (데이터 보호):</strong> <code>drive.file</code> 스코프만 제한적으로 인가합니다. 애플리케이션이 <strong>직접 생성한 파일에만 접근 가능</strong>하므로, 사용자의 개인 사진이나 타 문서 등 다른 드라이브 파일을 읽거나 수정할 위험이 원천 차단됩니다.</li>
+                        <li><strong>정책적 제한:</strong> Google 서버 측에서 허용한 CORS(교차 출처 리소스 공유) 엔드포인트로만 통신이 가능하며, 단시간 내 비정상적인 잦은 요청 시 구글 API 할당량(Quota) 제한 정책에 의해 자동 블록됩니다.</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details class="sync-details">
+                <summary class="sync-summary">🔄 자동 로그인 및 백그라운드 동기화가 불가능한 이유</summary>
+                <div class="sync-content" style="background: #fdfdfd;">
+                    <div style="font-size: 11px; color: #64748b; margin-bottom: 10px; padding: 8px; background: #f1f5f9; border-radius: 6px;">
+                        💡 <b>Junior's Note:</b> 왜 사용자가 앱을 켤 때마다 알아서 로그인하고 뒤에서 동기화해주지 못할까요? 프론트엔드(Client-Side) 생태계의 보안과 구조적 한계 때문입니다.
+                    </div>
+                    <ul class="tech-list">
+                        <li><strong>Step 1. 짧은 수명의 출입증 (Access Token):</strong> 구글 API에 접근하기 위한 토큰은 보안상 수명이 약 1시간으로 매우 짧습니다. 시간이 지나면 만료되어 다시 발급받아야 합니다.</li>
+                        <li><strong>Step 2. 무제한 토큰(Refresh Token)의 브라우저 저장 위험:</strong> 만료된 토큰을 연장하려면 'Refresh Token'이 필요합니다. 하지만 백엔드(DB) 없이 브라우저(LocalStorage 등)에 이를 저장하면, XSS 해킹 등에 의해 영구적인 권한이 탈취될 수 있어 구글이 프론트엔드 환경에는 이 토큰 발급을 엄격히 제한합니다.</li>
+                        <li><strong>Step 3. 모던 브라우저의 서드파티 쿠키 차단 (ITP 정책):</strong> 과거에는 보이지 않는 iframe을 띄워 구글 세션을 통해 몰래 토큰을 갱신(Silent Refresh)할 수 있었습니다. 하지만 현재 사파리, 크롬 등은 사용자의 행동 추적을 막기 위해 타사 쿠키(3rd-party cookie)를 기본 차단하므로 이 꼼수가 막혔습니다.</li>
+                        <li><strong>Step 4. 서버리스(Serverless)의 물리적 한계:</strong> 앱이 꺼져 있는 동안 백그라운드에서 동기화(Cron Job)를 수행해 줄 24시간 가동되는 백엔드 서버가 존재하지 않습니다.</li>
+                    </ul>
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #e2e8f0; font-weight: 800; color: #3b82f6;">
+                        🎯 결론: 버튼을 눌러 명시적으로 구글 로그인을 호출(사용자 개입)하고, 1회성 토큰을 받아 수동 동기화하는 것이 현재 아키텍처에서 가장 안전하고 확실한 방법입니다.
+                    </div>
+                </div>
+            </details>
+
+            <div style="display:flex; gap:8px; margin-top:2px;">
+                <button class="base-btn" style="flex:1; background:#10b981; font-size:14px; padding:12px;" onclick="syncToGoogleDrive()">☁️ G드라이브 병합 저장</button>
+                <button class="base-btn" style="flex:1; background:#8b5cf6; font-size:14px; padding:12px;" onclick="loadFromGoogleDrive()">☁️ G드라이브 불러오기</button>
+            </div>
+        </div>
+        
+        <div style="width: 100%; height: 1px; background: var(--border-color); margin: 6px 0;"></div>
+        
+        <!-- 📁 로컬 파일 다운로드/불러오기 섹션 -->
+        <div class="sec-select-area">
+            <div class="sec-select-title">📁 로컬 파일 다운로드/복원 (Offline-First)</div>
+            <div style="font-size:12.5px; color:var(--text-muted); line-height:1.4; margin-bottom:4px;">
+                네트워크 연결이 없는 오프라인 환경에서도 학습 기록을 JSON 파일로 직접 내보내거나 가져와 완벽하게 복원할 수 있습니다.
+            </div>
+
+            <details class="sync-details">
+                <summary class="sync-summary">📴 오프라인 환경에서 로컬 파일 백업이 필수적인 이유</summary>
+                <div class="sync-content">
+                    <ul class="tech-list">
+                        <li><strong>Zero Network Dependency:</strong> 외부 API 서버나 클라우드 인증 없이 브라우저 내장 <code>Blob</code> 및 <code>FileReader API</code>만으로 디스크 I/O를 처리하므로, 비행기 모드나 지하철 등 완전한 오프라인 상태에서도 100% 정상 작동합니다.</li>
+                        <li><strong>LocalStorage 휘발성 방어 (Storage Eviction 대응):</strong> 모바일 OS(특히 iOS WebKit/Safari)는 기기 저장공간이 부족하거나 앱을 일정 기간(7일 이상) 미사용 시 LocalStorage를 예고 없이 삭제(Eviction)합니다. 중요한 학습 데이터는 물리적인 파일(JSON)로 다운로드해 보관하는 것이 데이터 손실을 막는 가장 안전한 방법입니다.</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details class="sync-details">
+                <summary class="sync-summary">🔄 타 플랫폼(Anki/Quizlet) 이식성 및 유연한 파싱 엔진</summary>
+                <div class="sync-content">
+                    <ul class="tech-list">
+                        <li><strong>데이터 주권 보장 (Data Portability):</strong> 표준 JSON 및 TSV/CSV 형식과 호환되도록 설계되어 사용자가 원할 때 언제든 단어장 데이터를 텍스트 파일로 열람, 수정하거나 타 암기 앱으로 이전할 수 있습니다.</li>
+                        <li><strong>Robust Parser:</strong> 단어 리스트 배열 구조뿐만 아니라 탭(`\t`), 쉼표(`,`), 연속 공백 등으로 구분된 비정형 텍스트 파일도 정규식 기반 폴백(Fallback) 파서가 자동 감지하여 데이터를 안전하게 병합 복원합니다.</li>
+                    </ul>
+                </div>
+            </details>
+
+            <div style="display:flex; gap:8px; margin-top:2px;">
+                <button class="base-btn" style="flex:1; background:#f8fafc; color:#475569; border:1px solid #cbd5e1; font-size:14px; padding:12px;" onclick="backupWeakWords()">⬇️ 로컬 백업</button>
+                <button class="base-btn" style="flex:1; background:#f8fafc; color:#475569; border:1px solid #cbd5e1; font-size:14px; padding:12px;" onclick="restoreWeakWords()">⬆️ 로컬 복원</button>
+            </div>
+        </div>
+
+        <button class="base-btn" style="background:var(--slack-purple); width:100%; padding:12px; margin-top:4px;" onclick="closeDataModal()">닫기</button>
+    </div>
+</div>
+
 <div id="autoplay-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeAutoplayModal()"><div class="modal-card"><div class="modal-header"><span>🤖 자동재생 설정</span><button onclick="closeAutoplayModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button></div><div class="sec-select-area"><div class="sec-select-title">⏱️ 정답 공개 전 대기 시간 선택 (기본: 2.0초)</div><div class="sec-btn-grid"><button class="sec-btn" onclick="selectTempAutoplaySec(0.5)">0.5초</button><button class="sec-btn" onclick="selectTempAutoplaySec(1.0)">1.0초</button><button class="sec-btn" onclick="selectTempAutoplaySec(1.5)">1.5초</button><button class="sec-btn" onclick="selectTempAutoplaySec(2.0)">2.0초 ⭐</button><button class="sec-btn" onclick="selectTempAutoplaySec(2.5)">2.5초</button><button class="sec-btn" onclick="selectTempAutoplaySec(3.0)">3.0초</button></div></div><div class="sec-select-area" style="margin-top: 4px;"><div class="sec-select-title">🗣️ 한글 뜻 음성 먼저 읽기 (기본: ON)</div><button id="ko-read-btn" class="sec-btn selected" onclick="toggleAutoplayReadKorean()" style="width:100%; padding:12px; font-weight:800; text-align:center;">🔊 한글 뜻 읽기 (ON)</button></div><button class="base-btn" style="background:#16a34a; width:100%; padding:12px; margin-top:6px;" onclick="confirmAutoplayModal()">확인 (Enter)</button></div></div>
 <div id="voice-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeVoiceModal()"><div class="modal-card"><div class="modal-header"><span>🎙️ 음성 선택 (시스템 최적화)</span><button onclick="closeVoiceModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button></div><div class="sec-select-area"><div class="sec-select-title">1️⃣ 감지된 지역별 영어 보이스</div><div id="voice-list-wrapper" class="voice-list-container"></div></div><div class="sec-select-area"><div class="sec-select-title">2️⃣ 음성 톤 & 억양 캐릭터 변경</div><div class="voice-tune-grid"><div id="tune-normal" class="tune-card selected" onclick="selectVoiceTune('normal', 1.0, 0.85)"><span class="tune-title">🎙️ 기본 톤</span></div><div id="tune-deep" class="tune-card" onclick="selectVoiceTune('deep', 0.75, 0.8)"><span class="tune-title">🧔 중저음 톤</span></div><div id="tune-bright" class="tune-card" onclick="selectVoiceTune('bright', 1.3, 0.9)"><span class="tune-title">👩 밝은 고음 톤</span></div><div id="tune-fast" class="tune-card" onclick="selectVoiceTune('fast', 1.1, 1.1)"><span class="tune-title">⚡ 빠른 속도</span></div></div></div><button class="base-btn" style="background:var(--slack-purple); width:100%; padding:12px;" onclick="closeVoiceModal()">적용 완료</button></div></div>
 <div id="speaking-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeSpeakingModal()"><div id="speaking-card" class="speaking-modal-card"></div></div>
