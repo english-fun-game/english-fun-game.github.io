@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pongcrush-v5'; // 버전업 (새로운 SW 설치 유도)
+const CACHE_NAME = 'pongcrush-v6'; // 버전업 (새로운 SW 설치 유도)
 
 // 캐싱할 정적, 미디어 자원 및 엑셀 파일 리스트
 const ASSETS_TO_CACHE = [
@@ -73,6 +73,29 @@ self.addEventListener('fetch', (event) => {
                 });
                 return response;
             }).catch(() => caches.match('./index.html'));
+        })
+    );
+});
+
+// 🔔 알림 클릭 이벤트 처리 (앱 열기 및 파라미터 전달)
+self.addEventListener('notificationclick', function(event) {
+    event.notification.close();
+    const targetUrl = event.notification.data.url;
+
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
+            // 열려있는 탭이 있으면 포커스 맞추고 해당 URL로 이동
+            for (let i = 0; i < clientList.length; i++) {
+                let client = clientList[i];
+                if (client.url.includes('index.html') && 'focus' in client) {
+                    client.navigate(targetUrl);
+                    return client.focus();
+                }
+            }
+            // 없으면 새 창 열기
+            if (clients.openWindow) {
+                return clients.openWindow(targetUrl);
+            }
         })
     );
 });
