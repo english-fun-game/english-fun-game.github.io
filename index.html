@@ -131,49 +131,37 @@
         .release-modal-card {
             width: 100%;
             max-width: 650px;
-            height: 90vh; /* 화면의 90% 고정 확보 */
+            height: 90vh;
             display: flex;
             flex-direction: column;
             background: #ffffff;
             border-radius: 20px 20px 0 0;
             margin: 0 auto;
+            padding: 0; /* 불필요한 패딩 제거 */
             overflow: hidden;
             box-shadow: 0 -10px 40px rgba(0,0,0,0.15);
         }
 
-        /* 📢 릴리즈 노트 아코디언 전용 (짤림 방지) */
-        .rn-details { border: 1px solid var(--border-color); border-radius: 12px; margin: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .rn-summary { padding: 14px; display: flex; align-items: flex-start; gap: 10px; background: #ffffff; cursor: pointer; list-style: none; user-select: none; border-radius: 12px; }
+        /* 📢 릴리즈 노트 아코디언 전용 (UI 압축) */
+        .rn-details { border: 1px solid var(--border-color); border-radius: 10px; margin: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .rn-summary { padding: 10px 12px; display: flex; align-items: flex-start; gap: 8px; background: #ffffff; cursor: pointer; list-style: none; user-select: none; border-radius: 10px; }
         .rn-summary::-webkit-details-marker { display: none; }
-        .rn-summary::after { content: '▼'; font-size: 12px; color: #94a3b8; margin-left: auto; transition: transform 0.2s; margin-top: 2px; }
+        .rn-summary::after { content: '▼'; font-size: 11px; color: #94a3b8; margin-left: auto; transition: transform 0.2s; margin-top: 4px; flex-shrink: 0; }
         .rn-details[open] .rn-summary::after { transform: rotate(180deg); }
         .rn-details[open] .rn-summary { border-bottom: 1px dashed var(--border-color); border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
-        .rn-content { padding: 16px; background: #f8fafc; font-size: 14px; color: #475569; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; }
+        .rn-content { padding: 12px; background: #f8fafc; font-size: 13px; color: #475569; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; }
 
-        @media (max-width: 650px) {
-            .release-modal-card {
-                height: 95vh; /* 모바일에서는 95% 꽉 채움 */
-                border-radius: 24px 24px 0 0;
-            }
+        /* 📢 릴리즈 노트 아코디언 제목 전용 (2줄 말줄임표 처리) */
+        .rn-title {
+            font-size: 13.5px; font-weight: 800; color: var(--text-main); flex: 1; text-align: left;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; 
+            overflow: hidden; text-overflow: ellipsis; word-break: keep-all; line-height: 1.4; margin-top: 1px;
         }
-
-        /* 💡 릴리즈 노트 전용 모달 레이아웃 (모바일 대응 강화) */
-        .release-modal-card {
-            width: 100%;
-            max-width: 600px;
-            height: 90vh; /* 기본 높이 제한 */
-            max-height: 90vh;
-            display: flex;
-            flex-direction: column;
-            padding: 24px;
-            background: #ffffff;
-            border-radius: 20px;
-            box-sizing: border-box;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        .sync-details[open] .rn-title {
+            display: block; overflow: visible; -webkit-line-clamp: unset;
         }
 
         @media (max-width: 650px) {
-            body { padding: 8px; }
             .app-version {
                 font-size: 10px; 
                 bottom: 6px;
@@ -188,12 +176,8 @@
                 height: 95vh !important;
                 max-height: 95vh !important;
                 border-radius: 24px 24px 0 0 !important;
-                padding: 20px 16px 16px 16px !important;
-                margin-top: auto; /* 하단으로 밀착 */
-            }
-            .release-modal-overlay {
-                align-items: flex-end !important; /* 모달을 바닥에 붙임 */
                 padding: 0 !important;
+                margin-top: auto; 
             }
         }
 
@@ -244,12 +228,12 @@
             background: #ffffff;
         }
         .tech-table { width: 100%; border-collapse: collapse; text-align: left; background: #ffffff; }
-        .tech-table th, .tech-table td { padding: 8px 10px; border-bottom: 1px solid var(--border-color); }
-        .tech-table th { font-weight: 800; background: #f1f5f9; color: #475569; width: 35%; }
-        .tech-table td { font-weight: 600; text-align: left; color: var(--slack-blue); font-size: 12.5px; word-break: keep-all;}
-        .tech-list { margin: 0; padding-left: 18px; }
-        .tech-list li { margin-bottom: 6px; padding-left: 2px; }
-        .tech-list li::marker { color: var(--slack-blue); font-size: 14px; }
+        .tech-table th, .tech-table td { padding: 6px 8px; border-bottom: 1px solid var(--border-color); }
+        .tech-table th { font-weight: 800; background: #f1f5f9; color: #475569; width: 35%; font-size: 11.5px; }
+        .tech-table td { font-weight: 600; text-align: left; color: var(--slack-blue); font-size: 12px; word-break: keep-all;}
+        .tech-list { margin: 0; padding-left: 16px; font-size: 12.5px; }
+        .tech-list li { margin-bottom: 4px; padding-left: 2px; }
+        .tech-list li::marker { color: var(--slack-blue); font-size: 13px; }
 
         .container {
             width: 100%;
@@ -906,14 +890,13 @@
 <div id="release-note-modal" class="modal-overlay release-modal-overlay hidden" style="z-index: 30000;" onclick="if(event.target === this) closeReleaseNoteModal()">
     <div class="release-modal-card">
         
-        <!-- 상단 헤더 (고정) -->
-        <div style="padding: 20px; border-bottom: 1px solid var(--border-color); background: #ffffff; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 18px; font-weight: 900; color: var(--text-main);">🎉 릴리즈 노트 & 테크 블로그</span>
-            <button onclick="closeReleaseNoteModal()" style="background:none; border:none; font-size:22px; cursor:pointer; color:var(--text-muted);">✖</button>
+        <!-- 상단 헤더 (고정, 닫기 버튼 삭제 후 가운데 정렬) -->
+        <div style="padding: 16px; border-bottom: 1px solid var(--border-color); background: #ffffff; flex-shrink: 0; text-align: center; border-radius: 20px 20px 0 0;">
+            <span style="font-size: 16px; font-weight: 900; color: var(--text-main);">🎉 릴리즈 노트 & 테크 블로그</span>
         </div>
         
         <!-- 중앙 스크롤 영역 (화면 전체를 쓰도록 flex: 1 할당) -->
-        <div id="release-note-content" style="flex: 1; overflow-y: auto; background: #f1f5f9; padding: 20px 16px; min-height: 0;">
+        <div id="release-note-content" style="flex: 1; overflow-y: auto; background: #f1f5f9; padding: 16px; min-height: 0;">
             <!-- JS 렌더링 영역 -->
         </div>
 
@@ -1041,7 +1024,8 @@
                     <div id="writing-modal-en-hint" style="font-size: 32px; font-weight: 700; color: var(--slack-blue); line-height: 1.3;"></div>
                     <div id="writing-modal-ko-text" style="font-size: 32px; font-weight: 900; color: var(--text-main); word-break: keep-all; line-height: 1.3;"></div>
                 </div>
-                <textarea id="modal-sentence-textarea" class="sentence-test-textarea" placeholder="영문장을 작성하세요 (Shift+Enter 줄바꿈, Enter 제출)" style="flex: 1; min-height: 120px; font-size: 32px; padding: 24px; line-height: 1.4;" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+                <!-- 💡 onkeydown 이벤트 리스너 추가 -->
+                <textarea id="modal-sentence-textarea" class="sentence-test-textarea" placeholder="영문장을 작성하세요 (Shift+Enter 줄바꿈, Enter 제출)" style="flex: 1; min-height: 120px; font-size: 32px; padding: 24px; line-height: 1.4;" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); submitModalWritingTest(); }"></textarea>
                 <button type="button" class="base-btn" style="background: var(--slack-purple); padding: 18px; font-size: 18px; flex-shrink: 0;" onclick="submitModalWritingTest()">✍️ 제출 (Enter)</button>
             </div>
             <div id="writing-result-view" class="hidden" style="display: flex; flex-direction: column; gap: 16px; flex: 1; min-height: 0;">
@@ -1379,7 +1363,7 @@
 </div>
 
 <!-- 💡 앱 버전을 클릭하면 수동으로 릴리즈 노트를 열 수 있습니다 -->
-<div class="app-version" onclick="openReleaseNoteModal()" title="릴리즈 노트 보기">v6.9.2 (Update Log)</div>
+<div class="app-version" onclick="openReleaseNoteModal()" title="릴리즈 노트 보기">v6.9.3 (Update Log)</div>
 
 <script>
     let wakeLock = null;
@@ -1410,7 +1394,7 @@
     window.addEventListener('offline', updateNetworkStatus);
     updateNetworkStatus();
 
-    // 📢 릴리즈 노트 확인 및 렌더링 로직 (Tech Note 고급 지원)
+    // 📢 릴리즈 노트 확인 및 렌더링 로직
     let globalReleaseNotes = [];
 
     async function checkReleaseNotes(forceOpen = false) {
@@ -1458,70 +1442,99 @@
         }
     }
 
+    // 전역에서 접근할 수 있도록 아코디언 토글 함수 선언
+    window.toggleAllAccordions = function(versionSafeStr, btnEl) {
+        const details = document.querySelectorAll(`.rn-detail-${versionSafeStr}`);
+        let allOpen = true;
+        details.forEach(d => { if (!d.hasAttribute('open')) allOpen = false; });
+        details.forEach(d => {
+            if (allOpen) { d.removeAttribute('open'); }
+            else { d.setAttribute('open', ''); }
+        });
+        if (btnEl) {
+            btnEl.innerText = allOpen ? "모두 열기" : "모두 닫기";
+        }
+    };
+
     function renderReleaseNotes(releases) {
         const container = document.getElementById('release-note-content');
         let html = '';
         
+        function getShortCategory(cat) {
+            const lower = cat.toLowerCase();
+            if(lower.includes('arch')) return '구조';
+            if(lower.includes('perf')) return '성능';
+            if(lower.includes('bug')) return '버그';
+            if(lower.includes('ux') || lower.includes('ui')) return 'UX';
+            return '기타';
+        }
+
         releases.forEach((release, index) => {
             const isLatest = index === 0;
-            // 각 버전의 래퍼 박스
-            html += `<div style="border: 1px solid var(--border-color); border-radius: 16px; background: #ffffff; overflow: hidden; margin-bottom: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">`;
+            const safeVer = release.version.replace(/\./g, '-');
             
-            // 버전명 헤더 (스크롤 시 상단에 예쁘게 고정되도록 sticky 유지)
-            html += `<div style="padding: 14px 18px; background: ${isLatest ? '#f0f9ff' : '#f8fafc'}; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 5;">`;
-            html += `<span style="font-weight: 900; color: ${isLatest ? '#0284c7' : 'var(--text-main)'}; font-size: 17px;">${release.version} ${isLatest ? '<span style="font-size:10px; background:#bae6fd; color:#0369a1; padding:3px 6px; border-radius:6px; margin-left:6px; font-weight:800;">LATEST</span>' : ''}</span>`;
-            html += `<span style="font-size: 12.5px; color: var(--text-muted); font-weight: 700;">${release.date}</span>`;
-            html += `</div>`;
+            // 각 버전의 래퍼 박스 (UI 압축)
+            html += `<div style="border: 1px solid var(--border-color); border-radius: 12px; background: #ffffff; overflow: hidden; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">`;
             
-            // 🚨 핵심 해결 포인트: max-height와 overflow 속성을 완전히 제거했습니다!
-            // 이제 테크노트를 열면 모달의 전체 높이를 마음껏 사용하며 시원하게 펼쳐집니다.
-            html += `<div style="padding: 12px; display: flex; flex-direction: column; gap: 10px; background: #fdfdfd;">`;
+            // 버전명 헤더 
+            html += `<div style="padding: 10px 14px; background: ${isLatest ? '#f0f9ff' : '#f8fafc'}; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 5;">`;
+            html += `<span style="font-weight: 900; color: ${isLatest ? '#0284c7' : 'var(--text-main)'}; font-size: 15px;">${release.version} ${isLatest ? '<span style="font-size:9px; background:#bae6fd; color:#0369a1; padding:2px 5px; border-radius:4px; margin-left:4px; font-weight:800;">LATEST</span>' : ''}</span>`;
+            
+            // 우측 날짜 영역에 '모두 열기' 버튼 추가
+            html += `<div style="display: flex; align-items: center; gap: 8px;">`;
+            html += `<button type="button" onclick="toggleAllAccordions('${safeVer}', this)" style="background: #e2e8f0; border: none; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; color: #475569; cursor: pointer; transition: all 0.15s ease;">모두 열기</button>`;
+            html += `<span style="font-size: 12px; color: var(--text-muted); font-weight: 700;">${release.date}</span>`;
+            html += `</div></div>`;
+            
+            // 내부 콘텐츠 영역 (UI 압축)
+            html += `<div style="padding: 8px; display: flex; flex-direction: column; gap: 6px; background: #fdfdfd;">`;
             
             release.changes.forEach(change => {
                 const badgeColor = change.categoryColor || '#64748b';
+                const shortCat = getShortCategory(change.category);
                 
                 // 항목 아코디언 래퍼
-                html += `<details class="sync-details" style="margin: 0; border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); overflow: hidden;">`;
+                html += `<details class="sync-details rn-detail-${safeVer}" style="margin: 0; border: 1px solid var(--border-color); border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">`;
                 
-                // 제목 바
-                html += `<summary class="sync-summary" style="padding: 14px; display: flex; align-items: flex-start; gap: 10px; background: #ffffff; line-height: 1.4;">`;
-                html += `<span style="font-size: 11.5px; font-weight: 800; color: ${badgeColor}; background: ${badgeColor}15; padding: 4px 8px; border-radius: 6px; white-space: nowrap; flex-shrink: 0; border: 1px solid ${badgeColor}30; margin-top: 1px;">${change.category}</span>`;
-                html += `<span style="font-size: 14.5px; font-weight: 800; color: var(--text-main); flex: 1; text-align: left; white-space: normal; word-break: keep-all;">${change.title}</span>`;
+                // 요약 바(summary) - 2글자 칩 추가 및 마진 조정
+                html += `<summary class="sync-summary" style="padding: 10px 12px; display: flex; align-items: flex-start; gap: 8px; background: #ffffff; line-height: 1.3;">`;
+                html += `<span style="font-size: 11px; font-weight: 800; color: ${badgeColor}; background: ${badgeColor}15; padding: 3px 0; width: 28px; text-align: center; border-radius: 4px; border: 1px solid ${badgeColor}30; flex-shrink: 0; margin-top: 1px;">${shortCat}</span>`;
+                html += `<span class="rn-title">${change.title}</span>`;
                 html += `</summary>`;
                 
                 // 열렸을 때 펼쳐지는 상세 영역
-                html += `<div class="sync-content" style="background: #f8fafc; padding: 16px; border-top: 1px dashed var(--border-color); font-size: 14px; color: #475569;">`;
+                html += `<div class="sync-content" style="background: #f8fafc; padding: 12px; border-top: 1px dashed var(--border-color); font-size: 13px; color: #475569;">`;
                 
                 // 일반 설명 텍스트
                 if (change.description) {
-                    html += `<div style="line-height: 1.6; margin-bottom: ${change.techNotes ? '16px' : '0'}; color: var(--text-main); font-weight: 500; word-break: keep-all;">${change.description}</div>`;
+                    html += `<div style="line-height: 1.5; margin-bottom: ${change.techNotes ? '10px' : '0'}; color: var(--text-main); font-weight: 500; word-break: keep-all;">${change.description}</div>`;
                 }
                 
-                // Tech Note 렌더링 (모바일 화면 꽉 차게 렌더링 됨)
+                // Tech Note 렌더링
                 if (change.techNotes && change.techNotes.length > 0) {
-                    html += `<div style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">`;
-                    html += `<div style="padding: 12px 14px; background: #f1f5f9; border-bottom: 1.5px dashed #cbd5e1; font-size: 13px; font-weight: 900; color: var(--slack-blue); display: flex; align-items: center; gap: 6px;">👨‍💻 Junior's Tech Note</div>`;
-                    html += `<div style="padding: 16px; display: flex; flex-direction: column; gap: 16px;">`;
+                    html += `<div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">`;
+                    html += `<div style="padding: 8px 10px; background: #f1f5f9; border-bottom: 1px dashed #cbd5e1; font-size: 12px; font-weight: 900; color: var(--slack-blue); display: flex; align-items: center; gap: 6px;">👨‍💻 Tech Note</div>`;
+                    html += `<div style="padding: 10px; display: flex; flex-direction: column; gap: 12px;">`;
                     
                     change.techNotes.forEach(note => {
-                        html += `<div style="display: flex; flex-direction: column; gap: 8px;">`;
+                        html += `<div style="display: flex; flex-direction: column; gap: 6px;">`;
                         if (note.title) {
-                            html += `<div style="font-weight: 900; font-size: 14px; color: var(--text-main); border-left: 3px solid var(--slack-blue); padding-left: 8px; line-height: 1.3;">${note.title}</div>`;
+                            html += `<div style="font-weight: 900; font-size: 13px; color: var(--text-main); border-left: 3px solid var(--slack-blue); padding-left: 6px; line-height: 1.3;">${note.title}</div>`;
                         }
                         
                         if (note.type === 'table' && note.rows) {
-                            html += `<div style="border-radius: 8px; border: 1px solid var(--border-color); overflow: hidden; margin-top: 4px;">`;
+                            html += `<div style="border-radius: 6px; border: 1px solid var(--border-color); overflow: hidden; margin-top: 2px;">`;
                             html += `<table class="tech-table" style="margin: 0; background: #ffffff;"><tbody>`;
                             note.rows.forEach(row => {
-                                html += `<tr><th style="width: 35%; background: #f8fafc; font-size: 12px;">${row.key}</th><td style="font-size: 12.5px; font-weight: 600; color: var(--slack-blue); line-height: 1.4; word-break: keep-all;">${row.val}</td></tr>`;
+                                html += `<tr><th style="width: 35%; background: #f8fafc; font-size: 11.5px; padding: 6px 8px;">${row.key}</th><td style="font-size: 12px; font-weight: 600; color: var(--slack-blue); line-height: 1.4; word-break: keep-all; padding: 6px 8px;">${row.val}</td></tr>`;
                             });
                             html += `</tbody></table></div>`;
                         } else if (note.type === 'list' && note.items) {
-                            html += `<ul class="tech-list" style="margin: 0; padding-left: 20px; color: #334155; line-height: 1.6; font-size: 13.5px; font-weight: 500;">`;
-                            note.items.forEach(item => { html += `<li style="margin-bottom: 6px; word-break: keep-all;">${item}</li>`; });
+                            html += `<ul class="tech-list" style="margin: 0; padding-left: 16px; color: #334155; line-height: 1.5; font-size: 12.5px; font-weight: 500;">`;
+                            note.items.forEach(item => { html += `<li style="margin-bottom: 4px; word-break: keep-all;">${item}</li>`; });
                             html += `</ul>`;
                         } else if (note.type === 'note' && note.content) {
-                            html += `<div style="font-size: 13.5px; color: #0369a1; line-height: 1.6; padding: 14px; background: #f0f9ff; border-radius: 10px; border: 1px solid #bae6fd; font-weight: 600; word-break: keep-all;">💡 ${note.content}</div>`;
+                            html += `<div style="font-size: 12.5px; color: #0369a1; line-height: 1.5; padding: 10px; background: #f0f9ff; border-radius: 8px; border: 1px solid #bae6fd; font-weight: 600; word-break: keep-all;">💡 ${note.content}</div>`;
                         }
                         html += `</div>`;
                     });
@@ -1758,7 +1771,7 @@ When you finish the evaluation, STOP generating immediately.
 
 [Example Output]
 1. 문법 오류
-✅ 감정을 나타낼 때는 과거분사형태를 써야 매며, 전치사(in)와 동명사(-ing)가 연결되어야 합니다.
+✅ 감정을 나타낼 때는 과거분사형태를 써 매며, 전치사(in)와 동명사(-ing)가 연결되어야 합니다.
 전 : interesting to learn
 후 : interested in learning
 ✅ 주어가 3인칭 단수이므로 동사에 -s가 붙어야 하며, abroad는 부사이므로 전치사 to가 필요 없습니다.
@@ -2137,7 +2150,7 @@ When you finish the evaluation, STOP generating immediately.
         saveAISettings(cfg); closeAISettingsModal(); alert('AI 설정이 저장되었습니다.');
     }
 
-    function openWritingModalFromCard() {
+    window.openWritingModalFromCard = function() {
         const item = wordList[currentStartIndex];
         if (!item) return;
         const modal = document.getElementById('ai-feedback-modal');
@@ -2148,7 +2161,9 @@ When you finish the evaluation, STOP generating immediately.
         document.getElementById('modal-sentence-textarea').value = '';
         
         document.getElementById('writing-modal-en-hint').innerText = item.en;
-        document.getElementById('writing-modal-ko-text').innerText = item.ko.replace(/<[^>]*>/g, '').replace(/#/g, ' ');
+        
+        const targetKoText = item.exKo ? item.exKo : item.ko; 
+        document.getElementById('writing-modal-ko-text').innerText = targetKoText.replace(/<[^>]*>/g, '').replace(/#/g, ' ');
         
         setTimeout(() => { document.getElementById('modal-sentence-textarea').focus(); }, 100);
     }
@@ -2167,7 +2182,7 @@ When you finish the evaluation, STOP generating immediately.
         document.getElementById('writing-result-view').classList.remove('hidden');
         
         const item = wordList[currentStartIndex];
-        const targetKo = item.ko.replace(/<[^>]*>/g, '').replace(/#/g, ' ');
+        const targetKo = (item.exKo || item.ko).replace(/<[^>]*>/g, '').replace(/#/g, ' ');
         const targetEn = item.exEn || item.en;
         
         document.getElementById('ai-modal-user-text').innerText = userText;
@@ -3349,6 +3364,16 @@ When you finish the evaluation, STOP generating immediately.
 
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
+        // 💡 추가된 부분: 릴리즈 노트 모달이 열려있을 때 Enter 키로 닫기
+        const releaseNoteModal = document.getElementById('release-note-modal');
+        if (releaseNoteModal && !releaseNoteModal.classList.contains('hidden')) {
+            if (e.key === 'Enter') { 
+                e.preventDefault(); 
+                closeReleaseNoteModal(); 
+            }
+            return; 
+        }
+
         const autoplayModal = document.getElementById('autoplay-modal');
         if (autoplayModal && !autoplayModal.classList.contains('hidden')) {
             if (e.key === 'Enter') { e.preventDefault(); confirmAutoplayModal(); } return; 
@@ -3364,7 +3389,6 @@ When you finish the evaluation, STOP generating immediately.
             }
             return; 
         }
-
         const gameArea = document.getElementById('game-area');
         const isGameActive = gameArea && !gameArea.classList.contains('hidden') && document.getElementById('ai-feedback-modal').classList.contains('hidden');
 
