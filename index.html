@@ -126,6 +126,11 @@
         }
         .app-version:hover { background: #bae6fd; transform: translateY(-1px); }
 
+        /* 💡 테스트 중일 때 버전 UI 숨김 처리 */
+        body.game-active .app-version {
+            display: none !important;
+        }
+
         /* 📢 릴리즈 노트 전용 바텀시트 모달 레이아웃 */
         .release-modal-overlay { align-items: flex-end !important; padding: 0 !important; }
         .release-modal-card {
@@ -137,12 +142,12 @@
             background: #ffffff;
             border-radius: 20px 20px 0 0;
             margin: 0 auto;
-            padding: 0; /* 불필요한 패딩 제거 */
+            padding: 0;
             overflow: hidden;
             box-shadow: 0 -10px 40px rgba(0,0,0,0.15);
         }
 
-        /* 📢 릴리즈 노트 아코디언 전용 (UI 압축) */
+        /* 📢 릴리즈 노트 아코디언 전용 */
         .rn-details { border: 1px solid var(--border-color); border-radius: 10px; margin: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
         .rn-summary { padding: 10px 12px; display: flex; align-items: flex-start; gap: 8px; background: #ffffff; cursor: pointer; list-style: none; user-select: none; border-radius: 10px; }
         .rn-summary::-webkit-details-marker { display: none; }
@@ -151,7 +156,6 @@
         .rn-details[open] .rn-summary { border-bottom: 1px dashed var(--border-color); border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
         .rn-content { padding: 12px; background: #f8fafc; font-size: 13px; color: #475569; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; }
 
-        /* 📢 릴리즈 노트 아코디언 제목 전용 (2줄 말줄임표 처리) */
         .rn-title {
             font-size: 13.5px; font-weight: 800; color: var(--text-main); flex: 1; text-align: left;
             display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; 
@@ -169,7 +173,6 @@
                 padding: 4px 6px;
             }
             
-            /* 📱 릴리즈 노트 모달 모바일 최적화 (Bottom Sheet 느낌) */
             .release-modal-card {
                 width: 100vw !important;
                 max-width: 100% !important;
@@ -384,7 +387,7 @@
         .status-msg.error { color: #d63031; }
 
         .spinner {
-            display: inline-block; width: 18px; height: 18px;
+            display: inline-block width: 18px; height: 18px;
             border: 3px solid rgba(18, 100, 163, 0.2);
             border-radius: 50%;
             border-top-color: var(--slack-blue);
@@ -890,17 +893,13 @@
 <div id="release-note-modal" class="modal-overlay release-modal-overlay hidden" style="z-index: 30000;" onclick="if(event.target === this) closeReleaseNoteModal()">
     <div class="release-modal-card">
         
-        <!-- 상단 헤더 (고정, 닫기 버튼 삭제 후 가운데 정렬) -->
         <div style="padding: 16px; border-bottom: 1px solid var(--border-color); background: #ffffff; flex-shrink: 0; text-align: center; border-radius: 20px 20px 0 0;">
             <span style="font-size: 16px; font-weight: 900; color: var(--text-main);">🎉 릴리즈 노트 & 테크 블로그</span>
         </div>
         
-        <!-- 중앙 스크롤 영역 (화면 전체를 쓰도록 flex: 1 할당) -->
         <div id="release-note-content" style="flex: 1; overflow-y: auto; background: #f1f5f9; padding: 16px; min-height: 0;">
-            <!-- JS 렌더링 영역 -->
         </div>
 
-        <!-- 하단 컨트롤 (한 줄로 압축하여 공간 절약) -->
         <div style="padding: 14px 20px; background: #ffffff; border-top: 1px solid var(--border-color); flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: calc(14px + env(safe-area-inset-bottom));">
             <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; color: var(--text-muted); cursor: pointer; margin: 0;">
                 <input type="checkbox" id="release-hide-checkbox" style="width: 18px; height: 18px; margin: 0; cursor: pointer;">
@@ -929,7 +928,7 @@
                     <span style="font-weight: 900; font-size: 16px; color: #15803d;">🟢 Llama-3.2-1B (초경량)</span>
                     <span class="model-badge">다운로드 약 0.8GB</span>
                 </div>
-                <div style="font-size: 13px; color: var(--text-muted);">가장 빠르고 배터 소모가 적습니다. 모바일 기기나 간단한 문법 교정에 적합합니다.</div>
+                <div style="font-size: 13px; color: var(--text-muted);">가장 빠르고 배터리 소모가 적습니다. 모바일 기기나 간단한 문법 교정에 적합합니다.</div>
             </div>
             <div id="model-card-3b" class="model-option-card" onclick="selectAIModel('Llama-3.2-3B-Instruct-q4f16_1-MLC', '3B')">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -1024,7 +1023,6 @@
                     <div id="writing-modal-en-hint" style="font-size: 32px; font-weight: 700; color: var(--slack-blue); line-height: 1.3;"></div>
                     <div id="writing-modal-ko-text" style="font-size: 32px; font-weight: 900; color: var(--text-main); word-break: keep-all; line-height: 1.3;"></div>
                 </div>
-                <!-- 💡 onkeydown 이벤트 리스너 추가 -->
                 <textarea id="modal-sentence-textarea" class="sentence-test-textarea" placeholder="영문장을 작성하세요 (Shift+Enter 줄바꿈, Enter 제출)" style="flex: 1; min-height: 120px; font-size: 32px; padding: 24px; line-height: 1.4;" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); submitModalWritingTest(); }"></textarea>
                 <button type="button" class="base-btn" style="background: var(--slack-purple); padding: 18px; font-size: 18px; flex-shrink: 0;" onclick="submitModalWritingTest()">✍️ 제출 (Enter)</button>
             </div>
@@ -1281,7 +1279,6 @@
             <button class="quick-btn" style="border: 2px dashed #94a3b8; color: #475569; margin-top: 8px;" onclick="openDataModal()">
                 💾 백업 및 데이터 관리
             </button>
-            <input type="file" id="restore-file-input" accept=".json,application/json,.txt,text/plain" style="display:none" onchange="handleRestoreFile(event)">
         </div>
     </div>
     
@@ -1362,8 +1359,7 @@
     </div>
 </div>
 
-<!-- 💡 앱 버전을 클릭하면 수동으로 릴리즈 노트를 열 수 있습니다 -->
-<div class="app-version" onclick="openReleaseNoteModal()" title="릴리즈 노트 보기">v6.9.3 (Update Log)</div>
+<div class="app-version" onclick="openReleaseNoteModal()" title="릴리즈 노트 보기">v6.9.4 (Update Log)</div>
 
 <script>
     let wakeLock = null;
@@ -1394,7 +1390,6 @@
     window.addEventListener('offline', updateNetworkStatus);
     updateNetworkStatus();
 
-    // 📢 릴리즈 노트 확인 및 렌더링 로직
     let globalReleaseNotes = [];
 
     async function checkReleaseNotes(forceOpen = false) {
@@ -1411,7 +1406,7 @@
                 if (forceOpen || hideVersion !== latestVersion) {
                     renderReleaseNotes(data);
                     const checkbox = document.getElementById('release-hide-checkbox');
-                    if (checkbox) checkbox.checked = false; // 열 때마다 체크 해제
+                    if (checkbox) checkbox.checked = false;
                     document.getElementById('release-note-modal').classList.remove('hidden');
                 }
             }
@@ -1435,14 +1430,12 @@
         const modal = document.getElementById('release-note-modal');
         if (modal) modal.classList.add('hidden');
         
-        // 닫을 때 '다시 보지 않기'가 체크되어 있다면 현재 최신 버전을 저장
         const checkbox = document.getElementById('release-hide-checkbox');
         if (checkbox && checkbox.checked && globalReleaseNotes.length > 0) {
             localStorage.setItem('pongcrush_hide_version', globalReleaseNotes[0].version);
         }
     }
 
-    // 전역에서 접근할 수 있도록 아코디언 토글 함수 선언
     window.toggleAllAccordions = function(versionSafeStr, btnEl) {
         const details = document.querySelectorAll(`.rn-detail-${versionSafeStr}`);
         let allOpen = true;
@@ -1473,44 +1466,30 @@
             const isLatest = index === 0;
             const safeVer = release.version.replace(/\./g, '-');
             
-            // 각 버전의 래퍼 박스 (UI 압축)
             html += `<div style="border: 1px solid var(--border-color); border-radius: 12px; background: #ffffff; overflow: hidden; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">`;
-            
-            // 버전명 헤더 
             html += `<div style="padding: 10px 14px; background: ${isLatest ? '#f0f9ff' : '#f8fafc'}; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 5;">`;
             html += `<span style="font-weight: 900; color: ${isLatest ? '#0284c7' : 'var(--text-main)'}; font-size: 15px;">${release.version} ${isLatest ? '<span style="font-size:9px; background:#bae6fd; color:#0369a1; padding:2px 5px; border-radius:4px; margin-left:4px; font-weight:800;">LATEST</span>' : ''}</span>`;
-            
-            // 우측 날짜 영역에 '모두 열기' 버튼 추가
             html += `<div style="display: flex; align-items: center; gap: 8px;">`;
             html += `<button type="button" onclick="toggleAllAccordions('${safeVer}', this)" style="background: #e2e8f0; border: none; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; color: #475569; cursor: pointer; transition: all 0.15s ease;">모두 열기</button>`;
             html += `<span style="font-size: 12px; color: var(--text-muted); font-weight: 700;">${release.date}</span>`;
             html += `</div></div>`;
-            
-            // 내부 콘텐츠 영역 (UI 압축)
             html += `<div style="padding: 8px; display: flex; flex-direction: column; gap: 6px; background: #fdfdfd;">`;
             
             release.changes.forEach(change => {
                 const badgeColor = change.categoryColor || '#64748b';
                 const shortCat = getShortCategory(change.category);
                 
-                // 항목 아코디언 래퍼
                 html += `<details class="sync-details rn-detail-${safeVer}" style="margin: 0; border: 1px solid var(--border-color); border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">`;
-                
-                // 요약 바(summary) - 2글자 칩 추가 및 마진 조정
                 html += `<summary class="sync-summary" style="padding: 10px 12px; display: flex; align-items: flex-start; gap: 8px; background: #ffffff; line-height: 1.3;">`;
                 html += `<span style="font-size: 11px; font-weight: 800; color: ${badgeColor}; background: ${badgeColor}15; padding: 3px 0; width: 28px; text-align: center; border-radius: 4px; border: 1px solid ${badgeColor}30; flex-shrink: 0; margin-top: 1px;">${shortCat}</span>`;
                 html += `<span class="rn-title">${change.title}</span>`;
                 html += `</summary>`;
-                
-                // 열렸을 때 펼쳐지는 상세 영역
                 html += `<div class="sync-content" style="background: #f8fafc; padding: 12px; border-top: 1px dashed var(--border-color); font-size: 13px; color: #475569;">`;
                 
-                // 일반 설명 텍스트
                 if (change.description) {
                     html += `<div style="line-height: 1.5; margin-bottom: ${change.techNotes ? '10px' : '0'}; color: var(--text-main); font-weight: 500; word-break: keep-all;">${change.description}</div>`;
                 }
                 
-                // Tech Note 렌더링
                 if (change.techNotes && change.techNotes.length > 0) {
                     html += `<div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">`;
                     html += `<div style="padding: 8px 10px; background: #f1f5f9; border-bottom: 1px dashed #cbd5e1; font-size: 12px; font-weight: 900; color: var(--slack-blue); display: flex; align-items: center; gap: 6px;">👨‍💻 Tech Note</div>`;
@@ -1824,15 +1803,15 @@ When you finish the evaluation, STOP generating immediately.
 
     window.initLocalAIEngine = initLocalAIEngine;
     window.stopAIComputation = stopAIComputation;
-    window.requestLocalAIStreamingCorrection = requestLocalAIStreamingCorrection;
+    window.requestLocalAIStreaming correction = requestLocalAIStreamingCorrection;
     window.getAISettings = getAISettings;
     window.updateAIPipelineStep = updateAIPipelineStep;
     window.closeSpeakingModalAndNext = function() { closeSpeakingModal(); handlePrimaryAction(); }
 </script>
 
 <script>
-    function sanitizeForMatch(text) { return text ? text.replace(/<[^>]*>/g, '').replace(/#/g, '').replace(/[\s\W_]+/g, '').toLowerCase() : ''; }
-    function formatContextInText(text) { return text ? text.replace(/(\[.*?\]|\(.*?\))/g, '<span class="context-bracket">$1</span>') : ''; }
+    function sanitizeForMatch(text) { return text ? String(text).replace(/<[^>]*>/g, '').replace(/#/g, '').replace(/[\s\W_]+/g, '').toLowerCase() : ''; }
+    function formatContextInText(text) { return text ? String(text).replace(/(\[.*?\]|\(.*?\))/g, '<span class="context-bracket">$1</span>') : ''; }
 
     class ClientSpeakingEngine {
         constructor(minGreenConfidence = 0.82) { this.minGreenConfidence = minGreenConfidence; }
@@ -1927,7 +1906,7 @@ When you finish the evaluation, STOP generating immediately.
                 const tNorm = this.normalize(targetRaw); const sNorm = this.normalize(sttRaw);
                 let color = 'RED', score = 0, reason = '';
                 if (!sNorm) { reason = `단어 누락 (원문: '${targetRaw}')`; }
-                else if (tNorm === sNorm) { color = 'GREEN'; score = 100; reason = `정확 단 일치 ('${targetRaw}')`; }
+                else if (tNorm === sNorm) { color = 'GREEN'; score = 100; reason = `정확한 일치 ('${targetRaw}')`; }
                 else {
                     const tStem = this.getStem(tNorm); const sStem = this.getStem(sNorm);
                     const sim = this.similarityRatio(tNorm, sNorm);
@@ -2232,11 +2211,52 @@ When you finish the evaluation, STOP generating immediately.
         if (modal) modal.classList.add('hidden');
     }
 
-    async function processImportedData(importedList) {
-        if (!Array.isArray(importedList)) throw new Error("올바른 백업 파일 형식이 아닙니다.");
+    async function processImportedData(rawContent) {
+        let importedList = [];
+
+        if (typeof rawContent === 'string') {
+            const trimmed = rawContent.trim();
+            if (trimmed.startsWith('[') || trimmed.startsWith('{')) {
+                try {
+                    const parsed = JSON.parse(trimmed);
+                    if (Array.isArray(parsed)) {
+                        importedList = parsed;
+                    } else if (parsed && typeof parsed === 'object') {
+                        const possibleArray = Object.values(parsed).find(v => Array.isArray(v));
+                        if (possibleArray) importedList = possibleArray;
+                        else if (parsed.ko && parsed.en) importedList = [parsed];
+                    }
+                } catch(e) {
+                    console.warn("JSON parse failed, trying line parse:", e);
+                }
+            }
+
+            if (importedList.length === 0) {
+                const lines = trimmed.split(/\r?\n/);
+                lines.forEach(line => {
+                    const parts = line.split(/\t|,|\s{2,}/);
+                    if (parts.length >= 2) {
+                        importedList.push({
+                            ko: parts[0].trim(),
+                            en: parts[1].trim(),
+                            exEn: parts[2] ? parts[2].trim() : '',
+                            exKo: parts[3] ? parts[3].trim() : '',
+                            synonyms: parts[4] ? parts[4].trim() : '',
+                            vagueCount: 1
+                        });
+                    }
+                });
+            }
+        } else if (Array.isArray(rawContent)) {
+            importedList = rawContent;
+        }
+
+        if (!Array.isArray(importedList) || importedList.length === 0) {
+            throw new Error("올바른 백업 형식이 아니거나 데이터가 비어 있습니다.");
+        }
 
         if (!window.isAllDbLoaded) {
-            const confirmLoad = confirm("⚠️ 현재 브라우저 메모리에 전체 단어장 DB가 로드되어 있지 않습니다.\n(특정 시험만 본 상태에서 불러오면 스피킹 등의 예문이 누락될 수 있습니다.)\n\n완벽한 복원을 위해 기본 단어장(스피킹, 라이팅, 초록이, 라잎)을 모두 불러오시겠습니까?");
+            const confirmLoad = confirm("⚠️ 현재 브라우저 메모리에 전체 단어장 DB가 로드되어 있지 않습니다.\n\n완벽한 복원을 위해 기본 단어장(스피킹, 라이팅, 초록이, 라잎)을 모두 불러오시겠습니까?");
             
             if (confirmLoad) {
                 const loadingModal = document.getElementById('loading-overlay');
@@ -2303,22 +2323,32 @@ When you finish the evaluation, STOP generating immediately.
     }
 
     function restoreWeakWords() {
-        const input = document.getElementById('restore-file-input');
-        if (input) { input.value = ''; input.click(); }
-    }
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = ".json,.txt,text/plain,application/json,*/*";
+        input.style.display = 'none';
 
-    function handleRestoreFile(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = async function(e) {
-            try {
-                const importedList = JSON.parse(e.target.result);
-                await processImportedData(importedList);
-                closeDataModal();
-            } catch (err) { alert("파일을 불러오는 중 오류가 발생했습니다: " + err.message); }
+        input.onchange = function(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    await processImportedData(e.target.result);
+                    closeDataModal();
+                } catch (err) {
+                    alert("파일 복원 실패: " + err.message);
+                }
+            };
+            reader.onerror = function() {
+                alert("파일을 읽는 중 에러가 발생했습니다.");
+            };
+            reader.readAsText(file, 'UTF-8');
         };
-        reader.readAsText(file, 'UTF-8');
+
+        document.body.appendChild(input);
+        input.click();
+        setTimeout(() => { document.body.removeChild(input); }, 1000);
     }
 
     window.syncToGoogleDrive = async function() {
@@ -3364,7 +3394,6 @@ When you finish the evaluation, STOP generating immediately.
 
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
-        // 💡 추가된 부분: 릴리즈 노트 모달이 열려있을 때 Enter 키로 닫기
         const releaseNoteModal = document.getElementById('release-note-modal');
         if (releaseNoteModal && !releaseNoteModal.classList.contains('hidden')) {
             if (e.key === 'Enter') { 
@@ -3421,7 +3450,6 @@ When you finish the evaluation, STOP generating immediately.
         loadSavedVoiceSettings(); updatePWAReviewButtonUI();
         window.updateAIToggleUI(); window.updateAIChipUI();
         
-        // 📢 초기 로딩 시 릴리즈 노트 확인 실행
         checkReleaseNotes();
 
         setTimeout(() => { patchPWASavedWordsWithNewData(); }, 3000);

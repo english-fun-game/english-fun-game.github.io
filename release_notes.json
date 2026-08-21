@@ -1,5 +1,63 @@
 [
-
+{
+  "version": "v6.9.4",
+  "date": "2026-08-21",
+  "changes": [
+    {
+      "category": "Architecture",
+      "categoryColor": "#10b981",
+      "title": "동적 파일 입력 라이프사이클 격리 및 크로스 브라우징 파일 I/O 개선",
+      "description": "정적 DOM에 상주하던 파일 입력 요소를 동적 생성 및 즉시 소멸(Ephemeral) 방식으로 전환하여 모바일 및 웹뷰 환경의 파일 선택 안정성을 확보했습니다.",
+      "techNotes": [
+        {
+          "type": "table",
+          "title": "📊 의사결정: 정적 File Input vs 동적 메모리 객체 수명 관리",
+          "rows": [
+            {
+              "key": "기존 (Static DOM Input)",
+              "val": "동일 파일 재선택 시 change 이벤트 미발생, 모바일 OS 파일 피커 취소 시 stale state 잔존"
+            },
+            {
+              "key": "변경 (Dynamic Ephemeral DOM)",
+              "val": "호출 시점에만 임시 노드를 생성·트리거한 후 1회성 GC로 소멸시켜 이벤트 누락 원천 방지"
+            },
+            {
+              "key": "트레이드오프",
+              "val": "매 파일 I/O마다 마이크로 단위의 DOM 조작 오버헤드가 발생하나, 모바일 PWA 환경 호환성을 결정적으로 개선"
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "title": "💡 핵심 CS 개념: 브라우저 가비지 컬렉션(GC)과 Transient Activation",
+          "content": "브라우저 보안 모델은 사용자 인터랙션(Transient User Activation) 맥락에서만 파일 피커 호출을 인가합니다. 핸들러 내부에서 단발성 노드를 동적 생성하고 타이머로 디태치(Detach)함으로써 메모리 누수 없이 OS 파일 I/O 제어권을 일관되게 획득합니다."
+        }
+      ]
+    },
+    {
+      "category": "Robustness",
+      "categoryColor": "#6366f1",
+      "title": "포스텔의 법칙(Postel's Law) 기반 다형성 데이터 복원 파서 구축",
+      "description": "엄격한 JSON 배열 파싱 의존성을 제거하고, 객체 래핑 및 구분자 텍스트(TSV/CSV)까지 폭넓게 수용하는 유연한 복원 파이프라인을 구현했습니다.",
+      "techNotes": [
+        {
+          "type": "list",
+          "title": "📌 데이터 복원 파이프라인 단계별 처리 원칙",
+          "items": [
+            "1. JSON 구조 우선 감지: Array 또는 중첩 Object({ data: [...] }) 패턴 자동 언래핑",
+            "2. Fallback Delimiter 파싱: 비정형 텍스트 유입 시 정규식 기반 TSV/CSV/공백 행 단위 분기 복원",
+            "3. Defensive Type Casting: 원시 타입 불일치 방지를 위한 String() 전처리 및 정규화 매칭"
+          ]
+        },
+        {
+          "type": "note",
+          "title": "💡 핵심 CS 개념: 포스텔의 법칙 (Robustness Principle)",
+          "content": "'자신의 출력은 엄격하게, 타인의 입력은 너그럽게 수용하라'는 원칙입니다. 직렬화된 데이터 포맷의 사소한 파편화에도 클라이언트가 크래시 없이 점진적 복구(Graceful Degradation)를 달성하도록 설계되었습니다."
+        }
+      ]
+    }
+  ]
+},
   {
   "version": "v6.9.3",
   "date": "2026-08-21",
