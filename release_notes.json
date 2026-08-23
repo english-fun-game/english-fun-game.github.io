@@ -1,5 +1,59 @@
 [
   {
+  "version": "v6.9.6",
+  "date": "2026-08-23",
+  "changes": [
+    {
+      "category": "Architecture",
+      "categoryColor": "#8b5cf6",
+      "title": "음성 합성(TTS) 엔진 자원 할당 방식 변경",
+      "description": "소프트웨어적으로 음높이(Pitch)와 속도(Rate)를 강제로 변조하던 방식을 폐기하고, 브라우저가 제공하는 실제 네이티브 음성 모델(Voice Object)을 직접 성별/특성별로 분류하여 매핑하는 방식으로 재설계했습니다.",
+      "techNotes": [
+        {
+          "type": "note",
+          "title": "💡 개념 설명: Pitch/Rate 변조의 한계",
+          "content": "Pitch(주파수)와 Rate(재생 속도)를 단순히 소프트웨어 알고리즘으로 비틀면, 오디오가 기계음이나 헬륨가스를 마신 것처럼 왜곡(Chipmunk effect)됩니다. 대신 처음부터 남성/여성 톤으로 녹음 및 최적화된 '원형 데이터(Native Voice)'를 선택하여 재생하는 것이 음질 확보에 훨씬 유리합니다."
+        },
+        {
+          "type": "note",
+          "title": "💡 개념 설명: OS별로 음성 데이터가 다른 이유",
+          "content": "웹 브라우저는 자체적인 음성 엔진을 무겁게 들고 다니지 않고, 현재 실행 중인 호스트 OS의 네이티브 API(Windows SAPI, Android TTS, Apple AVSpeechSynthesizer 등)를 호출해서 사용합니다. Flutter 개발 시 플랫폼 채널(MethodChannel)을 통해 안드로이드나 iOS의 네이티브 기능을 꺼내 쓰는 것과 정확히 같은 원리입니다. 따라서 윈도우 PC와 안드로이드 스마트폰에서 제공하는 기본 목소리 목록이 다를 수밖에 없습니다."
+        }
+      ]
+    },
+    {
+      "category": "Bugfix",
+      "categoryColor": "#ef4444",
+      "title": "비동기 오디오 큐(Queue) 레이스 컨디션 방어",
+      "description": "음성을 강제로 끄는 취소(Cancel) 명령과 새로운 음성을 재생(Speak)하는 명령의 타이밍이 겹쳐서 소리가 먹통이 되는 현상을 플래그(Flag) 상태 제어로 해결했습니다.",
+      "techNotes": [
+        {
+          "type": "note",
+          "title": "💡 개념 설명: 논블로킹(Non-blocking)과 레이스 컨디션",
+          "content": "논블로킹은 특정 작업(음성 취소)을 백그라운드에 던져놓고 완료를 기다리지 않은 채 바로 다음 줄의 코드를 실행하는 특성입니다. C#에서 async Task를 await 없이 호출하거나, WinForms에서 메인 UI 스레드와 BackgroundWorker가 타이밍 꼬임으로 데이터 충돌을 일으키는 것과 같습니다. 이전 소리가 채 꺼지기도 전에 새 소리가 재생 자원을 차지하려 싸우는 '레이스 컨디션(경합 상태)'이 발생하여, 이를 의도적인 딜레이(setTimeout)와 전역 상태 플래그를 통해 안전하게 격리했습니다."
+        }
+      ]
+    },
+    {
+      "category": "UI/UX",
+      "categoryColor": "#f59e0b",
+      "title": "음성 설정 모달(Voice Modal) 전면 개편",
+      "description": "기존의 단순한 톤 변경(기본/중저음/밝은 톤) UI를 완전히 제거하고, 사용 가능한 모든 OS 네이티브 음성 목록을 조회하여 남/여 랜덤 또는 특정 음성으로 고정할 수 있는 디테일한 설정 화면으로 개편했습니다.",
+      "techNotes": [
+        {
+          "type": "list",
+          "title": "🎨 UI 변경 상세",
+          "items": [
+            "단순 톤 선택 대신 [전체 랜덤, 남성 랜덤, 여성 랜덤] 선택 버튼 그룹 도입",
+            "현재 기기(OS)에서 제공하는 지원 가능한 음성 목록 전체 리스트업 및 개별 테스트(▶️) 재생 버튼 추가",
+            "메인 화면의 음성 버튼 내 뱃지 텍스트를 통해 현재 적용된 모드 상태(예: 남성 랜덤, 고정)를 실시간 피드백"
+          ]
+        }
+      ]
+    }
+  ]
+},
+  {
   "version": "v6.9.5",
   "date": "2026-08-21",
   "changes": [

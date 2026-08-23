@@ -222,11 +222,6 @@
         .voice-name { font-size: 14px; font-weight: 800; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .voice-lang { font-size: 11px; color: var(--text-muted); margin-top: 2px; display: flex; align-items: center; gap: 4px; }
         .voice-badge { background: #e2e8f0; color: #334155; font-size: 10px; padding: 1px 5px; border-radius: 4px; font-weight: 700; }
-        .voice-tune-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 4px; }
-        .tune-card { background: #ffffff; border: 1.5px solid var(--border-color); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; text-align: center; }
-        .tune-card.selected { border-color: #2563eb; background: #eff6ff; }
-        .tune-title { font-size: 13px; font-weight: 800; color: var(--text-main); }
-        .tune-desc { font-size: 10.5px; color: var(--text-muted); }
         .hidden { display: none !important; }
         .mobile-only-flex { display: none !important; }
         .sentence-test-textarea { width: 100%; padding: 14px 16px; font-family: inherit; border: 2px solid var(--slack-blue); border-radius: 14px; outline: none; box-sizing: border-box; text-align: left; background: #ffffff; color: var(--text-main); resize: none; overflow: hidden; transition: all 0.2s ease; line-height: 1.45; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
@@ -296,7 +291,6 @@
 <div id="day-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeDayModal()"><div class="modal-card"><div class="modal-header"><span id="day-modal-title">📅 학습 Day 선택</span><button onclick="closeDayModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button></div><div class="sec-select-area"><div id="fixed-notice-banner" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; padding:10px 12px; border-radius:10px; font-size:13px; font-weight:800; text-align:center;">⚡ 스피킹 30 / 라이팅 40 / 초록이 60 / 라잎 15 고정 시험</div></div><div class="sec-select-area" style="flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden;"><div class="sec-select-title" id="day-list-title">📌 학습할 Day 선택</div><div id="day-buttons-grid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; overflow-y:auto; padding: 4px; box-sizing: border-box;"></div></div></div></div>
 <div id="weak-review-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeWeakReviewModal()"><div class="modal-card tall-modal"><div class="modal-header"><span>🔥 취약 단어 복습</span><button onclick="closeWeakReviewModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button></div><button id="weak-review-all-btn" class="base-btn" style="background:#2563eb; padding:13px; font-size:15px; flex-shrink:0;" onclick="startWeakReviewSession('ALL')">🔥 전체 취약 단어 복습 (0개)</button><div class="weak-col-container"><div class="weak-col"><div class="weak-col-header">🗣️ 스피킹</div><button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '스피킹')">전체 복습<br><span id="col-cnt-speaking" style="font-size:11px; opacity:0.8;">(0)</span></button><div class="weak-day-list" id="weak-day-list-speaking"></div></div><div class="weak-col"><div class="weak-col-header">✍️ 라이팅</div><button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '라이팅')">전체 복습<br><span id="col-cnt-writing" style="font-size:11px; opacity:0.8;">(0)</span></button><div class="weak-day-list" id="weak-day-list-writing"></div></div><div class="weak-col"><div class="weak-col-header">🍀 초록이</div><button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '초록이')">전체 복습<br><span id="col-cnt-green" style="font-size:11px; opacity:0.8;">(0)</span></button><div class="weak-day-list" id="weak-day-list-green"></div></div><div class="weak-col"><div class="weak-col-header">🌿 라잎</div><button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '라잎')">전체 복습<br><span id="col-cnt-life" style="font-size:11px; opacity:0.8;">(0)</span></button><div class="weak-day-list" id="weak-day-list-life"></div></div></div></div></div>
 
-<!-- 💾 데이터 관리 모달 -->
 <div id="data-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeDataModal()">
     <div class="modal-card">
         <div class="modal-header">
@@ -304,13 +298,11 @@
             <button onclick="closeDataModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button>
         </div>
         
-        <!-- ☁️ 구글 드라이브 연동 섹션 -->
         <div class="sec-select-area">
             <div class="sec-select-title">☁️ 구글 드라이브 연동</div>
             <div style="font-size:12.5px; color:var(--text-muted); line-height:1.4; margin-bottom:4px;">
                 구글 계정에 로그인하여 내 드라이브와 데이터를 수동으로 안전하게 동기화할 수 있습니다.
             </div>
-
             <details class="sync-details">
                 <summary class="sync-summary">📊 단어 400개 기준 네트워크 사용량</summary>
                 <div class="sync-content">
@@ -324,7 +316,6 @@
                     </table>
                 </div>
             </details>
-
             <details class="sync-details">
                 <summary class="sync-summary">🛡️ 브라우저 직접 동기화 방식 아키텍처 및 보안</summary>
                 <div class="sync-content">
@@ -336,7 +327,6 @@
                     </ul>
                 </div>
             </details>
-
             <details class="sync-details">
                 <summary class="sync-summary">🔄 자동 로그인 및 백그라운드 동기화가 불가능한 이유</summary>
                 <div class="sync-content" style="background: #fdfdfd;">
@@ -354,7 +344,6 @@
                     </div>
                 </div>
             </details>
-
             <div style="display:flex; gap:8px; margin-top:2px;">
                 <button class="base-btn" style="flex:1; background:#10b981; font-size:14px; padding:12px;" onclick="syncToGoogleDrive()">☁️ G드라이브 병합 저장</button>
                 <button class="base-btn" style="flex:1; background:#8b5cf6; font-size:14px; padding:12px;" onclick="loadFromGoogleDrive()">☁️ G드라이브 불러오기</button>
@@ -363,13 +352,11 @@
         
         <div style="width: 100%; height: 1px; background: var(--border-color); margin: 6px 0;"></div>
         
-        <!-- 📁 로컬 파일 다운로드/불러오기 섹션 -->
         <div class="sec-select-area">
             <div class="sec-select-title">📁 로컬 파일 다운로드/복원 (Offline-First)</div>
             <div style="font-size:12.5px; color:var(--text-muted); line-height:1.4; margin-bottom:4px;">
                 네트워크 연결이 없는 오프라인 환경에서도 학습 기록을 JSON 파일로 직접 내보내거나 가져와 완벽하게 복원할 수 있습니다.
             </div>
-
             <details class="sync-details">
                 <summary class="sync-summary">📴 오프라인 환경에서 로컬 파일 백업이 필수적인 이유</summary>
                 <div class="sync-content">
@@ -379,7 +366,6 @@
                     </ul>
                 </div>
             </details>
-
             <details class="sync-details">
                 <summary class="sync-summary">🔄 타 플랫폼(Anki/Quizlet) 이식성 및 유연한 파싱 엔진</summary>
                 <div class="sync-content">
@@ -389,19 +375,28 @@
                     </ul>
                 </div>
             </details>
-
             <div style="display:flex; gap:8px; margin-top:2px;">
                 <button class="base-btn" style="flex:1; background:#f8fafc; color:#475569; border:1px solid #cbd5e1; font-size:14px; padding:12px;" onclick="backupWeakWords()">⬇️ 로컬 백업</button>
                 <button class="base-btn" style="flex:1; background:#f8fafc; color:#475569; border:1px solid #cbd5e1; font-size:14px; padding:12px;" onclick="restoreWeakWords()">⬆️ 로컬 복원</button>
             </div>
         </div>
-
         <button class="base-btn" style="background:var(--slack-purple); width:100%; padding:12px; margin-top:4px;" onclick="closeDataModal()">닫기</button>
     </div>
 </div>
 
 <div id="autoplay-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeAutoplayModal()"><div class="modal-card"><div class="modal-header"><span>🤖 자동재생 설정</span><button onclick="closeAutoplayModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button></div><div class="sec-select-area"><div class="sec-select-title">⏱️ 정답 공개 전 대기 시간 선택 (기본: 2.0초)</div><div class="sec-btn-grid"><button class="sec-btn" onclick="selectTempAutoplaySec(0.5)">0.5초</button><button class="sec-btn" onclick="selectTempAutoplaySec(1.0)">1.0초</button><button class="sec-btn" onclick="selectTempAutoplaySec(1.5)">1.5초</button><button class="sec-btn" onclick="selectTempAutoplaySec(2.0)">2.0초 ⭐</button><button class="sec-btn" onclick="selectTempAutoplaySec(2.5)">2.5초</button><button class="sec-btn" onclick="selectTempAutoplaySec(3.0)">3.0초</button></div></div><div class="sec-select-area" style="margin-top: 4px;"><div class="sec-select-title">🗣️ 한글 뜻 음성 먼저 읽기 (기본: ON)</div><button id="ko-read-btn" class="sec-btn selected" onclick="toggleAutoplayReadKorean()" style="width:100%; padding:12px; font-weight:800; text-align:center;">🔊 한글 뜻 읽기 (ON)</button></div><button class="base-btn" style="background:#16a34a; width:100%; padding:12px; margin-top:6px;" onclick="confirmAutoplayModal()">확인 (Enter)</button></div></div>
-<div id="voice-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeVoiceModal()"><div class="modal-card"><div class="modal-header"><span>🎙️ 음성 선택 (시스템 최적화)</span><button onclick="closeVoiceModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button></div><div class="sec-select-area"><div class="sec-select-title">1️⃣ 감지된 지역별 영어 보이스</div><div id="voice-list-wrapper" class="voice-list-container"></div></div><div class="sec-select-area"><div class="sec-select-title">2️⃣ 음성 톤 & 억양 캐릭터 변경</div><div class="voice-tune-grid"><div id="tune-normal" class="tune-card selected" onclick="selectVoiceTune('normal', 1.0, 0.85)"><span class="tune-title">🎙️ 기본 톤</span></div><div id="tune-deep" class="tune-card" onclick="selectVoiceTune('deep', 0.75, 0.8)"><span class="tune-title">🧔 중저음 톤</span></div><div id="tune-bright" class="tune-card" onclick="selectVoiceTune('bright', 1.3, 0.9)"><span class="tune-title">👩 밝은 고음 톤</span></div><div id="tune-fast" class="tune-card" onclick="selectVoiceTune('fast', 1.1, 1.1)"><span class="tune-title">⚡ 빠른 속도</span></div></div></div><button class="base-btn" style="background:var(--slack-purple); width:100%; padding:12px;" onclick="closeVoiceModal()">적용 완료</button></div></div>
+
+<div id="voice-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeVoiceModal()">
+    <div class="modal-card">
+        <div class="modal-header">
+            <span>🎙️ 음성 설정</span>
+            <button onclick="closeVoiceModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button>
+        </div>
+        <div id="voice-modal-content-area" style="display:flex; flex-direction:column; gap:16px;"></div>
+        <button class="base-btn" style="background:#16a34a; width:100%; padding:12px; margin-top:8px;" onclick="confirmVoiceSettings()">확인하기 (Enter)</button>
+    </div>
+</div>
+
 <div id="speaking-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeSpeakingModal()"><div id="speaking-card" class="speaking-modal-card"></div></div>
 <div id="life-notice-modal" class="modal-overlay hidden" style="z-index: 21000;" onclick="if(event.target === this) closeLifeNoticeModal()"><div class="modal-card" style="max-width: 380px; text-align: center; padding: 28px 24px;"><div style="font-size: 42px; margin-bottom: 12px;">🌿</div><div style="font-size: 18px; font-weight: 900; color: var(--text-main); margin-bottom: 8px;">라잎 단어장 열기</div><div style="font-size: 13.5px; color: var(--text-muted); line-height: 1.5; margin-bottom: 24px; word-break: keep-all;">이 단어장은 수시로 업데이트됩니다.<br>기본적으로 빠르게 접속 가능한 <b>저장된 데이터</b>를 권장합니다.</div><button class="base-btn" style="background: var(--slack-purple); padding: 18px; font-size: 17px; font-weight: 900; margin-bottom: 24px;" onclick="loadCachedLifeData()">⚡ 기존 데이터로 바로 시작</button><button style="background: none; color: #64748b; border: 1px solid #cbd5e1; padding: 8px 12px; font-size: 12px; font-weight: 800; border-radius: 8px; cursor: pointer;" onclick="loadFreshLifeData()">🔄 최신 엑셀 받아오기</button></div></div>
 
@@ -424,7 +419,7 @@
     <div id="game-area" class="hidden">
         <div class="cards-grid" id="cards-wrapper"></div>
         <div class="bottom-action-area"><button id="prev-btn" class="bottom-prev-btn" onclick="handlePrevAction()" title="이전 단어 (←)">이전<span class="shortcut-text" style="margin-left: 2px;">(←)</span></button><button id="vague-btn" class="bottom-vague-btn" onclick="handleVagueAction(currentStartIndex)"><span id="vague-btn-text">몰라요 ❓</span> <span class="shortcut-text">(↓)</span></button><button id="action-btn" class="bottom-primary-btn" onclick="handlePrimaryAction()"><span id="action-btn-text">정답 확인 👁️</span> <span class="shortcut-text">(→)</span></button></div>
-        <div id="nyan-timer-container" class="nyan-timer-box"><div class="nyan-timer-header"><div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap; width: 100%;"><button id="autoplay-btn" class="autoplay-btn" onclick="handleAutoplayBtnClick()"><span id="autoplay-btn-label">🖐️<span class="hide-on-mobile"> 수동</span></span> <span class="shortcut-text">(S)</span></button><button id="mute-btn" class="mute-btn is-muted" onclick="toggleMute()"><span id="mute-btn-label">🔇 뮤트</span> <span class="shortcut-text">(D)</span></button><button id="voice-btn" class="voice-btn" onclick="openVoiceModal()">🎙️ 목소리 <span id="voice-mode-tag">(자동)</span> <span class="shortcut-text">(F)</span></button><button id="mobile-infinite-btn" class="mute-btn mobile-only-flex" onclick="toggleInfiniteLoop()" style="margin-left: auto;">♾️ 무한</button></div></div><div class="nyan-controls-row"><div class="nyan-track"><div class="nyan-trail" id="nyan-trail"><span class="nyan-cat" id="nyan-cat-emoji">🐱</span></div></div><span class="timer-text" id="study-timer-text">00:00</span><span class="progress" id="card-progress">0 / 0</span></div></div>
+        <div id="nyan-timer-container" class="nyan-timer-box"><div class="nyan-timer-header"><div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap; width: 100%;"><button id="autoplay-btn" class="autoplay-btn" onclick="handleAutoplayBtnClick()"><span id="autoplay-btn-label">🖐️<span class="hide-on-mobile"> 수동</span></span> <span class="shortcut-text">(S)</span></button><button id="mute-btn" class="mute-btn is-muted" onclick="toggleMute()"><span id="mute-btn-label">🔇 뮤트</span> <span class="shortcut-text">(D)</span></button><button id="voice-btn" class="voice-btn" onclick="openVoiceModal()">🎙️ 음성 설정 <span id="voice-mode-tag">(전체)</span> <span class="shortcut-text">(F)</span></button><button id="mobile-infinite-btn" class="mute-btn mobile-only-flex" onclick="toggleInfiniteLoop()" style="margin-left: auto;">♾️ 무한</button></div></div><div class="nyan-controls-row"><div class="nyan-track"><div class="nyan-trail" id="nyan-trail"><span class="nyan-cat" id="nyan-cat-emoji">🐱</span></div></div><span class="timer-text" id="study-timer-text">00:00</span><span class="progress" id="card-progress">0 / 0</span></div></div>
     </div>
     <div id="summary-area" class="hidden">
         <div id="capture-target"><div class="nyan-timer-header" style="margin-bottom: 10px; flex-shrink: 0;"><span id="summary-title-text" style="font-weight: 800; color: var(--slack-purple); font-size: 17px;">📋 복습 리스트</span><span class="progress" id="summary-count" style="background: rgba(236, 178, 46, 0.15); color: #d08700;">복습할 단어: 0개</span></div><div class="table-wrapper" id="summary-table-wrapper"><table id="summary-table"><thead><tr id="summary-thead-row"><th style="width: 45%;">KOREAN</th><th style="width: 43%;">ENGLISH</th><th id="summary-action-th" style="width: 12%; text-align: center;" class="hidden">관리</th></tr></thead><tbody id="summary-tbody"></tbody></table></div></div>
@@ -432,7 +427,7 @@
     </div>
 </div>
 
-<div class="app-version" onclick="openReleaseNoteModal()" title="릴리즈 노트 보기">v6.9.5 (Update Log)</div>
+<div class="app-version" onclick="openReleaseNoteModal()" title="릴리즈 노트 보기">v6.9.6 (Update Log)</div>
 
 <script>
     let wakeLock = null;
@@ -464,7 +459,7 @@
     function updateAIPipelineStep(stepNumber) { const steps = [ document.getElementById('step-1'), document.getElementById('step-2'), document.getElementById('step-3'), document.getElementById('step-4') ]; if (stepNumber <= 0) { steps.forEach(el => el && el.classList.remove('active', 'done', 'error')); if (stepNumber === -1) steps.forEach(el => el && el.classList.add('error')); return; } steps.forEach((el, index) => { if (!el) return; el.classList.remove('active', 'done', 'error'); const currentStep = index + 1; if (currentStep < stepNumber) el.classList.add('done'); else if (currentStep === stepNumber) el.classList.add('active'); }); }
     async function initLocalAIEngine() { if (aiEngine || isAiInitializing) return aiEngine; if (!navigator.gpu) { alert("⚠️ 현재 브라우저가 WebGPU를 지원하지 않아 AI 엔진을 시작할 수 없습니다."); return null; } isAiInitializing = true; updateAIPipelineStep(1); const config = getAISettings(); const shortName = config.modelName.includes('8B') ? '8B' : (config.modelName.includes('3B') ? '3B' : '1B'); const loadingText = document.getElementById('ai-loading-text'); const loadingOverlay = document.getElementById('ai-loading-overlay'); const isModalOpen = !document.getElementById('ai-feedback-modal').classList.contains('hidden'); if (!isModalOpen && loadingText && loadingOverlay) { loadingText.innerText = `🤖 ${shortName} AI 모델 로딩 중...`; loadingOverlay.classList.remove('hidden'); } try { aiEngine = await webllm.CreateMLCEngine(config.modelName, { initProgressCallback: (progress) => { const pct = Math.round(progress.progress * 100); const centerText = document.getElementById('ai-center-progress-text'); const step1Desc = document.getElementById('step-1-desc'); if (centerText && window.isFirstTokenForUI) centerText.innerText = `신경망 다운로드 및 VRAM 적재 중... (${pct}%)`; if (step1Desc) { if (pct < 100) { step1Desc.innerText = `다운로드 (${pct}%)`; step1Desc.style.color = '#2563eb'; } else { step1Desc.innerText = `VRAM 할당 완료`; step1Desc.style.color = ''; } } if (!isModalOpen && loadingText) { loadingText.innerText = `🤖 ${shortName} 엔진 준비 중: ${pct}%`; const fillEl = document.getElementById('ai-loading-progress-fill'); if (fillEl) fillEl.style.width = pct + '%'; } } }); isAiReady = true; } catch (err) { aiEngine = null; updateAIPipelineStep(-1); alert(`${shortName} AI 초기화 실패:\n` + err.message); } finally { isAiInitializing = false; if (loadingOverlay) loadingOverlay.classList.add('hidden'); } return aiEngine; }
     function stopAIComputation() { isAiCancelled = true; const inlineLoaderBtn = document.getElementById('ai-combined-stop-btn'); const streamingBody = document.getElementById('streaming-grammar-body'); const progressText = document.getElementById('ai-center-progress-text'); if (inlineLoaderBtn) inlineLoaderBtn.classList.add('hidden'); if (progressText) progressText.innerText = ''; if (streamingBody) { streamingBody.style.display = 'block'; if (window.isFirstTokenForUI) streamingBody.innerHTML = "<div style='color:#dc2626; font-weight:800;'>(🛑 연산 강제 종료됨)</div>"; else streamingBody.innerHTML = window.fullAiResponse + "<br><br><span style='color:#dc2626; font-weight:800;'>(🛑 종료됨)</span>"; } updateAIPipelineStep(-1); setTimeout(() => { if (aiEngine && typeof aiEngine.interruptGenerate === 'function') { try { aiEngine.interruptGenerate(); } catch(e){} } }, 300); }
-    async function requestLocalAIStreamingCorrection(userText, koreanText, onTokenCallback) { if (!navigator.gpu) { onTokenCallback("WebGPU 미지원 브라우저입니다."); return; } isAiCancelled = false; window.isFirstTokenForUI = true; window.fullAiResponse = ""; const inlineLoaderBtn = document.getElementById('ai-combined-stop-btn'); if (inlineLoaderBtn) inlineLoaderBtn.classList.remove('hidden'); if (!isAiReady) { const engine = await initLocalAIEngine(); if (!engine) { onTokenCallback("AI 로드 실패."); updateAIPipelineStep(-1); return; } } updateAIPipelineStep(2); const config = getAISettings(); try { const systemPrompt = `You are a strict and helpful English grammar teacher.\nAnalyze if the [Student's English Sentence] accurately and grammatically translates the [Intended Korean Meaning].\nYou MUST output your response ONLY in Korean, strictly following the EXACT format of the Example below.\nDo not add any extra greetings, markdown, or copy placeholders.\nIf possible, provide at least 2 grammar corrections and 2 expression improvements.\nWhen you finish the evaluation, STOP generating immediately.\n\n[Example Input]\n[Intended Korean Meaning] : "그녀는 새로운 언어를 배우는 데 관심이 있고 해외로 가고 싶어 한다."\n[Student's English Sentence] : "She interesting to learn new language and want go to abroad."\n\n[Example Output]\n1. 문법 오류\n✅ 감정을 나타낼 때는 과거분사형태를 써 매며, 전치사(in)와 동명사(-ing)가 연결되어야 합니다.\n전 : interesting to learn\n후 : interested in learning\n✅ 주어가 3인칭 단수이므로 동사에 -s가 붙어야 하며, abroad는 부사이므로 전치사 to가 필요 없습니다.\n전 : want go to abroad\n후 : wants to go abroad\n\n2. 표현 교정\n✅ '언어(language)'는 셀 수 있는 명사이므로 복수형(-s)으로 쓰는 것이 자연스럽습니다.\n전 : language\n후 : languages\n✅ 단순한 'go'보다는 문맥에 맞춰 'travel'이나 'study'를 사용하면 의미가 훨씬 풍부해집니다.\n전 : go abroad\n후 : travel abroad`; const userPrompt = `[Intended Korean Meaning] : "${koreanText}"\n[Student's English Sentence] : "${userText}"\n\n위의 [Example Output]과 똑같은 형식(1. 문법 오류, 2. 표현 교정)으로 한국어 피드백을 작성해. 제시된 한국어 의미를 바탕으로 학생의 영작을 평가해. 오류가 전혀 없다면 "✅ 완벽합니다!" 라고만 적어. 평가가 끝나면 즉시 출력을 멈춰.`; const asyncStream = await aiEngine.chat.completions.create({ messages: [ { role: "system", content: systemPrompt }, { role: "user", content: userPrompt } ], temperature: parseFloat(config.temperature), top_p: parseFloat(config.topP), max_tokens: parseInt(config.maxTokens, 10), frequency_penalty: 0.7, presence_penalty: 0.5, stop: ["[Intended", "[Student", "[Example", "3."], stream: true }); for await (const chunk of asyncStream) { if (isAiCancelled) break; if (window.isFirstTokenForUI) { updateAIPipelineStep(3); const pipeline = document.getElementById('ai-pipeline'); const streamingBody = document.getElementById('streaming-grammar-body'); const progressText = document.getElementById('ai-center-progress-text'); if (progressText) progressText.innerText = ''; if (pipeline) { pipeline.style.borderBottom = '1px dashed var(--border-color)'; pipeline.style.paddingBottom = '16px'; pipeline.style.marginBottom = '16px'; } if (streamingBody) streamingBody.style.display = 'block'; window.isFirstTokenForUI = false; } const delta = chunk.choices[0]?.delta?.content || ""; if (delta) { window.fullAiResponse += delta; onTokenCallback(delta); } } if (!isAiCancelled) { updateAIPipelineStep(5); const step4Desc = document.querySelector('#step-4 .step-desc'); if (step4Desc) step4Desc.innerText = "분석 완료"; } } catch (e) { if (!isAiCancelled) { onTokenCallback("\n\n(AI 토큰 생성 중 오류가 발생했습니다. 설정에서 Max Tokens를 줄여보세요.)"); updateAIPipelineStep(-1); } } finally { if (inlineLoaderBtn) inlineLoaderBtn.classList.add('hidden'); } }
+    async function requestLocalAIStreamingCorrection(userText, koreanText, onTokenCallback) { if (!navigator.gpu) { onTokenCallback("WebGPU 미지원 브라우저입니다."); return; } isAiCancelled = false; window.isFirstTokenForUI = true; window.fullAiResponse = ""; const inlineLoaderBtn = document.getElementById('ai-combined-stop-btn'); if (inlineLoaderBtn) inlineLoaderBtn.classList.remove('hidden'); if (!isAiReady) { const engine = await initLocalAIEngine(); if (!engine) { onTokenCallback("AI 로드 실패."); updateAIPipelineStep(-1); return; } } updateAIPipelineStep(2); const config = getAISettings(); try { const systemPrompt = `You are a strict and helpful English grammar teacher.\nAnalyze if the [Student's English Sentence] accurately and grammatically translates the [Intended Korean Meaning].\nYou MUST output your response ONLY in Korean, strictly following the EXACT format of the Example below.\nDo not add any extra greetings, markdown, or copy placeholders.\nIf possible, provide at least 2 grammar corrections and 2 expression improvements.\nWhen you finish the evaluation, STOP generating immediately.\n\n[Example Input]\n[Intended Korean Meaning] : "그녀는 새로운 언어를 배우는 데 관심이 있고 해외로 가고 싶어 한다."\n[Student's English Sentence] : "She interesting to learn new language and want go to abroad."\n\n[Example Output]\n1. 문법 오류\n✅ 감정을 나타낼 때는 과거분사형태를 써 매며, 전치사(in)와 동명사(-ing)가 연결되어야 합니다.\n전 : interesting to learn\n후 : interested in learning\n✅ 주어가 3인칭 단수이므로 동사에 -s가 붙어야 하며, abroad는 부사이므로 전치사 to가 필요 없습니다.\n전 : want go to abroad\n후 : wants to go abroad\n\n2. 표현 교정\n✅ '언어(language)'는 셀 수 있는 명사이므로 복수형(-s)으로 쓰는 가장 자연스럽습니다.\n전 : language\n후 : languages\n✅ 단순한 'go'보다는 문맥에 맞춰 'travel'이나 'study'를 사용하면 의미가 훨씬 풍부해집니다.\n전 : go abroad\n후 : travel abroad`; const userPrompt = `[Intended Korean Meaning] : "${koreanText}"\n[Student's English Sentence] : "${userText}"\n\n위의 [Example Output]과 똑같은 형식(1. 문법 오류, 2. 표현 교정)으로 한국어 피드백을 작성해. 제시된 한국어 의미를 바탕으로 학생의 영작을 평가해. 오류가 전혀 없다면 "✅ 완벽합니다!" 라고만 적어. 평가가 끝나면 즉시 출력을 멈춰.`; const asyncStream = await aiEngine.chat.completions.create({ messages: [ { role: "system", content: systemPrompt }, { role: "user", content: userPrompt } ], temperature: parseFloat(config.temperature), top_p: parseFloat(config.topP), max_tokens: parseInt(config.maxTokens, 10), frequency_penalty: 0.7, presence_penalty: 0.5, stop: ["[Intended", "[Student", "[Example", "3."], stream: true }); for await (const chunk of asyncStream) { if (isAiCancelled) break; if (window.isFirstTokenForUI) { updateAIPipelineStep(3); const pipeline = document.getElementById('ai-pipeline'); const streamingBody = document.getElementById('streaming-grammar-body'); const progressText = document.getElementById('ai-center-progress-text'); if (progressText) progressText.innerText = ''; if (pipeline) { pipeline.style.borderBottom = '1px dashed var(--border-color)'; pipeline.style.paddingBottom = '16px'; pipeline.style.marginBottom = '16px'; } if (streamingBody) streamingBody.style.display = 'block'; window.isFirstTokenForUI = false; } const delta = chunk.choices[0]?.delta?.content || ""; if (delta) { window.fullAiResponse += delta; onTokenCallback(delta); } } if (!isAiCancelled) { updateAIPipelineStep(5); const step4Desc = document.querySelector('#step-4 .step-desc'); if (step4Desc) step4Desc.innerText = "분석 완료"; } } catch (e) { if (!isAiCancelled) { onTokenCallback("\n\n(AI 토큰 생성 중 오류가 발생했습니다. 설정에서 Max Tokens를 줄여보세요.)"); updateAIPipelineStep(-1); } } finally { if (inlineLoaderBtn) inlineLoaderBtn.classList.add('hidden'); } }
     window.initLocalAIEngine = initLocalAIEngine; window.stopAIComputation = stopAIComputation; window.requestLocalAIStreamingCorrection = requestLocalAIStreamingCorrection; window.getAISettings = getAISettings; window.updateAIPipelineStep = updateAIPipelineStep; window.closeSpeakingModalAndNext = function() { closeSpeakingModal(); handlePrimaryAction(); }
 </script>
 
@@ -472,15 +467,24 @@
     function sanitizeForMatch(text) { return text ? String(text).replace(/<[^>]*>/g, '').replace(/#/g, '').replace(/[\s\W_]+/g, '').toLowerCase() : ''; }
     function formatContextInText(text) { return text ? String(text).replace(/(\[.*?\]|\(.*?\))/g, '<span class="context-bracket">$1</span>') : ''; }
     class ClientSpeakingEngine { constructor(minGreenConfidence = 0.82) { this.minGreenConfidence = minGreenConfidence; } normalize(word) { return word ? word.replace(/[^\w\s]/g, '').toLowerCase().trim() : ''; } levenshteinDistance(s1, s2) { if (s1.length < s2.length) return this.levenshteinDistance(s2, s1); if (s2.length === 0) return s1.length; let previousRow = Array.from({ length: s2.length + 1 }, (_, i) => i); for (let i = 0; i < s1.length; i++) { let currentRow = [i + 1]; for (let j = 0; j < s2.length; j++) { let insertions = previousRow[j + 1] + 1; let deletions = currentRow[j] + 1; let substitutions = previousRow[j] + (s1[i] !== s2[j] ? 1 : 0); currentRow.push(Math.min(insertions, deletions, substitutions)); } previousRow = currentRow; } return previousRow[s2.length]; } similarityRatio(s1, s2) { const dist = this.levenshteinDistance(s1, s2); const maxLen = Math.max(s1.length, s2.length); return maxLen === 0 ? 1.0 : 1.0 - (dist / maxLen); } getStem(word) { let w = word.toLowerCase().trim(); if (w.length <= 3) return w; if (w.endsWith('ies')) return w.slice(0, -3) + 'y'; if (w.endsWith('es')) return w.slice(0, -2); if (w.endsWith('s') && !w.endsWith('ss')) return w.slice(0, -1); if (w.endsWith('ied')) return w.slice(0, -3) + 'y'; if (w.endsWith('ed')) { if (w.length > 4 && w[w.length - 3] === w[w.length - 4]) return w.slice(0, -3); return w.slice(0, -2); } if (w.endsWith('ing') && w.length > 4) return w.slice(0, -3); return w; } alignWords(targetWords, sttWords) { const n = targetWords.length; const m = sttWords.length; const dp = Array.from({ length: n + 1 }, () => Array(m + 1).fill(0)); for (let i = 0; i <= n; i++) dp[i][0] = i * -1; for (let j = 0; j <= m; j++) dp[0][j] = j * -1; for (let i = 1; i <= n; i++) { for (let j = 1; j <= m; j++) { const tNorm = this.normalize(targetWords[i - 1]); const sNorm = this.normalize(sttWords[j - 1]); const sim = this.similarityRatio(tNorm, sNorm); const matchScore = sim > 0.85 ? 2 : (sim > 0.5 ? 0.5 : -1); dp[i][j] = Math.max(dp[i - 1][j - 1] + matchScore, dp[i - 1][j] - 1, dp[i][j - 1] - 1); } } const aligned = []; let i = n, j = m; while (i > 0 || j > 0) { if (i > 0 && j > 0) { const tNorm = this.normalize(targetWords[i - 1]); const sNorm = this.normalize(sttWords[j - 1]); const sim = this.similarityRatio(tNorm, sNorm); const matchScore = sim > 0.85 ? 2 : (sim > 0.5 ? 0.5 : -1); if (dp[i][j] === dp[i - 1][j - 1] + matchScore) { aligned.push({ target: targetWords[i - 1], stt: sttWords[j - 1] }); i--; j--; continue; } } if (i > 0 && (j === 0 || dp[i][j] === dp[i - 1][j] - 1)) { aligned.push({ target: targetWords[i - 1], stt: '' }); i--; } else { aligned.push({ target: '', stt: sttWords[j - 1] }); j--; } } return aligned.reverse(); } evaluate(targetSentence, sttTranscript) { const cleanTargetSentence = targetSentence.replace(/[^\w\s]/g, ' '); const cleanSttTranscript = sttTranscript.replace(/[^\w\s]/g, ' '); const targetWords = cleanTargetSentence.trim().split(/\s+/).filter(Boolean); const sttWords = cleanSttTranscript.trim().split(/\s+/).filter(Boolean); if (sttWords.length === 0) { return { overallScore: 0, details: targetWords.map(tw => ({ targetWord: tw, spokenWord: '[미인식]', color: 'RED', score: 0, reason: '단어를 발음하지 않음' })) }; } const alignedPairs = this.alignWords(targetWords, sttWords); const details = []; let totalScore = 0; let validTargetCount = 0; alignedPairs.forEach(pair => { const targetRaw = pair.target; const sttRaw = pair.stt; if (!targetRaw && sttRaw) { details.push({ targetWord: '', spokenWord: sttRaw, color: 'RED', score: 0, reason: `추가 발음: '${sttRaw}'` }); return; } validTargetCount++; const tNorm = this.normalize(targetRaw); const sNorm = this.normalize(sttRaw); let color = 'RED', score = 0, reason = ''; if (!sNorm) { reason = `단어 누락 (원문: '${targetRaw}')`; } else if (tNorm === sNorm) { color = 'GREEN'; score = 100; reason = `정확한 일치 ('${targetRaw}')`; } else { const tStem = this.getStem(tNorm); const sStem = this.getStem(sNorm); const sim = this.similarityRatio(tNorm, sNorm); if (tStem === sStem) { color = 'ORANGE'; score = 50; reason = `단/복수 또는 시제 변형 오류 (원문: '${targetRaw}' ↔ 발음: '${sttRaw}')`; } else if (sim >= 0.55) { color = 'ORANGE'; score = 40; reason = `유사 발음 오독 (원문: '${targetRaw}' ↔ 발음: '${sttRaw}')`; } else { reason = `잘못된 단어 선택 (원문: '${targetRaw}' ↔ 발음: '${sttRaw}')`; } } totalScore += score; details.push({ targetWord: targetRaw, spokenWord: sttRaw || '[미인식]', color: color, score: score, reason: reason }); }); const count = validTargetCount > 0 ? validTargetCount : 1; const overallScore = Math.round(totalScore / count); return { overallScore, details }; } }
+    
     let loadedRawWordList = []; let perDayCount = 30; let currentDayIndex = 0; let originalWordList = []; let wordList = []; let vagueWords = []; let currentStartIndex = 0; let showAnswers = false;    
     let currentCategory = '단어암기'; let isWeakReviewMode = false; let testedWeakWordsInSession = []; let isCurrentCardChecked = false; let cardsPerPage = 1; let currentWeakReviewTitle = ''; window.ttsUtterances = []; 
     let currentImageType = 'type1'; let currentImgNum = 1;
     let isAutoplay = false; let isInfiniteLoop = false; let autoplayIntervalSec = 2.0; let tempAutoplaySec = 2.0; let autoplayTimer = null; let isAutoplayReadKorean = true; 
     let sessionStartTimeMs = 0; let sessionTimerInterval = null;
-    let bgAudio = null; let isMuted = true; let synthAudioCtx = null; let selectedVoiceURI = ''; let currentPitch = 1.0; let currentRate = 0.85; let currentTuneProfile = 'normal'; let availableVoices = [];
+    let bgAudio = null; let isMuted = true; let synthAudioCtx = null; let availableVoices = [];
     let speakingTargetText = ''; let speakingType = 'sentence'; let speakingStep = 1; let speakingSpeechSpeed = 1.0; let isSpeakingTextVisible = false; let speakingRecognition = null; let speakingRecordedTranscript = ''; let sessionFinalTranscript = ''; let speakingTimerInterval = null; let speakingSeconds = 0; let isSpeakingRecording = false;
     let micAudioContext = null; let micAnalyser = null; let micAnimFrameId = null; let pendingLifeUrl = ''; 
-    const PWA_VAGUE_STORAGE_KEY = 'pwa_vague_words_list_v2'; const SELECTED_VOICE_STORAGE_KEY = 'selected_tts_voice_uri_v4'; const SELECTED_TUNE_STORAGE_KEY = 'selected_tts_tune_profile_v4';
+    const PWA_VAGUE_STORAGE_KEY = 'pwa_vague_words_list_v2'; 
+    const SELECTED_RANDOM_TYPE_KEY = 'pongcrush_random_voice_type_v4';
+    const SELECTED_FIXED_VOICE_KEY = 'pongcrush_fixed_voice_uri_v4';
+
+    let currentRandomType = 'ALL'; 
+    let currentFixedVoiceURI = '';
+    let tempRandomType = 'ALL';
+    let tempFixedVoiceURI = '';
+    let lastVoiceURI = '';
 
     function getPWASavedWords() { try { const savedData = localStorage.getItem(PWA_VAGUE_STORAGE_KEY); return savedData ? JSON.parse(savedData) : []; } catch (error) { return []; } }
     function addWordToPWAStorage(item) { let savedList = getPWASavedWords(); const existingIdx = savedList.findIndex(w => w.ko === item.ko && w.en === item.en); if (existingIdx > -1) { savedList[existingIdx].vagueCount = (savedList[existingIdx].vagueCount || 1) + 1; } else { savedList.push({...item, vagueCount: 1}); } localStorage.setItem(PWA_VAGUE_STORAGE_KEY, JSON.stringify(savedList)); updatePWAReviewButtonUI(); }
@@ -489,46 +493,205 @@
     function registerServiceWorker() { if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js').then(reg => { console.log('SW Registered'); }).catch(err => { console.warn('SW Registration Failed', err); }); } }
     function requestPersistentStorage() { if (navigator.storage && navigator.storage.persist) { navigator.storage.persist().then(granted => { console.log("Persistent Storage:", granted); }); } }
     function patchPWASavedWordsWithNewData() { console.log("PWA DB Check Complete."); }
-    function initVoiceEngine() { if ('speechSynthesis' in window) { availableVoices = window.speechSynthesis.getVoices(); window.speechSynthesis.onvoiceschanged = () => { availableVoices = window.speechSynthesis.getVoices(); }; } }
-    function loadSavedVoiceSettings() { selectedVoiceURI = localStorage.getItem(SELECTED_VOICE_STORAGE_KEY) || ''; currentTuneProfile = localStorage.getItem(SELECTED_TUNE_STORAGE_KEY) || 'normal'; if (currentTuneProfile === 'normal') { currentPitch = 1.0; currentRate = 0.85; } else if (currentTuneProfile === 'deep') { currentPitch = 0.75; currentRate = 0.8; } else if (currentTuneProfile === 'bright') { currentPitch = 1.3; currentRate = 0.9; } else if (currentTuneProfile === 'fast') { currentPitch = 1.1; currentRate = 1.1; } updateVoiceModeTagUI(); }
-    function openVoiceModal() { const modal = document.getElementById('voice-modal'); if (modal) modal.classList.remove('hidden'); renderVoiceListUI(); }
-    function closeVoiceModal() { const modal = document.getElementById('voice-modal'); if (modal) modal.classList.add('hidden'); }
-    function renderVoiceListUI() { const wrapper = document.getElementById('voice-list-wrapper'); if (!wrapper) return; wrapper.innerHTML = ''; const enVoices = availableVoices.filter(v => v.lang.startsWith('en')); if (enVoices.length === 0) { wrapper.innerHTML = '<div style="padding:10px; text-align:center;">사용 가능한 영어 음성이 없습니다.</div>'; return; } enVoices.forEach(voice => { const isSelected = voice.voiceURI === selectedVoiceURI; const div = document.createElement('div'); div.className = `voice-item ${isSelected ? 'selected' : ''}`; div.onclick = () => { selectedVoiceURI = voice.voiceURI; localStorage.setItem(SELECTED_VOICE_STORAGE_KEY, selectedVoiceURI); renderVoiceListUI(); updateVoiceModeTagUI(); }; div.innerHTML = `<div class="voice-info"><span class="voice-name">${voice.name}</span><span class="voice-lang">🌐 ${voice.lang} <span class="voice-badge">${voice.localService ? '로컬' : '클라우드'}</span></span></div>`; wrapper.appendChild(div); }); document.querySelectorAll('.tune-card').forEach(card => card.classList.remove('selected')); const activeTuneCard = document.getElementById(`tune-${currentTuneProfile}`); if (activeTuneCard) activeTuneCard.classList.add('selected'); }
-    function selectVoiceTune(profile, pitch, rate) { currentTuneProfile = profile; currentPitch = pitch; currentRate = rate; localStorage.setItem(SELECTED_TUNE_STORAGE_KEY, profile); renderVoiceListUI(); }
-    function updateVoiceModeTagUI() { const tag = document.getElementById('voice-mode-tag'); if (tag) tag.innerText = selectedVoiceURI ? "(수동)" : "(자동)"; }
-
-    function getRandomOrSelectedVoice() {
-    // 1. 영어 음성만 필터링 (없으면 폴백 불가, null 반환)
-    const enVoices = availableVoices.filter(v => v.lang.startsWith('en'));
-    if (enVoices.length === 0) return null;
-
-    // 2. 사용자가 특정 음성을 고정(수동) 선택한 경우 바로 반환
-    if (selectedVoiceURI) {
-        const found = enVoices.find(v => v.voiceURI === selectedVoiceURI);
-        if (found) return found;
+    
+    function initVoiceEngine() { 
+        if ('speechSynthesis' in window) { 
+            availableVoices = window.speechSynthesis.getVoices(); 
+            window.speechSynthesis.onvoiceschanged = () => { 
+                availableVoices = window.speechSynthesis.getVoices(); 
+            }; 
+        } 
+    }
+    
+    function loadSavedVoiceSettings() {
+        currentRandomType = localStorage.getItem(SELECTED_RANDOM_TYPE_KEY) || 'ALL';
+        currentFixedVoiceURI = localStorage.getItem(SELECTED_FIXED_VOICE_KEY) || '';
+        updateVoiceModeTagUI();
+    }
+    function updateVoiceModeTagUI() {
+        const tag = document.getElementById('voice-mode-tag');
+        if (tag) {
+            if (currentRandomType === 'MALE') tag.innerText = "(남성 랜덤)";
+            else if (currentRandomType === 'FEMALE') tag.innerText = "(여성 랜덤)";
+            else if (currentRandomType === 'FIXED') tag.innerText = "(고정)";
+            else tag.innerText = "(전체 랜덤)";
+        }
     }
 
-    // 3. 랜덤(다양한 음성 섞기) 로직 & 폴백
-    // 3-1. iOS/Mac(siri, premium), Windows(natural), Android(google) 등 고품질 엔진 키워드
-    const premiumKeywords = ['google', 'siri', 'premium', 'enhanced', 'natural', 'neural'];
-    
-    // 3-2. 고품질 음성 먼저 필터링 (없으면 일반 영어 음성 전체로 폴백)
-    let pool = enVoices.filter(v => premiumKeywords.some(kw => v.name.toLowerCase().includes(kw)));
-    if (pool.length === 0) pool = enVoices;
+    function openVoiceModal() {
+        tempRandomType = currentRandomType;
+        tempFixedVoiceURI = currentFixedVoiceURI;
+        const modal = document.getElementById('voice-modal');
+        if (modal) modal.classList.remove('hidden');
+        renderVoiceListUI();
+    }
 
-    // 3-3. US, GB, AU 등 주요 영어권 위주로 한 번 더 필터링 (알아듣기 힘든 억양 최소화)
-    let primaryPool = pool.filter(v => v.lang === 'en-US' || v.lang === 'en-GB' || v.lang === 'en-AU');
-    
-    // 주요 영어권이 아예 없다면 이전 풀로 다시 폴백
-    if (primaryPool.length === 0) primaryPool = pool; 
+    function closeVoiceModal() {
+        const modal = document.getElementById('voice-modal');
+        if (modal) modal.classList.add('hidden');
+    }
 
-    // 4. 최종 정제된 풀(Pool)에서 무작위로 하나 추출하여 다채롭게 믹스
-    const randomIndex = Math.floor(Math.random() * primaryPool.length);
-    
-    // 최후의 최후까지 대비한 Fallback (primaryPool[randomIndex]가 실패하면 enVoices[0] 반환)
-    return primaryPool[randomIndex] || enVoices[0];
-}
+    function selectTempRandomType(type) {
+        tempRandomType = type;
+        renderVoiceListUI();
+    }
 
+    function selectTempFixedVoice(uri) {
+        tempRandomType = 'FIXED';
+        tempFixedVoiceURI = uri;
+        renderVoiceListUI();
+    }
+
+    function confirmVoiceSettings() {
+        currentRandomType = tempRandomType;
+        currentFixedVoiceURI = tempFixedVoiceURI;
+        localStorage.setItem(SELECTED_RANDOM_TYPE_KEY, currentRandomType);
+        localStorage.setItem(SELECTED_FIXED_VOICE_KEY, currentFixedVoiceURI);
+        updateVoiceModeTagUI();
+        closeVoiceModal();
+    }
+
+    function testVoice(uri, event) {
+        if (event) event.stopPropagation();
+        stopTTS();
+        setTimeout(() => {
+            const voice = getEnVoices().find(v => v.voiceURI === uri);
+            if (!voice) return;
+            const utter = new SpeechSynthesisUtterance("I can't drink a bottle of water after dancing.");
+            utter.voice = voice;
+            utter.lang = voice.lang || 'en-US';
+            utter.rate = 1.0;
+            utter.pitch = 1.0;
+            window.speechSynthesis.speak(utter);
+        }, 60);
+    }
+    
+    function getEnVoices() {
+        if (!('speechSynthesis' in window)) return [];
+        let voices = window.speechSynthesis.getVoices();
+        if (voices.length === 0 && availableVoices.length > 0) voices = availableVoices;
+        return voices.filter(v => {
+            const lang = (v.lang || '').replace(/_/g, '-').toLowerCase();
+            return lang === 'en-us' || lang === 'en-gb';
+        });
+    }
+
+    function getVoiceGender(voice) {
+        const name = (voice.name || '').toLowerCase();
+        const uri = (voice.voiceURI || '').toLowerCase();
+        const str = `${name} ${uri}`;
+
+        if (/\b(female|woman|girl)\b/i.test(str)) return 'FEMALE';
+        if (/\b(male|man|boy)\b/i.test(str)) return 'MALE';
+
+        const maleIdentifiers = [
+            'david', 'mark', 'george', 'guy', 'ryan', 'eric', 'christopher', 'roger', 
+            'steffan', 'thomas', 'jason', 'tony', 'bruce', 'ralph', 'albert', 'junior', 
+            'alex', 'daniel', 'fred', 'oliver', 'aaron', 'arthur', 'brian', 'evan', 'tom',
+            'en-us-x-iob', 'en-us-x-iol', 'en-us-x-tpc', 'en-gb-x-gbb', 'en-gb-x-gbd', 'en-gb-x-fis',
+            'male 1', 'male 2', 'male 3'
+        ];
+
+        const femaleIdentifiers = [
+            'zira', 'jenny', 'aria', 'hazel', 'susan', 'sonia', 'libby', 'maisie', 
+            'michelle', 'samantha', 'victoria', 'karen', 'moira', 'tessa', 'catherine', 
+            'mary', 'martha', 'sandy', 'serena', 'allison', 'ava', 'chloe', 'emma', 
+            'joelle', 'kendall', 'kimberly', 'lauren', 'nicole', 'fiona', 'laura', 
+            'melina', 'nicky', 'veena', 'amy', 'mia', 'ruth', 'stephanie', 'zoe',
+            'google us english', 'google uk english female',
+            'en-us-x-sfg', 'en-us-x-iom', 'en-us-x-tpf', 'en-gb-x-rjs', 'en-gb-x-gba', 'en-gb-x-gbc',
+            'female 1', 'female 2', 'female 3'
+        ];
+
+        if (maleIdentifiers.some(k => str.includes(k))) return 'MALE';
+        if (femaleIdentifiers.some(k => str.includes(k))) return 'FEMALE';
+
+        return 'UNKNOWN';
+    }
+
+    function renderVoiceListUI() {
+        const area = document.getElementById('voice-modal-content-area');
+        if (!area) return;
+        const enVoices = getEnVoices();
+        let html = `
+            <div class="sec-select-area">
+                <div class="sec-select-title">1️⃣ 음성 랜덤 모드 선택 (US/UK 한정)</div>
+                <div class="sec-btn-grid">
+                    <button class="sec-btn ${tempRandomType === 'ALL' ? 'selected' : ''}" onclick="selectTempRandomType('ALL')">🎲 전체 랜덤</button>
+                    <button class="sec-btn ${tempRandomType === 'MALE' ? 'selected' : ''}" onclick="selectTempRandomType('MALE')">👨 남성 랜덤</button>
+                    <button class="sec-btn ${tempRandomType === 'FEMALE' ? 'selected' : ''}" onclick="selectTempRandomType('FEMALE')">👩 여성 랜덤</button>
+                </div>
+            </div>
+            <div class="sec-select-area">
+                <div class="sec-select-title">2️⃣ 특정 음성 고정 선택 및 테스트 (총 ${enVoices.length}개 감지됨)</div>
+                <div class="voice-list-container" style="max-height: 220px; opacity: 0.95;">
+        `;
+        if (enVoices.length === 0) {
+            html += '<div style="padding:10px; text-align:center; color:#64748b;">지원되는 US/UK 영어가 없습니다. (시스템 엔진 확인 요망)</div>';
+        } else {
+            enVoices.forEach(voice => {
+                const g = getVoiceGender(voice);
+                const icon = g === 'MALE' ? '👨' : (g === 'FEMALE' ? '👩' : '🤖');
+                const badgeText = g === 'MALE' ? '남성' : (g === 'FEMALE' ? '여성' : '미분류');
+                const isSelected = (tempRandomType === 'FIXED' && tempFixedVoiceURI === voice.voiceURI);
+                
+                html += `
+                    <div class="voice-item ${isSelected ? 'selected' : ''}" onclick="selectTempFixedVoice('${voice.voiceURI.replace(/'/g, "\\'")}')" style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+                        <div class="voice-info" style="flex:1;">
+                            <span class="voice-name" style="font-size: 13px; font-weight:${isSelected ? '900' : '700'}; color:${isSelected ? '#c2410c' : 'inherit'};">${icon} ${voice.name}</span>
+                            <span class="voice-lang" style="font-size: 10px;">🌐 ${voice.lang} <span class="voice-badge" style="background:#e0f2fe; color:#0369a1;">${badgeText}</span> <span class="voice-badge">${voice.localService ? '로컬' : '네트워크'}</span></span>
+                        </div>
+                        <button class="card-action-btn" style="background:#e2e8f0; color:#0f172a; padding:6px 10px; font-size:16px; border:none; box-shadow:0 1px 2px rgba(0,0,0,0.1); margin-left:8px;" onclick="testVoice('${voice.voiceURI.replace(/'/g, "\\'")}', event)" title="테스트 문장 듣기">▶️</button>
+                    </div>`;
+            });
+        }
+        html += `</div></div>`;
+        area.innerHTML = html;
+    }
+    
+    function getRandomOrSelectedVoice() {
+        const enVoices = getEnVoices();
+        if (enVoices.length === 0) return null;
+        
+        // 1. 고정 모드인 경우
+        if (currentRandomType === 'FIXED' && currentFixedVoiceURI) {
+            const fixedVoice = enVoices.find(v => v.voiceURI === currentFixedVoiceURI);
+            if (fixedVoice) return fixedVoice;
+        }
+
+        // 2. 랜덤 모드인 경우
+        let pool = [];
+        if (currentRandomType === 'MALE') {
+            pool = enVoices.filter(v => getVoiceGender(v) === 'MALE');
+            if (pool.length === 0) {
+                pool = enVoices.filter(v => getVoiceGender(v) !== 'FEMALE');
+            }
+        } else if (currentRandomType === 'FEMALE') {
+            pool = enVoices.filter(v => getVoiceGender(v) === 'FEMALE');
+            if (pool.length === 0) {
+                pool = enVoices.filter(v => getVoiceGender(v) !== 'MALE');
+            }
+        } else {
+            pool = enVoices;
+        }
+
+        if (pool.length === 0) pool = enVoices;
+
+        // 동일한 음성이 연속으로 나오는 것을 방지 (pool 개수가 2개 이상일 때)
+        if (pool.length > 1 && lastVoiceURI) {
+            const candidates = pool.filter(v => v.voiceURI !== lastVoiceURI);
+            if (candidates.length > 0) {
+                const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+                lastVoiceURI = chosen.voiceURI;
+                return chosen;
+            }
+        }
+
+        const chosen = pool[Math.floor(Math.random() * pool.length)] || enVoices[0];
+        if (chosen) lastVoiceURI = chosen.voiceURI;
+        return chosen;
+    }
+    
     function openAISettingsModal() { const modal = document.getElementById('ai-settings-modal'); if (modal) modal.classList.remove('hidden'); const cfg = getAISettings(); document.getElementById('input-max-tokens').value = cfg.maxTokens; document.getElementById('val-max-tokens').innerText = cfg.maxTokens; document.getElementById('input-context-window').value = cfg.contextWindow; document.getElementById('val-context-window').innerText = cfg.contextWindow; document.getElementById('input-temperature').value = cfg.temperature; document.getElementById('val-temperature').innerText = cfg.temperature; document.getElementById('input-top-p').value = cfg.topP; document.getElementById('val-top-p').innerText = cfg.topP; }
     function closeAISettingsModal() { const modal = document.getElementById('ai-settings-modal'); if (modal) modal.classList.add('hidden'); }
     function applyAISettingsUI() { const cfg = { maxTokens: parseInt(document.getElementById('input-max-tokens').value), contextWindow: parseInt(document.getElementById('input-context-window').value), temperature: parseFloat(document.getElementById('input-temperature').value), topP: parseFloat(document.getElementById('input-top-p').value) }; saveAISettings(cfg); closeAISettingsModal(); alert('AI 설정이 저장되었습니다.'); }
@@ -558,9 +721,18 @@
     function speakKoreanWord(text, onCompleteCallback) { stopTTS(); if (!('speechSynthesis' in window) || !text) { if (onCompleteCallback) onCompleteCallback(); return; } let isFired = false; const safeCallback = () => { if (!isFired) { isFired = true; if (onCompleteCallback) onCompleteCallback(); } }; const cleanText = text.replace(/<[^>]*>/g, '').replace(/#/g, ' ').replace(/<br>/g, ' ').trim(); const utter = new SpeechSynthesisUtterance(cleanText); utter.lang = 'ko-KR'; utter.rate = 1.0; utter.onend = safeCallback; utter.onerror = safeCallback; setTimeout(safeCallback, 3500); window.ttsUtterances.push(utter); if (window.ttsUtterances.length > 10) window.ttsUtterances.shift(); window.speechSynthesis.speak(utter); }
     function startAutoplayLoopForCurrentCard() { clearAutoplayTimer(); if (!isAutoplay) return; if (document.getElementById('game-area').classList.contains('hidden')) return; if (wordList.length === 0) return; if (!showAnswers) { const item = wordList[currentStartIndex]; if (isAutoplayReadKorean && item && item.ko) { speakKoreanWord(item.ko, () => { autoplayTimer = setTimeout(() => { revealAndSpeakAutoplay(); }, autoplayIntervalSec * 1000); }); } else { autoplayTimer = setTimeout(() => { revealAndSpeakAutoplay(); }, autoplayIntervalSec * 1000); } } else { speakCurrentWord(() => { if (isAutoplay) handlePrimaryAction(); }); } }
     function revealAndSpeakAutoplay() { if (!isAutoplay) return; if (!showAnswers) { showAnswers = true; wrapperEl.classList.add('show-answers'); updateButtonsUI(); } speakCurrentWord(() => { if (isAutoplay) { autoplayTimer = setTimeout(() => { handlePrimaryAction(); }, 500); } }); }
-    function resetDefaultSessionSettings() { isAutoplay = false; releaseWakeLock(); isInfiniteLoop = false; updateInfiniteButtonUI(); clearAutoplayTimer(); const autoBtn = document.getElementById('autoplay-btn'); const autoLabel = document.getElementById('autoplay-btn-label'); if (autoBtn) autoBtn.classList.remove('active'); if (autoLabel) autoLabel.innerHTML = "🖐️<span class='hide-on-mobile'> 수동</span>"; isMuted = true; if (bgAudio) bgAudio.muted = true; const muteBtn = document.getElementById('mute-btn'); const muteLabel = document.getElementById('mute-btn-label'); if (muteBtn) { muteBtn.classList.add('is-muted'); muteBtn.classList.remove('active-music'); } if (muteLabel) muteLabel.innerText = "🔇 뮤트"; selectedVoiceURI = ''; try { localStorage.removeItem(SELECTED_VOICE_STORAGE_KEY); } catch(e){} updateVoiceModeTagUI(); }
-    function stopTTS() { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); }
-    function speakCurrentWord(onCompleteCallback) { stopTTS(); if (!('speechSynthesis' in window)) { if (onCompleteCallback) onCompleteCallback(); return; } const item = wordList[currentStartIndex]; if (!item) { if (onCompleteCallback) onCompleteCallback(); return; } const cleanWord = item.en ? item.en.replace(/<[^>]*>/g, '').replace(/#/g, ' ').trim() : ''; const cleanExEn = item.exEn ? item.exEn.replace(/<[^>]*>/g, '').replace(/#/g, ' ').trim() : ''; if (!cleanWord) { if (onCompleteCallback) onCompleteCallback(); return; } try { let isFired = false; const safeCallback = () => { if (!isFired) { isFired = true; if (onCompleteCallback) onCompleteCallback(); } }; const wordUtterance = new SpeechSynthesisUtterance(cleanWord); wordUtterance.pitch = currentPitch; wordUtterance.rate = currentRate; const voiceObj = getRandomOrSelectedVoice(); if (voiceObj) { wordUtterance.voice = voiceObj; wordUtterance.lang = voiceObj.lang || 'en-US'; } else wordUtterance.lang = 'en-US'; if (cleanExEn) { const exUtterance = new SpeechSynthesisUtterance(cleanExEn); exUtterance.pitch = currentPitch; exUtterance.rate = currentRate; if (voiceObj) { exUtterance.voice = voiceObj; exUtterance.lang = voiceObj.lang || 'en-US'; } else exUtterance.lang = 'en-US'; wordUtterance.onend = () => { window.speechSynthesis.speak(exUtterance); }; exUtterance.onend = safeCallback; exUtterance.onerror = safeCallback; setTimeout(safeCallback, 10000); window.ttsUtterances.push(wordUtterance, exUtterance); } else { wordUtterance.onend = safeCallback; wordUtterance.onerror = safeCallback; setTimeout(safeCallback, 3500); window.ttsUtterances.push(wordUtterance); } if (window.ttsUtterances.length > 10) window.ttsUtterances.splice(0, window.ttsUtterances.length - 10); window.speechSynthesis.speak(wordUtterance); } catch (e) { if (onCompleteCallback) onCompleteCallback(); } }
+    function resetDefaultSessionSettings() { isAutoplay = false; releaseWakeLock(); isInfiniteLoop = false; updateInfiniteButtonUI(); clearAutoplayTimer(); const autoBtn = document.getElementById('autoplay-btn'); const autoLabel = document.getElementById('autoplay-btn-label'); if (autoBtn) autoBtn.classList.remove('active'); if (autoLabel) autoLabel.innerHTML = "🖐️<span class='hide-on-mobile'> 수동</span>"; isMuted = true; if (bgAudio) bgAudio.muted = true; const muteBtn = document.getElementById('mute-btn'); const muteLabel = document.getElementById('mute-btn-label'); if (muteBtn) { muteBtn.classList.add('is-muted'); muteBtn.classList.remove('active-music'); } if (muteLabel) muteLabel.innerText = "🔇 뮤트"; updateVoiceModeTagUI(); }
+    
+    let globalTTSCancelFlag = false;
+    function stopTTS() { 
+        if ('speechSynthesis' in window) { 
+            globalTTSCancelFlag = true;
+            window.speechSynthesis.cancel(); 
+            setTimeout(() => { globalTTSCancelFlag = false; }, 50);
+        } 
+    }
+    
+    function speakCurrentWord(onCompleteCallback) { stopTTS(); if (!('speechSynthesis' in window)) { if (onCompleteCallback) onCompleteCallback(); return; } const item = wordList[currentStartIndex]; if (!item) { if (onCompleteCallback) onCompleteCallback(); return; } const cleanWord = item.en ? item.en.replace(/<[^>]*>/g, '').replace(/#/g, ' ').trim() : ''; const cleanExEn = item.exEn ? item.exEn.replace(/<[^>]*>/g, '').replace(/#/g, ' ').trim() : ''; if (!cleanWord) { if (onCompleteCallback) onCompleteCallback(); return; } setTimeout(() => { try { let isFired = false; const safeCallback = () => { if (!isFired) { isFired = true; if (onCompleteCallback) onCompleteCallback(); } }; const wordUtterance = new SpeechSynthesisUtterance(cleanWord); wordUtterance.pitch = 1.0; wordUtterance.rate = 1.0; const voiceObj = getRandomOrSelectedVoice(); if (voiceObj) { wordUtterance.voice = voiceObj; wordUtterance.lang = voiceObj.lang || 'en-US'; } else wordUtterance.lang = 'en-US'; if (cleanExEn) { const exUtterance = new SpeechSynthesisUtterance(cleanExEn); exUtterance.pitch = 1.0; exUtterance.rate = 1.0; if (voiceObj) { exUtterance.voice = voiceObj; exUtterance.lang = voiceObj.lang || 'en-US'; } else exUtterance.lang = 'en-US'; wordUtterance.onend = () => { if (!globalTTSCancelFlag) { window.speechSynthesis.speak(exUtterance); } }; exUtterance.onend = safeCallback; exUtterance.onerror = safeCallback; setTimeout(safeCallback, 10000); window.ttsUtterances.push(wordUtterance, exUtterance); } else { wordUtterance.onend = safeCallback; wordUtterance.onerror = safeCallback; setTimeout(safeCallback, 3500); window.ttsUtterances.push(wordUtterance); } if (window.ttsUtterances.length > 10) window.ttsUtterances.splice(0, window.ttsUtterances.length - 10); window.speechSynthesis.speak(wordUtterance); } catch (e) { if (onCompleteCallback) onCompleteCallback(); } }, 60); }
     function getSynthAudioContext() { if (!synthAudioCtx) synthAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (synthAudioCtx.state === 'suspended') synthAudioCtx.resume(); return synthAudioCtx; }
     function unlockAudioContext() { const ctx = getSynthAudioContext(); if (ctx && ctx.state === 'suspended') ctx.resume(); } window.addEventListener('click', unlockAudioContext, { passive: true }); window.addEventListener('touchstart', unlockAudioContext, { passive: true }); window.addEventListener('keydown', unlockAudioContext, { passive: true });
     function toggleMute() { isMuted = !isMuted; const muteBtn = document.getElementById('mute-btn'); const muteBtnLabel = document.getElementById('mute-btn-label'); if (isMuted) { if (muteBtnLabel) muteBtnLabel.innerText = '🔇 뮤트'; if (muteBtn) { muteBtn.classList.add('is-muted'); muteBtn.classList.remove('active-music'); } } else { if (muteBtnLabel) muteBtnLabel.innerText = '🎵 노래'; if (muteBtn) { muteBtn.classList.remove('is-muted'); muteBtn.classList.add('active-music'); } } if (bgAudio) bgAudio.muted = isMuted; }
@@ -602,25 +774,25 @@
     function restartFullGame() { wordList = shuffleArray(originalWordList); vagueWords = []; currentStartIndex = 0; document.getElementById('summary-area').classList.add('hidden'); document.getElementById('game-area').classList.remove('hidden'); startStudyTimer(); renderCards(); }
     function openSpeakingModal(type, targetText) { if (isAutoplay) { isAutoplay = false; clearAutoplayTimer(); releaseWakeLock(); const btn = document.getElementById('autoplay-btn'); const btnLabel = document.getElementById('autoplay-btn-label'); if (btn && btnLabel) { btn.classList.remove('active'); btnLabel.innerHTML = "🖐️<span class='hide-on-mobile'> 수동</span>"; } } if (isInfiniteLoop) { isInfiniteLoop = false; updateInfiniteButtonUI(); } speakingType = type; speakingTargetText = targetText ? targetText.replace(/<[^>]*>/g, '').replace(/#/g, ' ').trim() : ''; speakingStep = 1; speakingSpeechSpeed = 1.0; isSpeakingTextVisible = false; speakingRecordedTranscript = ''; const modal = document.getElementById('speaking-modal'); if (modal) modal.classList.remove('hidden'); renderSpeakingModalUI(); speakTargetTextInModal(); }
     function closeSpeakingModal() { stopTTS(); stopSpeakingRecording(); const modal = document.getElementById('speaking-modal'); if (modal) modal.classList.add('hidden'); } function toggleSpeakingSpeechSpeed() { speakingSpeechSpeed = (speakingSpeechSpeed === 1.0) ? 0.75 : 1.0; renderSpeakingModalUI(); speakTargetTextInModal(); } function toggleSpeakingTextVisibility() { isSpeakingTextVisible = !isSpeakingTextVisible; renderSpeakingModalUI(); }
-    function speakTargetTextInModal() { stopTTS(); if (!('speechSynthesis' in window) || !speakingTargetText) return; const utter = new SpeechSynthesisUtterance(speakingTargetText); utter.pitch = currentPitch; utter.rate = currentRate * speakingSpeechSpeed; const voiceObj = getRandomOrSelectedVoice(); if (voiceObj) { utter.voice = voiceObj; utter.lang = voiceObj.lang || 'en-US'; } else utter.lang = 'en-US'; window.speechSynthesis.speak(utter); }
+    function speakTargetTextInModal() { stopTTS(); setTimeout(() => { if (!('speechSynthesis' in window) || !speakingTargetText) return; const utter = new SpeechSynthesisUtterance(speakingTargetText); utter.pitch = 1.0; utter.rate = 1.0 * speakingSpeechSpeed; const voiceObj = getRandomOrSelectedVoice(); if (voiceObj) { utter.voice = voiceObj; utter.lang = voiceObj.lang || 'en-US'; } else utter.lang = 'en-US'; window.speechSynthesis.speak(utter); }, 60); }
     function setupMicVolumeVisualizer() { const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent); if (isMobile) { startMobileWaveformSimulation(); return; } if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return; navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => { window.speakingAudioStream = stream; try { const AudioContext = window.AudioContext || window.webkitAudioContext; micAudioContext = new AudioContext(); const source = micAudioContext.createMediaStreamSource(stream); micAnalyser = micAudioContext.createAnalyser(); micAnalyser.fftSize = 64; source.connect(micAnalyser); const dataArray = new Uint8Array(micAnalyser.frequencyBinCount); function updateWaveVisual() { if (!isSpeakingRecording) return; micAnalyser.getByteFrequencyData(dataArray); let sum = 0; for (let i = 0; i < dataArray.length; i++) sum += dataArray[i]; let average = sum / dataArray.length; const NOISE_GATE_THRESHOLD = 18; document.querySelectorAll('.speaking-wave-bar').forEach((bar, index) => { if (average < NOISE_GATE_THRESHOLD) bar.style.height = '12px'; else bar.style.height = `${Math.min(80, Math.max(12, (average - NOISE_GATE_THRESHOLD) * (1.2 + (index % 3) * 0.4)))}px`; }); micAnimFrameId = requestAnimationFrame(updateWaveVisual); } updateWaveVisual(); } catch(e) {} }).catch(err => { startMobileWaveformSimulation(); }); }
     function startMobileWaveformSimulation() { function updateSimulatedWave() { if (!isSpeakingRecording) return; document.querySelectorAll('.speaking-wave-bar').forEach(bar => { bar.style.height = `${Math.floor(Math.random() * 35) + 12}px`; }); micAnimFrameId = requestAnimationFrame(updateSimulatedWave); } updateSimulatedWave(); }
     function startSpeakingRecording() { stopTTS(); speakingStep = 2; speakingRecordedTranscript = ''; sessionFinalTranscript = ''; speakingSeconds = 0; isSpeakingRecording = true; renderSpeakingModalUI(); if (speakingTimerInterval) clearInterval(speakingTimerInterval); speakingTimerInterval = setInterval(() => { speakingSeconds++; const timerEl = document.getElementById('speaking-rec-timer'); if (timerEl) timerEl.innerText = `${String(Math.floor(speakingSeconds / 60)).padStart(2, '0')}:${String(speakingSeconds % 60).padStart(2, '0')}`; }, 1000); const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent); const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition; if (SpeechRecognition) { try { if (speakingRecognition) { try { speakingRecognition.abort(); } catch(e){} } speakingRecognition = new SpeechRecognition(); speakingRecognition.lang = 'en-US'; speakingRecognition.continuous = !isMobile; speakingRecognition.interimResults = true; speakingRecognition.maxAlternatives = 1; speakingRecognition.onresult = (e) => { let currentFinal = ''; let currentInterim = ''; for (let i = e.resultIndex; i < e.results.length; ++i) { if (e.results[i].isFinal) currentFinal += e.results[i][0].transcript + ' '; else currentInterim += e.results[i][0].transcript; } if (currentFinal) sessionFinalTranscript += currentFinal; const fullText = (sessionFinalTranscript + currentInterim).trim(); if (fullText) speakingRecordedTranscript = fullText; }; speakingRecognition.onend = () => { if (isSpeakingRecording && speakingRecognition) { try { speakingRecognition.start(); } catch(err){} } }; speakingRecognition.start(); } catch (e) {} } setupMicVolumeVisualizer(); }
     function stopSpeakingRecording() { isSpeakingRecording = false; if (speakingTimerInterval) { clearInterval(speakingTimerInterval); speakingTimerInterval = null; } if (speakingRecognition) { try { speakingRecognition.onend = null; speakingRecognition.stop(); } catch(e) {} speakingRecognition = null; } if (micAnimFrameId) { cancelAnimationFrame(micAnimFrameId); micAnimFrameId = null; } if (micAudioContext) { try { micAudioContext.close(); } catch(e){} micAudioContext = null; } if (window.speakingAudioStream) { try { window.speakingAudioStream.getTracks().forEach(track => track.stop()); } catch(e){} window.speakingAudioStream = null; } }
     function finishSpeakingRecording() { stopSpeakingRecording(); speakingStep = 3; renderSpeakingModalUI(); }
-    function renderSpeakingModalUI() { const card = document.getElementById('speaking-card'); if (!card) return; if (speakingStep === 1) { card.className = 'speaking-modal-card'; const displayText = isSpeakingTextVisible ? `<div style="font-size: clamp(22px, 3vw, 32px); font-weight: 800; line-height: 1.4; color: #ffffff; padding: 10px;">${speakingTargetText}</div>` : `<div style="font-size: 60px; color: rgba(255,255,255,0.4);">❓</div>`; card.innerHTML = ` <div class="speaking-top-bar"> <div style="display:flex; align-items:center; gap:8px;"><span style="font-size:24px;">🎙️</span><span>스피킹 훈련</span></div> <button class="speaking-close-btn" onclick="closeSpeakingModal()">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button> </div> <div class="speaking-content-area"> <div class="speaking-title">원어민 발음을 듣고<br>문장을 기억해 보세요</div> <div class="speaking-subtitle">준비가 되면 마이크 버튼을 눌러 스피킹을 시작하세요</div> <button type="button" class="speaking-circle-play-btn" onclick="speakTargetTextInModal()">▶</button> <div class="speaking-pill-group"> <button class="speaking-pill-btn" onclick="toggleSpeakingSpeechSpeed()">${(speakingSpeechSpeed === 1.0) ? '🐢 느리게 듣기' : '🐰 원상태로 듣기'}</button> <button class="speaking-pill-btn" onclick="toggleSpeakingTextVisibility()">${isSpeakingTextVisible ? '🙈 텍스트 숨기기' : '👁️ 텍스트 보기'}</button> </div> ${displayText} </div> <button class="speaking-bottom-btn" style="background:#ffffff; color:#1d4ed8;" onclick="startSpeakingRecording()">🎙️ 마이크 켜고 말하기 (Enter)</button> `; } else if (speakingStep === 2) { card.className = 'speaking-modal-card white-theme'; const textContentHtml = isSpeakingTextVisible ? `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed #fcd34d; font-size: 17px; font-weight: 800; color: #713f12; line-height: 1.4; word-break: keep-all;">${speakingTargetText}</div>` : ''; card.innerHTML = ` <div class="speaking-top-bar" style="color: #1e293b;"> <div style="display:flex; align-items:center; gap:8px;"><span style="color: #ef4444;">🔴</span><span>녹음 중...</span></div> </div> <div class="speaking-content-area" style="color: #1e293b; padding-bottom: 0;"> <div id="speaking-rec-timer" class="speaking-timer-text">${String(Math.floor(speakingSeconds / 60)).padStart(2, '0')}:${String(speakingSeconds % 60).padStart(2, '0')}</div> <div class="speaking-waveform-box"><div class="speaking-wave-bar"></div><div class="speaking-wave-bar"></div><div class="speaking-wave-bar"></div><div class="speaking-wave-bar"></div><div class="speaking-wave-bar"></div></div> <div style="background: #fef9c3; border: 1px solid #fde047; padding: 14px; border-radius: 14px; width: 100%; box-sizing: border-box; text-align: center; margin-top: auto; margin-bottom: 10px;"> <div style="font-size: 12.5px; font-weight: 800; color: #854d0e; margin-bottom: 8px;">💡 가장 좋은 건 원어민의 소리를 들은 대로 말해보는 것입니다!</div> <button class="speaking-pill-btn" style="background: #ffffff; color: #a16207; border: 1px solid #fde047; font-size: 12px; padding: 6px 14px; box-shadow: none;" onclick="toggleSpeakingTextVisibility()">${isSpeakingTextVisible ? '🙈 원문 숨기기' : '👁️ 원문 참고하기'}</button> ${textContentHtml} </div> </div> <button class="speaking-bottom-btn" style="background:#ef4444; color:#ffffff;" onclick="finishSpeakingRecording()">⏹️ 녹음 완료 및 평가 받기 (Enter)</button> `; } else if (speakingStep === 3) { card.className = 'speaking-modal-card white-theme'; const evalResult = new ClientSpeakingEngine().evaluate(speakingTargetText, speakingRecordedTranscript); let scoreColor = evalResult.overallScore >= 80 ? '#16a34a' : (evalResult.overallScore >= 50 ? '#f59e0b' : '#dc2626'); let evalHtml = ''; evalResult.details.forEach(d => { if (d.color === 'GREEN') evalHtml += `<span class="word-match-correct">${d.spokenWord}</span> `; else if (d.color === 'ORANGE') evalHtml += `<span class="word-match-fuzzy" title="${d.reason}">${d.spokenWord}</span> `; else evalHtml += `<span class="word-match-wrong" title="${d.reason}">${d.targetWord}</span> `; }); if (evalResult.details.length === 0 || !speakingRecordedTranscript) evalHtml = '<span style="color:#64748b; font-weight:600;">(마이크에 인식된 음성이 없습니다)</span>'; card.innerHTML = ` <div class="speaking-top-bar" style="color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 8px;"> <span>📊 평가 결과</span> <button class="speaking-close-btn" onclick="closeSpeakingModal()" style="color: #64748b;">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button> </div> <div class="speaking-content-area" style="justify-content: flex-start; gap: 12px; padding: 0;"> <div class="result-score-box"><div style="font-size: 13px; font-weight: 800; color: #64748b;">발음 및 유사도 점수</div><div class="result-score-val" style="color: ${scoreColor};">${evalResult.overallScore}점</div></div> <div class="result-card-box question"><div style="font-size: 11px; font-weight: 800; opacity: 0.8; margin-bottom: 4px;">원문 (정답)</div><div style="font-size: 16px; font-weight: 800; line-height: 1.4;">${speakingTargetText}</div></div> <div class="result-card-box my-answer"><div style="font-size: 11px; font-weight: 800; color: #64748b; margin-bottom: 4px;">내 발음 분석 결과</div><div style="font-size: 16px; line-height: 1.4;">${evalHtml}</div></div> </div> <div class="speaking-two-btn-row"> <button class="btn-light" onclick="speakingStep=1; renderSpeakingModalUI(); speakTargetTextInModal();">다시 연습하기</button> <button class="btn-dark" onclick="window.closeSpeakingModalAndNext()">닫기 및 다음 단어 (Enter)</button> </div> `; } }
+    function renderSpeakingModalUI() { const card = document.getElementById('speaking-card'); if (!card) return; if (speakingStep === 1) { card.className = 'speaking-modal-card'; const displayText = isSpeakingTextVisible ? `<div style="font-size: clamp(22px, 3vw, 32px); font-weight: 800; line-height: 1.4; color: #ffffff; padding: 10px;">${speakingTargetText}</div>` : `<div style="font-size: 60px; color: rgba(255,255,255,0.4);">❓</div>`; card.innerHTML = ` <div class="speaking-top-bar"> <div style="display:flex; align-items:center; gap:8px;"><span style="font-size:24px;">🎙️</span><span>스피킹 훈련</span></div> <button class="speaking-close-btn" onclick="closeSpeakingModal()">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button> </div> <div class="speaking-content-area"> <div class="speaking-title">원어민 발음을 듣고<br>문장을 기억해 보세요</div> <div class="speaking-subtitle">준비가 되면 마이크 버튼을 눌러 스피킹 시작하세요</div> <button type="button" class="speaking-circle-play-btn" onclick="speakTargetTextInModal()">▶</button> <div class="speaking-pill-group"> <button class="speaking-pill-btn" onclick="toggleSpeakingSpeechSpeed()">${(speakingSpeechSpeed === 1.0) ? '🐢 느리게 듣기' : '🐰 원상태로 듣기'}</button> <button class="speaking-pill-btn" onclick="toggleSpeakingTextVisibility()">${isSpeakingTextVisible ? '🙈 텍스트 숨기기' : '👁️ 텍스트 보기'}</button> </div> ${displayText} </div> <button class="speaking-bottom-btn" style="background:#ffffff; color:#1d4ed8;" onclick="startSpeakingRecording()">🎙️ 마이크 켜고 말하기 (Enter)</button> `; } else if (speakingStep === 2) { card.className = 'speaking-modal-card white-theme'; const textContentHtml = isSpeakingTextVisible ? `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed #fcd34d; font-size: 17px; font-weight: 800; color: #713f12; line-height: 1.4; word-break: keep-all;">${speakingTargetText}</div>` : ''; card.innerHTML = ` <div class="speaking-top-bar" style="color: #1e293b;"> <div style="display:flex; align-items:center; gap:8px;"><span style="color: #ef4444;">🔴</span><span>녹음 중...</span></div> </div> <div class="speaking-content-area" style="color: #1e293b; padding-bottom: 0;"> <div id="speaking-rec-timer" class="speaking-timer-text">${String(Math.floor(speakingSeconds / 60)).padStart(2, '0')}:${String(speakingSeconds % 60).padStart(2, '0')}</div> <div class="speaking-waveform-box"><div class="speaking-wave-bar"></div><div class="speaking-wave-bar"></div><div class="speaking-wave-bar"></div><div class="speaking-wave-bar"></div><div class="speaking-wave-bar"></div></div> <div style="background: #fef9c3; border: 1px solid #fde047; padding: 14px; border-radius: 14px; width: 100%; box-sizing: border-box; text-align: center; margin-top: auto; margin-bottom: 10px;"> <div style="font-size: 12.5px; font-weight: 800; color: #854d0e; margin-bottom: 8px;">💡 가장 좋은 건 원어민의 소리를 들은 대로 말해보는 것입니다!</div> <button class="speaking-pill-btn" style="background: #ffffff; color: #a16207; border: 1px solid #fde047; font-size: 12px; padding: 6px 14px; box-shadow: none;" onclick="toggleSpeakingTextVisibility()">${isSpeakingTextVisible ? '🙈 원문 숨기기' : '👁️ 원문 참고하기'}</button> ${textContentHtml} </div> </div> <button class="speaking-bottom-btn" style="background:#ef4444; color:#ffffff;" onclick="finishSpeakingRecording()">⏹️ 녹음 완료 및 평가 받기 (Enter)</button> `; } else if (speakingStep === 3) { card.className = 'speaking-modal-card white-theme'; const evalResult = new ClientSpeakingEngine().evaluate(speakingTargetText, speakingRecordedTranscript); let scoreColor = evalResult.overallScore >= 80 ? '#16a34a' : (evalResult.overallScore >= 50 ? '#f59e0b' : '#dc2626'); let evalHtml = ''; evalResult.details.forEach(d => { if (d.color === 'GREEN') evalHtml += `<span class="word-match-correct">${d.spokenWord}</span> `; else if (d.color === 'ORANGE') evalHtml += `<span class="word-match-fuzzy" title="${d.reason}">${d.spokenWord}</span> `; else evalHtml += `<span class="word-match-wrong" title="${d.reason}">${d.targetWord}</span> `; }); if (evalResult.details.length === 0 || !speakingRecordedTranscript) evalHtml = '<span style="color:#64748b; font-weight:600;">(마이크에 인식된 음성이 없습니다)</span>'; card.innerHTML = ` <div class="speaking-top-bar" style="color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 8px;"> <span>📊 평가 결과</span> <button class="speaking-close-btn" onclick="closeSpeakingModal()" style="color: #64748b;">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button> </div> <div class="speaking-content-area" style="justify-content: flex-start; gap: 12px; padding: 0;"> <div class="result-score-box"><div style="font-size: 13px; font-weight: 800; color: #64748b;">발음 및 유사도 점수</div><div class="result-score-val" style="color: ${scoreColor};">${evalResult.overallScore}점</div></div> <div class="result-card-box question"><div style="font-size: 11px; font-weight: 800; opacity: 0.8; margin-bottom: 4px;">원문 (정답)</div><div style="font-size: 16px; font-weight: 800; line-height: 1.4;">${speakingTargetText}</div></div> <div class="result-card-box my-answer"><div style="font-size: 11px; font-weight: 800; color: #64748b; margin-bottom: 4px;">내 발음 분석 결과</div><div style="font-size: 16px; line-height: 1.4;">${evalHtml}</div></div> </div> <div class="speaking-two-btn-row"> <button class="btn-light" onclick="speakingStep=1; renderSpeakingModalUI(); speakTargetTextInModal();">다시 연습하기</button> <button class="btn-dark" onclick="window.closeSpeakingModalAndNext()">닫기 및 다음 단어 (Enter)</button> </div> `; } }
 
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') { closeDayModal(); closeWeakReviewModal(); closeAutoplayModal(); closeVoiceModal(); closeSpeakingModal(); closeAISettingsModal(); closeModelSelectModal(); closeAIFeedbackModal(); closeLifeNoticeModal(); closeDataModal(); closeReleaseNoteModal(); return; }
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
         const releaseNoteModal = document.getElementById('release-note-modal'); if (releaseNoteModal && !releaseNoteModal.classList.contains('hidden')) { if (e.key === 'Enter') { e.preventDefault(); closeReleaseNoteModal(); } return; }
         const autoplayModal = document.getElementById('autoplay-modal'); if (autoplayModal && !autoplayModal.classList.contains('hidden')) { if (e.key === 'Enter') { e.preventDefault(); confirmAutoplayModal(); } return; }
+        const voiceModal = document.getElementById('voice-modal'); if (voiceModal && !voiceModal.classList.contains('hidden')) { if (e.key === 'Enter') { e.preventDefault(); confirmVoiceSettings(); } return; }
         const speakingModal = document.getElementById('speaking-modal'); if (speakingModal && !speakingModal.classList.contains('hidden')) { if (e.key === 'Enter') { e.preventDefault(); if (speakingStep === 1) startSpeakingRecording(); else if (speakingStep === 2) finishSpeakingRecording(); else if (speakingStep === 3) window.closeSpeakingModalAndNext(); } return; }
         const gameArea = document.getElementById('game-area'); const isGameActive = gameArea && !gameArea.classList.contains('hidden') && document.getElementById('ai-feedback-modal').classList.contains('hidden');
         if (e.key === 'ArrowUp' && isGameActive) { e.preventDefault(); if (showAnswers) speakCurrentWord(); } else if (e.key === 'ArrowRight' && isGameActive) { e.preventDefault(); handlePrimaryAction(); } else if (e.key === 'ArrowDown' && isGameActive) { e.preventDefault(); handleVagueAction(currentStartIndex); } else if (e.key === 'ArrowLeft' && isGameActive) { e.preventDefault(); handlePrevAction(); } else if (e.key === 'Shift' && isGameActive) { e.preventDefault(); toggleInfiniteLoop(); } else if (e.code === 'Space' && isGameActive) { e.preventDefault(); if (showAnswers) speakCurrentWord(); } else if (e.key.toLowerCase() === 's' && isGameActive) { e.preventDefault(); handleAutoplayBtnClick(); } else if (e.key.toLowerCase() === 'd' && isGameActive) { e.preventDefault(); toggleMute(); } else if (e.key.toLowerCase() === 'f' && isGameActive) { e.preventDefault(); openVoiceModal(); } else if (e.key.toLowerCase() === 'z' && isGameActive && showAnswers) { e.preventDefault(); const item = wordList[currentStartIndex]; if (item) { openSpeakingModal(item.exEn ? 'sentence' : 'word', item.exEn ? item.exEn : item.en); } } else if (e.key.toLowerCase() === 't' && isGameActive) { e.preventDefault(); openWritingModalFromCard(); } else if (e.key.toLowerCase() === 'q') { const modal = document.getElementById('ai-feedback-modal'); if (modal && !modal.classList.contains('hidden') && window.stopAIComputation) window.stopAIComputation(); }
     });
 
-    // 🔔 스케줄러: 오전 10시부터 21시 전까지 2시간 간격 랜덤 알림
     if ("Notification" in window) {
         Notification.requestPermission().then(permission => {
             if (permission === "granted") startStudyNotifier();
@@ -632,7 +804,6 @@
         setInterval(() => {
             const now = new Date();
             const hour = now.getHours();
-            // 10시 ~ 20시 (21시 전까지 2시간 간격: 10, 12, 14, 16, 18, 20)
             if (hour >= 10 && hour < 21 && hour % 2 === 0) {
                 if (lastNotifiedHour !== hour) {
                     sendRandomStudyNotification(hour);
@@ -674,7 +845,6 @@
         checkReleaseNotes();
         setTimeout(() => { patchPWASavedWordsWithNewData(); }, 3000);
 
-        // 🔔 알림을 클릭하고 들어온 경우, 전달받은 파라미터를 파싱해 바로 모달을 띄움
         const urlParams = new URLSearchParams(window.location.search);
         const action = urlParams.get('action');
         if (action) {
@@ -686,7 +856,6 @@
                 } else if (action === 'green') {
                     loadShortcutUrl('https://docs.google.com/spreadsheets/d/1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U/edit?usp=sharing');
                 }
-                // 새로고침 시 다시 모달이 뜨는 것을 방지하기 위해 URL 파라미터 삭제
                 window.history.replaceState({}, document.title, window.location.pathname);
             }, 500); 
         }
