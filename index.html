@@ -496,7 +496,39 @@
     function renderVoiceListUI() { const wrapper = document.getElementById('voice-list-wrapper'); if (!wrapper) return; wrapper.innerHTML = ''; const enVoices = availableVoices.filter(v => v.lang.startsWith('en')); if (enVoices.length === 0) { wrapper.innerHTML = '<div style="padding:10px; text-align:center;">사용 가능한 영어 음성이 없습니다.</div>'; return; } enVoices.forEach(voice => { const isSelected = voice.voiceURI === selectedVoiceURI; const div = document.createElement('div'); div.className = `voice-item ${isSelected ? 'selected' : ''}`; div.onclick = () => { selectedVoiceURI = voice.voiceURI; localStorage.setItem(SELECTED_VOICE_STORAGE_KEY, selectedVoiceURI); renderVoiceListUI(); updateVoiceModeTagUI(); }; div.innerHTML = `<div class="voice-info"><span class="voice-name">${voice.name}</span><span class="voice-lang">🌐 ${voice.lang} <span class="voice-badge">${voice.localService ? '로컬' : '클라우드'}</span></span></div>`; wrapper.appendChild(div); }); document.querySelectorAll('.tune-card').forEach(card => card.classList.remove('selected')); const activeTuneCard = document.getElementById(`tune-${currentTuneProfile}`); if (activeTuneCard) activeTuneCard.classList.add('selected'); }
     function selectVoiceTune(profile, pitch, rate) { currentTuneProfile = profile; currentPitch = pitch; currentRate = rate; localStorage.setItem(SELECTED_TUNE_STORAGE_KEY, profile); renderVoiceListUI(); }
     function updateVoiceModeTagUI() { const tag = document.getElementById('voice-mode-tag'); if (tag) tag.innerText = selectedVoiceURI ? "(수동)" : "(자동)"; }
-    function getRandomOrSelectedVoice() { const enVoices = availableVoices.filter(v => v.lang.startsWith('en')); if (enVoices.length === 0) return null; if (selectedVoiceURI) { const found = enVoices.find(v => v.voiceURI === selectedVoiceURI); if (found) return found; } const usVoices = enVoices.filter(v => v.lang === 'en-US'); return usVoices.length > 0 ? usVoices[0] : enVoices[0]; }
+
+    function getRandomOrSelectedVoice() {
+    // 1. 영어 음성만 필터링 (없으면 폴백 불가, null 반환)
+    const enVoices = availableVoices.filter(v => v.lang.startsWith('en'));
+    if (enVoices.length === 0) return null;
+
+    // 2. 사용자가 특정 음성을 고정(수동) 선택한 경우 바로 반환
+    if (selectedVoiceURI) {
+        const found = enVoices.find(v => v.voiceURI === selectedVoiceURI);
+        if (found) return found;
+    }
+
+    // 3. 랜덤(다양한 음성 섞기) 로직 & 폴백
+    // 3-1. iOS/Mac(siri, premium), Windows(natural), Android(google) 등 고품질 엔진 키워드
+    const premiumKeywords = ['google', 'siri', 'premium', 'enhanced', 'natural', 'neural'];
+    
+    // 3-2. 고품질 음성 먼저 필터링 (없으면 일반 영어 음성 전체로 폴백)
+    let pool = enVoices.filter(v => premiumKeywords.some(kw => v.name.toLowerCase().includes(kw)));
+    if (pool.length === 0) pool = enVoices;
+
+    // 3-3. US, GB, AU 등 주요 영어권 위주로 한 번 더 필터링 (알아듣기 힘든 억양 최소화)
+    let primaryPool = pool.filter(v => v.lang === 'en-US' || v.lang === 'en-GB' || v.lang === 'en-AU');
+    
+    // 주요 영어권이 아예 없다면 이전 풀로 다시 폴백
+    if (primaryPool.length === 0) primaryPool = pool; 
+
+    // 4. 최종 정제된 풀(Pool)에서 무작위로 하나 추출하여 다채롭게 믹스
+    const randomIndex = Math.floor(Math.random() * primaryPool.length);
+    
+    // 최후의 최후까지 대비한 Fallback (primaryPool[randomIndex]가 실패하면 enVoices[0] 반환)
+    return primaryPool[randomIndex] || enVoices[0];
+}
+
     function openAISettingsModal() { const modal = document.getElementById('ai-settings-modal'); if (modal) modal.classList.remove('hidden'); const cfg = getAISettings(); document.getElementById('input-max-tokens').value = cfg.maxTokens; document.getElementById('val-max-tokens').innerText = cfg.maxTokens; document.getElementById('input-context-window').value = cfg.contextWindow; document.getElementById('val-context-window').innerText = cfg.contextWindow; document.getElementById('input-temperature').value = cfg.temperature; document.getElementById('val-temperature').innerText = cfg.temperature; document.getElementById('input-top-p').value = cfg.topP; document.getElementById('val-top-p').innerText = cfg.topP; }
     function closeAISettingsModal() { const modal = document.getElementById('ai-settings-modal'); if (modal) modal.classList.add('hidden'); }
     function applyAISettingsUI() { const cfg = { maxTokens: parseInt(document.getElementById('input-max-tokens').value), contextWindow: parseInt(document.getElementById('input-context-window').value), temperature: parseFloat(document.getElementById('input-temperature').value), topP: parseFloat(document.getElementById('input-top-p').value) }; saveAISettings(cfg); closeAISettingsModal(); alert('AI 설정이 저장되었습니다.'); }
