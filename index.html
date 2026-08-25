@@ -273,12 +273,109 @@
 </head>
 <body>
 
+<!-- AI & Release Note & Settings & Other Modals -->
 <div id="loading-overlay" class="loading-overlay hidden"><div class="loading-card"><div class="spinner"></div><div class="loading-title" id="loading-text">단어장 데이터를 가져오는 중...</div></div></div>
 <div id="ai-loading-overlay" class="loading-overlay hidden" style="z-index: 25000;"><div class="loading-card" style="max-width: 320px; text-align: center; padding: 24px 32px;"><div class="loading-title" id="ai-loading-text" style="color: #1264a3; margin-top: 8px;">🤖 AI 엔진 준비 중...</div><div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-top: 12px;"><div id="ai-loading-progress-fill" style="height: 100%; width: 0%; background: #1264a3; transition: width 0.3s ease;"></div></div><div style="font-size: 12px; color: var(--text-muted); line-height: 1.4; margin-top: 12px;">최초 실행 시 브라우저에 AI 모델을 다운로드하여 캐시에 저장합니다.<br>네트워크 환경에 따라 수 분이 소요될 수 있습니다.</div></div></div>
 <div id="release-note-modal" class="modal-overlay release-modal-overlay hidden" style="z-index: 30000;" onclick="if(event.target === this) closeReleaseNoteModal()"><div class="release-modal-card"><div style="padding: 16px; border-bottom: 1px solid var(--border-color); background: #ffffff; flex-shrink: 0; text-align: center; border-radius: 20px 20px 0 0;"><span style="font-size: 16px; font-weight: 900; color: var(--text-main);">🎉 릴리즈 노트 & 테크 블로그</span></div><div id="release-note-content" style="flex: 1; overflow-y: auto; background: #f1f5f9; padding: 16px; min-height: 0;"></div><div style="padding: 14px 20px; background: #ffffff; border-top: 1px solid var(--border-color); flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: calc(14px + env(safe-area-inset-bottom));"><label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; color: var(--text-muted); cursor: pointer; margin: 0;"><input type="checkbox" id="release-hide-checkbox" style="width: 18px; height: 18px; margin: 0; cursor: pointer;">최신 버전 보지 않기</label><button class="base-btn" style="background:var(--slack-purple); padding: 12px 24px; font-size: 15px; font-weight: 900; width: auto; margin: 0; border-radius: 10px;" onclick="closeReleaseNoteModal()">닫기 (Enter)</button></div></div></div>
+
+<!-- === [신규] 히든 개발자 도구 (캐시 강제 초기화) 모달 === -->
+<div id="dev-reset-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeDevResetModal()" style="z-index: 50000;">
+    <div class="modal-card">
+        <div class="modal-header">
+            <span>🚨 개발자 전용: 하드 리셋</span>
+            <button onclick="closeDevResetModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button>
+        </div>
+        <div style="font-size:13px; color:var(--text-muted); margin-bottom:4px; line-height: 1.4;">
+            로컬 스토리지, AI 모델 설정, PWA 서비스 워커 캐시 등 디바이스의 모든 데이터를 강제로 날리고 초기화합니다.
+        </div>
+        <div style="font-size:12px; color:#dc2626; font-weight:800; margin-bottom:12px;">
+            ※ 실수 방지를 위해 <b>delete</b> 라고 정확히 입력해주세요.
+        </div>
+        
+        <input type="text" id="dev-reset-input" class="sentence-test-textarea" style="padding: 14px; font-size: 16px; min-height: unset; text-align: center; font-weight: 900; letter-spacing: 1px;" placeholder="delete" autocomplete="off">
+        
+        <button class="base-btn" style="background:#dc2626; margin-top:12px; padding: 14px;" onclick="executeDevReset()">🚀 강제 초기화 및 새로고침 (Enter)</button>
+
+        <!-- 🎓 테크 블로그 아코디언 영역 -->
+        <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="font-size: 13.5px; font-weight: 900; color: var(--slack-purple); margin-bottom: 2px; padding-left: 2px;">🎓 주니어 프론트엔드 생존 가이드: "운영 환경의 재앙 대처법"</div>
+            
+            <!-- Accordion 1: UX/Architecture -->
+            <details class="sync-details" style="margin: 0; border: 1px solid var(--border-color); border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
+                <summary class="sync-summary" style="padding: 10px 12px; display: flex; align-items: flex-start; gap: 8px; background: #ffffff;">
+                    <span style="font-size: 11px; font-weight: 800; color: #4f46e5; background: #e0e7ff; padding: 3px 0; width: 44px; text-align: center; border-radius: 4px; border: 1px solid #c7d2fe; flex-shrink: 0; margin-top: 1px;">Arch</span>
+                    <span class="rn-title" style="font-size: 13px; font-weight: 800; color: var(--text-main); margin-top: 1px;">1. 화면 밖의 비상구: 숨겨진 백도어(Backdoor) 패턴</span>
+                </summary>
+                <div class="sync-content" style="background: #f8fafc; padding: 12px; border-top: 1px dashed var(--border-color);">
+                    <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                        <div style="padding: 8px 10px; background: #f1f5f9; border-bottom: 1px dashed #cbd5e1; font-size: 12px; font-weight: 900; color: var(--slack-blue); display: flex; align-items: center; gap: 6px;">💡 Story: 설정 메뉴조차 열리지 않는다면?</div>
+                        <div style="padding: 10px; display: flex; flex-direction: column; gap: 10px;">
+                            <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.5; font-weight: 600; word-break: keep-all;">
+                                배포 후 심각한 렌더링 에러로 하얀 화면만 뜨는 이른바 <b>'White Screen of Death'</b> 상황을 가정해 봅시다. 사용자는 앱 내의 '초기화' 버튼에 접근조차 할 수 없습니다.
+                            </div>
+                            <ul class="tech-list" style="margin:0; padding-left:16px; color:#334155; line-height:1.5; font-size:12.5px; font-weight:500;">
+                                <li style="margin-bottom:6px; word-break: keep-all;"><strong>전역 인터럽트 (Global Interrupt):</strong> 이럴 때 DOM 렌더링 상태와 완전히 독립적으로 동작하는 <b>전역 이벤트 리스너</b>(예: <code>Insert</code> 키 입력 또는 좌표 (0,0) 연속 터치)가 유일한 탈출구가 됩니다.</li>
+                                <li style="margin-bottom:6px; word-break: keep-all;"><strong>관심사 분리:</strong> 일반 사용자에게 노출되면 대참사(CS 폭주)가 일어날 파괴적 버튼을 숨겨두면서도, QA와 개발자에게는 즉각적인 디버깅 환경을 제공하는 실무의 단골 패턴입니다.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+            <!-- Accordion 2: Service Worker & Cache -->
+            <details class="sync-details" style="margin: 0; border: 1px solid var(--border-color); border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
+                <summary class="sync-summary" style="padding: 10px 12px; display: flex; align-items: flex-start; gap: 8px; background: #ffffff;">
+                    <span style="font-size: 11px; font-weight: 800; color: #ea580c; background: #ffedd5; padding: 3px 0; width: 44px; text-align: center; border-radius: 4px; border: 1px solid #fed7aa; flex-shrink: 0; margin-top: 1px;">Cache</span>
+                    <span class="rn-title" style="font-size: 13px; font-weight: 800; color: var(--text-main); margin-top: 1px;">2. PWA의 양날의 검: 캐시 좀비(Cache Zombie) 현상</span>
+                </summary>
+                <div class="sync-content" style="background: #f8fafc; padding: 12px; border-top: 1px dashed var(--border-color);">
+                    <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                        <div style="padding: 8px 10px; background: #f1f5f9; border-bottom: 1px dashed #cbd5e1; font-size: 12px; font-weight: 900; color: var(--slack-blue); display: flex; align-items: center; gap: 6px;">💡 Story: 왜 코드를 고쳤는데 안 바뀔까?</div>
+                        <div style="padding: 10px; display: flex; flex-direction: column; gap: 10px;">
+                            <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.5; font-weight: 600; word-break: keep-all;">
+                                PWA(Progressive Web App)는 오프라인에서도 작동하도록 서비스 워커를 통해 정적 파일들을 강력하게 캐싱합니다. 하지만 이것이 업데이트 시 발목을 잡습니다.
+                            </div>
+                            <div style="border-radius: 6px; border: 1px solid var(--border-color); overflow: hidden;">
+                                <table class="tech-table" style="margin: 0; background: #ffffff;">
+                                    <tbody>
+                                        <tr><th style="width: 32%; font-size: 11px; padding: 6px 8px;">Cache Sticking</th><td style="font-size: 11.5px; padding: 6px 8px;">브라우저가 이전 버전의 JS를 계속 서비스하여 새로고침(F5)만으로는 코드가 갱신되지 않습니다.</td></tr>
+                                        <tr><th style="width: 32%; font-size: 11px; padding: 6px 8px;">Schema Mismatch</th><td style="font-size: 11.5px; padding: 6px 8px;">데이터베이스 구조를 바꿨는데, <b>'과거의 JS 코드'</b>가 <b>'새로운 데이터'</b>를 파싱하려다 충돌해 앱이 죽어버립니다.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div style="font-size: 12.5px; color: #0369a1; line-height: 1.5; padding: 10px; background: #f0f9ff; border-radius: 8px; border: 1px solid #bae6fd; font-weight: 600; word-break: keep-all;">
+                                🎯 해결책: 단순 변수 초기화가 아닌, <code>caches.keys()</code>를 순회하며 <code>caches.delete()</code>로 서비스 워커의 생명줄을 물리적으로 끊어버리는 <b>'소프트웨어적 소각(Purge)'</b>이 필요합니다.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+            <!-- Accordion 3: UX Psychology -->
+            <details class="sync-details" style="margin: 0; border: 1px solid var(--border-color); border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
+                <summary class="sync-summary" style="padding: 10px 12px; display: flex; align-items: flex-start; gap: 8px; background: #ffffff;">
+                    <span style="font-size: 11px; font-weight: 800; color: #dc2626; background: #fee2e2; padding: 3px 0; width: 44px; text-align: center; border-radius: 4px; border: 1px solid #fecaca; flex-shrink: 0; margin-top: 1px;">Guard</span>
+                    <span class="rn-title" style="font-size: 13px; font-weight: 800; color: var(--text-main); margin-top: 1px;">3. 사용자를 멈춰 세우는 마법: 인지적 마찰(Cognitive Friction)</span>
+                </summary>
+                <div class="sync-content" style="background: #f8fafc; padding: 12px; border-top: 1px dashed var(--border-color);">
+                    <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                        <div style="padding: 8px 10px; background: #f1f5f9; border-bottom: 1px dashed #cbd5e1; font-size: 12px; font-weight: 900; color: var(--slack-blue); display: flex; align-items: center; gap: 6px;">💡 Story: "정말 삭제하시겠습니까?"는 왜 실패할까?</div>
+                        <div style="padding: 10px; display: flex; flex-direction: column; gap: 10px;">
+                            <ul class="tech-list" style="margin:0; padding-left:16px; color:#334155; line-height:1.5; font-size:12.5px; font-weight:500;">
+                                <li style="margin-bottom:6px; word-break: keep-all;">단순한 확인(Confirm) 팝업은 사용자의 <b>'근육 기억(Autopilot)'</b>을 이기지 못합니다. 사람들은 경고문구조차 읽지 않고 기계적으로 [확인]을 누르는 경향이 있습니다.</li>
+                                <li style="margin-bottom:6px; word-break: keep-all;"><strong>의도된 불편함:</strong> 이를 방지하기 위해 사용자가 직접 <code>delete</code>라는 단어를 <b>타이핑하도록 강제(Cognitive Friction)</b>합니다. 인지적 비용을 지불하는 순간, 뇌는 비로소 '오토파일럿'을 끄고 자신의 행동이 가져올 심각성을 자각하게 됩니다. (GitHub에서 리포지토리를 삭제할 때 이름을 직접 치게 만드는 것과 동일한 원리입니다)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </details>
+        </div>
+    </div>
+</div>
+
 <div id="ai-model-select-modal" class="modal-overlay hidden" style="z-index: 20000;" onclick="if(event.target === this) closeModelSelectModal()"><div class="modal-card" style="max-width: 580px;"><div class="modal-header"><span>🤖 AI 모델 선택</span><button onclick="closeModelSelectModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button></div><div style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5; font-weight: 600;">기기 성능과 배터리 상황에 맞춰 원하는 AI 모델을 선택하세요.<br>(최초 선택 시 모델 파일 다운로드가 백그라운드에서 1회 진행됩니다.)</div><div style="display: flex; flex-direction: column; gap: 10px;"><div id="model-card-1b" class="model-option-card" onclick="selectAIModel('Llama-3.2-1B-Instruct-q4f16_1-MLC', '1B')"><div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 900; font-size: 16px; color: #15803d;">🟢 Llama-3.2-1B (초경량)</span><span class="model-badge">다운로드 약 0.8GB</span></div><div style="font-size: 13px; color: var(--text-muted);">가장 빠르고 배터리 소모가 적습니다. 모바일 기기나 간단한 문법 교정에 적합합니다.</div></div><div id="model-card-3b" class="model-option-card" onclick="selectAIModel('Llama-3.2-3B-Instruct-q4f16_1-MLC', '3B')"><div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 900; font-size: 16px; color: #b45309;">🟡 Llama-3.2-3B (균형형)</span><span class="model-badge">다운로드 약 2.0GB</span></div><div style="font-size: 13px; color: var(--text-muted);">성능과 속도의 균형이 매우 좋습니다. 일반적인 데스크탑 환경이나 태블릿에 추천합니다.</div></div><div id="model-card-8b" class="model-option-card" onclick="selectAIModel('Llama-3.1-8B-Instruct-q4f32_1-MLC', '8B')"><div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 900; font-size: 16px; color: #be123c;">🔴 Llama-3.1-8B (최상급)</span><span class="model-badge" style="background: #ffe4e6; color: #be123c;">다운로드 약 4.5GB</span></div><div style="font-size: 13px; color: var(--text-muted);">가장 똑똑하고 복잡한 문맥을 잘 이해합니다. (RAM 16GB 이상 PC 환경 권장)</div></div><div id="model-card-home" class="model-option-card" style="border-style: dashed; opacity: 0.9;" onclick="selectAIModel('home-pc', '퐁퐁하우스')"><div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 900; font-size: 16px; color: #6d28d9;">🏠 퐁퐁하우스 자택 PC (To Be Continued...)</span><span class="model-badge" style="background: #f3e8ff; color: #6d28d9;">Ollama / vLLM 연동 예정</span></div><div style="font-size: 12.5px; color: var(--text-muted); margin-top: 4px; line-height: 1.45;"><b>하드웨어 스펙:</b> i5-14600KF + 64GB DDR5 RAM + 독립 VRAM 16GB<br><b>급간 비교:</b> 노트북용 내장 그래픽(UMA) 한계를 넘어서 <b>64GB RAM & 16GB 전용 VRAM</b>을 활용, <b>Qwen-2.5 32B / DeepSeek-R1 32B / Llama-3.3 70B</b>급 초고성능 모델을 가정용 서버망으로 무제한 연동 가능!</div></div></div></div></div>
 <div id="ai-settings-modal" class="modal-overlay hidden" style="z-index: 20000;" onclick="if(event.target === this) closeAISettingsModal()"><div class="modal-card" style="max-width: 520px;"><div class="modal-header"><span>⚙️ AI 파라미터 정밀 설정</span><button onclick="closeAISettingsModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button></div><div class="setting-field" style="display:flex; flex-direction:column; gap:6px; background:#f8fafc; padding:12px; border-radius:12px; border:1px solid var(--border-color);"><div class="setting-label" style="font-size:14px; font-weight:800; display:flex; justify-content:space-between;"><span>1. Max Tokens (최대 출력 토큰)</span><span id="val-max-tokens" style="color:#0284c7;">512</span></div><input type="range" id="input-max-tokens" min="128" max="2048" step="64" value="512" oninput="document.getElementById('val-max-tokens').innerText = this.value"></div><div class="setting-field" style="display:flex; flex-direction:column; gap:6px; background:#f8fafc; padding:12px; border-radius:12px; border:1px solid var(--border-color); margin-top:8px;"><div class="setting-label" style="font-size:14px; font-weight:800; display:flex; justify-content:space-between;"><span>2. Context Window (컨텍스트 기억 크기)</span><span id="val-context-window" style="color:#0284c7;">2048</span></div><select id="input-context-window" style="padding: 8px; border-radius: 8px; border: 1px solid var(--border-color); font-weight: 800;"><option value="1024">1,024 (소형 메모리)</option><option value="2048" selected>2048 (표준 세팅)</option><option value="4096">4,096 (대용량)</option><option value="8192">8,192 (최대)</option></select></div><div class="setting-field" style="display:flex; flex-direction:column; gap:6px; background:#f8fafc; padding:12px; border-radius:12px; border:1px solid var(--border-color); margin-top:8px;"><div class="setting-label" style="font-size:14px; font-weight:800; display:flex; justify-content:space-between;"><span>3. Temperature (창의성/샘플링 온도)</span><span id="val-temperature" style="color:#0284c7;">0.1</span></div><input type="range" id="input-temperature" min="0.0" max="1.0" step="0.05" value="0.1" oninput="document.getElementById('val-temperature').innerText = this.value"></div><div class="setting-field" style="display:flex; flex-direction:column; gap:6px; background:#f8fafc; padding:12px; border-radius:12px; border:1px solid var(--border-color); margin-top:8px;"><div class="setting-label" style="font-size:14px; font-weight:800; display:flex; justify-content:space-between;"><span>4. Top P (핵심 누적 확률)</span><span id="val-top-p" style="color:#0284c7;">0.95</span></div><input type="range" id="input-top-p" min="0.1" max="1.0" step="0.05" value="0.95" oninput="document.getElementById('val-top-p').innerText = this.value"></div><button class="base-btn" style="background:#16a34a; padding:14px; margin-top:12px;" onclick="applyAISettingsUI()">적용 및 저장</button></div></div>
-<div id="ai-feedback-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeAIFeedbackModal()"><div class="ai-modal-card" id="ai-modal-card"><div class="ai-modal-header"><div class="ai-modal-title"><span>로컬 AI 영작 첨삭</span><div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;"><button type="button" id="ai-toggle-btn" class="ai-chip-btn green-chip" onclick="toggleAIEnabled()">🤖 AI 첨삭: ON</button><button type="button" id="ai-model-chip-btn" class="ai-chip-btn green-chip" onclick="openModelSelectModal()">🟢 Llama-1B</button><button type="button" class="ai-chip-btn" onclick="openAISettingsModal()">⚙️ 설정</button></div></div><div style="display: flex; align-items: center; gap: 10px;"><button id="ai-combined-stop-btn" class="ai-combined-stop-btn hidden" onclick="window.stopAIComputation && window.stopAIComputation()"><span id="ai-loader-text" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">🛑 AI 상시 강제 중단 (Q)</span></button><button onclick="closeAIFeedbackModal()" class="ai-close-btn">✕ 나가기 <span style="font-size:11px; opacity:0.8;">(ESC)</span></button></div></div><div class="ai-modal-content-body"><div id="writing-input-view" style="display: flex; flex-direction: column; gap: 16px; flex: 1;"><div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 8px;"><div id="writing-modal-en-hint" style="font-size: 32px; font-weight: 700; color: var(--slack-blue); line-height: 1.3;"></div><div id="writing-modal-ko-text" style="font-size: 32px; font-weight: 900; color: var(--text-main); word-break: keep-all; line-height: 1.3;"></div></div><textarea id="modal-sentence-textarea" class="sentence-test-textarea" placeholder="영문장을 작성하세요 (Shift+Enter 줄바꿈, Enter 제출)" style="flex: 1; min-height: 120px; font-size: 32px; padding: 24px; line-height: 1.4;" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); submitModalWritingTest(); }"></textarea><button type="button" class="base-btn" style="background: var(--slack-purple); padding: 18px; font-size: 18px; flex-shrink: 0;" onclick="submitModalWritingTest()">✍️ 제출 (Enter)</button></div><div id="writing-result-view" class="hidden" style="display: flex; flex-direction: column; gap: 16px; flex: 1; min-height: 0;"><div style="display: flex; flex-direction: column; gap: 20px; flex-shrink: 0; background: white; padding: 24px 28px; border-radius: 16px; border: 2px solid #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.03);"><div id="ai-modal-user-text" style="font-size: clamp(24px, 2.5vw, 36px); font-weight: 900; color: #0f172a; line-height: 1.4; word-break: keep-all;"></div><div style="width: 100%; height: 1.5px; border-top: 1.5px dashed #cbd5e1;"></div><div id="ai-modal-target-text" style="font-size: clamp(24px, 2.5vw, 36px); font-weight: 900; color: #15803d; line-height: 1.4; word-break: keep-all;"></div></div><div class="ai-feedback-container" id="ai-feedback-container" style="flex: 1; background: white; border: 1.5px solid #cbd5e1; border-radius: 16px; padding: 20px 24px; overflow-y: auto; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); display: flex; flex-direction: column; min-height: 0; position: relative;"><div id="ai-disclaimer-text" style="font-size: 12px; color: #94a3b8; text-align: left; margin-bottom: 12px; line-height: 1.3; flex-shrink: 0; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; word-break: keep-all;">※ 현재 구동 중인 로컬 모델은 수백억 개 이상의 신경망을 가진 거대 AI(Gemini 등)에 비해 체급이 작아, 복잡한 문맥 추론에 한계가 있을 수 있습니다.</div><div class="ai-pipeline-stepper" id="ai-pipeline"><div class="ai-step" id="step-1"><div class="step-title">1. 가중치 로드</div><div class="step-desc" id="step-1-desc">VRAM 할당</div></div><div class="ai-step" id="step-2"><div class="step-title">2. 토크나이징</div><div class="step-desc">시퀀스 인코딩</div></div><div class="ai-step" id="step-3"><div class="step-title">3. 신경망 추론</div><div class="step-desc">순전파 연산</div></div><div class="ai-step" id="step-4"><div class="step-title">4. 디코딩</div><div class="step-desc" id="step-4-desc">렌더링</div></div></div><div id="ai-center-progress-text" style="font-size: 15px; font-weight: 700; color: var(--slack-blue); text-align: center; margin-top: 16px;"></div><div id="streaming-grammar-body" style="display: none; font-size: 16.5px; font-weight: 600; line-height: 1.75; color: #334155; white-space: pre-wrap; flex: 1;"></div></div></div></div></div></div>
+<div id="ai-feedback-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeAIFeedbackModal()"><div class="ai-modal-card" id="ai-modal-card"><div class="ai-modal-header"><div class="ai-modal-title"><span>로컬 AI 영작 첨삭</span><div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;"><button type="button" id="ai-toggle-btn" class="ai-chip-btn green-chip" onclick="toggleAIEnabled()">🤖 AI 첨삭: ON</button><button type="button" id="ai-model-chip-btn" class="ai-chip-btn green-chip" onclick="openModelSelectModal()">🟢 Llama-1B</button><button type="button" class="ai-chip-btn" onclick="openAISettingsModal()">⚙️ 설정</button></div></div><div style="display: flex; align-items: center; gap: 10px;"><button id="ai-combined-stop-btn" class="ai-combined-stop-btn hidden" onclick="window.stopAIComputation && window.stopAIComputation()"><span id="ai-loader-text" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">🛑 AI 상시 강제 중단 (Q)</span></button><button onclick="closeAIFeedbackModal()" class="ai-close-btn">✕ 나가기 <span style="font-size:11px; opacity:0.8;">(ESC)</span></button></div></div><div class="ai-modal-content-body"><div id="writing-input-view" style="display: flex; flex-direction: column; gap: 16px; flex: 1;"><div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 8px;"><div id="writing-modal-en-hint" style="font-size: 32px; font-weight: 700; color: var(--slack-blue); line-height: 1.3;"></div><div id="writing-modal-ko-text" style="font-size: 32px; font-weight: 900; color: var(--text-main); word-break: keep-all; line-height: 1.3;"></div></div><textarea id="modal-sentence-textarea" class="sentence-test-textarea" placeholder="영문장을 작성하세요 (Shift+Enter 줄바꿈, Enter 제출)" style="flex: 1; min-height: 120px; font-size: 32px; padding: 24px; line-height: 1.4;" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea><button type="button" class="base-btn" style="background: var(--slack-purple); padding: 18px; font-size: 18px; flex-shrink: 0;" onclick="submitModalWritingTest()">✍️ 제출 (Enter)</button></div><div id="writing-result-view" class="hidden" style="display: flex; flex-direction: column; gap: 16px; flex: 1; min-height: 0;"><div style="display: flex; flex-direction: column; gap: 20px; flex-shrink: 0; background: white; padding: 24px 28px; border-radius: 16px; border: 2px solid #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.03);"><div id="ai-modal-user-text" style="font-size: clamp(24px, 2.5vw, 36px); font-weight: 900; color: #0f172a; line-height: 1.4; word-break: keep-all;"></div><div style="width: 100%; height: 1.5px; border-top: 1.5px dashed #cbd5e1;"></div><div id="ai-modal-target-text" style="font-size: clamp(24px, 2.5vw, 36px); font-weight: 900; color: #15803d; line-height: 1.4; word-break: keep-all;"></div></div><div class="ai-feedback-container" id="ai-feedback-container" style="flex: 1; background: white; border: 1.5px solid #cbd5e1; border-radius: 16px; padding: 20px 24px; overflow-y: auto; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); display: flex; flex-direction: column; min-height: 0; position: relative;"><div id="ai-disclaimer-text" style="font-size: 12px; color: #94a3b8; text-align: left; margin-bottom: 12px; line-height: 1.3; flex-shrink: 0; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; word-break: keep-all;">※ 현재 구동 중인 로컬 모델은 수백억 개 이상의 신경망을 가진 거대 AI(Gemini 등)에 비해 체급이 작아, 복잡한 문맥 추론에 한계가 있을 수 있습니다.</div><div class="ai-pipeline-stepper" id="ai-pipeline"><div class="ai-step" id="step-1"><div class="step-title">1. 가중치 로드</div><div class="step-desc" id="step-1-desc">VRAM 할당</div></div><div class="ai-step" id="step-2"><div class="step-title">2. 토크나이징</div><div class="step-desc">시퀀스 인코딩</div></div><div class="ai-step" id="step-3"><div class="step-title">3. 신경망 추론</div><div class="step-desc">순전파 연산</div></div><div class="ai-step" id="step-4"><div class="step-title">4. 디코딩</div><div class="step-desc" id="step-4-desc">렌더링</div></div></div><div id="ai-center-progress-text" style="font-size: 15px; font-weight: 700; color: var(--slack-blue); text-align: center; margin-top: 16px;"></div><div id="streaming-grammar-body" style="display: none; font-size: 16.5px; font-weight: 600; line-height: 1.75; color: #334155; white-space: pre-wrap; flex: 1;"></div></div></div></div></div></div>
 <div id="day-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeDayModal()"><div class="modal-card"><div class="modal-header"><span id="day-modal-title">📅 학습 Day 선택</span><button onclick="closeDayModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button></div><div class="sec-select-area"><div id="fixed-notice-banner" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; padding:10px 12px; border-radius:10px; font-size:13px; font-weight:800; text-align:center;">⚡ 스피킹 30 / 라이팅 40 / 초록이 60 / 라잎 15 고정 시험</div></div><div class="sec-select-area" style="flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden;"><div class="sec-select-title" id="day-list-title">📌 학습할 Day 선택</div><div id="day-buttons-grid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; overflow-y:auto; padding: 4px; box-sizing: border-box;"></div></div></div></div>
 <div id="weak-review-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeWeakReviewModal()"><div class="modal-card tall-modal"><div class="modal-header"><span>🔥 취약 단어 복습</span><button onclick="closeWeakReviewModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button></div><button id="weak-review-all-btn" class="base-btn" style="background:#2563eb; padding:13px; font-size:15px; flex-shrink:0;" onclick="startWeakReviewSession('ALL')">🔥 전체 취약 단어 복습 (0개)</button><div class="weak-col-container"><div class="weak-col"><div class="weak-col-header">🗣️ 스피킹</div><button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '스피킹')">전체 복습<br><span id="col-cnt-speaking" style="font-size:11px; opacity:0.8;">(0)</span></button><div class="weak-day-list" id="weak-day-list-speaking"></div></div><div class="weak-col"><div class="weak-col-header">✍️ 라이팅</div><button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '라이팅')">전체 복습<br><span id="col-cnt-writing" style="font-size:11px; opacity:0.8;">(0)</span></button><div class="weak-day-list" id="weak-day-list-writing"></div></div><div class="weak-col"><div class="weak-col-header">🍀 초록이</div><button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '초록이')">전체 복습<br><span id="col-cnt-green" style="font-size:11px; opacity:0.8;">(0)</span></button><div class="weak-day-list" id="weak-day-list-green"></div></div><div class="weak-col"><div class="weak-col-header">🌿 라잎</div><button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '라잎')">전체 복습<br><span id="col-cnt-life" style="font-size:11px; opacity:0.8;">(0)</span></button><div class="weak-day-list" id="weak-day-list-life"></div></div></div></div></div>
 
@@ -974,10 +1071,85 @@ function renderVoiceListUI() {
     function closeSpeakingModal() { stopTTS(); stopSpeakingRecording(); const modal = document.getElementById('speaking-modal'); if (modal) modal.classList.add('hidden'); } function toggleSpeakingSpeechSpeed() { speakingSpeechSpeed = (speakingSpeechSpeed === 1.0) ? 0.75 : 1.0; renderSpeakingModalUI(); speakTargetTextInModal(); } function toggleSpeakingTextVisibility() { isSpeakingTextVisible = !isSpeakingTextVisible; renderSpeakingModalUI(); }
     function speakTargetTextInModal() { stopTTS(); setTimeout(() => { if (!('speechSynthesis' in window) || !speakingTargetText) return; const utter = new SpeechSynthesisUtterance(speakingTargetText); utter.pitch = 1.0; utter.rate = 1.0 * speakingSpeechSpeed; const voiceObj = getRandomOrSelectedVoice(); if (voiceObj) { utter.voice = voiceObj; utter.lang = voiceObj.lang || 'en-US'; } else utter.lang = 'en-US'; window.speechSynthesis.speak(utter); }, 60); }
     function setupMicVolumeVisualizer() { const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent); if (isMobile) { startMobileWaveformSimulation(); return; } if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return; navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => { window.speakingAudioStream = stream; try { const AudioContext = window.AudioContext || window.webkitAudioContext; micAudioContext = new AudioContext(); const source = micAudioContext.createMediaStreamSource(stream); micAnalyser = micAudioContext.createAnalyser(); micAnalyser.fftSize = 64; source.connect(micAnalyser); const dataArray = new Uint8Array(micAnalyser.frequencyBinCount); function updateWaveVisual() { if (!isSpeakingRecording) return; micAnalyser.getByteFrequencyData(dataArray); let sum = 0; for (let i = 0; i < dataArray.length; i++) sum += dataArray[i]; let average = sum / dataArray.length; const NOISE_GATE_THRESHOLD = 18; document.querySelectorAll('.speaking-wave-bar').forEach((bar, index) => { if (average < NOISE_GATE_THRESHOLD) bar.style.height = '12px'; else bar.style.height = `${Math.min(80, Math.max(12, (average - NOISE_GATE_THRESHOLD) * (1.2 + (index % 3) * 0.4)))}px`; }); micAnimFrameId = requestAnimationFrame(updateWaveVisual); } updateWaveVisual(); } catch(e) {} }).catch(err => { startMobileWaveformSimulation(); }); }
-    function startMobileWaveformSimulation() { function updateSimulatedWave() { if (!isSpeakingRecording) return; document.querySelectorAll('.speaking-wave-bar').forEach(bar => { bar.style.height = `${Math.floor(Math.random() * 35) + 12}px`; }); micAnimFrameId = requestAnimationFrame(updateSimulatedWave); } updateSimulatedWave(); }
-    function startSpeakingRecording() { stopTTS(); speakingStep = 2; speakingRecordedTranscript = ''; sessionFinalTranscript = ''; speakingSeconds = 0; isSpeakingRecording = true; renderSpeakingModalUI(); if (speakingTimerInterval) clearInterval(speakingTimerInterval); speakingTimerInterval = setInterval(() => { speakingSeconds++; const timerEl = document.getElementById('speaking-rec-timer'); if (timerEl) timerEl.innerText = `${String(Math.floor(speakingSeconds / 60)).padStart(2, '0')}:${String(speakingSeconds % 60).padStart(2, '0')}`; }, 1000); const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent); const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition; if (SpeechRecognition) { try { if (speakingRecognition) { try { speakingRecognition.abort(); } catch(e){} } speakingRecognition = new SpeechRecognition(); speakingRecognition.lang = 'en-US'; speakingRecognition.continuous = !isMobile; speakingRecognition.interimResults = true; speakingRecognition.maxAlternatives = 1; speakingRecognition.onresult = (e) => { let currentFinal = ''; let currentInterim = ''; for (let i = e.resultIndex; i < e.results.length; ++i) { if (e.results[i].isFinal) currentFinal += e.results[i][0].transcript + ' '; else currentInterim += e.results[i][0].transcript; } if (currentFinal) sessionFinalTranscript += currentFinal; const fullText = (sessionFinalTranscript + currentInterim).trim(); if (fullText) speakingRecordedTranscript = fullText; }; speakingRecognition.onend = () => { if (isSpeakingRecording && speakingRecognition) { try { speakingRecognition.start(); } catch(err){} } }; speakingRecognition.start(); } catch (e) {} } setupMicVolumeVisualizer(); }
-    function stopSpeakingRecording() { isSpeakingRecording = false; if (speakingTimerInterval) { clearInterval(speakingTimerInterval); speakingTimerInterval = null; } if (speakingRecognition) { try { speakingRecognition.onend = null; speakingRecognition.stop(); } catch(e) {} speakingRecognition = null; } if (micAnimFrameId) { cancelAnimationFrame(micAnimFrameId); micAnimFrameId = null; } if (micAudioContext) { try { micAudioContext.close(); } catch(e){} micAudioContext = null; } if (window.speakingAudioStream) { try { window.speakingAudioStream.getTracks().forEach(track => track.stop()); } catch(e){} window.speakingAudioStream = null; } }
-    function finishSpeakingRecording() { stopSpeakingRecording(); speakingStep = 3; renderSpeakingModalUI(); }
+    function startMobileWaveformSimulation() { 
+        function updateSimulatedWave() { 
+            if (!isSpeakingRecording) return; 
+            document.querySelectorAll('.speaking-wave-bar').forEach(bar => { 
+                bar.style.height = `${Math.floor(Math.random() * 35) + 12}px`; 
+            }); 
+            micAnimFrameId = requestAnimationFrame(updateSimulatedWave); 
+        } 
+        updateSimulatedWave(); 
+    }
+
+    function startSpeakingRecording() { 
+        stopTTS(); 
+        speakingStep = 2; 
+        speakingRecordedTranscript = ''; 
+        sessionFinalTranscript = ''; 
+        speakingSeconds = 0; 
+        isSpeakingRecording = true; 
+        renderSpeakingModalUI(); 
+        
+        if (speakingTimerInterval) clearInterval(speakingTimerInterval); 
+        speakingTimerInterval = setInterval(() => { 
+            speakingSeconds++; 
+            const timerEl = document.getElementById('speaking-rec-timer'); 
+            if (timerEl) timerEl.innerText = `${String(Math.floor(speakingSeconds / 60)).padStart(2, '0')}:${String(speakingSeconds % 60).padStart(2, '0')}`; 
+        }, 1000); 
+        
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent); 
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition; 
+        if (SpeechRecognition) { 
+            try { 
+                if (speakingRecognition) { 
+                    try { speakingRecognition.abort(); } catch(e){} 
+                } 
+                speakingRecognition = new SpeechRecognition(); 
+                speakingRecognition.lang = 'en-US'; 
+                speakingRecognition.continuous = !isMobile; 
+                speakingRecognition.interimResults = true; 
+                speakingRecognition.maxAlternatives = 1; 
+                speakingRecognition.onresult = (e) => { 
+                    let currentFinal = ''; 
+                    let currentInterim = ''; 
+                    for (let i = e.resultIndex; i < e.results.length; ++i) { 
+                        if (e.results[i].isFinal) currentFinal += e.results[i][0].transcript + ' '; 
+                        else currentInterim += e.results[i][0].transcript; 
+                    } 
+                    if (currentFinal) sessionFinalTranscript += currentFinal; 
+                    const fullText = (sessionFinalTranscript + currentInterim).trim(); 
+                    if (fullText) speakingRecordedTranscript = fullText; 
+                }; 
+                speakingRecognition.onend = () => { 
+                    if (isSpeakingRecording && speakingRecognition) { 
+                        try { speakingRecognition.start(); } catch(err){} 
+                    } 
+                }; 
+                speakingRecognition.start(); 
+            } catch (e) {} 
+        } 
+        setupMicVolumeVisualizer(); 
+    }
+
+    function stopSpeakingRecording() { 
+        isSpeakingRecording = false; 
+        if (speakingTimerInterval) { clearInterval(speakingTimerInterval); speakingTimerInterval = null; } 
+        if (speakingRecognition) { 
+            try { speakingRecognition.onend = null; speakingRecognition.stop(); } catch(e) {} 
+            speakingRecognition = null; 
+        } 
+        if (micAnimFrameId) { cancelAnimationFrame(micAnimFrameId); micAnimFrameId = null; } 
+        if (micAudioContext) { try { micAudioContext.close(); } catch(e){} micAudioContext = null; } 
+        if (window.speakingAudioStream) { try { window.speakingAudioStream.getTracks().forEach(track => track.stop()); } catch(e){} window.speakingAudioStream = null; } 
+    }
+
+    function finishSpeakingRecording() { 
+        stopSpeakingRecording(); 
+        speakingStep = 3; 
+        renderSpeakingModalUI(); 
+    }
+
     function renderSpeakingModalUI() { 
         const card = document.getElementById('speaking-card'); if (!card) return; 
         if (speakingStep === 1) { 
@@ -1003,15 +1175,164 @@ function renderVoiceListUI() {
         } 
     }
 
+    // ==========================================
+    // 🛠️ 개발자 전용 데이터 강제 초기화 (Hidden Feature)
+    // ==========================================
+    let isDevResetExecuting = false;
+
+    function openDevResetModal() {
+        const modal = document.getElementById('dev-reset-modal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            const input = document.getElementById('dev-reset-input');
+            if (input) {
+                input.value = '';
+                setTimeout(() => input.focus(), 100);
+            }
+        }
+    }
+
+    function closeDevResetModal() {
+        const modal = document.getElementById('dev-reset-modal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    async function executeDevReset() {
+        if (isDevResetExecuting) return;
+
+        const input = document.getElementById('dev-reset-input');
+        if (!input || input.value.trim().toLowerCase() !== 'delete') {
+            alert('안전 장치 작동 중: 입력란에 "delete"라고 정확히 입력해야 초기화가 진행됩니다.');
+            return;
+        }
+
+        isDevResetExecuting = true;
+        const confirmReset = confirm("경고: 저장된 모든 단어 기록, AI 설정, 로컬 캐시가 영구적으로 삭제됩니다.\n진행하시겠습니까?");
+        if (!confirmReset) {
+            isDevResetExecuting = false;
+            return;
+        }
+
+        try {
+            localStorage.clear();
+            sessionStorage.clear();
+
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                await Promise.all(cacheNames.map(name => caches.delete(name)));
+            }
+
+            alert('✅ 데이터 초기화가 완료되었습니다.\n애플리케이션을 새로고침합니다.');
+            window.location.reload(true);
+        } catch (error) {
+            alert('초기화 중 오류가 발생했습니다: ' + error.message);
+            isDevResetExecuting = false;
+        }
+    }
+
+    let devResetTapCount = 0;
+    let devResetTapTimer = null;
+    document.addEventListener('touchstart', (e) => {
+        if (e.touches.length > 0) {
+            const touch = e.touches[0];
+            if (touch.clientX <= 100 && touch.clientY <= 100) {
+                devResetTapCount++;
+                if (devResetTapTimer) clearTimeout(devResetTapTimer);
+                
+                if (devResetTapCount >= 3) {
+                    devResetTapCount = 0;
+                    openDevResetModal();
+                } else {
+                    devResetTapTimer = setTimeout(() => { devResetTapCount = 0; }, 600);
+                }
+            } else {
+                devResetTapCount = 0;
+            }
+        }
+    }, { passive: true });
+
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') { closeDayModal(); closeWeakReviewModal(); closeAutoplayModal(); closeVoiceModal(); closeSpeakingModal(); closeAISettingsModal(); closeModelSelectModal(); closeAIFeedbackModal(); closeLifeNoticeModal(); closeDataModal(); closeReleaseNoteModal(); return; }
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-        const releaseNoteModal = document.getElementById('release-note-modal'); if (releaseNoteModal && !releaseNoteModal.classList.contains('hidden')) { if (e.key === 'Enter') { e.preventDefault(); closeReleaseNoteModal(); } return; }
-        const autoplayModal = document.getElementById('autoplay-modal'); if (autoplayModal && !autoplayModal.classList.contains('hidden')) { if (e.key === 'Enter') { e.preventDefault(); confirmAutoplayModal(); } return; }
-        const voiceModal = document.getElementById('voice-modal'); if (voiceModal && !voiceModal.classList.contains('hidden')) { if (e.key === 'Enter') { e.preventDefault(); confirmVoiceSettings(); } return; }
-        const speakingModal = document.getElementById('speaking-modal'); if (speakingModal && !speakingModal.classList.contains('hidden')) { if (e.key === 'Enter') { e.preventDefault(); if (speakingStep === 1) startSpeakingRecording(); else if (speakingStep === 2) finishSpeakingRecording(); else if (speakingStep === 3) window.closeSpeakingModalAndNext(); } return; }
-        const gameArea = document.getElementById('game-area'); const isGameActive = gameArea && !gameArea.classList.contains('hidden') && document.getElementById('ai-feedback-modal').classList.contains('hidden');
-        if (e.key === 'ArrowUp' && isGameActive) { e.preventDefault(); if (showAnswers) speakCurrentWord(); } else if (e.key === 'ArrowRight' && isGameActive) { e.preventDefault(); handlePrimaryAction(); } else if (e.key === 'ArrowDown' && isGameActive) { e.preventDefault(); handleVagueAction(currentStartIndex); } else if (e.key === 'ArrowLeft' && isGameActive) { e.preventDefault(); handlePrevAction(); } else if (e.key === 'Shift' && isGameActive) { e.preventDefault(); toggleInfiniteLoop(); } else if (e.code === 'Space' && isGameActive) { e.preventDefault(); if (showAnswers) speakCurrentWord(); } else if (e.key.toLowerCase() === 'a' && isGameActive) { e.preventDefault(); handleAutoplayBtnClick(); } else if (e.key.toLowerCase() === 's' && isGameActive) { e.preventDefault(); openVoiceModal(); } else if (e.key.toLowerCase() === 'z' && isGameActive && showAnswers) { e.preventDefault(); const item = wordList[currentStartIndex]; if (item) { openSpeakingModal(item.exEn ? 'sentence' : 'word', item.exEn ? item.exEn : item.en); } } else if (e.key.toLowerCase() === 't' && isGameActive) { e.preventDefault(); openWritingModalFromCard(); } else if (e.key.toLowerCase() === 'q') { const modal = document.getElementById('ai-feedback-modal'); if (modal && !modal.classList.contains('hidden') && window.stopAIComputation) window.stopAIComputation(); }
+        if (e.key === 'Insert') {
+            e.preventDefault();
+            openDevResetModal();
+            return;
+        }
+
+        if (e.key === 'Escape') { 
+            closeDayModal(); 
+            closeWeakReviewModal(); 
+            closeAutoplayModal(); 
+            closeVoiceModal(); 
+            closeSpeakingModal(); 
+            closeAISettingsModal(); 
+            closeModelSelectModal(); 
+            closeAIFeedbackModal(); 
+            closeLifeNoticeModal(); 
+            closeDataModal(); 
+            closeReleaseNoteModal(); 
+            closeDevResetModal();
+            return; 
+        }
+
+        const devResetModal = document.getElementById('dev-reset-modal');
+        const isDevResetOpen = devResetModal && !devResetModal.classList.contains('hidden');
+
+        if (isDevResetOpen) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                executeDevReset();
+            }
+            return;
+        }
+
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            if (e.target.id === 'modal-sentence-textarea' && e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                submitModalWritingTest();
+            }
+            return;
+        }
+
+        const releaseNoteModal = document.getElementById('release-note-modal'); 
+        if (releaseNoteModal && !releaseNoteModal.classList.contains('hidden')) { if (e.key === 'Enter') { e.preventDefault(); closeReleaseNoteModal(); } return; }
+        
+        const autoplayModal = document.getElementById('autoplay-modal'); 
+        if (autoplayModal && !autoplayModal.classList.contains('hidden')) { if (e.key === 'Enter') { e.preventDefault(); confirmAutoplayModal(); } return; }
+        
+        const voiceModal = document.getElementById('voice-modal'); 
+        if (voiceModal && !voiceModal.classList.contains('hidden')) { if (e.key === 'Enter') { e.preventDefault(); confirmVoiceSettings(); } return; }
+        
+        const speakingModal = document.getElementById('speaking-modal'); 
+        if (speakingModal && !speakingModal.classList.contains('hidden')) { 
+            if (e.key === 'Enter') { 
+                e.preventDefault(); 
+                if (speakingStep === 1) startSpeakingRecording(); 
+                else if (speakingStep === 2) finishSpeakingRecording(); 
+                else if (speakingStep === 3) window.closeSpeakingModalAndNext(); 
+            } return; 
+        }
+
+        const gameArea = document.getElementById('game-area'); 
+        const isGameActive = gameArea && !gameArea.classList.contains('hidden') && document.getElementById('ai-feedback-modal').classList.contains('hidden');
+        
+        if (e.key === 'ArrowUp' && isGameActive) { e.preventDefault(); if (showAnswers) speakCurrentWord(); } 
+        else if (e.key === 'ArrowRight' && isGameActive) { e.preventDefault(); handlePrimaryAction(); } 
+        else if (e.key === 'ArrowDown' && isGameActive) { e.preventDefault(); handleVagueAction(currentStartIndex); } 
+        else if (e.key === 'ArrowLeft' && isGameActive) { e.preventDefault(); handlePrevAction(); } 
+        else if (e.key === 'Shift' && isGameActive) { e.preventDefault(); toggleInfiniteLoop(); } 
+        else if (e.code === 'Space' && isGameActive) { e.preventDefault(); if (showAnswers) speakCurrentWord(); } 
+        else if (e.key.toLowerCase() === 'a' && isGameActive) { e.preventDefault(); handleAutoplayBtnClick(); } 
+        else if (e.key.toLowerCase() === 's' && isGameActive) { e.preventDefault(); openVoiceModal(); } 
+        else if (e.key.toLowerCase() === 'z' && isGameActive && showAnswers) { 
+            e.preventDefault(); 
+            const item = wordList[currentStartIndex]; 
+            if (item) { openSpeakingModal(item.exEn ? 'sentence' : 'word', item.exEn ? item.exEn : item.en); } 
+        } 
+        else if (e.key.toLowerCase() === 't' && isGameActive) { e.preventDefault(); openWritingModalFromCard(); } 
+        else if (e.key.toLowerCase() === 'q') { 
+            const modal = document.getElementById('ai-feedback-modal'); 
+            if (modal && !modal.classList.contains('hidden') && window.stopAIComputation) window.stopAIComputation(); 
+        }
     });
 
     if ("Notification" in window) {
