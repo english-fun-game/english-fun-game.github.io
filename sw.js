@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pongcrush-v6'; // 버전업 (새로운 SW 설치 유도)
+const CACHE_NAME = 'pongcrush-v6.1'; // 버전업 (새로운 SW 설치 유도)
 
 // 캐싱할 정적, 미디어 자원 및 엑셀 파일 리스트
 const ASSETS_TO_CACHE = [
@@ -13,11 +13,8 @@ const ASSETS_TO_CACHE = [
     'https://docs.google.com/spreadsheets/d/1UYTEv88wdKsSS2kkB-UylHAfQAlV6yrvjwVNecG6m64/export?format=xlsx',
     'https://docs.google.com/spreadsheets/d/1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U/export?format=xlsx',
     'https://docs.google.com/spreadsheets/d/1ElLraPc80Uez8innH6RfXOBz36IV9ARXnkAiUembWH0/export?format=xlsx',
-
-    // 오디오 파일 (1~8.mp3)
-    ...Array.from({ length: 8 }, (_, i) => `./sounds/${i + 1}.mp3`),
     
-    // 🐱 이미지 파일 다시 복구 (type1, type2, type3 / 1~4.jpg)
+    // 🐱 이미지 파일 (type1, type2, type3 / 1~4.jpg)
     ...['type1', 'type2', 'type3'].flatMap(type => 
         Array.from({ length: 4 }, (_, i) => `./images/${type}/${i + 1}.jpg`)
     )
@@ -84,7 +81,6 @@ self.addEventListener('notificationclick', function(event) {
 
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
-            // 열려있는 탭이 있으면 포커스 맞추고 해당 URL로 이동
             for (let i = 0; i < clientList.length; i++) {
                 let client = clientList[i];
                 if (client.url.includes('index.html') && 'focus' in client) {
@@ -92,7 +88,6 @@ self.addEventListener('notificationclick', function(event) {
                     return client.focus();
                 }
             }
-            // 없으면 새 창 열기
             if (clients.openWindow) {
                 return clients.openWindow(targetUrl);
             }

@@ -12,25 +12,15 @@
         const GOOGLE_API_KEY = 'AIzaSyBQmE5nsOTvC57Ij_cBisXmS1QmtR5QOrQ'; 
         const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
-
-        let tokenClient;
-        let gapiInited = false;
-        let gisInited = false;
-
+        let tokenClient; let gapiInited = false; let gisInited = false;
         window.gapiLoaded = function() {
             gapi.load('client', async () => {
-                try {
-                    if (!GOOGLE_API_KEY) return; 
-                    await gapi.client.init({ apiKey: GOOGLE_API_KEY, discoveryDocs: [DISCOVERY_DOC], });
-                    gapiInited = true;
-                } catch (e) { console.warn("GAPI Init Error:", e); }
+                try { if (!GOOGLE_API_KEY) return; await gapi.client.init({ apiKey: GOOGLE_API_KEY, discoveryDocs: [DISCOVERY_DOC], }); gapiInited = true; } catch (e) {}
             });
         };
-
         window.gisLoaded = function() {
             if (!GOOGLE_CLIENT_ID) return;
-            tokenClient = google.accounts.oauth2.initTokenClient({ client_id: GOOGLE_CLIENT_ID, scope: SCOPES, callback: '', });
-            gisInited = true;
+            tokenClient = google.accounts.oauth2.initTokenClient({ client_id: GOOGLE_CLIENT_ID, scope: SCOPES, callback: '', }); gisInited = true;
         };
     </script>
     <script src="https://apis.google.com/js/api.js" async defer onload="gapiLoaded()"></script>
@@ -106,7 +96,7 @@
         #game-area { flex: 1; display: flex; flex-direction: column; min-height: 0; justify-content: flex-start; width: 100%; gap: 12px; }
         .nyan-timer-box { background-color: #ffffff; border: 1px solid var(--border-color); border-radius: 16px; padding: 12px 18px; margin-top: 2px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02); transition: all 0.3s ease; width: 100%; box-sizing: border-box; }
         .nyan-timer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 14px; font-weight: 800; gap: 8px; }
-        .mute-btn, .voice-btn, .autoplay-btn { height: 38px; line-height: 1; padding: 0 12px; font-size: 13px; font-weight: 800; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; white-space: nowrap; flex-shrink: 0; letter-spacing: -0.2px; transition: all 0.15s ease; }
+        .voice-btn, .autoplay-btn { height: 38px; line-height: 1; padding: 0 12px; font-size: 13px; font-weight: 800; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; white-space: nowrap; flex-shrink: 0; letter-spacing: -0.2px; transition: all 0.15s ease; }
         .shortcut-text { font-weight: 800 !important; opacity: 0.85; margin-left: 3px; }
         .nyan-controls-row { display: flex; align-items: center; gap: 12px; width: 100%; }
         .nyan-track { position: relative; flex: 1; height: 24px; background-color: #eef0f1; border-radius: 12px; overflow: visible; border: 1px solid #cbd5e1; box-sizing: border-box; transition: all 0.3s ease; }
@@ -115,13 +105,10 @@
         .timer-text { color: #d97706; background: #fffbeb; border: 1.5px solid #fcd34d; transition: all 0.3s ease; }
         .timer-text.overtime { color: #ffffff !important; background-color: #dc2626 !important; border-color: #b91c1c !important; }
         .progress { color: var(--text-muted); background: #f1f5f9; border: 1.5px solid #cbd5e1; }
-        .autoplay-btn, .mute-btn, .voice-btn { background-color: #f8f9fa; border: 1.5px solid #cbd5e1; color: #64748b; cursor: pointer; }
-        .autoplay-btn:hover, .mute-btn:hover, .voice-btn:hover { background-color: #f1f5f9; transform: translateY(-1px); }
+        .autoplay-btn, .voice-btn { background-color: #f8f9fa; border: 1.5px solid #cbd5e1; color: #64748b; cursor: pointer; }
+        .autoplay-btn:hover, .voice-btn:hover { background-color: #f1f5f9; transform: translateY(-1px); }
         .autoplay-btn.active { background-color: #dcfce7; border-color: #16a34a; color: #15803d; }
-        .mute-btn.active-music { background-color: #f3e8ff; border-color: #9333ea; color: #7e22ce; }
-        .mute-btn.is-muted { background-color: #fee2e2; border-color: #ef4444; color: #b91c1c; }
         .voice-btn { background-color: #fff7ed; border-color: #f97316; color: #c2410c; }
-        .mute-btn.active-infinite { background-color: #dcfce7 !important; border-color: #16a34a !important; color: #15803d !important; }
         .nyan-trail { position: absolute; left: 0; top: 0; height: 100%; width: 0%; background: linear-gradient(90deg, #ff4b4b, #ffb800, #20d070, #00b0ff, #9d4edd); border-radius: 12px; transition: width 1s linear; z-index: 2; }
         .nyan-cat { position: absolute; right: -14px; top: -6px; font-size: 24px; user-select: none; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.15)); animation: nyan-bounce 0.6s infinite alternate; }
         @keyframes nyan-bounce { from { transform: translateY(0px); } to { transform: translateY(-2px); } }
@@ -169,7 +156,7 @@
         .writing-test-trigger-btn:hover { background-color: #e0f2fe; border-color: #bae6fd; transform: translateY(-1px); }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box; }
         .modal-card { background: #ffffff; border-radius: 16px; width: 100%; max-width: 460px; padding: 22px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 16px; box-sizing: border-box; max-height: 90vh; overflow-y: auto; }
-        .modal-card.tall-modal { max-width: 580px; height: auto; max-height: 90vh; padding: 20px; border-radius: 18px; }
+        .modal-card.tall-modal { max-width: 580px; height: 90vh !important; max-height: 90vh !important; display: flex; flex-direction: column; overflow: hidden; padding: 0 !important; border-radius: 18px; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; font-size: 17px; font-weight: 800; color: var(--text-main); }
         .weak-col-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; flex: 1; min-height: 0; margin-top: 4px; }
         .weak-col { display: flex; flex-direction: column; background: #f8fafc; border: 1.5px solid var(--border-color); border-radius: 12px; padding: 8px 6px; gap: 8px; min-height: 0; }
@@ -219,13 +206,13 @@
         .sec-btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
         .sec-btn { padding: 12px 0; background: #ffffff; border: 1.5px solid var(--border-color); border-radius: 8px; font-weight: 800; font-size: 14px; color: var(--text-main); cursor: pointer; transition: all 0.15s; text-align: center; }
         .sec-btn.selected { background: #dcfce7; color: #15803d; border-color: #16a34a; }
-        .voice-list-container { display: flex; flex-direction: column; gap: 8px; max-height: 260px; overflow-y: auto; border: 1.5px solid var(--border-color); border-radius: 10px; padding: 8px; background: #f8f9fa; }
+        .voice-list-container { display: flex; flex-direction: column; gap: 8px; padding-bottom: 8px; }
         .voice-item { display: flex; justify-content: space-between; align-items: center; background: #ffffff; border: 1.5px solid var(--border-color); padding: 10px 12px; border-radius: 8px; gap: 8px; cursor: pointer; transition: all 0.15s ease; }
         .voice-item.selected { border-color: #f97316; background: #fff7ed; box-shadow: 0 2px 6px rgba(249, 115, 22, 0.15); }
-        .voice-info { display: flex; flex-direction: column; overflow: hidden; text-align: left; flex: 1; }
-        .voice-name { font-size: 14px; font-weight: 800; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .voice-lang { font-size: 11px; color: var(--text-muted); margin-top: 2px; display: flex; align-items: center; gap: 4px; }
-        .voice-badge { background: #e2e8f0; color: #334155; font-size: 10px; padding: 1px 5px; border-radius: 4px; font-weight: 700; }
+        .voice-info { display: flex; flex-direction: column; overflow: hidden; text-align: left; flex: 1; min-width: 0; padding-right: 4px; }
+        .voice-name { font-size: 14px; font-weight: 800; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+        .voice-lang { font-size: 11px; color: var(--text-muted); margin-top: 2px; display: flex; align-items: center; gap: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .voice-badge { background: #e2e8f0; color: #334155; font-size: 10px; padding: 1px 5px; border-radius: 4px; font-weight: 700; flex-shrink: 0; }
         .hidden { display: none !important; }
         .mobile-only-flex { display: none !important; }
         .sentence-test-textarea { width: 100%; padding: 14px 16px; font-family: inherit; border: 2px solid var(--slack-blue); border-radius: 14px; outline: none; box-sizing: border-box; text-align: left; background: #ffffff; color: var(--text-main); resize: none; overflow: hidden; transition: all 0.2s ease; line-height: 1.45; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
@@ -267,7 +254,7 @@
             .autoplay-btn { height: 24px !important; padding: 0 6px !important; font-size: 11px !important; width: auto !important; display: inline-flex !important; justify-content: center !important; } .hide-on-mobile { display: inline !important; } .mobile-only-flex { display: inline-flex !important; }
             .show-answers .section-en .card-top-actions { display: flex !important; position: absolute !important; top: 12px !important; left: 12px !important; right: 12px !important; transform: none !important; z-index: 100 !important; flex-direction: row !important; }
             .card-speaking-btn { width: 44px !important; height: 44px !important; display: inline-flex !important; justify-content: center !important; align-items: center !important; padding: 0 !important; } .card-infinite-btn { display: none !important; } .card-repeat-btn { display: none !important; }
-            .nyan-timer-header { font-size: 11px; gap: 3px; margin-bottom: 6px; } .mute-btn, .voice-btn { height: 28px; font-size: 11px; font-weight: 800; padding: 0 5px; }
+            .nyan-timer-header { font-size: 11px; gap: 3px; margin-bottom: 6px; } .voice-btn { height: 28px; font-size: 11px; font-weight: 800; padding: 0 5px; }
             .cards-grid { margin-bottom: 8px !important; flex: 1 !important; height: 100% !important; } #game-area .card { flex-direction: column !important; height: 100% !important; flex: 1 !important; }
             #game-area .card-section { overflow: hidden !important; padding: 20px 16px !important; display: flex !important; flex-direction: column !important; } #game-area .section-ko { border-right: none !important; border-bottom: 1px solid var(--border-color) !important; flex: 2.5 !important; background-size: cover !important; z-index: 1 !important; position: relative !important; } #game-area .section-en { flex: 3.5 !important; position: relative !important; z-index: 2 !important; }
             #game-area .card-content-center { gap: 12px !important; justify-content: center !important; align-items: center !important; margin: auto !important; padding-bottom: 0 !important; flex: none !important; height: auto !important; display: flex !important; flex-direction: column !important; width: 100% !important; }
@@ -290,7 +277,7 @@
 <div id="ai-loading-overlay" class="loading-overlay hidden" style="z-index: 25000;"><div class="loading-card" style="max-width: 320px; text-align: center; padding: 24px 32px;"><div class="loading-title" id="ai-loading-text" style="color: #1264a3; margin-top: 8px;">🤖 AI 엔진 준비 중...</div><div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-top: 12px;"><div id="ai-loading-progress-fill" style="height: 100%; width: 0%; background: #1264a3; transition: width 0.3s ease;"></div></div><div style="font-size: 12px; color: var(--text-muted); line-height: 1.4; margin-top: 12px;">최초 실행 시 브라우저에 AI 모델을 다운로드하여 캐시에 저장합니다.<br>네트워크 환경에 따라 수 분이 소요될 수 있습니다.</div></div></div>
 <div id="release-note-modal" class="modal-overlay release-modal-overlay hidden" style="z-index: 30000;" onclick="if(event.target === this) closeReleaseNoteModal()"><div class="release-modal-card"><div style="padding: 16px; border-bottom: 1px solid var(--border-color); background: #ffffff; flex-shrink: 0; text-align: center; border-radius: 20px 20px 0 0;"><span style="font-size: 16px; font-weight: 900; color: var(--text-main);">🎉 릴리즈 노트 & 테크 블로그</span></div><div id="release-note-content" style="flex: 1; overflow-y: auto; background: #f1f5f9; padding: 16px; min-height: 0;"></div><div style="padding: 14px 20px; background: #ffffff; border-top: 1px solid var(--border-color); flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: calc(14px + env(safe-area-inset-bottom));"><label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; color: var(--text-muted); cursor: pointer; margin: 0;"><input type="checkbox" id="release-hide-checkbox" style="width: 18px; height: 18px; margin: 0; cursor: pointer;">최신 버전 보지 않기</label><button class="base-btn" style="background:var(--slack-purple); padding: 12px 24px; font-size: 15px; font-weight: 900; width: auto; margin: 0; border-radius: 10px;" onclick="closeReleaseNoteModal()">닫기 (Enter)</button></div></div></div>
 <div id="ai-model-select-modal" class="modal-overlay hidden" style="z-index: 20000;" onclick="if(event.target === this) closeModelSelectModal()"><div class="modal-card" style="max-width: 580px;"><div class="modal-header"><span>🤖 AI 모델 선택</span><button onclick="closeModelSelectModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button></div><div style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5; font-weight: 600;">기기 성능과 배터리 상황에 맞춰 원하는 AI 모델을 선택하세요.<br>(최초 선택 시 모델 파일 다운로드가 백그라운드에서 1회 진행됩니다.)</div><div style="display: flex; flex-direction: column; gap: 10px;"><div id="model-card-1b" class="model-option-card" onclick="selectAIModel('Llama-3.2-1B-Instruct-q4f16_1-MLC', '1B')"><div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 900; font-size: 16px; color: #15803d;">🟢 Llama-3.2-1B (초경량)</span><span class="model-badge">다운로드 약 0.8GB</span></div><div style="font-size: 13px; color: var(--text-muted);">가장 빠르고 배터리 소모가 적습니다. 모바일 기기나 간단한 문법 교정에 적합합니다.</div></div><div id="model-card-3b" class="model-option-card" onclick="selectAIModel('Llama-3.2-3B-Instruct-q4f16_1-MLC', '3B')"><div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 900; font-size: 16px; color: #b45309;">🟡 Llama-3.2-3B (균형형)</span><span class="model-badge">다운로드 약 2.0GB</span></div><div style="font-size: 13px; color: var(--text-muted);">성능과 속도의 균형이 매우 좋습니다. 일반적인 데스크탑 환경이나 태블릿에 추천합니다.</div></div><div id="model-card-8b" class="model-option-card" onclick="selectAIModel('Llama-3.1-8B-Instruct-q4f32_1-MLC', '8B')"><div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 900; font-size: 16px; color: #be123c;">🔴 Llama-3.1-8B (최상급)</span><span class="model-badge" style="background: #ffe4e6; color: #be123c;">다운로드 약 4.5GB</span></div><div style="font-size: 13px; color: var(--text-muted);">가장 똑똑하고 복잡한 문맥을 잘 이해합니다. (RAM 16GB 이상 PC 환경 권장)</div></div><div id="model-card-home" class="model-option-card" style="border-style: dashed; opacity: 0.9;" onclick="selectAIModel('home-pc', '퐁퐁하우스')"><div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 900; font-size: 16px; color: #6d28d9;">🏠 퐁퐁하우스 자택 PC (To Be Continued...)</span><span class="model-badge" style="background: #f3e8ff; color: #6d28d9;">Ollama / vLLM 연동 예정</span></div><div style="font-size: 12.5px; color: var(--text-muted); margin-top: 4px; line-height: 1.45;"><b>하드웨어 스펙:</b> i5-14600KF + 64GB DDR5 RAM + 독립 VRAM 16GB<br><b>급간 비교:</b> 노트북용 내장 그래픽(UMA) 한계를 넘어서 <b>64GB RAM & 16GB 전용 VRAM</b>을 활용, <b>Qwen-2.5 32B / DeepSeek-R1 32B / Llama-3.3 70B</b>급 초고성능 모델을 가정용 서버망으로 무제한 연동 가능!</div></div></div></div></div>
-<div id="ai-settings-modal" class="modal-overlay hidden" style="z-index: 20000;" onclick="if(event.target === this) closeAISettingsModal()"><div class="modal-card" style="max-width: 520px;"><div class="modal-header"><span>⚙️ AI 파라미터 정밀 설정</span><button onclick="closeAISettingsModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button></div><div class="setting-field" style="display:flex; flex-direction:column; gap:6px; background:#f8fafc; padding:12px; border-radius:12px; border:1px solid var(--border-color);"><div class="setting-label" style="font-size:14px; font-weight:800; display:flex; justify-content:space-between;"><span>1. Max Tokens (최대 출력 토큰)</span><span id="val-max-tokens" style="color:#0284c7;">512</span></div><input type="range" id="input-max-tokens" min="128" max="2048" step="64" value="512" oninput="document.getElementById('val-max-tokens').innerText = this.value"></div><div class="setting-field" style="display:flex; flex-direction:column; gap:6px; background:#f8fafc; padding:12px; border-radius:12px; border:1px solid var(--border-color); margin-top:8px;"><div class="setting-label" style="font-size:14px; font-weight:800; display:flex; justify-content:space-between;"><span>2. Context Window (컨텍스트 기억 크기)</span><span id="val-context-window" style="color:#0284c7;">2048</span></div><select id="input-context-window" style="padding: 8px; border-radius: 8px; border: 1px solid var(--border-color); font-weight: 800;"><option value="1024">1,024 (소형 메모리)</option><option value="2048" selected>2,048 (표준 세팅)</option><option value="4096">4,096 (대용량)</option><option value="8192">8,192 (최대)</option></select></div><div class="setting-field" style="display:flex; flex-direction:column; gap:6px; background:#f8fafc; padding:12px; border-radius:12px; border:1px solid var(--border-color); margin-top:8px;"><div class="setting-label" style="font-size:14px; font-weight:800; display:flex; justify-content:space-between;"><span>3. Temperature (창의성/샘플링 온도)</span><span id="val-temperature" style="color:#0284c7;">0.1</span></div><input type="range" id="input-temperature" min="0.0" max="1.0" step="0.05" value="0.1" oninput="document.getElementById('val-temperature').innerText = this.value"></div><div class="setting-field" style="display:flex; flex-direction:column; gap:6px; background:#f8fafc; padding:12px; border-radius:12px; border:1px solid var(--border-color); margin-top:8px;"><div class="setting-label" style="font-size:14px; font-weight:800; display:flex; justify-content:space-between;"><span>4. Top P (핵심 누적 확률)</span><span id="val-top-p" style="color:#0284c7;">0.95</span></div><input type="range" id="input-top-p" min="0.1" max="1.0" step="0.05" value="0.95" oninput="document.getElementById('val-top-p').innerText = this.value"></div><button class="base-btn" style="background:#16a34a; padding:14px; margin-top:12px;" onclick="applyAISettingsUI()">적용 및 저장</button></div></div>
+<div id="ai-settings-modal" class="modal-overlay hidden" style="z-index: 20000;" onclick="if(event.target === this) closeAISettingsModal()"><div class="modal-card" style="max-width: 520px;"><div class="modal-header"><span>⚙️ AI 파라미터 정밀 설정</span><button onclick="closeAISettingsModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button></div><div class="setting-field" style="display:flex; flex-direction:column; gap:6px; background:#f8fafc; padding:12px; border-radius:12px; border:1px solid var(--border-color);"><div class="setting-label" style="font-size:14px; font-weight:800; display:flex; justify-content:space-between;"><span>1. Max Tokens (최대 출력 토큰)</span><span id="val-max-tokens" style="color:#0284c7;">512</span></div><input type="range" id="input-max-tokens" min="128" max="2048" step="64" value="512" oninput="document.getElementById('val-max-tokens').innerText = this.value"></div><div class="setting-field" style="display:flex; flex-direction:column; gap:6px; background:#f8fafc; padding:12px; border-radius:12px; border:1px solid var(--border-color); margin-top:8px;"><div class="setting-label" style="font-size:14px; font-weight:800; display:flex; justify-content:space-between;"><span>2. Context Window (컨텍스트 기억 크기)</span><span id="val-context-window" style="color:#0284c7;">2048</span></div><select id="input-context-window" style="padding: 8px; border-radius: 8px; border: 1px solid var(--border-color); font-weight: 800;"><option value="1024">1,024 (소형 메모리)</option><option value="2048" selected>2048 (표준 세팅)</option><option value="4096">4,096 (대용량)</option><option value="8192">8,192 (최대)</option></select></div><div class="setting-field" style="display:flex; flex-direction:column; gap:6px; background:#f8fafc; padding:12px; border-radius:12px; border:1px solid var(--border-color); margin-top:8px;"><div class="setting-label" style="font-size:14px; font-weight:800; display:flex; justify-content:space-between;"><span>3. Temperature (창의성/샘플링 온도)</span><span id="val-temperature" style="color:#0284c7;">0.1</span></div><input type="range" id="input-temperature" min="0.0" max="1.0" step="0.05" value="0.1" oninput="document.getElementById('val-temperature').innerText = this.value"></div><div class="setting-field" style="display:flex; flex-direction:column; gap:6px; background:#f8fafc; padding:12px; border-radius:12px; border:1px solid var(--border-color); margin-top:8px;"><div class="setting-label" style="font-size:14px; font-weight:800; display:flex; justify-content:space-between;"><span>4. Top P (핵심 누적 확률)</span><span id="val-top-p" style="color:#0284c7;">0.95</span></div><input type="range" id="input-top-p" min="0.1" max="1.0" step="0.05" value="0.95" oninput="document.getElementById('val-top-p').innerText = this.value"></div><button class="base-btn" style="background:#16a34a; padding:14px; margin-top:12px;" onclick="applyAISettingsUI()">적용 및 저장</button></div></div>
 <div id="ai-feedback-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeAIFeedbackModal()"><div class="ai-modal-card" id="ai-modal-card"><div class="ai-modal-header"><div class="ai-modal-title"><span>로컬 AI 영작 첨삭</span><div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;"><button type="button" id="ai-toggle-btn" class="ai-chip-btn green-chip" onclick="toggleAIEnabled()">🤖 AI 첨삭: ON</button><button type="button" id="ai-model-chip-btn" class="ai-chip-btn green-chip" onclick="openModelSelectModal()">🟢 Llama-1B</button><button type="button" class="ai-chip-btn" onclick="openAISettingsModal()">⚙️ 설정</button></div></div><div style="display: flex; align-items: center; gap: 10px;"><button id="ai-combined-stop-btn" class="ai-combined-stop-btn hidden" onclick="window.stopAIComputation && window.stopAIComputation()"><span id="ai-loader-text" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">🛑 AI 상시 강제 중단 (Q)</span></button><button onclick="closeAIFeedbackModal()" class="ai-close-btn">✕ 나가기 <span style="font-size:11px; opacity:0.8;">(ESC)</span></button></div></div><div class="ai-modal-content-body"><div id="writing-input-view" style="display: flex; flex-direction: column; gap: 16px; flex: 1;"><div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 8px;"><div id="writing-modal-en-hint" style="font-size: 32px; font-weight: 700; color: var(--slack-blue); line-height: 1.3;"></div><div id="writing-modal-ko-text" style="font-size: 32px; font-weight: 900; color: var(--text-main); word-break: keep-all; line-height: 1.3;"></div></div><textarea id="modal-sentence-textarea" class="sentence-test-textarea" placeholder="영문장을 작성하세요 (Shift+Enter 줄바꿈, Enter 제출)" style="flex: 1; min-height: 120px; font-size: 32px; padding: 24px; line-height: 1.4;" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); submitModalWritingTest(); }"></textarea><button type="button" class="base-btn" style="background: var(--slack-purple); padding: 18px; font-size: 18px; flex-shrink: 0;" onclick="submitModalWritingTest()">✍️ 제출 (Enter)</button></div><div id="writing-result-view" class="hidden" style="display: flex; flex-direction: column; gap: 16px; flex: 1; min-height: 0;"><div style="display: flex; flex-direction: column; gap: 20px; flex-shrink: 0; background: white; padding: 24px 28px; border-radius: 16px; border: 2px solid #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.03);"><div id="ai-modal-user-text" style="font-size: clamp(24px, 2.5vw, 36px); font-weight: 900; color: #0f172a; line-height: 1.4; word-break: keep-all;"></div><div style="width: 100%; height: 1.5px; border-top: 1.5px dashed #cbd5e1;"></div><div id="ai-modal-target-text" style="font-size: clamp(24px, 2.5vw, 36px); font-weight: 900; color: #15803d; line-height: 1.4; word-break: keep-all;"></div></div><div class="ai-feedback-container" id="ai-feedback-container" style="flex: 1; background: white; border: 1.5px solid #cbd5e1; border-radius: 16px; padding: 20px 24px; overflow-y: auto; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); display: flex; flex-direction: column; min-height: 0; position: relative;"><div id="ai-disclaimer-text" style="font-size: 12px; color: #94a3b8; text-align: left; margin-bottom: 12px; line-height: 1.3; flex-shrink: 0; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; word-break: keep-all;">※ 현재 구동 중인 로컬 모델은 수백억 개 이상의 신경망을 가진 거대 AI(Gemini 등)에 비해 체급이 작아, 복잡한 문맥 추론에 한계가 있을 수 있습니다.</div><div class="ai-pipeline-stepper" id="ai-pipeline"><div class="ai-step" id="step-1"><div class="step-title">1. 가중치 로드</div><div class="step-desc" id="step-1-desc">VRAM 할당</div></div><div class="ai-step" id="step-2"><div class="step-title">2. 토크나이징</div><div class="step-desc">시퀀스 인코딩</div></div><div class="ai-step" id="step-3"><div class="step-title">3. 신경망 추론</div><div class="step-desc">순전파 연산</div></div><div class="ai-step" id="step-4"><div class="step-title">4. 디코딩</div><div class="step-desc" id="step-4-desc">렌더링</div></div></div><div id="ai-center-progress-text" style="font-size: 15px; font-weight: 700; color: var(--slack-blue); text-align: center; margin-top: 16px;"></div><div id="streaming-grammar-body" style="display: none; font-size: 16.5px; font-weight: 600; line-height: 1.75; color: #334155; white-space: pre-wrap; flex: 1;"></div></div></div></div></div></div>
 <div id="day-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeDayModal()"><div class="modal-card"><div class="modal-header"><span id="day-modal-title">📅 학습 Day 선택</span><button onclick="closeDayModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button></div><div class="sec-select-area"><div id="fixed-notice-banner" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; padding:10px 12px; border-radius:10px; font-size:13px; font-weight:800; text-align:center;">⚡ 스피킹 30 / 라이팅 40 / 초록이 60 / 라잎 15 고정 시험</div></div><div class="sec-select-area" style="flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden;"><div class="sec-select-title" id="day-list-title">📌 학습할 Day 선택</div><div id="day-buttons-grid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; overflow-y:auto; padding: 4px; box-sizing: border-box;"></div></div></div></div>
 <div id="weak-review-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeWeakReviewModal()"><div class="modal-card tall-modal"><div class="modal-header"><span>🔥 취약 단어 복습</span><button onclick="closeWeakReviewModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button></div><button id="weak-review-all-btn" class="base-btn" style="background:#2563eb; padding:13px; font-size:15px; flex-shrink:0;" onclick="startWeakReviewSession('ALL')">🔥 전체 취약 단어 복습 (0개)</button><div class="weak-col-container"><div class="weak-col"><div class="weak-col-header">🗣️ 스피킹</div><button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '스피킹')">전체 복습<br><span id="col-cnt-speaking" style="font-size:11px; opacity:0.8;">(0)</span></button><div class="weak-day-list" id="weak-day-list-speaking"></div></div><div class="weak-col"><div class="weak-col-header">✍️ 라이팅</div><button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '라이팅')">전체 복습<br><span id="col-cnt-writing" style="font-size:11px; opacity:0.8;">(0)</span></button><div class="weak-day-list" id="weak-day-list-writing"></div></div><div class="weak-col"><div class="weak-col-header">🍀 초록이</div><button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '초록이')">전체 복습<br><span id="col-cnt-green" style="font-size:11px; opacity:0.8;">(0)</span></button><div class="weak-day-list" id="weak-day-list-green"></div></div><div class="weak-col"><div class="weak-col-header">🌿 라잎</div><button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '라잎')">전체 복습<br><span id="col-cnt-life" style="font-size:11px; opacity:0.8;">(0)</span></button><div class="weak-day-list" id="weak-day-list-life"></div></div></div></div></div>
@@ -307,51 +294,75 @@
             <div style="font-size:12.5px; color:var(--text-muted); line-height:1.4; margin-bottom:4px;">
                 구글 계정에 로그인하여 내 드라이브와 데이터를 수동으로 안전하게 동기화할 수 있습니다.
             </div>
-            <details class="sync-details">
-                <summary class="sync-summary">📊 단어 400개 기준 네트워크 사용량</summary>
-                <div class="sync-content">
-                    <table class="tech-table">
-                        <tbody>
-                            <tr><th>순수 텍스트(JSON) 데이터</th><td>~ 100 KB</td></tr>
-                            <tr><th>네트워크 헤더 및 암호화 오버헤드</th><td>~ 5 KB</td></tr>
-                            <tr><th>1회 API 통신 총합</th><td style="color: #2563eb;">~ 105 KB</td></tr>
-                            <tr style="border-bottom: none;"><th>월 100회 동기화 시 누적치</th><td style="color: #16a34a;">~ 10.5 MB</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </details>
-            <details class="sync-details">
-                <summary class="sync-summary">🛡️ 브라우저 직접 동기화 방식 아키텍처 및 보안</summary>
-                <div class="sync-content">
-                    <ul class="tech-list">
-                        <li><strong>작동 가능 원리:</strong> 백엔드 서버 없이 Google Identity Services(OAuth 2.0 Implicit Grant)를 사용하여 클라이언트에서 직접 인증 토큰을 획득하고 REST API와 통신합니다.</li>
-                        <li><strong>보안 수준:</strong> 발급된 Access Token은 디스크가 아닌 브라우저 메모리에만 일시적으로 보관되며, 모든 통신이 HTTPS로 강제되어 탈취가 불가능에 가깝습니다.</li>
-                        <li><strong>권한 격리 (데이터 보호):</strong> <code>drive.file</code> 스코프만 제한적으로 인가합니다. 애플리케이션이 <strong>직접 생성한 파일에만 접근 가능</strong>하므로, 사용자의 개인 사진이나 타 문서 등 다른 드라이브 파일을 읽거나 수정할 위험이 원천 차단됩니다.</li>
-                        <li><strong>정책적 제한:</strong> Google 서버 측에서 허용한 CORS(교차 출처 리소스 공유) 엔드포인트로만 통신이 가능하며, 단시간 내 비정상적인 잦은 요청 시 구글 API 할당량(Quota) 제한 정책에 의해 자동 블록됩니다.</li>
-                    </ul>
-                </div>
-            </details>
-            <details class="sync-details">
-                <summary class="sync-summary">🔄 자동 로그인 및 백그라운드 동기화가 불가능한 이유</summary>
-                <div class="sync-content" style="background: #fdfdfd;">
-                    <div style="font-size: 11px; color: #64748b; margin-bottom: 10px; padding: 8px; background: #f1f5f9; border-radius: 6px;">
-                        💡 <b>Junior's Note:</b> 왜 사용자가 앱을 켤 때마다 알아서 로그인하고 뒤에서 동기화해주지 못할까요? 프론트엔드(Client-Side) 생태계의 보안과 구조적 한계 때문입니다.
-                    </div>
-                    <ul class="tech-list">
-                        <li><strong>Step 1. 짧은 수명의 출입증 (Access Token):</strong> 구글 API에 접근하기 위한 토큰은 보안상 수명이 약 1시간으로 매우 짧습니다. 시간이 지나면 만료되어 다시 발급받아야 합니다.</li>
-                        <li><strong>Step 2. 무제한 토큰(Refresh Token)의 브라우저 저장 위험:</strong> 만료된 토큰을 연장하려면 'Refresh Token'이 필요합니다. 하지만 백엔드(DB) 없이 브라우저(LocalStorage 등)에 이를 저장하면, XSS 해킹 등에 의해 영구적인 권한이 탈취될 수 있어 구글이 프론트엔드 환경에는 이 토큰 발급을 엄격히 제한합니다.</li>
-                        <li><strong>Step 3. 모던 브라우저의 서드파티 쿠키 차단 (ITP 정책):</strong> 과거에는 보이지 않는 iframe을 띄워 구글 세션을 통해 몰래 토큰을 갱신(Silent Refresh)할 수 있었습니다. 하지만 현재 사파리, 크롬 등은 사용자의 행동 추적을 막기 위해 타사 쿠키(3rd-party cookie)를 기본 차단하므로 이 꼼수가 막혔습니다.</li>
-                        <li><strong>Step 4. 서버리스(Serverless)의 물리적 한계:</strong> 앱이 꺼져 있는 동안 백그라운드에서 동기화(Cron Job)를 수행해 줄 24시간 가동되는 백엔드 서버가 존재하지 않습니다.</li>
-                    </ul>
-                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #e2e8f0; font-weight: 800; color: #3b82f6;">
-                        🎯 결론: 버튼을 눌러 명시적으로 구글 로그인을 호출(사용자 개입)하고, 1회성 토큰을 받아 수동 동기화하는 것이 현재 아키텍처에서 가장 안전하고 확실한 방법입니다.
-                    </div>
-                </div>
-            </details>
-            <div style="display:flex; gap:8px; margin-top:2px;">
+            
+            <div style="display:flex; gap:8px; margin-top:2px; margin-bottom:12px;">
                 <button class="base-btn" style="flex:1; background:#10b981; font-size:14px; padding:12px;" onclick="syncToGoogleDrive()">☁️ G드라이브 병합 저장</button>
                 <button class="base-btn" style="flex:1; background:#8b5cf6; font-size:14px; padding:12px;" onclick="loadFromGoogleDrive()">☁️ G드라이브 불러오기</button>
             </div>
+
+            <details class="sync-details" style="margin: 0 0 8px 0; border: 1px solid var(--border-color); border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
+                <summary class="sync-summary" style="padding: 10px 12px; display: flex; align-items: flex-start; gap: 8px; background: #ffffff;">
+                    <span style="font-size: 11px; font-weight: 800; color: #16a34a; background: #dcfce7; padding: 3px 0; width: 36px; text-align: center; border-radius: 4px; border: 1px solid #bbf7d0; flex-shrink: 0; margin-top: 1px;">Perf</span>
+                    <span class="rn-title">단어 400개 기준 네트워크 사용량</span>
+                </summary>
+                <div class="sync-content" style="background: #f8fafc; padding: 12px; border-top: 1px dashed var(--border-color);">
+                    <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                        <div style="padding: 8px 10px; background: #f1f5f9; border-bottom: 1px dashed #cbd5e1; font-size: 12px; font-weight: 900; color: var(--slack-blue); display: flex; align-items: center; gap: 6px;">👨‍💻 Tech Note</div>
+                        <div style="padding: 10px; display: flex; flex-direction: column; gap: 12px;">
+                            <div style="border-radius: 6px; border: 1px solid var(--border-color); overflow: hidden; margin-top: 2px;">
+                                <table class="tech-table" style="margin: 0; background: #ffffff;">
+                                    <tbody>
+                                        <tr><th style="width: 45%; background: #f8fafc; font-size: 11.5px; padding: 6px 8px;">순수 텍스트(JSON) 데이터</th><td style="font-size: 12px; font-weight: 600; color: var(--slack-blue); padding: 6px 8px;">~ 100 KB</td></tr>
+                                        <tr><th style="width: 45%; background: #f8fafc; font-size: 11.5px; padding: 6px 8px;">네트워크 헤더 및 오버헤드</th><td style="font-size: 12px; font-weight: 600; color: var(--slack-blue); padding: 6px 8px;">~ 5 KB</td></tr>
+                                        <tr><th style="width: 45%; background: #f8fafc; font-size: 11.5px; padding: 6px 8px;">1회 통신 총합</th><td style="font-size: 12px; font-weight: 600; color: #2563eb; padding: 6px 8px;">~ 105 KB</td></tr>
+                                        <tr><th style="width: 45%; background: #f8fafc; font-size: 11.5px; padding: 6px 8px;">월 100회 동기화 시</th><td style="font-size: 12px; font-weight: 600; color: #16a34a; padding: 6px 8px;">~ 10.5 MB</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+            <details class="sync-details" style="margin: 0 0 8px 0; border: 1px solid var(--border-color); border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
+                <summary class="sync-summary" style="padding: 10px 12px; display: flex; align-items: flex-start; gap: 8px; background: #ffffff;">
+                    <span style="font-size: 11px; font-weight: 800; color: #ea580c; background: #ffedd5; padding: 3px 0; width: 36px; text-align: center; border-radius: 4px; border: 1px solid #fed7aa; flex-shrink: 0; margin-top: 1px;">Arch</span>
+                    <span class="rn-title">브라우저 직접 동기화 방식 및 권한 격리 보호</span>
+                </summary>
+                <div class="sync-content" style="background: #f8fafc; padding: 12px; border-top: 1px dashed var(--border-color);">
+                    <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                        <div style="padding: 8px 10px; background: #f1f5f9; border-bottom: 1px dashed #cbd5e1; font-size: 12px; font-weight: 900; color: var(--slack-blue); display: flex; align-items: center; gap: 6px;">👨‍💻 Tech Note</div>
+                        <div style="padding: 10px; display: flex; flex-direction: column; gap: 12px;">
+                            <ul class="tech-list" style="color: #334155; line-height: 1.5; font-size: 12.5px; font-weight: 500;">
+                                <li style="margin-bottom: 4px; word-break: keep-all;"><strong>OAuth 2.0 Implicit Grant:</strong> 백엔드 서버 없이 Google Identity Services를 사용하여 클라이언트 브라우저에서 직접 인증 토큰을 획득하고 통신합니다.</li>
+                                <li style="margin-bottom: 4px; word-break: keep-all;"><strong>보안 격리 (drive.file):</strong> 애플리케이션이 <strong>직접 생성한 파일에만 접근 가능</strong>하므로, 타 개인 문서나 사진을 읽을 권한이 원천적으로 차단됩니다.</li>
+                                <li style="margin-bottom: 4px; word-break: keep-all;"><strong>메모리 볼라틸리티:</strong> Access Token은 디스크(Local Storage)가 아닌 브라우저 메모리에만 일시 보관되어 XSS 탈취 위험을 최소화합니다.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+            <details class="sync-details" style="margin: 0 0 8px 0; border: 1px solid var(--border-color); border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
+                <summary class="sync-summary" style="padding: 10px 12px; display: flex; align-items: flex-start; gap: 8px; background: #ffffff;">
+                    <span style="font-size: 11px; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 3px 0; width: 36px; text-align: center; border-radius: 4px; border: 1px solid #bae6fd; flex-shrink: 0; margin-top: 1px;">Auth</span>
+                    <span class="rn-title">자동 로그인 및 백그라운드 동기화가 불가능한 이유</span>
+                </summary>
+                <div class="sync-content" style="background: #f8fafc; padding: 12px; border-top: 1px dashed var(--border-color);">
+                    <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                        <div style="padding: 8px 10px; background: #f1f5f9; border-bottom: 1px dashed #cbd5e1; font-size: 12px; font-weight: 900; color: var(--slack-blue); display: flex; align-items: center; gap: 6px;">👨‍💻 Tech Note</div>
+                        <div style="padding: 10px; display: flex; flex-direction: column; gap: 12px;">
+                            <div style="font-size: 12.5px; color: #0369a1; line-height: 1.5; padding: 10px; background: #f0f9ff; border-radius: 8px; border: 1px solid #bae6fd; font-weight: 600;">💡 Junior's Note: 왜 사용자가 앱을 켤 때마다 알아서 로그인하고 뒤에서 동기화해주지 못할까요? 프론트엔드(Client-Side) 생태계의 보안과 구조적 한계 때문입니다!</div>
+                            <ul class="tech-list" style="color: #334155; line-height: 1.5; font-size: 12.5px; font-weight: 500;">
+                                <li style="margin-bottom: 4px; word-break: keep-all;"><strong style="color:var(--text-main);">1. 짧은 수명의 출입증 (Access Token):</strong> API에 접근하기 위한 토큰은 보안상 수명이 약 1시간으로 매우 짧습니다.</li>
+                                <li style="margin-bottom: 4px; word-break: keep-all;"><strong style="color:var(--text-main);">2. Refresh Token의 브라우저 저장 위험:</strong> 만료된 토큰을 연장하는 무제한 토큰(Refresh Token)을 브라우저에 저장하면, XSS 해킹 시 영구 권한이 탈취될 수 있어 구글이 이를 프론트 환경에서는 발급하지 않습니다.</li>
+                                <li style="margin-bottom: 4px; word-break: keep-all;"><strong style="color:var(--text-main);">3. 서드파티 쿠키 차단 (ITP 정책):</strong> 과거 유행하던 iframe 기반 백그라운드 토큰 갱신(Silent Refresh) 꼼수는 모던 브라우저의 프라이버시 정책 강화로 전부 차단되었습니다.</li>
+                                <li style="margin-bottom: 4px; word-break: keep-all;"><strong style="color:var(--text-main);">4. 서버리스(Serverless)의 한계:</strong> 앱이 꺼진 동안 동기화를 수행해 줄 24시간 가동 서버가 현재 아키텍처에는 존재하지 않습니다.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </details>
         </div>
         
         <div style="width: 100%; height: 1px; background: var(--border-color); margin: 6px 0;"></div>
@@ -361,43 +372,70 @@
             <div style="font-size:12.5px; color:var(--text-muted); line-height:1.4; margin-bottom:4px;">
                 네트워크 연결이 없는 오프라인 환경에서도 학습 기록을 JSON 파일로 직접 내보내거나 가져와 완벽하게 복원할 수 있습니다.
             </div>
-            <details class="sync-details">
-                <summary class="sync-summary">📴 오프라인 환경에서 로컬 파일 백업이 필수적인 이유</summary>
-                <div class="sync-content">
-                    <ul class="tech-list">
-                        <li><strong>Zero Network Dependency:</strong> 외부 API 서버나 클라우드 인증 없이 브라우저 내장 <code>Blob</code> 및 <code>FileReader API</code>만으로 디스크 I/O를 처리하므로, 비행기 모드나 지하철 등 완전한 오프라인 상태에서도 100% 정상 작동합니다.</li>
-                        <li><strong>LocalStorage 휘발성 방어 (Storage Eviction 대응):</strong> 모바일 OS(특히 iOS WebKit/Safari)는 기기 저장공간이 부족하거나 앱을 일정 기간(7일 이상) 미사용 시 LocalStorage를 예고 없이 삭제(Eviction)합니다. 중요한 학습 데이터는 물리적인 파일(JSON)로 다운로드해 보관하는 것이 데이터 손실을 막는 가장 안전한 방법입니다.</li>
-                    </ul>
-                </div>
-            </details>
-            <details class="sync-details">
-                <summary class="sync-summary">🔄 타 플랫폼(Anki/Quizlet) 이식성 및 유연한 파싱 엔진</summary>
-                <div class="sync-content">
-                    <ul class="tech-list">
-                        <li><strong>데이터 주권 보장 (Data Portability):</strong> 표준 JSON 및 TSV/CSV 형식과 호환되도록 설계되어 사용자가 원할 때 언제든 단어장 데이터를 텍스트 파일로 열람, 수정하거나 타 암기 앱으로 이전할 수 있습니다.</li>
-                        <li><strong>Robust Parser:</strong> 단어 리스트 배열 구조뿐만 아니라 탭(`\t`), 쉼표(`,`), 연속 공백 등으로 구분된 비정형 텍스트 파일도 정규식 기반 폴백(Fallback) 파서가 자동 감지하여 데이터를 안전하게 병합 복원합니다.</li>
-                    </ul>
-                </div>
-            </details>
-            <div style="display:flex; gap:8px; margin-top:2px;">
+
+            <div style="display:flex; gap:8px; margin-top:2px; margin-bottom:12px;">
                 <button class="base-btn" style="flex:1; background:#f8fafc; color:#475569; border:1px solid #cbd5e1; font-size:14px; padding:12px;" onclick="backupWeakWords()">⬇️ 로컬 백업</button>
                 <button class="base-btn" style="flex:1; background:#f8fafc; color:#475569; border:1px solid #cbd5e1; font-size:14px; padding:12px;" onclick="restoreWeakWords()">⬆️ 로컬 복원</button>
             </div>
+
+            <details class="sync-details" style="margin: 0 0 8px 0; border: 1px solid var(--border-color); border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
+                <summary class="sync-summary" style="padding: 10px 12px; display: flex; align-items: flex-start; gap: 8px; background: #ffffff;">
+                    <span style="font-size: 11px; font-weight: 800; color: #ea580c; background: #ffedd5; padding: 3px 0; width: 36px; text-align: center; border-radius: 4px; border: 1px solid #fed7aa; flex-shrink: 0; margin-top: 1px;">Arch</span>
+                    <span class="rn-title">오프라인 환경에서 로컬 백업이 필수적인 이유</span>
+                </summary>
+                <div class="sync-content" style="background: #f8fafc; padding: 12px; border-top: 1px dashed var(--border-color);">
+                    <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                        <div style="padding: 8px 10px; background: #f1f5f9; border-bottom: 1px dashed #cbd5e1; font-size: 12px; font-weight: 900; color: var(--slack-blue); display: flex; align-items: center; gap: 6px;">👨‍💻 Tech Note</div>
+                        <div style="padding: 10px; display: flex; flex-direction: column; gap: 12px;">
+                            <ul class="tech-list" style="color: #334155; line-height: 1.5; font-size: 12.5px; font-weight: 500;">
+                                <li style="margin-bottom: 4px; word-break: keep-all;"><strong>Zero Network Dependency:</strong> 외부 API나 클라우드 인증 없이 브라우저 내장 <code>Blob</code> 및 <code>FileReader API</code>만으로 파일 I/O를 처리하여 비행기 모드에서도 작동합니다.</li>
+                                <li style="margin-bottom: 4px; word-break: keep-all;"><strong>Storage Eviction 대응:</strong> 모바일 OS(특히 iOS Safari)는 용량 부족 시 7일 이상 미사용한 사이트의 LocalStorage를 경고 없이 삭제합니다. 물리적 파일 다운로드는 이를 방어하는 가장 확실한 수단입니다.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+            <details class="sync-details" style="margin: 0; border: 1px solid var(--border-color); border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
+                <summary class="sync-summary" style="padding: 10px 12px; display: flex; align-items: flex-start; gap: 8px; background: #ffffff;">
+                    <span style="font-size: 11px; font-weight: 800; color: #4f46e5; background: #e0e7ff; padding: 3px 0; width: 36px; text-align: center; border-radius: 4px; border: 1px solid #c7d2fe; flex-shrink: 0; margin-top: 1px;">Data</span>
+                    <span class="rn-title">타 플랫폼 이식성(Portability) 및 파싱 엔진</span>
+                </summary>
+                <div class="sync-content" style="background: #f8fafc; padding: 12px; border-top: 1px dashed var(--border-color);">
+                    <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                        <div style="padding: 8px 10px; background: #f1f5f9; border-bottom: 1px dashed #cbd5e1; font-size: 12px; font-weight: 900; color: var(--slack-blue); display: flex; align-items: center; gap: 6px;">👨‍💻 Tech Note</div>
+                        <div style="padding: 10px; display: flex; flex-direction: column; gap: 12px;">
+                            <ul class="tech-list" style="color: #334155; line-height: 1.5; font-size: 12.5px; font-weight: 500;">
+                                <li style="margin-bottom: 4px; word-break: keep-all;"><strong>Data Portability:</strong> Anki나 Quizlet 같은 타 암기 앱으로 언제든 이전할 수 있도록 표준 JSON / TSV 형식 호환을 보장합니다.</li>
+                                <li style="margin-bottom: 4px; word-break: keep-all;"><strong>Robust Parser:</strong> 탭(`\t`), 쉼표(`,`), 연속 공백 등으로 구분된 비정형 텍스트 파일도 정규식 폴백(Fallback) 파서가 자동 감지하여 오류 없이 안전하게 병합합니다.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </details>
         </div>
-        <button class="base-btn" style="background:var(--slack-purple); width:100%; padding:12px; margin-top:4px;" onclick="closeDataModal()">닫기</button>
+        <button class="base-btn" style="background:var(--slack-purple); width:100%; padding:12px; margin-top:12px;" onclick="closeDataModal()">닫기</button>
     </div>
 </div>
 
 <div id="autoplay-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeAutoplayModal()"><div class="modal-card"><div class="modal-header"><span>🤖 자동재생 설정</span><button onclick="closeAutoplayModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button></div><div class="sec-select-area"><div class="sec-select-title">⏱️ 정답 공개 전 대기 시간 선택 (기본: 2.0초)</div><div class="sec-btn-grid"><button class="sec-btn" onclick="selectTempAutoplaySec(0.5)">0.5초</button><button class="sec-btn" onclick="selectTempAutoplaySec(1.0)">1.0초</button><button class="sec-btn" onclick="selectTempAutoplaySec(1.5)">1.5초</button><button class="sec-btn" onclick="selectTempAutoplaySec(2.0)">2.0초 ⭐</button><button class="sec-btn" onclick="selectTempAutoplaySec(2.5)">2.5초</button><button class="sec-btn" onclick="selectTempAutoplaySec(3.0)">3.0초</button></div></div><div class="sec-select-area" style="margin-top: 4px;"><div class="sec-select-title">🗣️ 한글 뜻 음성 먼저 읽기 (기본: ON)</div><button id="ko-read-btn" class="sec-btn selected" onclick="toggleAutoplayReadKorean()" style="width:100%; padding:12px; font-weight:800; text-align:center;">🔊 한글 뜻 읽기 (ON)</button></div><button class="base-btn" style="background:#16a34a; width:100%; padding:12px; margin-top:6px;" onclick="confirmAutoplayModal()">확인 (Enter)</button></div></div>
 
+<!-- 음성 설정 모달 -->
 <div id="voice-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeVoiceModal()">
-    <div class="modal-card">
-        <div class="modal-header">
-            <span>🎙️ 음성 설정</span>
+    <div class="modal-card tall-modal" style="display:flex; flex-direction:column; padding:0 !important; overflow:hidden;">
+        <div class="modal-header" style="padding:20px 20px 10px 20px; flex-shrink:0;">
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <span>🎙️ 음성 설정</span>
+                <span style="font-size:11.5px; font-weight:600; color:var(--text-muted); letter-spacing:-0.5px;">(미선택 시 기본 전체 랜덤 반복)</span>
+            </div>
             <button onclick="closeVoiceModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button>
         </div>
-        <div id="voice-modal-content-area" style="display:flex; flex-direction:column; gap:16px;"></div>
-        <button class="base-btn" style="background:#16a34a; width:100%; padding:12px; margin-top:8px;" onclick="confirmVoiceSettings()">확인하기 (Enter)</button>
+        
+        <div id="voice-modal-content-area" style="flex:1; display:flex; flex-direction:column; min-height:0; padding:0 20px; overflow-y:auto;"></div>
+        
+        <div style="padding:16px 20px; border-top:1px solid var(--border-color); background:#ffffff; flex-shrink:0; z-index:10;">
+            <button class="base-btn" style="background:#16a34a; width:100%; margin:0; font-size:15px;" onclick="confirmVoiceSettings()">저장 및 확인하기 (Enter)</button>
+        </div>
     </div>
 </div>
 
@@ -423,7 +461,7 @@
     <div id="game-area" class="hidden">
         <div class="cards-grid" id="cards-wrapper"></div>
         <div class="bottom-action-area"><button id="prev-btn" class="bottom-prev-btn" onclick="handlePrevAction()" title="이전 단어 (←)">이전<span class="shortcut-text" style="margin-left: 2px;">(←)</span></button><button id="vague-btn" class="bottom-vague-btn" onclick="handleVagueAction(currentStartIndex)"><span id="vague-btn-text">몰라요 ❓</span> <span class="shortcut-text">(↓)</span></button><button id="action-btn" class="bottom-primary-btn" onclick="handlePrimaryAction()"><span id="action-btn-text">정답 확인 👁️</span> <span class="shortcut-text">(→)</span></button></div>
-        <div id="nyan-timer-container" class="nyan-timer-box"><div class="nyan-timer-header"><div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap; width: 100%;"><button id="autoplay-btn" class="autoplay-btn" onclick="handleAutoplayBtnClick()"><span id="autoplay-btn-label">🖐️<span class="hide-on-mobile"> 수동</span></span> <span class="shortcut-text">(S)</span></button><button id="mute-btn" class="mute-btn is-muted" onclick="toggleMute()"><span id="mute-btn-label">🔇 뮤트</span> <span class="shortcut-text">(D)</span></button><button id="voice-btn" class="voice-btn" onclick="openVoiceModal()">🎙️ 음성 설정 <span id="voice-mode-tag">(전체)</span> <span class="shortcut-text">(F)</span></button><button id="mobile-infinite-btn" class="mute-btn mobile-only-flex" onclick="toggleInfiniteLoop()" style="margin-left: auto;">♾️ 무한</button></div></div><div class="nyan-controls-row"><div class="nyan-track"><div class="nyan-trail" id="nyan-trail"><span class="nyan-cat" id="nyan-cat-emoji">🐱</span></div></div><span class="timer-text" id="study-timer-text">00:00</span><span class="progress" id="card-progress">0 / 0</span></div></div>
+        <div id="nyan-timer-container" class="nyan-timer-box"><div class="nyan-timer-header"><div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap; width: 100%;"><button id="autoplay-btn" class="autoplay-btn" onclick="handleAutoplayBtnClick()"><span id="autoplay-btn-label">🖐️<span class="hide-on-mobile"> 수동</span></span> <span class="shortcut-text">(A)</span></button><button id="voice-btn" class="voice-btn" onclick="openVoiceModal()">🎙️ 음성 설정 <span id="voice-mode-tag">(전체)</span> <span class="shortcut-text">(S)</span></button><button id="mobile-infinite-btn" class="voice-btn mobile-only-flex" onclick="toggleInfiniteLoop()" style="margin-left: auto;">♾️ 무한</button></div></div><div class="nyan-controls-row"><div class="nyan-track"><div class="nyan-trail" id="nyan-trail"><span class="nyan-cat" id="nyan-cat-emoji">🐱</span></div></div><span class="timer-text" id="study-timer-text">00:00</span><span class="progress" id="card-progress">0 / 0</span></div></div>
     </div>
     <div id="summary-area" class="hidden">
         <div id="capture-target"><div class="nyan-timer-header" style="margin-bottom: 10px; flex-shrink: 0;"><span id="summary-title-text" style="font-weight: 800; color: var(--slack-purple); font-size: 17px;">📋 복습 리스트</span><span class="progress" id="summary-count" style="background: rgba(236, 178, 46, 0.15); color: #d08700;">복습할 단어: 0개</span></div><div class="table-wrapper" id="summary-table-wrapper"><table id="summary-table"><thead><tr id="summary-thead-row"><th style="width: 45%;">KOREAN</th><th style="width: 43%;">ENGLISH</th><th id="summary-action-th" style="width: 12%; text-align: center;" class="hidden">관리</th></tr></thead><tbody id="summary-tbody"></tbody></table></div></div>
@@ -431,7 +469,7 @@
     </div>
 </div>
 
-<div class="app-version" onclick="openReleaseNoteModal()" title="릴리즈 노트 보기">v6.9.6 (Update Log)</div>
+<div class="app-version" onclick="openReleaseNoteModal()" title="릴리즈 노트 보기">v6.9.7 (Update Log)</div>
 <div id="toast-notification" class="toast-notification"></div>
 
 <script>
@@ -509,7 +547,7 @@
     function updateAIPipelineStep(stepNumber) { const steps = [ document.getElementById('step-1'), document.getElementById('step-2'), document.getElementById('step-3'), document.getElementById('step-4') ]; if (stepNumber <= 0) { steps.forEach(el => el && el.classList.remove('active', 'done', 'error')); if (stepNumber === -1) steps.forEach(el => el && el.classList.add('error')); return; } steps.forEach((el, index) => { if (!el) return; el.classList.remove('active', 'done', 'error'); const currentStep = index + 1; if (currentStep < stepNumber) el.classList.add('done'); else if (currentStep === stepNumber) el.classList.add('active'); }); }
     async function initLocalAIEngine() { if (aiEngine || isAiInitializing) return aiEngine; if (!navigator.gpu) { alert("⚠️ 현재 브라우저가 WebGPU를 지원하지 않아 AI 엔진을 시작할 수 없습니다."); return null; } isAiInitializing = true; updateAIPipelineStep(1); const config = getAISettings(); const shortName = config.modelName.includes('8B') ? '8B' : (config.modelName.includes('3B') ? '3B' : '1B'); const loadingText = document.getElementById('ai-loading-text'); const loadingOverlay = document.getElementById('ai-loading-overlay'); const isModalOpen = !document.getElementById('ai-feedback-modal').classList.contains('hidden'); if (!isModalOpen && loadingText && loadingOverlay) { loadingText.innerText = `🤖 ${shortName} AI 모델 로딩 중...`; loadingOverlay.classList.remove('hidden'); } try { aiEngine = await webllm.CreateMLCEngine(config.modelName, { initProgressCallback: (progress) => { const pct = Math.round(progress.progress * 100); const centerText = document.getElementById('ai-center-progress-text'); const step1Desc = document.getElementById('step-1-desc'); if (centerText && window.isFirstTokenForUI) centerText.innerText = `신경망 다운로드 및 VRAM 적재 중... (${pct}%)`; if (step1Desc) { if (pct < 100) { step1Desc.innerText = `다운로드 (${pct}%)`; step1Desc.style.color = '#2563eb'; } else { step1Desc.innerText = `VRAM 할당 완료`; step1Desc.style.color = ''; } } if (!isModalOpen && loadingText) { loadingText.innerText = `🤖 ${shortName} 엔진 준비 중: ${pct}%`; const fillEl = document.getElementById('ai-loading-progress-fill'); if (fillEl) fillEl.style.width = pct + '%'; } } }); isAiReady = true; } catch (err) { aiEngine = null; updateAIPipelineStep(-1); alert(`${shortName} AI 초기화 실패:\n` + err.message); } finally { isAiInitializing = false; if (loadingOverlay) loadingOverlay.classList.add('hidden'); } return aiEngine; }
     function stopAIComputation() { isAiCancelled = true; const inlineLoaderBtn = document.getElementById('ai-combined-stop-btn'); const streamingBody = document.getElementById('streaming-grammar-body'); const progressText = document.getElementById('ai-center-progress-text'); if (inlineLoaderBtn) inlineLoaderBtn.classList.add('hidden'); if (progressText) progressText.innerText = ''; if (streamingBody) { streamingBody.style.display = 'block'; if (window.isFirstTokenForUI) streamingBody.innerHTML = "<div style='color:#dc2626; font-weight:800;'>(🛑 연산 강제 종료됨)</div>"; else streamingBody.innerHTML = window.fullAiResponse + "<br><br><span style='color:#dc2626; font-weight:800;'>(🛑 종료됨)</span>"; } updateAIPipelineStep(-1); setTimeout(() => { if (aiEngine && typeof aiEngine.interruptGenerate === 'function') { try { aiEngine.interruptGenerate(); } catch(e){} } }, 300); }
-    async function requestLocalAIStreamingCorrection(userText, koreanText, onTokenCallback) { if (!navigator.gpu) { onTokenCallback("WebGPU 미지원 브라우저입니다."); return; } isAiCancelled = false; window.isFirstTokenForUI = true; window.fullAiResponse = ""; const inlineLoaderBtn = document.getElementById('ai-combined-stop-btn'); if (inlineLoaderBtn) inlineLoaderBtn.classList.remove('hidden'); if (!isAiReady) { const engine = await initLocalAIEngine(); if (!engine) { onTokenCallback("AI 로드 실패."); updateAIPipelineStep(-1); return; } } updateAIPipelineStep(2); const config = getAISettings(); try { const systemPrompt = `You are a strict and helpful English grammar teacher.\nAnalyze if the [Student's English Sentence] accurately and grammatically translates the [Intended Korean Meaning].\nYou MUST output your response ONLY in Korean, strictly following the EXACT format of the Example below.\nDo not add any extra greetings, markdown, or copy placeholders.\nIf possible, provide at least 2 grammar corrections and 2 expression improvements.\nWhen you finish the evaluation, STOP generating immediately.\n\n[Example Input]\n[Intended Korean Meaning] : "그녀는 새로운 언어를 배우는 데 관심이 있고 해외로 가고 싶어 한다."\n[Student's English Sentence] : "She interesting to learn new language and want go to abroad."\n\n[Example Output]\n1. 문법 오류\n✅ 감정을 나타낼 때는 과거분사형태를 써 매며, 전치사(in)와 동명사(-ing)가 연결되어야 합니다.\n전 : interesting to learn\n후 : interested in learning\n✅ 주어가 3인칭 단수이므로 동사에 -s가 붙어야 하며, abroad는 부사이므로 전치사 to가 필요 없습니다.\n전 : want go to abroad\n후 : wants to go abroad\n\n2. 표현 교정\n✅ '언어(language)'는 셀 수 있는 명사이므로 복수형(-s)으로 쓰는 가장 자연스럽습니다.\n전 : language\n후 : languages\n✅ 단순한 'go'보다는 문맥에 맞춰 'travel'이나 'study'를 사용하면 의미가 훨씬 풍부해집니다.\n전 : go abroad\n후 : travel abroad`; const userPrompt = `[Intended Korean Meaning] : "${koreanText}"\n[Student's English Sentence] : "${userText}"\n\n위의 [Example Output]과 똑같은 형식(1. 문법 오류, 2. 표현 교정)으로 한국어 피드백을 작성해. 제시된 한국어 의미를 바탕으로 학생의 영작을 평가해. 오류가 전혀 없다면 "✅ 완벽합니다!" 라고만 적어. 평가가 끝나면 즉시 출력을 멈춰.`; const asyncStream = await aiEngine.chat.completions.create({ messages: [ { role: "system", content: systemPrompt }, { role: "user", content: userPrompt } ], temperature: parseFloat(config.temperature), top_p: parseFloat(config.topP), max_tokens: parseInt(config.maxTokens, 10), frequency_penalty: 0.7, presence_penalty: 0.5, stop: ["[Intended", "[Student", "[Example", "3."], stream: true }); for await (const chunk of asyncStream) { if (isAiCancelled) break; if (window.isFirstTokenForUI) { updateAIPipelineStep(3); const pipeline = document.getElementById('ai-pipeline'); const streamingBody = document.getElementById('streaming-grammar-body'); const progressText = document.getElementById('ai-center-progress-text'); if (progressText) progressText.innerText = ''; if (pipeline) { pipeline.style.borderBottom = '1px dashed var(--border-color)'; pipeline.style.paddingBottom = '16px'; pipeline.style.marginBottom = '16px'; } if (streamingBody) streamingBody.style.display = 'block'; window.isFirstTokenForUI = false; } const delta = chunk.choices[0]?.delta?.content || ""; if (delta) { window.fullAiResponse += delta; onTokenCallback(delta); } } if (!isAiCancelled) { updateAIPipelineStep(5); const step4Desc = document.querySelector('#step-4 .step-desc'); if (step4Desc) step4Desc.innerText = "분석 완료"; } } catch (e) { if (!isAiCancelled) { onTokenCallback("\n\n(AI 토큰 생성 중 오류가 발생했습니다. 설정에서 Max Tokens를 줄여보세요.)"); updateAIPipelineStep(-1); } } finally { if (inlineLoaderBtn) inlineLoaderBtn.classList.add('hidden'); } }
+    async function requestLocalAIStreamingCorrection(userText, koreanText, onTokenCallback) { if (!navigator.gpu) { onTokenCallback("WebGPU 미지원 브라우저입니다."); return; } isAiCancelled = false; window.isFirstTokenForUI = true; window.fullAiResponse = ""; const inlineLoaderBtn = document.getElementById('ai-combined-stop-btn'); if (inlineLoaderBtn) inlineLoaderBtn.classList.remove('hidden'); if (!isAiReady) { const engine = await initLocalAIEngine(); if (!engine) { onTokenCallback("AI 로드 실패."); updateAIPipelineStep(-1); return; } } updateAIPipelineStep(2); const config = getAISettings(); try { const systemPrompt = `You are a strict and helpful English grammar teacher.\nAnalyze if the [Student's English Sentence] accurately and grammatically translates the [Intended Korean Meaning].\nYou MUST output your response ONLY in Korean, strictly following the EXACT format of the Example below.\nDo not add any extra greetings, markdown, or copy placeholders.\nIf possible, provide at least 2 grammar corrections and 2 expression improvements.\nWhen you finish the evaluation, STOP generating immediately.\n\n[Example Input]\n[Intended Korean Meaning] : "그녀는 새로운 언어를 배우는 데 관심이 있고 해외로 가고 싶어 한다."\n[Student's English Sentence] : "She interesting to learn new language and want go to abroad."\n\n[Example Output]\n1. 문법 오류\n✅ 감정을 나타낼 때는 과거분사형태를 써 매며, 전치사(in)와 동명사(-ing)가 연결되어야 합니다.\n전 : interesting to learn\n후 : interested in learning\n✅ 주어가 3인칭 단수이므로 동사에 -s가 붙어야 하며, abroad는 부사이므로 전치사 to가 필요 없습니다.\n전 : want go to abroad\n후 : wants to go abroad\n\n2. 표현 교정\n✅ '언어(language)'는 셀 수 있는 명사이므로 복수형(-s)으로 쓰는 가장 자연스럽습니다.\n전 : language\n후 : languages\n✅ 단순한 'go'보다는 문맥에 맞춰 'travel'이나 'study'를 사용하면 의미가 훨씬 풍부해집니다.\n전 : go abroad\n후 : travel abroad`; const userPrompt = `[Intended Korean Meaning] : "${koreanText}"\n[Student's English Sentence] : "${userText}"\n\n위의 [Example Output]과 똑같은 형식(1. 문법 오류, 2. 표현 교정)으로 한국어 피드백을 작성해. 제시된 한국어 의미를 바탕으로 학생의 영작을 평가해. 오류가 전혀 없다면 "✅ 완벽합니다!" 라고만 적어. 평가가 끝나면 즉시 출력을 멈춰.`; const asyncStream = await aiEngine.chat.completions.create({ messages: [ { role: "system", content: systemPrompt }, { role: "user", content: userPrompt } ], temperature: parseFloat(config.temperature), top_p: parseFloat(config.topP), maxTokens: parseInt(config.maxTokens, 10), frequency_penalty: 0.7, presence_penalty: 0.5, stop: ["[Intended", "[Student", "[Example", "3."], stream: true }); for await (const chunk of asyncStream) { if (isAiCancelled) break; if (window.isFirstTokenForUI) { updateAIPipelineStep(3); const pipeline = document.getElementById('ai-pipeline'); const streamingBody = document.getElementById('streaming-grammar-body'); const progressText = document.getElementById('ai-center-progress-text'); if (progressText) progressText.innerText = ''; if (pipeline) { pipeline.style.borderBottom = '1px dashed var(--border-color)'; pipeline.style.paddingBottom = '16px'; pipeline.style.marginBottom = '16px'; } if (streamingBody) streamingBody.style.display = 'block'; window.isFirstTokenForUI = false; } const delta = chunk.choices[0]?.delta?.content || ""; if (delta) { window.fullAiResponse += delta; onTokenCallback(delta); } } if (!isAiCancelled) { updateAIPipelineStep(5); const step4Desc = document.querySelector('#step-4 .step-desc'); if (step4Desc) step4Desc.innerText = "분석 완료"; } } catch (e) { if (!isAiCancelled) { onTokenCallback("\n\n(AI 토큰 생성 중 오류가 발생했습니다. 설정에서 Max Tokens를 줄여보세요.)"); updateAIPipelineStep(-1); } } finally { if (inlineLoaderBtn) inlineLoaderBtn.classList.add('hidden'); } }
     window.initLocalAIEngine = initLocalAIEngine; window.stopAIComputation = stopAIComputation; window.requestLocalAIStreamingCorrection = requestLocalAIStreamingCorrection; window.getAISettings = getAISettings; window.updateAIPipelineStep = updateAIPipelineStep; window.closeSpeakingModalAndNext = function() { closeSpeakingModal(); handlePrimaryAction(); }
 </script>
 
@@ -523,17 +561,15 @@
     let currentImageType = 'type1'; let currentImgNum = 1;
     let isAutoplay = false; let isInfiniteLoop = false; let autoplayIntervalSec = 2.0; let tempAutoplaySec = 2.0; let autoplayTimer = null; let isAutoplayReadKorean = true; 
     let sessionStartTimeMs = 0; let sessionTimerInterval = null;
-    let bgAudio = null; let isMuted = true; let synthAudioCtx = null; let availableVoices = [];
+    let synthAudioCtx = null; let availableVoices = [];
     let speakingTargetText = ''; let speakingType = 'sentence'; let speakingStep = 1; let speakingSpeechSpeed = 1.0; let isSpeakingTextVisible = false; let speakingRecognition = null; let speakingRecordedTranscript = ''; let sessionFinalTranscript = ''; let speakingTimerInterval = null; let speakingSeconds = 0; let isSpeakingRecording = false;
     let micAudioContext = null; let micAnalyser = null; let micAnimFrameId = null; let pendingLifeUrl = ''; 
     const PWA_VAGUE_STORAGE_KEY = 'pwa_vague_words_list_v2'; 
-    const SELECTED_RANDOM_TYPE_KEY = 'pongcrush_random_voice_type_v4';
     const SELECTED_FIXED_VOICE_KEY = 'pongcrush_fixed_voice_uri_v4';
 
-    let currentRandomType = 'ALL'; 
-    let currentFixedVoiceURI = '';
-    let tempRandomType = 'ALL';
-    let tempFixedVoiceURI = '';
+    let currentFixedVoiceURIs = [];
+    let tempFixedVoiceURIs = [];
+    let currentFixedVoiceIndex = 0;
     let lastVoiceURI = '';
 
     function getPWASavedWords() { try { const savedData = localStorage.getItem(PWA_VAGUE_STORAGE_KEY); return savedData ? JSON.parse(savedData) : []; } catch (error) { return []; } }
@@ -554,23 +590,32 @@
     }
     
     function loadSavedVoiceSettings() {
-        currentRandomType = localStorage.getItem(SELECTED_RANDOM_TYPE_KEY) || 'ALL';
-        currentFixedVoiceURI = localStorage.getItem(SELECTED_FIXED_VOICE_KEY) || '';
+        try {
+            const savedURIs = localStorage.getItem('pongcrush_fixed_voice_uris_v5');
+            currentFixedVoiceURIs = savedURIs ? JSON.parse(savedURIs) : [];
+        } catch(e) { currentFixedVoiceURIs = []; }
+        
+        if (currentFixedVoiceURIs.length === 0 && localStorage.getItem(SELECTED_FIXED_VOICE_KEY)) {
+            currentFixedVoiceURIs = [localStorage.getItem(SELECTED_FIXED_VOICE_KEY)];
+        }
         updateVoiceModeTagUI();
     }
+
     function updateVoiceModeTagUI() {
         const tag = document.getElementById('voice-mode-tag');
         if (tag) {
-            if (currentRandomType === 'MALE') tag.innerText = "(남성 랜덤)";
-            else if (currentRandomType === 'FEMALE') tag.innerText = "(여성 랜덤)";
-            else if (currentRandomType === 'FIXED') tag.innerText = "(고정)";
-            else tag.innerText = "(전체 랜덤)";
+            if (currentFixedVoiceURIs.length > 1) {
+                tag.innerText = `(고정 ${currentFixedVoiceURIs.length}개 교차)`;
+            } else if (currentFixedVoiceURIs.length === 1) {
+                tag.innerText = "(단일 고정)";
+            } else {
+                tag.innerText = "(전체 랜덤)";
+            }
         }
     }
 
     function openVoiceModal() {
-        tempRandomType = currentRandomType;
-        tempFixedVoiceURI = currentFixedVoiceURI;
+        tempFixedVoiceURIs = [...currentFixedVoiceURIs];
         const modal = document.getElementById('voice-modal');
         if (modal) modal.classList.remove('hidden');
         renderVoiceListUI();
@@ -581,22 +626,26 @@
         if (modal) modal.classList.add('hidden');
     }
 
-    function selectTempRandomType(type) {
-        tempRandomType = type;
+    function toggleTempFixedVoice(uri) {
+        const container = document.querySelector('.voice-list-container');
+        const scrollPos = container ? container.scrollTop : 0;
+        
+        const idx = tempFixedVoiceURIs.indexOf(uri);
+        if (idx > -1) {
+            tempFixedVoiceURIs.splice(idx, 1);
+        } else {
+            tempFixedVoiceURIs.push(uri);
+        }
         renderVoiceListUI();
-    }
-
-    function selectTempFixedVoice(uri) {
-        tempRandomType = 'FIXED';
-        tempFixedVoiceURI = uri;
-        renderVoiceListUI();
+        
+        const newContainer = document.querySelector('.voice-list-container');
+        if (newContainer) newContainer.scrollTop = scrollPos;
     }
 
     function confirmVoiceSettings() {
-        currentRandomType = tempRandomType;
-        currentFixedVoiceURI = tempFixedVoiceURI;
-        localStorage.setItem(SELECTED_RANDOM_TYPE_KEY, currentRandomType);
-        localStorage.setItem(SELECTED_FIXED_VOICE_KEY, currentFixedVoiceURI);
+        currentFixedVoiceURIs = [...tempFixedVoiceURIs];
+        localStorage.setItem('pongcrush_fixed_voice_uris_v5', JSON.stringify(currentFixedVoiceURIs));
+        currentFixedVoiceIndex = 0;
         updateVoiceModeTagUI();
         closeVoiceModal();
     }
@@ -620,114 +669,213 @@
         if (!('speechSynthesis' in window)) return [];
         let voices = window.speechSynthesis.getVoices();
         if (voices.length === 0 && availableVoices.length > 0) voices = availableVoices;
+        
         return voices.filter(v => {
             const lang = (v.lang || '').replace(/_/g, '-').toLowerCase();
-            return lang === 'en-us' || lang === 'en-gb';
+            return lang.startsWith('en-') || lang === 'en';
         });
     }
 
-    function getVoiceGender(voice) {
-        const name = (voice.name || '').toLowerCase();
-        const uri = (voice.voiceURI || '').toLowerCase();
-        const str = `${name} ${uri}`;
-
-        if (/\b(female|woman|girl)\b/i.test(str)) return 'FEMALE';
-        if (/\b(male|man|boy)\b/i.test(str)) return 'MALE';
-
-        const maleIdentifiers = [
-            'david', 'mark', 'george', 'guy', 'ryan', 'eric', 'christopher', 'roger', 
-            'steffan', 'thomas', 'jason', 'tony', 'bruce', 'ralph', 'albert', 'junior', 
-            'alex', 'daniel', 'fred', 'oliver', 'aaron', 'arthur', 'brian', 'evan', 'tom',
-            'en-us-x-iob', 'en-us-x-iol', 'en-us-x-tpc', 'en-gb-x-gbb', 'en-gb-x-gbd', 'en-gb-x-fis',
-            'male 1', 'male 2', 'male 3'
-        ];
-
-        const femaleIdentifiers = [
-            'zira', 'jenny', 'aria', 'hazel', 'susan', 'sonia', 'libby', 'maisie', 
-            'michelle', 'samantha', 'victoria', 'karen', 'moira', 'tessa', 'catherine', 
-            'mary', 'martha', 'sandy', 'serena', 'allison', 'ava', 'chloe', 'emma', 
-            'joelle', 'kendall', 'kimberly', 'lauren', 'nicole', 'fiona', 'laura', 
-            'melina', 'nicky', 'veena', 'amy', 'mia', 'ruth', 'stephanie', 'zoe',
-            'google us english', 'google uk english female',
-            'en-us-x-sfg', 'en-us-x-iom', 'en-us-x-tpf', 'en-gb-x-rjs', 'en-gb-x-gba', 'en-gb-x-gbc',
-            'female 1', 'female 2', 'female 3'
-        ];
-
-        if (maleIdentifiers.some(k => str.includes(k))) return 'MALE';
-        if (femaleIdentifiers.some(k => str.includes(k))) return 'FEMALE';
-
-        return 'UNKNOWN';
+    function getEngineCompany(name) {
+        const lower = name.toLowerCase();
+        if (lower.includes('google')) return { name: 'Google', color: '#ea4335' };
+        if (lower.includes('microsoft')) return { name: 'Microsoft', color: '#00a4ef' };
+        if (lower.includes('apple') || lower.includes('siri') || lower.includes('mac')) return { name: 'Apple', color: '#555555' };
+        if (lower.includes('samsung') || lower.includes('bixby')) return { name: 'Samsung', color: '#1428a0' };
+        if (lower.includes('amazon')) return { name: 'Amazon', color: '#ff9900' };
+        return { name: 'OS/System', color: '#64748b' };
     }
 
-    function renderVoiceListUI() {
+    function getCountryName(lang) {
+        const l = lang.toLowerCase();
+        if (l.includes('us')) return '미국';
+        if (l.includes('gb') || l.includes('uk')) return '영국';
+        if (l.includes('au')) return '호주';
+        if (l.includes('ca')) return '캐나다';
+        if (l.includes('in')) return '인도';
+        if (l.includes('ie')) return '아일랜드';
+        if (l.includes('za')) return '남아공';
+        if (l.includes('nz')) return '뉴질랜드';
+        if (l.includes('sg')) return '싱가포르';
+        if (l.includes('ph')) return '필리핀';
+        if (l.includes('ng')) return '나이지리아';
+        if (l.startsWith('en')) return '글로벌';
+        return '기타';
+    }
+
+function renderVoiceListUI() {
         const area = document.getElementById('voice-modal-content-area');
         if (!area) return;
         const enVoices = getEnVoices();
+        
         let html = `
-            <div class="sec-select-area">
-                <div class="sec-select-title">1️⃣ 음성 랜덤 모드 선택 (US/UK 한정)</div>
-                <div class="sec-btn-grid">
-                    <button class="sec-btn ${tempRandomType === 'ALL' ? 'selected' : ''}" onclick="selectTempRandomType('ALL')">🎲 전체 랜덤</button>
-                    <button class="sec-btn ${tempRandomType === 'MALE' ? 'selected' : ''}" onclick="selectTempRandomType('MALE')">👨 남성 랜덤</button>
-                    <button class="sec-btn ${tempRandomType === 'FEMALE' ? 'selected' : ''}" onclick="selectTempRandomType('FEMALE')">👩 여성 랜덤</button>
+            <div style="flex:1; display:flex; flex-direction:column; gap:16px; margin-top: 8px;">
+                
+                <!-- 🎓 Tech Blog Accordions (최상단 배치) -->
+                <div class="sec-select-area" style="flex-shrink:0; display:flex; flex-direction:column; gap:8px;">
+                    <div style="font-size: 13.5px; font-weight: 900; color: var(--slack-purple); margin-bottom: 4px; padding-left: 2px;">
+                        🎓 주니어 프론트엔드를 위한 TTS 아키텍처 딥다이브
+                    </div>
+
+                    <!-- Accordion 1: 동작 원리 & GC 버그 -->
+                    <details class="sync-details" style="margin: 0; border: 1px solid var(--border-color); border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
+                        <summary class="sync-summary" style="padding: 10px 12px; display: flex; align-items: flex-start; gap: 8px; background: #ffffff;">
+                            <span style="font-size: 11px; font-weight: 800; color: #4f46e5; background: #e0e7ff; padding: 3px 0; width: 44px; text-align: center; border-radius: 4px; border: 1px solid #c7d2fe; flex-shrink: 0; margin-top: 1px;">Arch</span>
+                            <span class="rn-title" style="font-size: 13px; font-weight: 800; color: var(--text-main); margin-top: 1px;">1. Web Speech API: 브라우저와 OS의 보이지 않는 릴레이</span>
+                        </summary>
+                        <div class="sync-content" style="background: #f8fafc; padding: 12px; border-top: 1px dashed var(--border-color);">
+                            <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                                <div style="padding: 8px 10px; background: #f1f5f9; border-bottom: 1px dashed #cbd5e1; font-size: 12px; font-weight: 900; color: var(--slack-blue); display: flex; align-items: center; gap: 6px;">👨‍💻 Core Pipeline & Call Stack</div>
+                                <div style="padding: 10px; display: flex; flex-direction: column; gap: 10px;">
+                                    <div style="font-size: 12px; font-weight: 600; color: var(--text-main); line-height: 1.5; word-break: keep-all;">
+                                        <code>speechSynthesis.speak()</code>를 호출하면 브라우저는 하드웨어 스피커에 직접 접근하지 못하고 아래와 같은 다단계 릴레이를 거칩니다.
+                                    </div>
+                                    
+                                    <div style="border-radius: 6px; border: 1px solid var(--border-color); overflow: hidden;">
+                                        <table class="tech-table" style="margin: 0; background: #ffffff;">
+                                            <tbody>
+                                                <tr><th style="width: 25%; font-size: 11px;">1. JS Call</th><td style="font-size: 11.5px;"><code>speechSynthesis.speak(utterance)</code> 인스턴스를 큐(Queue)에 등록</td></tr>
+                                                <tr><th style="width: 25%; font-size: 11px;">2. IPC 중계</th><td style="font-size: 11.5px;">샌드박스 렌더러 -> 브라우저 메인 Audio Service 프로세스로 텍스트 전달</td></tr>
+                                                <tr><th style="width: 25%; font-size: 11px;">3. OS 위임</th><td style="font-size: 11.5px;">Windows SAPI / macOS NSSpeechSynthesizer 등의 네이티브 드라이버로 중계</td></tr>
+                                                <tr><th style="width: 25%; font-size: 11px;">4. 비동기 이벤트</th><td style="font-size: 11.5px;">오디오 백그라운드 스레드에서 음소 합성 후 <code>onend</code>, <code>onerror</code>를 메인 스레드로 디스패치</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <ul class="tech-list" style="margin:0; padding-left:16px; color:#334155; line-height:1.5; font-size:12.5px; font-weight:500;">
+                                        <li style="margin-bottom:6px;"><strong>🚨 15초 멈춤 현상(GC Bug):</strong> 긴 문장을 읽을 때 중간에 음성이 뚝 끊기는 치명적인 버그가 있습니다. 함수가 끝나며 <code>utterance</code> 변수의 스코프가 닫히면, JS 가비지 컬렉터(GC)가 음성이 재생 중임에도 객체를 메모리에서 날려버리기 때문입니다.</li>
+                                        <li><strong>💡 Hotfix 패턴:</strong> 본 앱에서는 <code>window.ttsUtterances.push(utter)</code>를 통해 <strong>전역 배열에 강제로 참조(Reference)를 유지</strong>시켜 GC를 방어하고 있습니다. (메모리 누수 방지를 위해 최대 10개 큐로 관리)</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+
+                    <!-- Accordion 2: 브라우저 전쟁 & Win11 오프라인 내추럴 팩의 진실 -->
+                    <details class="sync-details" style="margin: 0; border: 1px solid var(--border-color); border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
+                        <summary class="sync-summary" style="padding: 10px 12px; display: flex; align-items: flex-start; gap: 8px; background: #ffffff;">
+                            <span style="font-size: 11px; font-weight: 800; color: #dc2626; background: #fee2e2; padding: 3px 0; width: 44px; text-align: center; border-radius: 4px; border: 1px solid #fecaca; flex-shrink: 0; margin-top: 1px;">Lock-in</span>
+                            <span class="rn-title" style="font-size: 13px; font-weight: 800; color: var(--text-main); margin-top: 1px;">2. 크롬 vs 엣지 전쟁 & Win11 내추럴 팩 오프라인 구동의 진실</span>
+                        </summary>
+                        <div class="sync-content" style="background: #f8fafc; padding: 12px; border-top: 1px dashed var(--border-color);">
+                            <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                                <div style="padding: 8px 10px; background: #f1f5f9; border-bottom: 1px dashed #cbd5e1; font-size: 12px; font-weight: 900; color: var(--slack-blue); display: flex; align-items: center; gap: 6px;">⚔️ 벤더사별 음성 엔진 격리 비교</div>
+                                <div style="padding: 10px; display: flex; flex-direction: column; gap: 10px;">
+                                    <div style="border-radius: 6px; border: 1px solid var(--border-color); overflow: hidden;">
+                                        <table class="tech-table" style="margin: 0; background: #ffffff;">
+                                            <tbody>
+                                                <tr><th style="width: 25%; font-size: 11px;">Google Chrome</th><td style="font-size: 11.5px; color:#ea4335;">Google Network Voices 내장 (타 브라우저 접근 불가 ❌)</td></tr>
+                                                <tr><th style="width: 25%; font-size: 11px;">MS Edge</th><td style="font-size: 11.5px; color:#00a4ef;">Azure 기반 Natural Voices 온라인 스트리밍 독점 제공 💎</td></tr>
+                                                <tr><th style="width: 25%; font-size: 11px;">Apple Safari</th><td style="font-size: 11.5px; color:#475569;">macOS/iOS Siri 및 Compact 로컬 보이스 사용</td></tr>
+                                                <tr><th style="width: 25%; font-size: 11px;">Windows 기본</th><td style="font-size: 11.5px; color:#d97706;">구형 SAPI 기계음(David, Zira) -> 깡통 로봇 소리 폴백</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <ul class="tech-list" style="margin:0; padding-left:16px; color:#334155; line-height:1.5; font-size:12.5px; font-weight:500;">
+                                        <li style="margin-bottom:6px;"><strong>🤔 윈도우 11 'Natural 음성 팩'을 받으면 오프라인 엣지에서 될까?</strong><br>
+                                        -> <strong>정답은 YES & NO! (반은 맞고 반은 다릅니다)</strong>
+                                        <br>- <strong>온라인 엣지 Natural:</strong> MS Azure 클라우드 대규모 신경망에서 합성해 음질이 압도적이지만 인터넷 끊김 시 즉시 사용 불가합니다.
+                                        <br>- <strong>Win11 설정 다운로드 Natural:</strong> <code>설정 > 시간 및 언어 > 음성</code>에서 '자연스러운 음성(Natural)' 언어 팩을 다운로드하면, Windows OneCore 로컬 신경망 모델이 설치되어 <strong>오프라인 상태의 엣지 및 타 브라우저에서도 고품질 음성을 로컬 연산으로 구동</strong>할 수 있습니다!</li>
+                                        <li><strong>🔒 Vendor Lock-in:</strong> 크롬은 구글 음성을 엣지에게 안 주고, 엣지는 Azure 음성을 크롬에게 안 줍니다. 결국 클라이언트 API만으로는 모든 유저에게 100% 동일한 고품질 음성을 보장할 수 없습니다.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+
+                    <!-- Accordion 3: 상용 서비스급 아키텍처 -->
+                    <details class="sync-details" style="margin: 0; border: 1px solid var(--border-color); border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
+                        <summary class="sync-summary" style="padding: 10px 12px; display: flex; align-items: flex-start; gap: 8px; background: #ffffff;">
+                            <span style="font-size: 11px; font-weight: 800; color: #16a34a; background: #dcfce7; padding: 3px 0; width: 44px; text-align: center; border-radius: 4px; border: 1px solid #bbf7d0; flex-shrink: 0; margin-top: 1px;">Pro</span>
+                            <span class="rn-title" style="font-size: 13px; font-weight: 800; color: var(--text-main); margin-top: 1px;">3. 듀오링고, 스픽은 어떻게 상용급 오디오를 안정적으로 제공할까?</span>
+                        </summary>
+                        <div class="sync-content" style="background: #f8fafc; padding: 12px; border-top: 1px dashed var(--border-color);">
+                            <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                                <div style="padding: 8px 10px; background: #f1f5f9; border-bottom: 1px dashed #cbd5e1; font-size: 12px; font-weight: 900; color: var(--slack-blue); display: flex; align-items: center; gap: 6px;">🚀 Enterprise Zero-Compute Architecture</div>
+                                <div style="padding: 10px; display: flex; flex-direction: column; gap: 10px;">
+                                    <div style="font-size: 12px; font-weight: 600; color: var(--text-main); line-height: 1.5; word-break: keep-all;">
+                                        상용 프로덕트는 브라우저 내장 Web Speech API의 파편화와 버그를 피하기 위해 <strong>Server-side 렌더링 + CDN 캐싱 파이프라인</strong>을 구축합니다.
+                                    </div>
+
+                                    <div style="border-radius: 6px; border: 1px solid var(--border-color); overflow: hidden;">
+                                        <table class="tech-table" style="margin: 0; background: #ffffff;">
+                                            <tbody>
+                                                <tr><th style="width: 25%; font-size: 11px;">1. 결정론적 해시</th><td style="font-size: 11.5px;"><code>SHA-256(Text + VoiceID + Rate)</code>로 고유 Key 추출</td></tr>
+                                                <tr><th style="width: 25%; font-size: 11px;">2. 최초 합성 (Miss)</th><td style="font-size: 11.5px;">AWS Polly / ElevenLabs API 1회 호출 -> MP3 파일 생성 후 S3 적재</td></tr>
+                                                <tr><th style="width: 25%; font-size: 11px;">3. 엣지 캐시 (Hit)</th><td style="font-size: 11.5px;">CloudFront(CDN) 엣지 로케이션에 캐싱 -> <strong>추가 API 비용 0원 & 20ms 이내 서빙</strong></td></tr>
+                                                <tr><th style="width: 25%; font-size: 11px;">4. 3단계 폴백</th><td style="font-size: 11.5px;">CDN MP3 재생 실패 시 -> 브라우저 TTS -> Web Audio API 비프음 폴스루</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <div style="font-size: 12px; color: #0284c7; font-weight: 700; background: #f0f9ff; padding: 8px; border-radius: 6px; line-height: 1.4;">
+                                        🎯 핵심 인사이트: 1,000만 명의 유저가 같은 단어를 1억 번 들어도 최초 1회 API 비용 외에는 서버 연산 비용이 들지 않는 것이 프로덕션 레벨의 오디오 설계 표준입니다.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
                 </div>
-            </div>
-            <div class="sec-select-area">
-                <div class="sec-select-title">2️⃣ 특정 음성 고정 선택 및 테스트 (총 ${enVoices.length}개 감지됨)</div>
-                <div class="voice-list-container" style="max-height: 220px; opacity: 0.95;">
+
+                <!-- Voice List Section (아코디언 아래 배치) -->
+                <div class="voice-list-container" style="flex:1; overflow-y:auto; min-height:0; opacity: 0.95; padding: 4px; border:none; background:transparent;">
         `;
+        
         if (enVoices.length === 0) {
-            html += '<div style="padding:10px; text-align:center; color:#64748b;">지원되는 US/UK 영어가 없습니다. (시스템 엔진 확인 요망)</div>';
+            html += '<div style="padding:10px; text-align:center; color:#64748b; font-weight:800; font-size:13px;">지원되는 영어 음성 엔진이 없습니다. (시스템 환경 확인 요망)</div>';
         } else {
             enVoices.forEach(voice => {
-                const g = getVoiceGender(voice);
-                const icon = g === 'MALE' ? '👨' : (g === 'FEMALE' ? '👩' : '🤖');
-                const badgeText = g === 'MALE' ? '남성' : (g === 'FEMALE' ? '여성' : '미분류');
-                const isSelected = (tempRandomType === 'FIXED' && tempFixedVoiceURI === voice.voiceURI);
+                const isSelected = tempFixedVoiceURIs.includes(voice.voiceURI);
+                const orderIndex = tempFixedVoiceURIs.indexOf(voice.voiceURI);
+                const orderBadge = isSelected ? `<span style="background:#ea580c; color:#fff; border-radius:50%; width:16px; height:16px; display:inline-flex; align-items:center; justify-content:center; font-size:10px; margin-right:6px; flex-shrink:0;">${orderIndex + 1}</span>` : '';
                 
+                const company = getEngineCompany(voice.name);
+                let cleanName = voice.name.replace(/(Google|Microsoft|Apple|Siri|Samsung|Amazon|Bixby|Cortana)\s*-?\s*/gi, '').replace(/english/gi, '').replace(/\(\s*\)/g, '').replace(/\s{2,}/g, ' ').trim() || 'Voice';
+                
+                const nameChip = `<span style="background:${company.color}15; color:${company.color}; padding:3px 6px; border-radius:6px; font-size:10px; font-weight:900; border:1px solid ${company.color}30; white-space:nowrap; flex-shrink:0;">${company.name}</span>`;
+                
+                const countryName = getCountryName(voice.lang);
+                const countryChip = `<span class="voice-badge" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:2px 6px; font-weight:800; flex-shrink:0;">🌍 ${countryName}</span>`;
+                const localChip = `<span class="voice-badge" style="background:${voice.localService ? '#dcfce7' : '#fce7f3'}; color:${voice.localService ? '#16a34a' : '#db2777'}; border:1px solid ${voice.localService ? '#bbf7d0' : '#fbcfe8'}; font-weight:800; flex-shrink:0;">${voice.localService ? '로컬' : '네트워크'}</span>`;
+
                 html += `
-                    <div class="voice-item ${isSelected ? 'selected' : ''}" onclick="selectTempFixedVoice('${voice.voiceURI.replace(/'/g, "\\'")}')" style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
-                        <div class="voice-info" style="flex:1;">
-                            <span class="voice-name" style="font-size: 13px; font-weight:${isSelected ? '900' : '700'}; color:${isSelected ? '#c2410c' : 'inherit'};">${icon} ${voice.name}</span>
-                            <span class="voice-lang" style="font-size: 10px;">🌐 ${voice.lang} <span class="voice-badge" style="background:#e0f2fe; color:#0369a1;">${badgeText}</span> <span class="voice-badge">${voice.localService ? '로컬' : '네트워크'}</span></span>
+                    <div class="voice-item ${isSelected ? 'selected' : ''}" onclick="toggleTempFixedVoice('${voice.voiceURI.replace(/'/g, "\\'")}')">
+                        <div class="voice-info" style="flex:1; overflow:hidden; min-width:0; padding-right:8px;">
+                            <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px; overflow:hidden;">
+                                ${orderBadge}
+                                ${nameChip}
+                                <span class="voice-name" style="font-size: 14px; font-weight:${isSelected ? '900' : '700'}; color:${isSelected ? '#c2410c' : 'inherit'}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:block;">${cleanName}</span>
+                            </div>
+                            <div style="display:flex; gap:4px;">
+                                ${countryChip}
+                                ${localChip}
+                            </div>
                         </div>
-                        <button class="card-action-btn" style="background:#e2e8f0; color:#0f172a; padding:6px 10px; font-size:16px; border:none; box-shadow:0 1px 2px rgba(0,0,0,0.1); margin-left:8px;" onclick="testVoice('${voice.voiceURI.replace(/'/g, "\\'")}', event)" title="테스트 문장 듣기">▶️</button>
+                        <button class="card-action-btn" style="background:#e2e8f0; color:#0f172a; padding:6px 10px; font-size:16px; border:none; box-shadow:0 1px 2px rgba(0,0,0,0.1); margin-left:8px; flex-shrink:0;" onclick="testVoice('${voice.voiceURI.replace(/'/g, "\\'")}', event)" title="테스트 문장 듣기">▶️</button>
                     </div>`;
             });
         }
-        html += `</div></div>`;
+        
+        html += `</div></div>`; // container and wrapper close
         area.innerHTML = html;
-    }
-    
+    }    
+
+
     function getRandomOrSelectedVoice() {
         const enVoices = getEnVoices();
         if (enVoices.length === 0) return null;
         
-        // 1. 고정 모드인 경우
-        if (currentRandomType === 'FIXED' && currentFixedVoiceURI) {
-            const fixedVoice = enVoices.find(v => v.voiceURI === currentFixedVoiceURI);
-            if (fixedVoice) return fixedVoice;
+        if (currentFixedVoiceURIs.length > 0) {
+            const validVoices = currentFixedVoiceURIs.map(uri => enVoices.find(v => v.voiceURI === uri)).filter(Boolean);
+            if (validVoices.length > 0) {
+                const voice = validVoices[currentFixedVoiceIndex % validVoices.length];
+                currentFixedVoiceIndex++;
+                return voice;
+            }
         }
 
-        // 2. 랜덤 모드인 경우
-        let pool = [];
-        if (currentRandomType === 'MALE') {
-            pool = enVoices.filter(v => getVoiceGender(v) === 'MALE');
-            if (pool.length === 0) {
-                pool = enVoices.filter(v => getVoiceGender(v) !== 'FEMALE');
-            }
-        } else if (currentRandomType === 'FEMALE') {
-            pool = enVoices.filter(v => getVoiceGender(v) === 'FEMALE');
-            if (pool.length === 0) {
-                pool = enVoices.filter(v => getVoiceGender(v) !== 'MALE');
-            }
-        } else {
-            pool = enVoices;
-        }
-
-        if (pool.length === 0) pool = enVoices;
-
-        // 동일한 음성이 연속으로 나오는 것을 방지 (pool 개수가 2개 이상일 때)
+        let pool = enVoices;
         if (pool.length > 1 && lastVoiceURI) {
             const candidates = pool.filter(v => v.voiceURI !== lastVoiceURI);
             if (candidates.length > 0) {
@@ -753,7 +901,7 @@
     function closeDataModal() { const modal = document.getElementById('data-modal'); if (modal) modal.classList.add('hidden'); }
     async function processImportedData(rawContent) { let importedList = []; if (typeof rawContent === 'string') { const trimmed = rawContent.trim(); if (trimmed.startsWith('[') || trimmed.startsWith('{')) { try { const parsed = JSON.parse(trimmed); if (Array.isArray(parsed)) { importedList = parsed; } else if (parsed && typeof parsed === 'object') { const possibleArray = Object.values(parsed).find(v => Array.isArray(v)); if (possibleArray) importedList = possibleArray; else if (parsed.ko && parsed.en) importedList = [parsed]; } } catch(e) { console.warn("JSON parse failed, trying line parse:", e); } } if (importedList.length === 0) { const lines = trimmed.split(/\r?\n/); lines.forEach(line => { const parts = line.split(/\t|,|\s{2,}/); if (parts.length >= 2) { importedList.push({ ko: parts[0].trim(), en: parts[1].trim(), exEn: parts[2] ? parts[2].trim() : '', exKo: parts[3] ? parts[3].trim() : '', synonyms: parts[4] ? parts[4].trim() : '', vagueCount: 1 }); } }); } } else if (Array.isArray(rawContent)) { importedList = rawContent; } if (!Array.isArray(importedList) || importedList.length === 0) { throw new Error("올바른 백업 형식이 아니거나 데이터가 비어 있습니다."); } if (!window.isAllDbLoaded) { const confirmLoad = confirm("⚠️ 현재 브라우저 메모리에 전체 단어장 DB가 로드되어 있지 않습니다.\n\n완벽한 복원을 위해 기본 단어장(스피킹, 라이팅, 초록이, 라잎)을 모두 불러오시겠습니까?"); if (confirmLoad) { const loadingModal = document.getElementById('loading-overlay'); const loadingText = document.getElementById('loading-text'); if (loadingModal) { if (loadingText) loadingText.innerText = "단어장 통합 데이터 로딩 중..."; loadingModal.classList.remove('hidden'); } try { const urls = [ 'https://docs.google.com/spreadsheets/d/1m7KXifCB6txkKEOHqApMWOR4MQwqb6Ji1Dm-hRJYzLc/edit?usp=sharing', 'https://docs.google.com/spreadsheets/d/1UYTEv88wdKsSS2kkB-UylHAfQAlV6yrvjwVNecG6m64/edit?usp=sharing', 'https://docs.google.com/spreadsheets/d/1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U/edit?usp=sharing', 'https://docs.google.com/spreadsheets/d/1ElLraPc80Uez8innH6RfXOBz36IV9ARXnkAiUembWH0/edit?usp=sharing' ]; const results = await Promise.all(urls.map(url => fetchSheetData(url))); loadedRawWordList = []; results.forEach(res => { loadedRawWordList = loadedRawWordList.concat(res); }); window.isAllDbLoaded = true; } catch (err) { if (loadingModal) loadingModal.classList.add('hidden'); throw new Error("통합 데이터를 불러오는데 실패했습니다: " + err.message); } if (loadingModal) loadingModal.classList.add('hidden'); if (loadingText) loadingText.innerText = "단어장 데이터를 가져오는 중..."; } } let currentList = getPWASavedWords(); let addedCount = 0; let updatedCount = 0; importedList.forEach(item => { if (item && item.ko && item.en) { let syn = item.synonyms || ''; let exEn = item.exEn || ''; let exKo = item.exKo || ''; const matchKo = sanitizeForMatch(item.ko); const matchEn = sanitizeForMatch(item.en); if (loadedRawWordList && loadedRawWordList.length > 0) { const match = loadedRawWordList.find(r => sanitizeForMatch(r.ko) === matchKo && sanitizeForMatch(r.en) === matchEn); if (match) { if (!syn && match.synonyms) syn = match.synonyms; if (!exEn && match.exEn) exEn = match.exEn; if (!exKo && match.exKo) exKo = match.exKo; } } const existingIdx = currentList.findIndex(w => sanitizeForMatch(w.ko) === matchKo && sanitizeForMatch(w.en) === matchEn); if (existingIdx > -1) { currentList[existingIdx].vagueCount = Math.max(currentList[existingIdx].vagueCount || 1, item.vagueCount || 1); if (!currentList[existingIdx].synonyms && syn) currentList[existingIdx].synonyms = syn; if (!currentList[existingIdx].exEn && exEn) currentList[existingIdx].exEn = exEn; if (!currentList[existingIdx].exKo && exKo) currentList[existingIdx].exKo = exKo; updatedCount++; } else { currentList.push({ ko: item.ko, en: item.en, exEn: exEn, exKo: exKo, synonyms: syn, category: item.category || '기타', dayIndex: item.dayIndex !== undefined ? item.dayIndex : -1, vagueCount: item.vagueCount || 1 }); addedCount++; } } }); localStorage.setItem(PWA_VAGUE_STORAGE_KEY, JSON.stringify(currentList)); updatePWAReviewButtonUI(); alert(`백업 데이터에서 ${importedList.length}개 단어를 확인했습니다.\n(신규 추가: ${addedCount}개, 병합 업데이트: ${updatedCount}개 완료)`); }
     function restoreWeakWords() { const input = document.createElement('input'); input.type = 'file'; input.accept = ".json,.txt,text/plain,application/json,*/*"; input.style.display = 'none'; input.onchange = function(event) { const file = event.target.files && event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = async function(e) { try { await processImportedData(e.target.result); closeDataModal(); } catch (err) { alert("파일 복원 실패: " + err.message); } }; reader.onerror = function() { alert("파일을 읽는 중 에러가 발생했습니다."); }; reader.readAsText(file, 'UTF-8'); }; document.body.appendChild(input); input.click(); setTimeout(() => { document.body.removeChild(input); }, 1000); }
-    window.syncToGoogleDrive = async function() { if (!GOOGLE_CLIENT_ID) { alert("스크립트 상단에 GOOGLE_CLIENT_ID를 먼저 입력해야 합니다."); return; } let localList = getPWASavedWords(); if (localList.length === 0) { alert("백업할 취약 단어가 없습니다."); return; } requestGoogleAuth(async () => { const loadingOverlay = document.getElementById('loading-overlay'); const loadingText = document.getElementById('loading-text'); loadingText.innerText = "구글 드라이브와 병합(Merge) 중..."; loadingOverlay.classList.remove('hidden'); try { const fileName = 'pongcrush_sync_data.json'; const res = await gapi.client.drive.files.list({ q: `name = '${fileName}' and trashed = false`, fields: 'files(id, name)', spaces: 'drive' }); const files = res.result.files; let mergedList = [...localList]; let addedCount = 0; if (files && files.length > 0) { const fileData = await gapi.client.drive.files.get({ fileId: files[0].id, alt: 'media' }); const existingList = typeof fileData.body === 'string' ? JSON.parse(fileData.body) : fileData.body; if (Array.isArray(existingList)) { existingList.forEach(existingItem => { const matchKo = sanitizeForMatch(existingItem.ko); const matchEn = sanitizeForMatch(existingItem.en); const localIndex = mergedList.findIndex(w => sanitizeForMatch(w.ko) === matchKo && sanitizeForMatch(w.en) === matchEn); if (localIndex > -1) { mergedList[localIndex].vagueCount = Math.max(mergedList[localIndex].vagueCount || 1, existingItem.vagueCount || 1); } else { mergedList.push(existingItem); addedCount++; } }); } const fileContent = new Blob([JSON.stringify(mergedList, null, 2)], { type: 'application/json' }); await fetch(`https://www.googleapis.com/upload/drive/v3/files/${files[0].id}?uploadType=media`, { method: 'PATCH', headers: { Authorization: `Bearer ${gapi.client.getToken().access_token}`, 'Content-Type': 'application/json' }, body: fileContent }); localStorage.setItem(PWA_VAGUE_STORAGE_KEY, JSON.stringify(mergedList)); updatePWAReviewButtonUI(); alert(`✅ 구글 드라이브와 기존 데이터 병합 완료!\n(기존 파일에서 로컬로 추가로 가져온 단어: ${addedCount}개)`); } else { const fileContent = new Blob([JSON.stringify(mergedList, null, 2)], { type: 'application/json' }); const metadata = { name: fileName, mimeType: 'application/json' }; const form = new FormData(); form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' })); form.append('file', fileContent); await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { Authorization: `Bearer ${gapi.client.getToken().access_token}` }, body: form }); alert('✅ 구글 드라이브에 새 백업 파일이 생성되었습니다!'); } closeDataModal(); } catch (err) { alert('❌ 구글 드라이브 동기화 실패: ' + err.message); } finally { loadingOverlay.classList.add('hidden'); loadingText.innerText = "단어장 데이터를 가져오는 중..."; } }); };
+    window.syncToGoogleDrive = async function() { if (!GOOGLE_CLIENT_ID) { alert("스크립트 상단에 GOOGLE_CLIENT_ID를 먼저 입력해야 합니다."); return; } let localList = getPWASavedWords(); if (localList.length === 0) { alert("백업할 취약 단어가 없습니다."); return; } requestGoogleAuth(async () => { const loadingOverlay = document.getElementById('loading-overlay'); const loadingText = document.getElementById('loading-text'); loadingText.innerText = "구글 드라이브와 병합(Merge) 중..."; loadingOverlay.classList.remove('hidden'); try { const fileName = 'pongcrush_sync_data.json'; const res = await gapi.client.drive.files.list({ q: `name = '${fileName}' and trashed = false`, fields: 'files(id, name)', spaces: 'drive' }); const files = res.result.files; let mergedList = [...localList]; let addedCount = 0; if (files && files.length > 0) { const fileData = await gapi.client.drive.files.get({ fileId: files[0].id, alt: 'media' }); const existingList = typeof fileData.body === 'string' ? JSON.parse(fileData.body) : fileData.body; if (Array.isArray(existingList)) { existingList.forEach(existingItem => { const matchKo = sanitizeForMatch(existingItem.ko); const matchEn = sanitizeForMatch(existingItem.en); const localIndex = mergedList.findIndex(w => sanitizeForMatch(w.ko) === matchKo && sanitizeForMatch(w.en) === matchEn); if (localIndex > -1) { mergedList[localIndex].vagueCount = Math.max(mergedList[localIndex].vagueCount || 1, existingItem.vagueCount || 1); } else { mergedList.push(existingItem); addedCount++; } }); } const fileContent = new Blob([JSON.stringify(mergedList, null, 2)], { type: 'application/json' }); await fetch(`https://www.googleapis.com/upload/drive/v3/files/${files[0].id}?uploadType=media`, { method: 'PATCH', headers: { Authorization: `Bearer ${gapi.client.getToken().access_token}`, 'Content-Type': 'application/json' }, body: fileContent }); localStorage.setItem(PWA_VAGUE_STORAGE_KEY, JSON.stringify(mergedList)); updatePWAReviewButtonUI(); alert(`✅ 구글 드라이브와 기존 데이터 병합 완료!\n(기존 파일에서 로컬로 추가로 가져온 단어: ${addedCount}개)`); } else { const fileContent = new Blob([JSON.stringify(mergedList, null, 2)], { type: 'application/json' }); const metadata = { name: fileName, mimeType: 'application/json' }; const form = new FormData(); form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' })); form.append('file', fileContent); await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { Authorization: `Bearer ${gapi.client.getToken().access_token}` }, body: form }); alert('✅ 구글 드라이브에 새 백업 파일이 생성되었습니다!'); } closeDataModal(); } catch (err) { alert('❌ 구글 동기화 실패: ' + err.message); } finally { loadingOverlay.classList.add('hidden'); loadingText.innerText = "단어장 데이터를 가져오는 중..."; } }); };
     window.loadFromGoogleDrive = async function() { if (!GOOGLE_CLIENT_ID) { alert("스크립트 상단에 GOOGLE_CLIENT_ID를 먼저 입력해야 합니다."); return; } requestGoogleAuth(async () => { const loadingOverlay = document.getElementById('loading-overlay'); const loadingText = document.getElementById('loading-text'); loadingText.innerText = "구글 드라이브에서 데이터 불러오는 중..."; loadingOverlay.classList.remove('hidden'); try { const fileName = 'pongcrush_sync_data.json'; const res = await gapi.client.drive.files.list({ q: `name = '${fileName}' and trashed = false`, fields: 'files(id, name)', spaces: 'drive' }); const files = res.result.files; if (!files || files.length === 0) { alert('⚠️ 구글 드라이브에 저장된 백업 파일이 없습니다.'); return; } const fileData = await gapi.client.drive.files.get({ fileId: files[0].id, alt: 'media' }); const importedList = typeof fileData.body === 'string' ? JSON.parse(fileData.body) : fileData.body; await processImportedData(importedList); closeDataModal(); } catch (err) { alert('❌ 불러오기 실패: ' + err.message); } finally { loadingOverlay.classList.add('hidden'); loadingText.innerText = "단어장 데이터를 가져오는 중..."; } }); };
     function requestGoogleAuth(callback) { if (!gapiInited || !gisInited) { alert("구글 API가 아직 준비되지 않았습니다. 잠시 후 시도해주세요."); return; } tokenClient.callback = async (resp) => { if (resp.error !== undefined) { localStorage.setItem('gdrive_connected', 'false'); throw resp; } localStorage.setItem('gdrive_connected', 'true'); if (callback) callback(); }; if (localStorage.getItem('gdrive_connected') === 'true') { tokenClient.requestAccessToken({prompt: ''}); } else { tokenClient.requestAccessToken({prompt: 'consent'}); } }
     function handleAutoplayBtnClick() { if (isAutoplay) { isAutoplay = false; clearAutoplayTimer(); releaseWakeLock(); const btn = document.getElementById('autoplay-btn'); const btnLabel = document.getElementById('autoplay-btn-label'); if (btn && btnLabel) { btn.classList.remove('active'); btnLabel.innerHTML = "🖐️<span class='hide-on-mobile'> 수동</span>"; } } else { openAutoplayModal(); } }
@@ -771,7 +919,7 @@
     function speakKoreanWord(text, onCompleteCallback) { stopTTS(); if (!('speechSynthesis' in window) || !text) { if (onCompleteCallback) onCompleteCallback(); return; } let isFired = false; const safeCallback = () => { if (!isFired) { isFired = true; if (onCompleteCallback) onCompleteCallback(); } }; const cleanText = text.replace(/<[^>]*>/g, '').replace(/#/g, ' ').replace(/<br>/g, ' ').trim(); const utter = new SpeechSynthesisUtterance(cleanText); utter.lang = 'ko-KR'; utter.rate = 1.0; utter.onend = safeCallback; utter.onerror = safeCallback; setTimeout(safeCallback, 3500); window.ttsUtterances.push(utter); if (window.ttsUtterances.length > 10) window.ttsUtterances.shift(); window.speechSynthesis.speak(utter); }
     function startAutoplayLoopForCurrentCard() { clearAutoplayTimer(); if (!isAutoplay) return; if (document.getElementById('game-area').classList.contains('hidden')) return; if (wordList.length === 0) return; if (!showAnswers) { const item = wordList[currentStartIndex]; if (isAutoplayReadKorean && item && item.ko) { speakKoreanWord(item.ko, () => { autoplayTimer = setTimeout(() => { revealAndSpeakAutoplay(); }, autoplayIntervalSec * 1000); }); } else { autoplayTimer = setTimeout(() => { revealAndSpeakAutoplay(); }, autoplayIntervalSec * 1000); } } else { speakCurrentWord(() => { if (isAutoplay) handlePrimaryAction(); }); } }
     function revealAndSpeakAutoplay() { if (!isAutoplay) return; if (!showAnswers) { showAnswers = true; wrapperEl.classList.add('show-answers'); updateButtonsUI(); } speakCurrentWord(() => { if (isAutoplay) { autoplayTimer = setTimeout(() => { handlePrimaryAction(); }, 500); } }); }
-    function resetDefaultSessionSettings() { isAutoplay = false; releaseWakeLock(); isInfiniteLoop = false; updateInfiniteButtonUI(); clearAutoplayTimer(); const autoBtn = document.getElementById('autoplay-btn'); const autoLabel = document.getElementById('autoplay-btn-label'); if (autoBtn) autoBtn.classList.remove('active'); if (autoLabel) autoLabel.innerHTML = "🖐️<span class='hide-on-mobile'> 수동</span>"; isMuted = true; if (bgAudio) bgAudio.muted = true; const muteBtn = document.getElementById('mute-btn'); const muteLabel = document.getElementById('mute-btn-label'); if (muteBtn) { muteBtn.classList.add('is-muted'); muteBtn.classList.remove('active-music'); } if (muteLabel) muteLabel.innerText = "🔇 뮤트"; updateVoiceModeTagUI(); }
+    function resetDefaultSessionSettings() { isAutoplay = false; releaseWakeLock(); isInfiniteLoop = false; updateInfiniteButtonUI(); clearAutoplayTimer(); const autoBtn = document.getElementById('autoplay-btn'); const autoLabel = document.getElementById('autoplay-btn-label'); if (autoBtn) autoBtn.classList.remove('active'); if (autoLabel) autoLabel.innerHTML = "🖐️<span class='hide-on-mobile'> 수동</span>"; updateVoiceModeTagUI(); }
     
     let globalTTSCancelFlag = false;
     function stopTTS() { 
@@ -785,13 +933,11 @@
     function speakCurrentWord(onCompleteCallback) { stopTTS(); if (!('speechSynthesis' in window)) { if (onCompleteCallback) onCompleteCallback(); return; } const item = wordList[currentStartIndex]; if (!item) { if (onCompleteCallback) onCompleteCallback(); return; } const cleanWord = item.en ? item.en.replace(/<[^>]*>/g, '').replace(/#/g, ' ').trim() : ''; const cleanExEn = item.exEn ? item.exEn.replace(/<[^>]*>/g, '').replace(/#/g, ' ').trim() : ''; if (!cleanWord) { if (onCompleteCallback) onCompleteCallback(); return; } setTimeout(() => { try { let isFired = false; const safeCallback = () => { if (!isFired) { isFired = true; if (onCompleteCallback) onCompleteCallback(); } }; const wordUtterance = new SpeechSynthesisUtterance(cleanWord); wordUtterance.pitch = 1.0; wordUtterance.rate = 1.0; const voiceObj = getRandomOrSelectedVoice(); if (voiceObj) { wordUtterance.voice = voiceObj; wordUtterance.lang = voiceObj.lang || 'en-US'; } else wordUtterance.lang = 'en-US'; if (cleanExEn) { const exUtterance = new SpeechSynthesisUtterance(cleanExEn); exUtterance.pitch = 1.0; exUtterance.rate = 1.0; if (voiceObj) { exUtterance.voice = voiceObj; exUtterance.lang = voiceObj.lang || 'en-US'; } else exUtterance.lang = 'en-US'; wordUtterance.onend = () => { if (!globalTTSCancelFlag) { window.speechSynthesis.speak(exUtterance); } }; exUtterance.onend = safeCallback; exUtterance.onerror = safeCallback; setTimeout(safeCallback, 10000); window.ttsUtterances.push(wordUtterance, exUtterance); } else { wordUtterance.onend = safeCallback; wordUtterance.onerror = safeCallback; setTimeout(safeCallback, 3500); window.ttsUtterances.push(wordUtterance); } if (window.ttsUtterances.length > 10) window.ttsUtterances.splice(0, window.ttsUtterances.length - 10); window.speechSynthesis.speak(wordUtterance); } catch (e) { if (onCompleteCallback) onCompleteCallback(); } }, 60); }
     function getSynthAudioContext() { if (!synthAudioCtx) synthAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (synthAudioCtx.state === 'suspended') synthAudioCtx.resume(); return synthAudioCtx; }
     function unlockAudioContext() { const ctx = getSynthAudioContext(); if (ctx && ctx.state === 'suspended') ctx.resume(); } window.addEventListener('click', unlockAudioContext, { passive: true }); window.addEventListener('touchstart', unlockAudioContext, { passive: true }); window.addEventListener('keydown', unlockAudioContext, { passive: true });
-    function toggleMute() { isMuted = !isMuted; const muteBtn = document.getElementById('mute-btn'); const muteBtnLabel = document.getElementById('mute-btn-label'); if (isMuted) { if (muteBtnLabel) muteBtnLabel.innerText = '🔇 뮤트'; if (muteBtn) { muteBtn.classList.add('is-muted'); muteBtn.classList.remove('active-music'); } } else { if (muteBtnLabel) muteBtnLabel.innerText = '🎵 노래'; if (muteBtn) { muteBtn.classList.remove('is-muted'); muteBtn.classList.add('active-music'); } } if (bgAudio) bgAudio.muted = isMuted; }
-    function playFanfareSound() { try { const ctx = getSynthAudioContext(); const now = ctx.currentTime; const notes = [ { freq: 523.25, time: 0, duration: 0.12 }, { freq: 523.25, time: 0.13, duration: 0.12 }, { freq: 523.25, time: 0.26, duration: 0.12 }, { freq: 659.25, time: 0.39, duration: 0.25 }, { freq: 783.99, time: 0.65, duration: 0.25 }, { freq: 1046.50, time: 0.92, duration: 0.8 } ]; notes.forEach(note => { const osc = ctx.createOscillator(); const gain = ctx.createGain(); osc.type = 'triangle'; osc.frequency.setValueAtTime(note.freq, now + note.time); gain.gain.setValueAtTime(0.25, now + note.time); gain.gain.exponentialRampToValueAtTime(0.001, now + note.time + note.duration); osc.connect(gain); gain.connect(ctx.destination); osc.start(now + note.time); osc.stop(now + note.time + note.duration); }); } catch (e) {} }
+    
     const wrapperEl = document.getElementById('cards-wrapper'); const actionBtn = document.getElementById('action-btn'); const vagueBtn = document.getElementById('vague-btn'); const statusEl = document.getElementById('status');
     function shuffleArray(array) { const shuffled = [...array]; for (let i = shuffled.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; } return shuffled; }
     function formatWordText(word) { return word ? String(word).trim().replace(/#/g, '<br>') : ''; }
-    function playRandomBgSound() { stopBgSound(); const randomTrack = Math.floor(Math.random() * 8) + 1; bgAudio = new Audio(`sounds/${randomTrack}.mp3`); bgAudio.loop = true; bgAudio.volume = 0.5; bgAudio.muted = isMuted; bgAudio.play().catch(err => {}); }
-    function stopBgSound() { if (bgAudio) { bgAudio.pause(); bgAudio.currentTime = 0; bgAudio = null; } }
+    
     function updateKoCardBackground() { const sectionKo = document.querySelector('.section-ko'); if (sectionKo) sectionKo.style.backgroundImage = `linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)), url('images/${currentImageType}/${currentImgNum}.jpg')`; }
     function startStudyTimer() { sessionStartTimeMs = Date.now(); if (sessionTimerInterval) clearInterval(sessionTimerInterval); const trailEl = document.getElementById('nyan-trail'); if (trailEl) trailEl.style.width = `0%`; const timerTextEl = document.getElementById('study-timer-text'); if (timerTextEl) { timerTextEl.innerText = "07:00"; timerTextEl.classList.remove('overtime'); } sessionTimerInterval = setInterval(() => { const elapsed = Date.now() - sessionStartTimeMs; const elapsedSec = Math.floor(elapsed / 1000); const maxSec = 420; let pct = (elapsedSec / maxSec) * 100; if (pct > 100) pct = 100; if (trailEl) trailEl.style.width = `${pct}%`; if (timerTextEl) { if (elapsedSec <= maxSec) { const remainSec = maxSec - elapsedSec; timerTextEl.innerText = `${String(Math.floor(remainSec / 60)).padStart(2, '0')}:${String(remainSec % 60).padStart(2, '0')}`; timerTextEl.classList.remove('overtime'); } else { const overSec = elapsedSec - maxSec; timerTextEl.innerText = `${String(Math.floor(overSec / 60)).padStart(2, '0')}:${String(overSec % 60).padStart(2, '0')}`; timerTextEl.classList.add('overtime'); } } let newImgNum = pct >= 75 ? 4 : (pct >= 50 ? 3 : (pct >= 25 ? 2 : 1)); if (currentImgNum !== newImgNum) { currentImgNum = newImgNum; updateKoCardBackground(); } }, 1000); }
     function stopStudyTimer() { if (sessionTimerInterval) { clearInterval(sessionTimerInterval); sessionTimerInterval = null; } }
@@ -804,11 +950,11 @@
     function openDayModal() { const modal = document.getElementById('day-modal'); if (!modal) return; const titleEl = document.getElementById('day-modal-title'); if (titleEl) titleEl.innerText = `📅 ${currentCategory} 시험 Day 선택`; modal.classList.remove('hidden'); renderDayButtonsUI(); }
     function closeDayModal() { const modal = document.getElementById('day-modal'); if (modal) modal.classList.add('hidden'); }
     function renderDayButtonsUI() { const titleEl = document.getElementById('day-list-title'); const gridEl = document.getElementById('day-buttons-grid'); if (!gridEl) return; const totalWords = loadedRawWordList.length; if (titleEl) titleEl.innerText = `📌 학습할 Day 선택 (총 ${totalWords}개 단어 / Day당 ${perDayCount}개)`; const totalDays = Math.ceil(totalWords / perDayCount); let html = `<button class="sec-btn" style="grid-column: span 3; background:#e0f2fe; color:#0369a1; border-color:#0284c7;" onclick="selectDayRange(-1)">🔥 전체 단어 복습 (1 ~ ${totalWords}번)</button>`; for (let i = 0; i < totalDays; i++) { const startIdx = i * perDayCount + 1; const endIdx = Math.min((i + 1) * perDayCount, totalWords); html += `<button class="sec-btn" onclick="selectDayRange(${i})">Day ${i + 1}<br><span style="font-size:11px; opacity:0.8; font-weight:normal;">(${startIdx}~${endIdx})</span></button>`; } gridEl.innerHTML = html; }
-    function selectDayRange(dayIndex) { closeDayModal(); let selectedSubset = []; currentDayIndex = dayIndex; isWeakReviewMode = false; if (dayIndex === -1) selectedSubset = [...loadedRawWordList]; else { const start = dayIndex * perDayCount; selectedSubset = loadedRawWordList.slice(start, Math.min((dayIndex + 1) * perDayCount, loadedRawWordList.length)); } if (selectedSubset.length === 0) return; originalWordList = shuffleArray(selectedSubset); wordList = [...originalWordList]; vagueWords = []; currentStartIndex = 0; showAnswers = false; resetDefaultSessionSettings(); document.getElementById('setup-area').classList.add('hidden'); document.getElementById('summary-area').classList.add('hidden'); document.getElementById('network-status-container').classList.add('hidden'); document.getElementById('app-footer').classList.add('hidden'); document.getElementById('game-area').classList.remove('hidden'); document.body.classList.add('game-active'); const types = ['type1', 'type2', 'type3']; currentImageType = types[Math.floor(Math.random() * types.length)]; currentImgNum = 1; startStudyTimer(); playRandomBgSound(); renderCards(); }
+    function selectDayRange(dayIndex) { closeDayModal(); let selectedSubset = []; currentDayIndex = dayIndex; isWeakReviewMode = false; if (dayIndex === -1) selectedSubset = [...loadedRawWordList]; else { const start = dayIndex * perDayCount; selectedSubset = loadedRawWordList.slice(start, Math.min((dayIndex + 1) * perDayCount, loadedRawWordList.length)); } if (selectedSubset.length === 0) return; originalWordList = shuffleArray(selectedSubset); wordList = [...originalWordList]; vagueWords = []; currentStartIndex = 0; showAnswers = false; resetDefaultSessionSettings(); document.getElementById('setup-area').classList.add('hidden'); document.getElementById('summary-area').classList.add('hidden'); document.getElementById('network-status-container').classList.add('hidden'); document.getElementById('app-footer').classList.add('hidden'); document.getElementById('game-area').classList.remove('hidden'); document.body.classList.add('game-active'); const types = ['type1', 'type2', 'type3']; currentImageType = types[Math.floor(Math.random() * types.length)]; currentImgNum = 1; startStudyTimer(); renderCards(); }
     function openWeakReviewModal() { const modal = document.getElementById('weak-review-modal'); if (!modal) return; modal.classList.remove('hidden'); renderWeakReviewModalUI(); } function closeWeakReviewModal() { const modal = document.getElementById('weak-review-modal'); if (modal) modal.classList.add('hidden'); }
     function renderWeakReviewModalUI() { const savedList = getPWASavedWords(); const allBtn = document.getElementById('weak-review-all-btn'); if (allBtn) allBtn.innerText = `🔥 전체 취약 단어 복습 (${savedList.length}개)`; const spkWords = savedList.filter(w => w.category === '스피킹'); const wrtWords = savedList.filter(w => w.category === '라이팅'); const grnWords = savedList.filter(w => w.category === '초록이'); const lifeWords = savedList.filter(w => w.category === '라잎'); document.getElementById('col-cnt-speaking').innerText = `(${spkWords.length}개)`; document.getElementById('col-cnt-writing').innerText = `(${wrtWords.length}개)`; document.getElementById('col-cnt-green').innerText = `(${grnWords.length}개)`; document.getElementById('col-cnt-life').innerText = `(${lifeWords.length}개)`; renderWeakDayList('speaking', '스피킹', spkWords); renderWeakDayList('writing', '라이팅', wrtWords); renderWeakDayList('green', '초록이', grnWords); renderWeakDayList('life', '라잎', lifeWords); }
     function renderWeakDayList(elementIdSuffix, categoryName, wordList) { const container = document.getElementById(`weak-day-list-${elementIdSuffix}`); if (!container) return; if (wordList.length === 0) { container.innerHTML = `<div style="text-align:center; padding:12px 0; color:#94a3b8; font-size:11px;">없음</div>`; return; } const dayMap = {}; wordList.forEach(w => { const dayIdx = w.dayIndex !== undefined ? w.dayIndex : -1; if (!dayMap[dayIdx]) dayMap[dayIdx] = 0; dayMap[dayIdx]++; }); let html = ''; Object.keys(dayMap).sort((a,b) => a - b).forEach(dayIdxStr => { const dayIdx = parseInt(dayIdxStr); const count = dayMap[dayIdx]; html += `<button class="weak-day-btn" onclick="startWeakReviewSession('DAY', '${categoryName}', ${dayIdx})">${dayIdx >= 0 ? `D${dayIdx + 1}` : '자율'} (${count})</button>`; }); container.innerHTML = html; }
-    function startWeakReviewSession(type, category, dayIndex) { closeWeakReviewModal(); const savedList = getPWASavedWords(); let targetWords = []; if (type === 'ALL') { targetWords = [...savedList]; currentWeakReviewTitle = '전체 영역'; } else if (type === 'CAT') { targetWords = savedList.filter(w => w.category === category); currentWeakReviewTitle = `${category} 전체`; } else if (type === 'DAY') { targetWords = savedList.filter(w => w.category === category && w.dayIndex === dayIndex); currentWeakReviewTitle = `${category} ${dayIndex >= 0 ? `D${dayIndex + 1}` : '자율'}`; } if (targetWords.length === 0) return; isWeakReviewMode = true; testedWeakWordsInSession = [...targetWords]; originalWordList = shuffleArray(targetWords); wordList = [...originalWordList]; vagueWords = []; currentStartIndex = 0; showAnswers = false; resetDefaultSessionSettings(); document.getElementById('setup-area').classList.add('hidden'); document.getElementById('summary-area').classList.add('hidden'); document.getElementById('network-status-container').classList.add('hidden'); document.getElementById('app-footer').classList.add('hidden'); document.getElementById('game-area').classList.remove('hidden'); document.body.classList.add('game-active'); const types = ['type1', 'type2', 'type3']; currentImageType = types[Math.floor(Math.random() * types.length)]; currentImgNum = 1; startStudyTimer(); playRandomBgSound(); renderCards(); }
+    function startWeakReviewSession(type, category, dayIndex) { closeWeakReviewModal(); const savedList = getPWASavedWords(); let targetWords = []; if (type === 'ALL') { targetWords = [...savedList]; currentWeakReviewTitle = '전체 영역'; } else if (type === 'CAT') { targetWords = savedList.filter(w => w.category === category); currentWeakReviewTitle = `${category} 전체`; } else if (type === 'DAY') { targetWords = savedList.filter(w => w.category === category && w.dayIndex === dayIndex); currentWeakReviewTitle = `${category} ${dayIndex >= 0 ? `D${dayIndex + 1}` : '자율'}`; } if (targetWords.length === 0) return; isWeakReviewMode = true; testedWeakWordsInSession = [...targetWords]; originalWordList = shuffleArray(targetWords); wordList = [...originalWordList]; vagueWords = []; currentStartIndex = 0; showAnswers = false; resetDefaultSessionSettings(); document.getElementById('setup-area').classList.add('hidden'); document.getElementById('summary-area').classList.add('hidden'); document.getElementById('network-status-container').classList.add('hidden'); document.getElementById('app-footer').classList.add('hidden'); document.getElementById('game-area').classList.remove('hidden'); document.body.classList.add('game-active'); const types = ['type1', 'type2', 'type3']; currentImageType = types[Math.floor(Math.random() * types.length)]; currentImgNum = 1; startStudyTimer(); renderCards(); }
     function updateButtonsUI() { if (wordList.length === 0) return; const targetItem = wordList[currentStartIndex]; const vagueTextEl = document.getElementById('vague-btn-text'); const actionTextEl = document.getElementById('action-btn-text'); vagueBtn.classList.remove('btn-state-yellow', 'btn-state-red', 'btn-state-green'); if (isCurrentCardChecked) { if (vagueTextEl) vagueTextEl.innerText = "체크 완료 ✓"; vagueBtn.classList.add('btn-state-green'); } else if (isWeakReviewMode) { if (!showAnswers) { if (vagueTextEl) vagueTextEl.innerText = "또 몰라요 ❓"; vagueBtn.classList.add('btn-state-yellow'); } else { if (vagueTextEl) vagueTextEl.innerText = "또 틀렸어요 ❌"; vagueBtn.classList.add('btn-state-red'); } } else { const savedList = getPWASavedWords(); const isVague = vagueWords.some(item => item.ko === targetItem.ko && item.en === targetItem.en); if (isVague) { if (vagueTextEl) vagueTextEl.innerText = "체크 완료 ✓"; vagueBtn.classList.add('btn-state-green'); } else if (!showAnswers) { if (vagueTextEl) vagueTextEl.innerText = "몰라요 ❓"; vagueBtn.classList.add('btn-state-yellow'); } else { if (vagueTextEl) vagueTextEl.innerText = "틀렸어요 ❌"; vagueBtn.classList.add('btn-state-red'); } } if (!showAnswers) { if (actionTextEl) actionTextEl.innerText = "정답 확인 👁️"; } else { if (actionTextEl) actionTextEl.innerText = "다음 단어 ▶"; } const prevBtn = document.getElementById('prev-btn'); if (prevBtn) { if (currentStartIndex === 0) { prevBtn.disabled = true; prevBtn.style.opacity = '0.4'; prevBtn.style.cursor = 'not-allowed'; } else { prevBtn.disabled = false; prevBtn.style.opacity = '1'; prevBtn.style.cursor = 'pointer'; } } }
     function getCardCheckCount(item) { if (!item) return 0; const savedList = getPWASavedWords(); const matchedSaved = savedList.find(w => w.ko === item.ko && w.en === item.en); return matchedSaved ? (matchedSaved.vagueCount || 0) : 0; }
     function renderCheckBadgesHtml(countVal) { if (countVal <= 0) return ''; let html = ''; for (let i = 0; i < countVal; i++) html += `<span class="check-icon-badge" title="${i + 1}회 체크">✔</span>`; return html; }
@@ -817,9 +963,9 @@
     function handlePrevAction() { stopTTS(); clearAutoplayTimer(); if (isInfiniteLoop) { isInfiniteLoop = false; updateInfiniteButtonUI(); } if (isAutoplay) { isAutoplay = false; releaseWakeLock(); const btn = document.getElementById('autoplay-btn'); const btnLabel = document.getElementById('autoplay-btn-label'); if (btn && btnLabel) { btn.classList.remove('active'); btnLabel.innerHTML = "🖐️<span class='hide-on-mobile'> 수동</span>"; } } if (wordList.length === 0) return; if (currentStartIndex > 0) { currentStartIndex -= cardsPerPage; renderCards(); } }
     function handleVagueAction(targetIndex) { clearAutoplayTimer(); if (wordList.length === 0) return; if (targetIndex < wordList.length) { const targetItem = wordList[targetIndex]; if (!isCurrentCardChecked) { if (!vagueWords.some(item => item.ko === targetItem.ko && item.en === targetItem.en)) vagueWords.push(targetItem); addWordToPWAStorage(targetItem); isCurrentCardChecked = true; updateCardCheckBadges(targetItem); } } if (!showAnswers) { showAnswers = true; wrapperEl.classList.add('show-answers'); speakCurrentWord(() => { if (isAutoplay) handlePrimaryAction(); }); } updateButtonsUI(); }
     function handlePrimaryAction() { clearAutoplayTimer(); if (wordList.length === 0) return; if (!showAnswers) { showAnswers = true; wrapperEl.classList.add('show-answers'); updateButtonsUI(); speakCurrentWord(() => { if (isAutoplay) handlePrimaryAction(); }); } else { stopTTS(); if (isInfiniteLoop) { isInfiniteLoop = false; updateInfiniteButtonUI(); } if (currentStartIndex + cardsPerPage < wordList.length) { currentStartIndex += cardsPerPage; renderCards(); } else { showSummaryNotes(); } } }
-    function showSummaryNotes() { stopTTS(); stopBgSound(); stopStudyTimer(); playFanfareSound(); document.getElementById('game-area').classList.add('hidden'); const summaryArea = document.getElementById('summary-area'); const tbody = document.getElementById('summary-tbody'); const titleText = document.getElementById('summary-title-text'); const actionTh = document.getElementById('summary-action-th'); tbody.innerHTML = ''; const targetDisplayList = isWeakReviewMode ? [...testedWeakWordsInSession] : [...vagueWords]; const savedList = getPWASavedWords(); targetDisplayList.sort((a, b) => { const savedA = savedList.find(w => w.ko === a.ko && w.en === a.en); const savedB = savedList.find(w => w.ko === b.ko && w.en === b.en); return (savedB ? (savedB.vagueCount || 0) : 0) - (savedA ? (savedA.vagueCount || 0) : 0); }); if (isWeakReviewMode) { if (titleText) titleText.innerText = "🔥 취약 단어 복습 완료 리스트"; if (actionTh) actionTh.classList.remove('hidden'); } else { if (titleText) titleText.innerText = "📋 복습 리스트"; if (actionTh) actionTh.classList.add('hidden'); } document.getElementById('summary-count').innerText = `복습할 단어: ${targetDisplayList.length}개`; if (targetDisplayList.length === 0) { tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--slack-blue); font-weight:700; padding:40px 0;">🎉 완벽합니다! 복습할 단어가 없습니다.</td></tr>`; } else { targetDisplayList.forEach(item => { let enCellContent = `<div style="color: var(--slack-blue); font-weight: bold;">${item.en}</div>`; if (item.exEn || item.exKo) { const formattedSummaryExKo = formatContextInText(item.exKo); enCellContent += ` <div style="font-size: 13px; color: #4b5563; font-weight: normal; margin-top: 4px; line-height: 1.4;"> ${item.exEn ? `<div>${item.exEn}</div>` : ''} ${item.exKo ? `<div style="color: #6b7280; font-size: 12px; margin-top: 2px;">${formattedSummaryExKo}</div>` : ''} </div> `; } const matchedSaved = savedList.find(w => w.ko === item.ko && w.en === item.en); const countVal = matchedSaved ? (matchedSaved.vagueCount || 0) : 0; const koCellContent = ` <div style="font-weight: 700; color: var(--text-main); display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap;"> <span>${item.ko}</span> ${countVal > 0 ? `<span style="font-size: 11px; color: #16a34a; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 2px 6px; border-radius: 12px; font-weight: 800; white-space: nowrap;">⚠️ ${countVal}회 체크</span>` : ''} </div> `; const actionTdHtml = isWeakReviewMode ? `<td style="text-align: center;"><button class="row-del-btn" onclick="deleteSingleWeakWordFromTable('${item.ko.replace(/'/g, "\\'")}', '${item.en.replace(/'/g, "\\'")}', this)">🗑️ 삭제</button></td>` : '<td class="hidden"></td>'; tbody.insertAdjacentHTML('beforeend', `<tr><td>${koCellContent}</td><td>${enCellContent}</td>${actionTdHtml}</tr>`); }); } summaryArea.classList.remove('hidden'); }
+    function showSummaryNotes() { stopTTS(); stopStudyTimer(); document.getElementById('game-area').classList.add('hidden'); const summaryArea = document.getElementById('summary-area'); const tbody = document.getElementById('summary-tbody'); const titleText = document.getElementById('summary-title-text'); const actionTh = document.getElementById('summary-action-th'); tbody.innerHTML = ''; const targetDisplayList = isWeakReviewMode ? [...testedWeakWordsInSession] : [...vagueWords]; const savedList = getPWASavedWords(); targetDisplayList.sort((a, b) => { const savedA = savedList.find(w => w.ko === a.ko && w.en === a.en); const savedB = savedList.find(w => w.ko === b.ko && w.en === b.en); return (savedB ? (savedB.vagueCount || 0) : 0) - (savedA ? (savedA.vagueCount || 0) : 0); }); if (isWeakReviewMode) { if (titleText) titleText.innerText = "🔥 취약 단어 복습 완료 리스트"; if (actionTh) actionTh.classList.remove('hidden'); } else { if (titleText) titleText.innerText = "📋 복습 리스트"; if (actionTh) actionTh.classList.add('hidden'); } document.getElementById('summary-count').innerText = `복습할 단어: ${targetDisplayList.length}개`; if (targetDisplayList.length === 0) { tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--slack-blue); font-weight:700; padding:40px 0;">🎉 완벽합니다! 복습할 단어가 없습니다.</td></tr>`; } else { targetDisplayList.forEach(item => { let enCellContent = `<div style="color: var(--slack-blue); font-weight: bold;">${item.en}</div>`; if (item.exEn || item.exKo) { const formattedSummaryExKo = formatContextInText(item.exKo); enCellContent += ` <div style="font-size: 13px; color: #4b5563; font-weight: normal; margin-top: 4px; line-height: 1.4;"> ${item.exEn ? `<div>${item.exEn}</div>` : ''} ${item.exKo ? `<div style="color: #6b7280; font-size: 12px; margin-top: 2px;">${formattedSummaryExKo}</div>` : ''} </div> `; } const matchedSaved = savedList.find(w => w.ko === item.ko && w.en === item.en); const countVal = matchedSaved ? (matchedSaved.vagueCount || 0) : 0; const koCellContent = ` <div style="font-weight: 700; color: var(--text-main); display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap;"> <span>${item.ko}</span> ${countVal > 0 ? `<span style="font-size: 11px; color: #16a34a; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 2px 6px; border-radius: 12px; font-weight: 800; white-space: nowrap;">⚠️ ${countVal}회 체크</span>` : ''} </div> `; const actionTdHtml = isWeakReviewMode ? `<td style="text-align: center;"><button class="row-del-btn" onclick="deleteSingleWeakWordFromTable('${item.ko.replace(/'/g, "\\'")}', '${item.en.replace(/'/g, "\\'")}', this)">🗑️ 삭제</button></td>` : '<td class="hidden"></td>'; tbody.insertAdjacentHTML('beforeend', `<tr><td>${koCellContent}</td><td>${enCellContent}</td>${actionTdHtml}</tr>`); }); } summaryArea.classList.remove('hidden'); }
     function deleteSingleWeakWordFromTable(ko, en, btnEl) { removeWordFromPWAStorage({ ko, en }); testedWeakWordsInSession = testedWeakWordsInSession.filter(w => !(w.ko === ko && w.en === en)); const row = btnEl.closest('tr'); if (row) { row.style.opacity = '0'; row.style.transform = 'scale(0.95)'; row.style.transition = 'all 0.2s ease'; setTimeout(() => { row.remove(); document.getElementById('summary-count').innerText = `복습할 단어: ${testedWeakWordsInSession.length}개`; }, 200); } }
-    function goToHome() { stopTTS(); stopBgSound(); stopStudyTimer(); releaseWakeLock(); document.getElementById('game-area').classList.add('hidden'); document.getElementById('summary-area').classList.add('hidden'); document.getElementById('setup-area').classList.remove('hidden'); document.getElementById('network-status-container').classList.remove('hidden'); document.getElementById('app-footer').classList.remove('hidden'); document.body.classList.remove('game-active'); updatePWAReviewButtonUI(); }
+    function goToHome() { stopTTS(); stopStudyTimer(); releaseWakeLock(); document.getElementById('game-area').classList.add('hidden'); document.getElementById('summary-area').classList.add('hidden'); document.getElementById('setup-area').classList.remove('hidden'); document.getElementById('network-status-container').classList.remove('hidden'); document.getElementById('app-footer').classList.remove('hidden'); document.body.classList.remove('game-active'); updatePWAReviewButtonUI(); }
     function reviewVagueWords() { const targetList = isWeakReviewMode ? testedWeakWordsInSession : vagueWords; if (targetList.length === 0) return; wordList = shuffleArray(targetList); vagueWords = []; currentStartIndex = 0; document.getElementById('summary-area').classList.add('hidden'); document.getElementById('game-area').classList.remove('hidden'); startStudyTimer(); renderCards(); }
     function restartFullGame() { wordList = shuffleArray(originalWordList); vagueWords = []; currentStartIndex = 0; document.getElementById('summary-area').classList.add('hidden'); document.getElementById('game-area').classList.remove('hidden'); startStudyTimer(); renderCards(); }
     function openSpeakingModal(type, targetText) { if (isAutoplay) { isAutoplay = false; clearAutoplayTimer(); releaseWakeLock(); const btn = document.getElementById('autoplay-btn'); const btnLabel = document.getElementById('autoplay-btn-label'); if (btn && btnLabel) { btn.classList.remove('active'); btnLabel.innerHTML = "🖐️<span class='hide-on-mobile'> 수동</span>"; } } if (isInfiniteLoop) { isInfiniteLoop = false; updateInfiniteButtonUI(); } speakingType = type; speakingTargetText = targetText ? targetText.replace(/<[^>]*>/g, '').replace(/#/g, ' ').trim() : ''; speakingStep = 1; speakingSpeechSpeed = 1.0; isSpeakingTextVisible = false; speakingRecordedTranscript = ''; const modal = document.getElementById('speaking-modal'); if (modal) modal.classList.remove('hidden'); renderSpeakingModalUI(); speakTargetTextInModal(); }
@@ -830,7 +976,30 @@
     function startSpeakingRecording() { stopTTS(); speakingStep = 2; speakingRecordedTranscript = ''; sessionFinalTranscript = ''; speakingSeconds = 0; isSpeakingRecording = true; renderSpeakingModalUI(); if (speakingTimerInterval) clearInterval(speakingTimerInterval); speakingTimerInterval = setInterval(() => { speakingSeconds++; const timerEl = document.getElementById('speaking-rec-timer'); if (timerEl) timerEl.innerText = `${String(Math.floor(speakingSeconds / 60)).padStart(2, '0')}:${String(speakingSeconds % 60).padStart(2, '0')}`; }, 1000); const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent); const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition; if (SpeechRecognition) { try { if (speakingRecognition) { try { speakingRecognition.abort(); } catch(e){} } speakingRecognition = new SpeechRecognition(); speakingRecognition.lang = 'en-US'; speakingRecognition.continuous = !isMobile; speakingRecognition.interimResults = true; speakingRecognition.maxAlternatives = 1; speakingRecognition.onresult = (e) => { let currentFinal = ''; let currentInterim = ''; for (let i = e.resultIndex; i < e.results.length; ++i) { if (e.results[i].isFinal) currentFinal += e.results[i][0].transcript + ' '; else currentInterim += e.results[i][0].transcript; } if (currentFinal) sessionFinalTranscript += currentFinal; const fullText = (sessionFinalTranscript + currentInterim).trim(); if (fullText) speakingRecordedTranscript = fullText; }; speakingRecognition.onend = () => { if (isSpeakingRecording && speakingRecognition) { try { speakingRecognition.start(); } catch(err){} } }; speakingRecognition.start(); } catch (e) {} } setupMicVolumeVisualizer(); }
     function stopSpeakingRecording() { isSpeakingRecording = false; if (speakingTimerInterval) { clearInterval(speakingTimerInterval); speakingTimerInterval = null; } if (speakingRecognition) { try { speakingRecognition.onend = null; speakingRecognition.stop(); } catch(e) {} speakingRecognition = null; } if (micAnimFrameId) { cancelAnimationFrame(micAnimFrameId); micAnimFrameId = null; } if (micAudioContext) { try { micAudioContext.close(); } catch(e){} micAudioContext = null; } if (window.speakingAudioStream) { try { window.speakingAudioStream.getTracks().forEach(track => track.stop()); } catch(e){} window.speakingAudioStream = null; } }
     function finishSpeakingRecording() { stopSpeakingRecording(); speakingStep = 3; renderSpeakingModalUI(); }
-    function renderSpeakingModalUI() { const card = document.getElementById('speaking-card'); if (!card) return; if (speakingStep === 1) { card.className = 'speaking-modal-card'; const displayText = isSpeakingTextVisible ? `<div style="font-size: clamp(22px, 3vw, 32px); font-weight: 800; line-height: 1.4; color: #ffffff; padding: 10px;">${speakingTargetText}</div>` : `<div style="font-size: 60px; color: rgba(255,255,255,0.4);">❓</div>`; card.innerHTML = ` <div class="speaking-top-bar"> <div style="display:flex; align-items:center; gap:8px;"><span style="font-size:24px;">🎙️</span><span>스피킹 훈련</span></div> <button class="speaking-close-btn" onclick="closeSpeakingModal()">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button> </div> <div class="speaking-content-area"> <div class="speaking-title">원어민 발음을 듣고<br>문장을 기억해 보세요</div> <div class="speaking-subtitle">준비가 되면 마이크 버튼을 눌러 스피킹을 시작하세요</div> <button type="button" class="speaking-circle-play-btn" onclick="speakTargetTextInModal()">▶</button> <div class="speaking-pill-group"> <button class="speaking-pill-btn" onclick="toggleSpeakingSpeechSpeed()">${(speakingSpeechSpeed === 1.0) ? '🐢 느리게 듣기' : '🐰 원상태로 듣기'}</button> <button class="speaking-pill-btn" onclick="toggleSpeakingTextVisibility()">${isSpeakingTextVisible ? '🙈 텍스트 숨기기' : '👁️ 텍스트 보기'}</button> </div> ${displayText} </div> <button class="speaking-bottom-btn" style="background:#ffffff; color:#1d4ed8;" onclick="startSpeakingRecording()">🎙️ 마이크 켜고 말하기 (Enter)</button> `; } else if (speakingStep === 2) { card.className = 'speaking-modal-card white-theme'; const textContentHtml = isSpeakingTextVisible ? `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed #fcd34d; font-size: 17px; font-weight: 800; color: #713f12; line-height: 1.4; word-break: keep-all;">${speakingTargetText}</div>` : ''; card.innerHTML = ` <div class="speaking-top-bar" style="color: #1e293b;"> <div style="display:flex; align-items:center; gap:8px;"><span style="color: #ef4444;">🔴</span><span>녹음 중...</span></div> </div> <div class="speaking-content-area" style="color: #1e293b; padding-bottom: 0;"> <div id="speaking-rec-timer" class="speaking-timer-text">${String(Math.floor(speakingSeconds / 60)).padStart(2, '0')}:${String(speakingSeconds % 60).padStart(2, '0')}</div> <div class="speaking-waveform-box"><div class="speaking-wave-bar"></div><div class="speaking-wave-bar"></div><div class="speaking-wave-bar"></div><div class="speaking-wave-bar"></div><div class="speaking-wave-bar"></div></div> <div style="background: #fef9c3; border: 1px solid #fde047; padding: 14px; border-radius: 14px; width: 100%; box-sizing: border-box; text-align: center; margin-top: auto; margin-bottom: 10px;"> <div style="font-size: 12.5px; font-weight: 800; color: #854d0e; margin-bottom: 8px;">💡 가장 좋은 건 원어민의 소리를 들은 대로 말해보는 것입니다!</div> <button class="speaking-pill-btn" style="background: #ffffff; color: #a16207; border: 1px solid #fde047; font-size: 12px; padding: 6px 14px; box-shadow: none;" onclick="toggleSpeakingTextVisibility()">${isSpeakingTextVisible ? '🙈 원문 숨기기' : '👁️ 원문 참고하기'}</button> ${textContentHtml} </div> </div> <button class="speaking-bottom-btn" style="background:#ef4444; color:#ffffff;" onclick="finishSpeakingRecording()">⏹️ 녹음 완료 및 평가 받기 (Enter)</button> `; } else if (speakingStep === 3) { card.className = 'speaking-modal-card white-theme'; const evalResult = new ClientSpeakingEngine().evaluate(speakingTargetText, speakingRecordedTranscript); let scoreColor = evalResult.overallScore >= 80 ? '#16a34a' : (evalResult.overallScore >= 50 ? '#f59e0b' : '#dc2626'); let evalHtml = ''; evalResult.details.forEach(d => { if (d.color === 'GREEN') evalHtml += `<span class="word-match-correct">${d.spokenWord}</span> `; else if (d.color === 'ORANGE') evalHtml += `<span class="word-match-fuzzy" title="${d.reason}">${d.spokenWord}</span> `; else evalHtml += `<span class="word-match-wrong" title="${d.reason}">${d.targetWord}</span> `; }); if (evalResult.details.length === 0 || !speakingRecordedTranscript) evalHtml = '<span style="color:#64748b; font-weight:600;">(마이크에 인식된 음성이 없습니다)</span>'; card.innerHTML = ` <div class="speaking-top-bar" style="color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 8px;"> <span>📊 평가 결과</span> <button class="speaking-close-btn" onclick="closeSpeakingModal()" style="color: #64748b;">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button> </div> <div class="speaking-content-area" style="justify-content: flex-start; gap: 12px; padding: 0;"> <div class="result-score-box"><div style="font-size: 13px; font-weight: 800; color: #64748b;">발음 및 유사도 점수</div><div class="result-score-val" style="color: ${scoreColor};">${evalResult.overallScore}점</div></div> <div class="result-card-box question"><div style="font-size: 11px; font-weight: 800; opacity: 0.8; margin-bottom: 4px;">원문 (정답)</div><div style="font-size: 16px; font-weight: 800; line-height: 1.4;">${speakingTargetText}</div></div> <div class="result-card-box my-answer"><div style="font-size: 11px; font-weight: 800; color: #64748b; margin-bottom: 4px;">내 발음 분석 결과</div><div style="font-size: 16px; line-height: 1.4;">${evalHtml}</div></div> </div> <div class="speaking-two-btn-row"> <button class="btn-light" onclick="speakingStep=1; renderSpeakingModalUI(); speakTargetTextInModal();">다시 연습하기</button> <button class="btn-dark" onclick="window.closeSpeakingModalAndNext()">닫기 및 다음 단어 (Enter)</button> </div> `; } }
+    function renderSpeakingModalUI() { 
+        const card = document.getElementById('speaking-card'); if (!card) return; 
+        if (speakingStep === 1) { 
+            card.className = 'speaking-modal-card'; 
+            const displayText = isSpeakingTextVisible ? `<div style="font-size: clamp(22px, 3vw, 32px); font-weight: 800; line-height: 1.4; color: #ffffff; padding: 10px;">${speakingTargetText}</div>` : `<div style="font-size: 60px; color: rgba(255,255,255,0.4);">❓</div>`; 
+            card.innerHTML = ` <div class="speaking-top-bar"> <div style="display:flex; align-items:center; gap:8px;"><span style="font-size:24px;">🎙️</span><span>스피킹 훈련</span></div> <button class="speaking-close-btn" onclick="closeSpeakingModal()">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button> </div> <div class="speaking-content-area"> <div class="speaking-title">원어민 발음을 듣고<br>문장을 기억해 보세요</div> <div class="speaking-subtitle">준비가 되면 마이크 버튼을 눌러 스피킹을 시작하세요</div> <button type="button" class="speaking-circle-play-btn" onclick="speakTargetTextInModal()">▶</button> <div class="speaking-pill-group"> <button class="speaking-pill-btn" onclick="toggleSpeakingSpeechSpeed()">${(speakingSpeechSpeed === 1.0) ? '🐢 느리게 듣기' : '🐰 원상태로 듣기'}</button> <button class="speaking-pill-btn" onclick="toggleSpeakingTextVisibility()">${isSpeakingTextVisible ? '🙈 텍스트 숨기기' : '👁️ 텍스트 보기'}</button> </div> ${displayText} </div> <button class="speaking-bottom-btn" style="background:#ffffff; color:#1d4ed8;" onclick="startSpeakingRecording()">🎙️ 마이크 켜고 말하기 (Enter)</button> `; 
+        } else if (speakingStep === 2) { 
+            card.className = 'speaking-modal-card white-theme'; 
+            const textContentHtml = isSpeakingTextVisible ? `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed #fcd34d; font-size: 17px; font-weight: 800; color: #713f12; line-height: 1.4; word-break: keep-all;">${speakingTargetText}</div>` : ''; 
+            card.innerHTML = ` <div class="speaking-top-bar" style="color: #1e293b;"> <div style="display:flex; align-items:center; gap:8px;"><span style="color: #ef4444;">🔴</span><span>녹음 중...</span></div> </div> <div class="speaking-content-area" style="color: #1e293b; padding-bottom: 0;"> <div id="speaking-rec-timer" class="speaking-timer-text">${String(Math.floor(speakingSeconds / 60)).padStart(2, '0')}:${String(speakingSeconds % 60).padStart(2, '0')}</div> <div class="speaking-waveform-box"><div class="speaking-wave-bar"></div><div class="speaking-wave-bar"></div><div class="speaking-wave-bar"></div><div class="speaking-wave-bar"></div><div class="speaking-wave-bar"></div></div> <div style="background: #fef9c3; border: 1px solid #fde047; padding: 14px; border-radius: 14px; width: 100%; box-sizing: border-box; text-align: center; margin-top: auto; margin-bottom: 10px;"> <div style="font-size: 12.5px; font-weight: 800; color: #854d0e; margin-bottom: 8px;">💡 가장 좋은 건 원어민의 소리를 들은 대로 말해보는 것입니다!</div> <button class="speaking-pill-btn" style="background: #ffffff; color: #a16207; border: 1px solid #fde047; font-size: 12px; padding: 6px 14px; box-shadow: none;" onclick="toggleSpeakingTextVisibility()">${isSpeakingTextVisible ? '🙈 원문 숨기기' : '👁️ 원문 참고하기'}</button> ${textContentHtml} </div> </div> <button class="speaking-bottom-btn" style="background:#ef4444; color:#ffffff;" onclick="finishSpeakingRecording()">⏹️ 녹음 완료 및 평가 받기 (Enter)</button> `; 
+        } else if (speakingStep === 3) { 
+            card.className = 'speaking-modal-card white-theme'; 
+            const evalResult = new ClientSpeakingEngine().evaluate(speakingTargetText, speakingRecordedTranscript); 
+            let scoreColor = evalResult.overallScore >= 80 ? '#16a34a' : (evalResult.overallScore >= 50 ? '#f59e0b' : '#dc2626'); 
+            let evalHtml = ''; 
+            evalResult.details.forEach(d => { 
+                if (d.color === 'GREEN') evalHtml += `<span class="word-match-correct">${d.spokenWord}</span> `; 
+                else if (d.color === 'ORANGE') evalHtml += `<span class="word-match-fuzzy" title="${d.reason}">${d.spokenWord}</span> `; 
+                else evalHtml += `<span class="word-match-wrong" title="${d.reason}">${d.targetWord}</span> `; 
+            }); 
+            if (evalResult.details.length === 0 || !speakingRecordedTranscript) evalHtml = '<span style="color:#64748b; font-weight:600;">(마이크에 인식된 음성이 없습니다)</span>'; 
+            card.innerHTML = ` <div class="speaking-top-bar" style="color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 8px;"> <span>📊 평가 결과</span> <button class="speaking-close-btn" onclick="closeSpeakingModal()" style="color: #64748b;">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button> </div> <div class="speaking-content-area" style="justify-content: flex-start; gap: 12px; padding: 0;"> <div class="result-score-box"><div style="font-size: 13px; font-weight: 800; color: #64748b;">발음 및 유사도 점수</div><div class="result-score-val" style="color: ${scoreColor};">${evalResult.overallScore}점</div></div> <div class="result-card-box question"><div style="font-size: 11px; font-weight: 800; opacity: 0.8; margin-bottom: 4px;">원문 (정답)</div><div style="font-size: 16px; font-weight: 800; line-height: 1.4;">${speakingTargetText}</div></div> <div class="result-card-box my-answer"><div style="font-size: 11px; font-weight: 800; color: #64748b; margin-bottom: 4px;">내 발음 분석 결과</div><div style="font-size: 16px; line-height: 1.4;">${evalHtml}</div></div> </div> <div class="speaking-two-btn-row"> <button class="btn-light" onclick="speakingStep=1; renderSpeakingModalUI(); speakTargetTextInModal();">다시 연습하기</button> <button class="btn-dark" onclick="window.closeSpeakingModalAndNext()">닫기 및 다음 단어 (Enter)</button> </div> `; 
+        } 
+    }
 
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') { closeDayModal(); closeWeakReviewModal(); closeAutoplayModal(); closeVoiceModal(); closeSpeakingModal(); closeAISettingsModal(); closeModelSelectModal(); closeAIFeedbackModal(); closeLifeNoticeModal(); closeDataModal(); closeReleaseNoteModal(); return; }
@@ -840,7 +1009,7 @@
         const voiceModal = document.getElementById('voice-modal'); if (voiceModal && !voiceModal.classList.contains('hidden')) { if (e.key === 'Enter') { e.preventDefault(); confirmVoiceSettings(); } return; }
         const speakingModal = document.getElementById('speaking-modal'); if (speakingModal && !speakingModal.classList.contains('hidden')) { if (e.key === 'Enter') { e.preventDefault(); if (speakingStep === 1) startSpeakingRecording(); else if (speakingStep === 2) finishSpeakingRecording(); else if (speakingStep === 3) window.closeSpeakingModalAndNext(); } return; }
         const gameArea = document.getElementById('game-area'); const isGameActive = gameArea && !gameArea.classList.contains('hidden') && document.getElementById('ai-feedback-modal').classList.contains('hidden');
-        if (e.key === 'ArrowUp' && isGameActive) { e.preventDefault(); if (showAnswers) speakCurrentWord(); } else if (e.key === 'ArrowRight' && isGameActive) { e.preventDefault(); handlePrimaryAction(); } else if (e.key === 'ArrowDown' && isGameActive) { e.preventDefault(); handleVagueAction(currentStartIndex); } else if (e.key === 'ArrowLeft' && isGameActive) { e.preventDefault(); handlePrevAction(); } else if (e.key === 'Shift' && isGameActive) { e.preventDefault(); toggleInfiniteLoop(); } else if (e.code === 'Space' && isGameActive) { e.preventDefault(); if (showAnswers) speakCurrentWord(); } else if (e.key.toLowerCase() === 's' && isGameActive) { e.preventDefault(); handleAutoplayBtnClick(); } else if (e.key.toLowerCase() === 'd' && isGameActive) { e.preventDefault(); toggleMute(); } else if (e.key.toLowerCase() === 'f' && isGameActive) { e.preventDefault(); openVoiceModal(); } else if (e.key.toLowerCase() === 'z' && isGameActive && showAnswers) { e.preventDefault(); const item = wordList[currentStartIndex]; if (item) { openSpeakingModal(item.exEn ? 'sentence' : 'word', item.exEn ? item.exEn : item.en); } } else if (e.key.toLowerCase() === 't' && isGameActive) { e.preventDefault(); openWritingModalFromCard(); } else if (e.key.toLowerCase() === 'q') { const modal = document.getElementById('ai-feedback-modal'); if (modal && !modal.classList.contains('hidden') && window.stopAIComputation) window.stopAIComputation(); }
+        if (e.key === 'ArrowUp' && isGameActive) { e.preventDefault(); if (showAnswers) speakCurrentWord(); } else if (e.key === 'ArrowRight' && isGameActive) { e.preventDefault(); handlePrimaryAction(); } else if (e.key === 'ArrowDown' && isGameActive) { e.preventDefault(); handleVagueAction(currentStartIndex); } else if (e.key === 'ArrowLeft' && isGameActive) { e.preventDefault(); handlePrevAction(); } else if (e.key === 'Shift' && isGameActive) { e.preventDefault(); toggleInfiniteLoop(); } else if (e.code === 'Space' && isGameActive) { e.preventDefault(); if (showAnswers) speakCurrentWord(); } else if (e.key.toLowerCase() === 'a' && isGameActive) { e.preventDefault(); handleAutoplayBtnClick(); } else if (e.key.toLowerCase() === 's' && isGameActive) { e.preventDefault(); openVoiceModal(); } else if (e.key.toLowerCase() === 'z' && isGameActive && showAnswers) { e.preventDefault(); const item = wordList[currentStartIndex]; if (item) { openSpeakingModal(item.exEn ? 'sentence' : 'word', item.exEn ? item.exEn : item.en); } } else if (e.key.toLowerCase() === 't' && isGameActive) { e.preventDefault(); openWritingModalFromCard(); } else if (e.key.toLowerCase() === 'q') { const modal = document.getElementById('ai-feedback-modal'); if (modal && !modal.classList.contains('hidden') && window.stopAIComputation) window.stopAIComputation(); }
     });
 
     if ("Notification" in window) {
