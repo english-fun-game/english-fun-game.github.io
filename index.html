@@ -158,7 +158,7 @@
         .modal-card { background: #ffffff; border-radius: 16px; width: 100%; max-width: 460px; padding: 22px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 16px; box-sizing: border-box; max-height: 90vh; overflow-y: auto; }
         .modal-card.tall-modal { max-width: 580px; height: 90vh !important; max-height: 90vh !important; display: flex; flex-direction: column; overflow: hidden; padding: 0 !important; border-radius: 18px; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; font-size: 17px; font-weight: 800; color: var(--text-main); }
-        .weak-col-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; flex: 1; min-height: 0; margin-top: 4px; }
+        .weak-col-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; flex: 1; min-height: 0; margin-top: 4px; }
         .weak-col { display: flex; flex-direction: column; background: #f8fafc; border: 1.5px solid var(--border-color); border-radius: 12px; padding: 8px 6px; gap: 8px; min-height: 0; }
         .weak-col-header { font-size: 13.5px; font-weight: 800; text-align: center; color: var(--text-main); padding: 2px 0; }
         .weak-col-all-btn { width: 100%; padding: 10px 4px; font-size: 12px; font-weight: 800; border-radius: 8px; border: 1.5px solid #2563eb; background: #ffffff; color: #2563eb; cursor: pointer; text-align: center; transition: all 0.15s ease; box-sizing: border-box; }
@@ -376,8 +376,8 @@
 <div id="ai-model-select-modal" class="modal-overlay hidden" style="z-index: 20000;" onclick="if(event.target === this) closeModelSelectModal()"><div class="modal-card" style="max-width: 580px;"><div class="modal-header"><span>🤖 AI 모델 선택</span><button onclick="closeModelSelectModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button></div><div style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5; font-weight: 600;">기기 성능과 배터리 상황에 맞춰 원하는 AI 모델을 선택하세요.<br>(최초 선택 시 모델 파일 다운로드가 백그라운드에서 1회 진행됩니다.)</div><div style="display: flex; flex-direction: column; gap: 10px;"><div id="model-card-1b" class="model-option-card" onclick="selectAIModel('Llama-3.2-1B-Instruct-q4f16_1-MLC', '1B')"><div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 900; font-size: 16px; color: #15803d;">🟢 Llama-3.2-1B (초경량)</span><span class="model-badge">다운로드 약 0.8GB</span></div><div style="font-size: 13px; color: var(--text-muted);">가장 빠르고 배터리 소모가 적습니다. 모바일 기기나 간단한 문법 교정에 적합합니다.</div></div><div id="model-card-3b" class="model-option-card" onclick="selectAIModel('Llama-3.2-3B-Instruct-q4f16_1-MLC', '3B')"><div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 900; font-size: 16px; color: #b45309;">🟡 Llama-3.2-3B (균형형)</span><span class="model-badge">다운로드 약 2.0GB</span></div><div style="font-size: 13px; color: var(--text-muted);">성능과 속도의 균형이 매우 좋습니다. 일반적인 데스크탑 환경이나 태블릿에 추천합니다.</div></div><div id="model-card-8b" class="model-option-card" onclick="selectAIModel('Llama-3.1-8B-Instruct-q4f32_1-MLC', '8B')"><div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 900; font-size: 16px; color: #be123c;">🔴 Llama-3.1-8B (최상급)</span><span class="model-badge" style="background: #ffe4e6; color: #be123c;">다운로드 약 4.5GB</span></div><div style="font-size: 13px; color: var(--text-muted);">가장 똑똑하고 복잡한 문맥을 잘 이해합니다. (RAM 16GB 이상 PC 환경 권장)</div></div><div id="model-card-home" class="model-option-card" style="border-style: dashed; opacity: 0.9;" onclick="selectAIModel('home-pc', '퐁퐁하우스')"><div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 900; font-size: 16px; color: #6d28d9;">🏠 퐁퐁하우스 자택 PC (To Be Continued...)</span><span class="model-badge" style="background: #f3e8ff; color: #6d28d9;">Ollama / vLLM 연동 예정</span></div><div style="font-size: 12.5px; color: var(--text-muted); margin-top: 4px; line-height: 1.45;"><b>하드웨어 스펙:</b> i5-14600KF + 64GB DDR5 RAM + 독립 VRAM 16GB<br><b>급간 비교:</b> 노트북용 내장 그래픽(UMA) 한계를 넘어서 <b>64GB RAM & 16GB 전용 VRAM</b>을 활용, <b>Qwen-2.5 32B / DeepSeek-R1 32B / Llama-3.3 70B</b>급 초고성능 모델을 가정용 서버망으로 무제한 연동 가능!</div></div></div></div></div>
 <div id="ai-settings-modal" class="modal-overlay hidden" style="z-index: 20000;" onclick="if(event.target === this) closeAISettingsModal()"><div class="modal-card" style="max-width: 520px;"><div class="modal-header"><span>⚙️ AI 파라미터 정밀 설정</span><button onclick="closeAISettingsModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button></div><div class="setting-field" style="display:flex; flex-direction:column; gap:6px; background:#f8fafc; padding:12px; border-radius:12px; border:1px solid var(--border-color);"><div class="setting-label" style="font-size:14px; font-weight:800; display:flex; justify-content:space-between;"><span>1. Max Tokens (최대 출력 토큰)</span><span id="val-max-tokens" style="color:#0284c7;">512</span></div><input type="range" id="input-max-tokens" min="128" max="2048" step="64" value="512" oninput="document.getElementById('val-max-tokens').innerText = this.value"></div><div class="setting-field" style="display:flex; flex-direction:column; gap:6px; background:#f8fafc; padding:12px; border-radius:12px; border:1px solid var(--border-color); margin-top:8px;"><div class="setting-label" style="font-size:14px; font-weight:800; display:flex; justify-content:space-between;"><span>2. Context Window (컨텍스트 기억 크기)</span><span id="val-context-window" style="color:#0284c7;">2048</span></div><select id="input-context-window" style="padding: 8px; border-radius: 8px; border: 1px solid var(--border-color); font-weight: 800;"><option value="1024">1,024 (소형 메모리)</option><option value="2048" selected>2048 (표준 세팅)</option><option value="4096">4,096 (대용량)</option><option value="8192">8,192 (최대)</option></select></div><div class="setting-field" style="display:flex; flex-direction:column; gap:6px; background:#f8fafc; padding:12px; border-radius:12px; border:1px solid var(--border-color); margin-top:8px;"><div class="setting-label" style="font-size:14px; font-weight:800; display:flex; justify-content:space-between;"><span>3. Temperature (창의성/샘플링 온도)</span><span id="val-temperature" style="color:#0284c7;">0.1</span></div><input type="range" id="input-temperature" min="0.0" max="1.0" step="0.05" value="0.1" oninput="document.getElementById('val-temperature').innerText = this.value"></div><div class="setting-field" style="display:flex; flex-direction:column; gap:6px; background:#f8fafc; padding:12px; border-radius:12px; border:1px solid var(--border-color); margin-top:8px;"><div class="setting-label" style="font-size:14px; font-weight:800; display:flex; justify-content:space-between;"><span>4. Top P (핵심 누적 확률)</span><span id="val-top-p" style="color:#0284c7;">0.95</span></div><input type="range" id="input-top-p" min="0.1" max="1.0" step="0.05" value="0.95" oninput="document.getElementById('val-top-p').innerText = this.value"></div><button class="base-btn" style="background:#16a34a; padding:14px; margin-top:12px;" onclick="applyAISettingsUI()">적용 및 저장</button></div></div>
 <div id="ai-feedback-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeAIFeedbackModal()"><div class="ai-modal-card" id="ai-modal-card"><div class="ai-modal-header"><div class="ai-modal-title"><span>로컬 AI 영작 첨삭</span><div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;"><button type="button" id="ai-toggle-btn" class="ai-chip-btn green-chip" onclick="toggleAIEnabled()">🤖 AI 첨삭: ON</button><button type="button" id="ai-model-chip-btn" class="ai-chip-btn green-chip" onclick="openModelSelectModal()">🟢 Llama-1B</button><button type="button" class="ai-chip-btn" onclick="openAISettingsModal()">⚙️ 설정</button></div></div><div style="display: flex; align-items: center; gap: 10px;"><button id="ai-combined-stop-btn" class="ai-combined-stop-btn hidden" onclick="window.stopAIComputation && window.stopAIComputation()"><span id="ai-loader-text" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">🛑 AI 상시 강제 중단 (Q)</span></button><button onclick="closeAIFeedbackModal()" class="ai-close-btn">✕ 나가기 <span style="font-size:11px; opacity:0.8;">(ESC)</span></button></div></div><div class="ai-modal-content-body"><div id="writing-input-view" style="display: flex; flex-direction: column; gap: 16px; flex: 1;"><div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 8px;"><div id="writing-modal-en-hint" style="font-size: 32px; font-weight: 700; color: var(--slack-blue); line-height: 1.3;"></div><div id="writing-modal-ko-text" style="font-size: 32px; font-weight: 900; color: var(--text-main); word-break: keep-all; line-height: 1.3;"></div></div><textarea id="modal-sentence-textarea" class="sentence-test-textarea" placeholder="영문장을 작성하세요 (Shift+Enter 줄바꿈, Enter 제출)" style="flex: 1; min-height: 120px; font-size: 32px; padding: 24px; line-height: 1.4;" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea><button type="button" class="base-btn" style="background: var(--slack-purple); padding: 18px; font-size: 18px; flex-shrink: 0;" onclick="submitModalWritingTest()">✍️ 제출 (Enter)</button></div><div id="writing-result-view" class="hidden" style="display: flex; flex-direction: column; gap: 16px; flex: 1; min-height: 0;"><div style="display: flex; flex-direction: column; gap: 20px; flex-shrink: 0; background: white; padding: 24px 28px; border-radius: 16px; border: 2px solid #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.03);"><div id="ai-modal-user-text" style="font-size: clamp(24px, 2.5vw, 36px); font-weight: 900; color: #0f172a; line-height: 1.4; word-break: keep-all;"></div><div style="width: 100%; height: 1.5px; border-top: 1.5px dashed #cbd5e1;"></div><div id="ai-modal-target-text" style="font-size: clamp(24px, 2.5vw, 36px); font-weight: 900; color: #15803d; line-height: 1.4; word-break: keep-all;"></div></div><div class="ai-feedback-container" id="ai-feedback-container" style="flex: 1; background: white; border: 1.5px solid #cbd5e1; border-radius: 16px; padding: 20px 24px; overflow-y: auto; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); display: flex; flex-direction: column; min-height: 0; position: relative;"><div id="ai-disclaimer-text" style="font-size: 12px; color: #94a3b8; text-align: left; margin-bottom: 12px; line-height: 1.3; flex-shrink: 0; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; word-break: keep-all;">※ 현재 구동 중인 로컬 모델은 수백억 개 이상의 신경망을 가진 거대 AI(Gemini 등)에 비해 체급이 작아, 복잡한 문맥 추론에 한계가 있을 수 있습니다.</div><div class="ai-pipeline-stepper" id="ai-pipeline"><div class="ai-step" id="step-1"><div class="step-title">1. 가중치 로드</div><div class="step-desc" id="step-1-desc">VRAM 할당</div></div><div class="ai-step" id="step-2"><div class="step-title">2. 토크나이징</div><div class="step-desc">시퀀스 인코딩</div></div><div class="ai-step" id="step-3"><div class="step-title">3. 신경망 추론</div><div class="step-desc">순전파 연산</div></div><div class="ai-step" id="step-4"><div class="step-title">4. 디코딩</div><div class="step-desc" id="step-4-desc">렌더링</div></div></div><div id="ai-center-progress-text" style="font-size: 15px; font-weight: 700; color: var(--slack-blue); text-align: center; margin-top: 16px;"></div><div id="streaming-grammar-body" style="display: none; font-size: 16.5px; font-weight: 600; line-height: 1.75; color: #334155; white-space: pre-wrap; flex: 1;"></div></div></div></div></div></div>
-<div id="day-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeDayModal()"><div class="modal-card"><div class="modal-header"><span id="day-modal-title">📅 학습 Day 선택</span><button onclick="closeDayModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button></div><div class="sec-select-area"><div id="fixed-notice-banner" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; padding:10px 12px; border-radius:10px; font-size:13px; font-weight:800; text-align:center;">⚡ 스피킹 30 / 라이팅 40 / 초록이 60 / 라잎 15 고정 시험</div></div><div class="sec-select-area" style="flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden;"><div class="sec-select-title" id="day-list-title">📌 학습할 Day 선택</div><div id="day-buttons-grid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; overflow-y:auto; padding: 4px; box-sizing: border-box;"></div></div></div></div>
-<div id="weak-review-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeWeakReviewModal()"><div class="modal-card tall-modal"><div class="modal-header"><span>🔥 취약 단어 복습</span><button onclick="closeWeakReviewModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button></div><button id="weak-review-all-btn" class="base-btn" style="background:#2563eb; padding:13px; font-size:15px; flex-shrink:0;" onclick="startWeakReviewSession('ALL')">🔥 전체 취약 단어 복습 (0개)</button><div class="weak-col-container"><div class="weak-col"><div class="weak-col-header">🗣️ 스피킹</div><button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '스피킹')">전체 복습<br><span id="col-cnt-speaking" style="font-size:11px; opacity:0.8;">(0)</span></button><div class="weak-day-list" id="weak-day-list-speaking"></div></div><div class="weak-col"><div class="weak-col-header">✍️ 라이팅</div><button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '라이팅')">전체 복습<br><span id="col-cnt-writing" style="font-size:11px; opacity:0.8;">(0)</span></button><div class="weak-day-list" id="weak-day-list-writing"></div></div><div class="weak-col"><div class="weak-col-header">🍀 초록이</div><button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '초록이')">전체 복습<br><span id="col-cnt-green" style="font-size:11px; opacity:0.8;">(0)</span></button><div class="weak-day-list" id="weak-day-list-green"></div></div><div class="weak-col"><div class="weak-col-header">🌿 라잎</div><button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '라잎')">전체 복습<br><span id="col-cnt-life" style="font-size:11px; opacity:0.8;">(0)</span></button><div class="weak-day-list" id="weak-day-list-life"></div></div></div></div></div>
+<div id="day-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeDayModal()"><div class="modal-card"><div class="modal-header"><span id="day-modal-title">📅 학습 Day 선택</span><button onclick="closeDayModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button></div><div class="sec-select-area"><div id="fixed-notice-banner" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; padding:10px 12px; border-radius:10px; font-size:13px; font-weight:800; text-align:center;">⚡ 스피킹 30 / 라이팅 40 / 초록이 60 고정 시험</div></div><div class="sec-select-area" style="flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden;"><div class="sec-select-title" id="day-list-title">📌 학습할 Day 선택</div><div id="day-buttons-grid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; overflow-y:auto; padding: 4px; box-sizing: border-box;"></div></div></div></div>
+<div id="weak-review-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeWeakReviewModal()"><div class="modal-card tall-modal"><div class="modal-header"><span>🔥 취약 단어 복습</span><button onclick="closeWeakReviewModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button></div><button id="weak-review-all-btn" class="base-btn" style="background:#2563eb; padding:13px; font-size:15px; flex-shrink:0;" onclick="startWeakReviewSession('ALL')">🔥 전체 취약 단어 복습 (0개)</button><div class="weak-col-container"><div class="weak-col"><div class="weak-col-header">🗣️ 스피킹</div><button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '스피킹')">전체 복습<br><span id="col-cnt-speaking" style="font-size:11px; opacity:0.8;">(0)</span></button><div class="weak-day-list" id="weak-day-list-speaking"></div></div><div class="weak-col"><div class="weak-col-header">✍️ 라이팅</div><button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '라이팅')">전체 복습<br><span id="col-cnt-writing" style="font-size:11px; opacity:0.8;">(0)</span></button><div class="weak-day-list" id="weak-day-list-writing"></div></div><div class="weak-col"><div class="weak-col-header">🍀 초록이</div><button class="weak-col-all-btn" onclick="startWeakReviewSession('CAT', '초록이')">전체 복습<br><span id="col-cnt-green" style="font-size:11px; opacity:0.8;">(0)</span></button><div class="weak-day-list" id="weak-day-list-green"></div></div></div></div></div>
 
 <div id="data-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeDataModal()">
     <div class="modal-card">
@@ -537,7 +537,6 @@
 </div>
 
 <div id="speaking-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeSpeakingModal()"><div id="speaking-card" class="speaking-modal-card"></div></div>
-<div id="life-notice-modal" class="modal-overlay hidden" style="z-index: 21000;" onclick="if(event.target === this) closeLifeNoticeModal()"><div class="modal-card" style="max-width: 380px; text-align: center; padding: 28px 24px;"><div style="font-size: 42px; margin-bottom: 12px;">🌿</div><div style="font-size: 18px; font-weight: 900; color: var(--text-main); margin-bottom: 8px;">라잎 단어장 열기</div><div style="font-size: 13.5px; color: var(--text-muted); line-height: 1.5; margin-bottom: 24px; word-break: keep-all;">이 단어장은 수시로 업데이트됩니다.<br>기본적으로 빠르게 접속 가능한 <b>저장된 데이터</b>를 권장합니다.</div><button class="base-btn" style="background: var(--slack-purple); padding: 18px; font-size: 17px; font-weight: 900; margin-bottom: 24px;" onclick="loadCachedLifeData()">⚡ 기존 데이터로 바로 시작</button><button style="background: none; color: #64748b; border: 1px solid #cbd5e1; padding: 8px 12px; font-size: 12px; font-weight: 800; border-radius: 8px; cursor: pointer;" onclick="loadFreshLifeData()">🔄 최신 엑셀 받아오기</button></div></div>
 
 <div class="container">
     <div id="network-status-container" style="width: 100%; max-width: 480px; margin: 0 auto 8px auto; display: flex; justify-content: flex-end; align-items: center; gap: 10px; user-select: none; box-sizing: border-box; padding: 0 4px;"><div id="net-online" style="opacity: 0.3; color: #94a3b8; display: flex; align-items: center; gap: 4px; transition: all 0.2s;"><span style="font-size: 11px;">🟢</span><span style="font-size: 11px; font-weight: 800; letter-spacing: -0.3px;">ONLINE</span></div><div id="net-offline" style="opacity: 0.3; color: #94a3b8; display: flex; align-items: center; gap: 4px; transition: all 0.2s;"><span style="font-size: 11px;">🔴</span><span style="font-size: 11px; font-weight: 800; letter-spacing: -0.3px;">OFFLINE</span></div></div>
@@ -549,8 +548,8 @@
             <button class="quick-btn" onclick="loadShortcutUrl('https://docs.google.com/spreadsheets/d/1m7KXifCB6txkKEOHqApMWOR4MQwqb6Ji1Dm-hRJYzLc/edit?usp=sharing')">🗣️ 스피킹 단어 시험 바로가기</button>
             <button class="quick-btn" onclick="loadShortcutUrl('https://docs.google.com/spreadsheets/d/1UYTEv88wdKsSS2kkB-UylHAfQAlV6yrvjwVNecG6m64/edit?usp=sharing')">✍️ 라이팅 단어 시험 바로가기</button>
             <button class="quick-btn" onclick="loadShortcutUrl('https://docs.google.com/spreadsheets/d/1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U/edit?usp=sharing')">🍀 초록이 단어 시험 바로가기</button>
-            <button class="quick-btn" onclick="loadShortcutUrl('https://docs.google.com/spreadsheets/d/1ElLraPc80Uez8innH6RfXOBz36IV9ARXnkAiUembWH0/edit?usp=sharing')">🌿 라잎 단어 시험 바로가기</button>
             <button id="pwa-review-btn" class="pwa-review-btn" onclick="openWeakReviewModal()">🔥 취약 단어 복습 (0개)</button>
+            <button class="quick-btn" onclick="location.href='speaking.html'">🔥 스피킹 학습 🔥</button>
             <button class="quick-btn" style="border: 2px dashed #94a3b8; color: #475569; margin-top: 8px;" onclick="openDataModal()">💾 백업 및 데이터 관리</button>
         </div>
     </div>
@@ -566,7 +565,7 @@
     </div>
 </div>
 
-<div class="app-version" onclick="openReleaseNoteModal()" title="릴리즈 노트 보기">v6.9.7 (Update Log)</div>
+<div class="app-version" onclick="openReleaseNoteModal()" title="릴리즈 노트 보기">v7.0.1 (Update Log)</div>
 <div id="toast-notification" class="toast-notification"></div>
 
 <script>
@@ -660,7 +659,7 @@
     let sessionStartTimeMs = 0; let sessionTimerInterval = null;
     let synthAudioCtx = null; let availableVoices = [];
     let speakingTargetText = ''; let speakingType = 'sentence'; let speakingStep = 1; let speakingSpeechSpeed = 1.0; let isSpeakingTextVisible = false; let speakingRecognition = null; let speakingRecordedTranscript = ''; let sessionFinalTranscript = ''; let speakingTimerInterval = null; let speakingSeconds = 0; let isSpeakingRecording = false;
-    let micAudioContext = null; let micAnalyser = null; let micAnimFrameId = null; let pendingLifeUrl = ''; 
+    let micAudioContext = null; let micAnalyser = null; let micAnimFrameId = null; 
     const PWA_VAGUE_STORAGE_KEY = 'pwa_vague_words_list_v2'; 
     const SELECTED_FIXED_VOICE_KEY = 'pongcrush_fixed_voice_uri_v4';
 
@@ -993,13 +992,241 @@ function renderVoiceListUI() {
     window.openWritingModalFromCard = function() { const item = wordList[currentStartIndex]; if (!item) return; const modal = document.getElementById('ai-feedback-modal'); if (modal) modal.classList.remove('hidden'); document.getElementById('writing-input-view').classList.remove('hidden'); document.getElementById('writing-result-view').classList.add('hidden'); document.getElementById('modal-sentence-textarea').value = ''; document.getElementById('writing-modal-en-hint').innerText = item.en; const targetKoText = item.exKo ? item.exKo : item.ko; document.getElementById('writing-modal-ko-text').innerText = targetKoText.replace(/<[^>]*>/g, '').replace(/#/g, ' '); setTimeout(() => { document.getElementById('modal-sentence-textarea').focus(); }, 100); }
     function closeAIFeedbackModal() { const modal = document.getElementById('ai-feedback-modal'); if (modal) modal.classList.add('hidden'); if (window.stopAIComputation) window.stopAIComputation(); }
     function submitModalWritingTest() { const userText = document.getElementById('modal-sentence-textarea').value.trim(); if (!userText) { alert("영문장을 입력해주세요."); return; } document.getElementById('writing-input-view').classList.add('hidden'); document.getElementById('writing-result-view').classList.remove('hidden'); const item = wordList[currentStartIndex]; const targetKo = (item.exKo || item.ko).replace(/<[^>]*>/g, '').replace(/#/g, ' '); const targetEn = item.exEn || item.en; document.getElementById('ai-modal-user-text').innerText = userText; document.getElementById('ai-modal-target-text').innerText = targetEn; document.getElementById('streaming-grammar-body').innerText = ""; document.getElementById('ai-center-progress-text').innerText = "AI 분석을 준비 중입니다..."; if (!window.isAIEnabledForWriting) { document.getElementById('streaming-grammar-body').innerText = "🤖 AI 첨삭 기능이 꺼져 있습니다. (상단에서 켜기 가능)"; document.getElementById('streaming-grammar-body').style.display = 'block'; return; } if (window.requestLocalAIStreamingCorrection) { window.requestLocalAIStreamingCorrection(userText, targetKo, (token) => {}); } else { document.getElementById('streaming-grammar-body').innerText = "AI 엔진 로드 오류"; document.getElementById('streaming-grammar-body').style.display = 'block'; } }
-    function backupWeakWords() { const savedList = getPWASavedWords(); if(savedList.length === 0) { alert("백업할 단어가 없습니다."); return; } const blob = new Blob([JSON.stringify(savedList, null, 2)], { type: 'application/json;charset=utf-8' }); const url = URL.createObjectURL(blob); const dlAnchorElem = document.createElement('a'); dlAnchorElem.href = url; dlAnchorElem.download = "pongcrush_local_backup.json"; document.body.appendChild(dlAnchorElem); dlAnchorElem.click(); document.body.removeChild(dlAnchorElem); URL.revokeObjectURL(url); }
+    
+    // 통합 데이터 백업 함수
+    function backupWeakWords() {
+        const savedList = getPWASavedWords();
+        const spkData = JSON.parse(localStorage.getItem('pongcrush_spk_data') || '[]');
+        
+        if(savedList.length === 0 && spkData.length === 0) { 
+            alert("백업할 데이터가 없습니다."); 
+            return; 
+        }
+        
+        const exportData = { type: "pongcrush_combined", words: savedList, speaking: spkData };
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const dlAnchorElem = document.createElement('a');
+        dlAnchorElem.href = url;
+        dlAnchorElem.download = "pongcrush_local_backup.json";
+        document.body.appendChild(dlAnchorElem);
+        dlAnchorElem.click();
+        document.body.removeChild(dlAnchorElem);
+        URL.revokeObjectURL(url);
+    }
+    
     function openDataModal() { const modal = document.getElementById('data-modal'); if (modal) modal.classList.remove('hidden'); }
     function closeDataModal() { const modal = document.getElementById('data-modal'); if (modal) modal.classList.add('hidden'); }
-    async function processImportedData(rawContent) { let importedList = []; if (typeof rawContent === 'string') { const trimmed = rawContent.trim(); if (trimmed.startsWith('[') || trimmed.startsWith('{')) { try { const parsed = JSON.parse(trimmed); if (Array.isArray(parsed)) { importedList = parsed; } else if (parsed && typeof parsed === 'object') { const possibleArray = Object.values(parsed).find(v => Array.isArray(v)); if (possibleArray) importedList = possibleArray; else if (parsed.ko && parsed.en) importedList = [parsed]; } } catch(e) { console.warn("JSON parse failed, trying line parse:", e); } } if (importedList.length === 0) { const lines = trimmed.split(/\r?\n/); lines.forEach(line => { const parts = line.split(/\t|,|\s{2,}/); if (parts.length >= 2) { importedList.push({ ko: parts[0].trim(), en: parts[1].trim(), exEn: parts[2] ? parts[2].trim() : '', exKo: parts[3] ? parts[3].trim() : '', synonyms: parts[4] ? parts[4].trim() : '', vagueCount: 1 }); } }); } } else if (Array.isArray(rawContent)) { importedList = rawContent; } if (!Array.isArray(importedList) || importedList.length === 0) { throw new Error("올바른 백업 형식이 아니거나 데이터가 비어 있습니다."); } if (!window.isAllDbLoaded) { const confirmLoad = confirm("⚠️ 현재 브라우저 메모리에 전체 단어장 DB가 로드되어 있지 않습니다.\n\n완벽한 복원을 위해 기본 단어장(스피킹, 라이팅, 초록이, 라잎)을 모두 불러오시겠습니까?"); if (confirmLoad) { const loadingModal = document.getElementById('loading-overlay'); const loadingText = document.getElementById('loading-text'); if (loadingModal) { if (loadingText) loadingText.innerText = "단어장 통합 데이터 로딩 중..."; loadingModal.classList.remove('hidden'); } try { const urls = [ 'https://docs.google.com/spreadsheets/d/1m7KXifCB6txkKEOHqApMWOR4MQwqb6Ji1Dm-hRJYzLc/edit?usp=sharing', 'https://docs.google.com/spreadsheets/d/1UYTEv88wdKsSS2kkB-UylHAfQAlV6yrvjwVNecG6m64/edit?usp=sharing', 'https://docs.google.com/spreadsheets/d/1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U/edit?usp=sharing', 'https://docs.google.com/spreadsheets/d/1ElLraPc80Uez8innH6RfXOBz36IV9ARXnkAiUembWH0/edit?usp=sharing' ]; const results = await Promise.all(urls.map(url => fetchSheetData(url))); loadedRawWordList = []; results.forEach(res => { loadedRawWordList = loadedRawWordList.concat(res); }); window.isAllDbLoaded = true; } catch (err) { if (loadingModal) loadingModal.classList.add('hidden'); throw new Error("통합 데이터를 불러오는데 실패했습니다: " + err.message); } if (loadingModal) loadingModal.classList.add('hidden'); if (loadingText) loadingText.innerText = "단어장 데이터를 가져오는 중..."; } } let currentList = getPWASavedWords(); let addedCount = 0; let updatedCount = 0; importedList.forEach(item => { if (item && item.ko && item.en) { let syn = item.synonyms || ''; let exEn = item.exEn || ''; let exKo = item.exKo || ''; const matchKo = sanitizeForMatch(item.ko); const matchEn = sanitizeForMatch(item.en); if (loadedRawWordList && loadedRawWordList.length > 0) { const match = loadedRawWordList.find(r => sanitizeForMatch(r.ko) === matchKo && sanitizeForMatch(r.en) === matchEn); if (match) { if (!syn && match.synonyms) syn = match.synonyms; if (!exEn && match.exEn) exEn = match.exEn; if (!exKo && match.exKo) exKo = match.exKo; } } const existingIdx = currentList.findIndex(w => sanitizeForMatch(w.ko) === matchKo && sanitizeForMatch(w.en) === matchEn); if (existingIdx > -1) { currentList[existingIdx].vagueCount = Math.max(currentList[existingIdx].vagueCount || 1, item.vagueCount || 1); if (!currentList[existingIdx].synonyms && syn) currentList[existingIdx].synonyms = syn; if (!currentList[existingIdx].exEn && exEn) currentList[existingIdx].exEn = exEn; if (!currentList[existingIdx].exKo && exKo) currentList[existingIdx].exKo = exKo; updatedCount++; } else { currentList.push({ ko: item.ko, en: item.en, exEn: exEn, exKo: exKo, synonyms: syn, category: item.category || '기타', dayIndex: item.dayIndex !== undefined ? item.dayIndex : -1, vagueCount: item.vagueCount || 1 }); addedCount++; } } }); localStorage.setItem(PWA_VAGUE_STORAGE_KEY, JSON.stringify(currentList)); updatePWAReviewButtonUI(); alert(`백업 데이터에서 ${importedList.length}개 단어를 확인했습니다.\n(신규 추가: ${addedCount}개, 병합 업데이트: ${updatedCount}개 완료)`); }
+    
+    // 통합 데이터 복원 함수
+    async function processImportedData(rawContent) { 
+        let importedList = []; 
+        if (typeof rawContent === 'string') { 
+            const trimmed = rawContent.trim(); 
+            if (trimmed.startsWith('[') || trimmed.startsWith('{')) { 
+                try { 
+                    const parsed = JSON.parse(trimmed); 
+                    if (Array.isArray(parsed)) { 
+                        importedList = parsed; 
+                    } else if (parsed && parsed.type === "pongcrush_combined") {
+                        importedList = parsed.words || [];
+                        if (parsed.speaking && parsed.speaking.length > 0) {
+                            localStorage.setItem('pongcrush_spk_data', JSON.stringify(parsed.speaking));
+                        }
+                    } else if (parsed && typeof parsed === 'object') { 
+                        const possibleArray = Object.values(parsed).find(v => Array.isArray(v)); 
+                        if (possibleArray) importedList = possibleArray; 
+                        else if (parsed.ko && parsed.en) importedList = [parsed]; 
+                    } 
+                } catch(e) { console.warn("JSON parse failed, trying line parse:", e); } 
+            } 
+            if (importedList.length === 0) { 
+                const lines = trimmed.split(/\r?\n/); 
+                lines.forEach(line => { 
+                    const parts = line.split(/\t|,|\s{2,}/); 
+                    if (parts.length >= 2) { 
+                        importedList.push({ ko: parts[0].trim(), en: parts[1].trim(), exEn: parts[2] ? parts[2].trim() : '', exKo: parts[3] ? parts[3].trim() : '', synonyms: parts[4] ? parts[4].trim() : '', vagueCount: 1 }); 
+                    } 
+                }); 
+            } 
+        } else if (Array.isArray(rawContent)) { 
+            importedList = rawContent; 
+        } 
+        
+        if (!Array.isArray(importedList) || importedList.length === 0) { throw new Error("올바른 백업 형식이 아니거나 데이터가 비어 있습니다."); } 
+        if (!window.isAllDbLoaded) { 
+            const confirmLoad = confirm("⚠️ 현재 브라우저 메모리에 전체 단어장 DB가 로드되어 있지 않습니다.\n\n완벽한 복원을 위해 기본 단어장(스피킹, 라이팅, 초록이)을 모두 불러오시겠습니까?"); 
+            if (confirmLoad) { 
+                const loadingModal = document.getElementById('loading-overlay'); 
+                const loadingText = document.getElementById('loading-text'); 
+                if (loadingModal) { 
+                    if (loadingText) loadingText.innerText = "단어장 통합 데이터 로딩 중..."; 
+                    loadingModal.classList.remove('hidden'); 
+                } 
+                try { 
+                    const urls = [ 
+                        'https://docs.google.com/spreadsheets/d/1m7KXifCB6txkKEOHqApMWOR4MQwqb6Ji1Dm-hRJYzLc/edit?usp=sharing', 
+                        'https://docs.google.com/spreadsheets/d/1UYTEv88wdKsSS2kkB-UylHAfQAlV6yrvjwVNecG6m64/edit?usp=sharing', 
+                        'https://docs.google.com/spreadsheets/d/1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U/edit?usp=sharing' 
+                    ]; 
+                    const results = await Promise.all(urls.map(url => fetchSheetData(url))); 
+                    loadedRawWordList = []; 
+                    results.forEach(res => { loadedRawWordList = loadedRawWordList.concat(res); }); 
+                    window.isAllDbLoaded = true; 
+                } catch (err) { 
+                    if (loadingModal) loadingModal.classList.add('hidden'); 
+                    throw new Error("통합 데이터를 불러오는데 실패했습니다: " + err.message); 
+                } 
+                if (loadingModal) loadingModal.classList.add('hidden'); 
+                if (loadingText) loadingText.innerText = "단어장 데이터를 가져오는 중..."; 
+            } 
+        } 
+        let currentList = getPWASavedWords(); 
+        let addedCount = 0; 
+        let updatedCount = 0; 
+        importedList.forEach(item => { 
+            if (item && item.ko && item.en) { 
+                let syn = item.synonyms || ''; 
+                let exEn = item.exEn || ''; 
+                let exKo = item.exKo || ''; 
+                const matchKo = sanitizeForMatch(item.ko); 
+                const matchEn = sanitizeForMatch(item.en); 
+                if (loadedRawWordList && loadedRawWordList.length > 0) { 
+                    const match = loadedRawWordList.find(r => sanitizeForMatch(r.ko) === matchKo && sanitizeForMatch(r.en) === matchEn); 
+                    if (match) { 
+                        if (!syn && match.synonyms) syn = match.synonyms; 
+                        if (!exEn && match.exEn) exEn = match.exEn; 
+                        if (!exKo && match.exKo) exKo = match.exKo; 
+                    } 
+                } 
+                const existingIdx = currentList.findIndex(w => sanitizeForMatch(w.ko) === matchKo && sanitizeForMatch(w.en) === matchEn); 
+                if (existingIdx > -1) { 
+                    currentList[existingIdx].vagueCount = Math.max(currentList[existingIdx].vagueCount || 1, item.vagueCount || 1); 
+                    if (!currentList[existingIdx].synonyms && syn) currentList[existingIdx].synonyms = syn; 
+                    if (!currentList[existingIdx].exEn && exEn) currentList[existingIdx].exEn = exEn; 
+                    if (!currentList[existingIdx].exKo && exKo) currentList[existingIdx].exKo = exKo; 
+                    updatedCount++; 
+                } else { 
+                    currentList.push({ ko: item.ko, en: item.en, exEn: exEn, exKo: exKo, synonyms: syn, category: item.category || '기타', dayIndex: item.dayIndex !== undefined ? item.dayIndex : -1, vagueCount: item.vagueCount || 1 }); 
+                    addedCount++; 
+                } 
+            } 
+        }); 
+        localStorage.setItem(PWA_VAGUE_STORAGE_KEY, JSON.stringify(currentList)); 
+        updatePWAReviewButtonUI(); 
+        alert(`백업 데이터에서 ${importedList.length}개 단어를 확인했습니다.\n(신규 추가: ${addedCount}개, 병합 업데이트: ${updatedCount}개 완료)`); 
+    }
+    
     function restoreWeakWords() { const input = document.createElement('input'); input.type = 'file'; input.accept = ".json,.txt,text/plain,application/json,*/*"; input.style.display = 'none'; input.onchange = function(event) { const file = event.target.files && event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = async function(e) { try { await processImportedData(e.target.result); closeDataModal(); } catch (err) { alert("파일 복원 실패: " + err.message); } }; reader.onerror = function() { alert("파일을 읽는 중 에러가 발생했습니다."); }; reader.readAsText(file, 'UTF-8'); }; document.body.appendChild(input); input.click(); setTimeout(() => { document.body.removeChild(input); }, 1000); }
-    window.syncToGoogleDrive = async function() { if (!GOOGLE_CLIENT_ID) { alert("스크립트 상단에 GOOGLE_CLIENT_ID를 먼저 입력해야 합니다."); return; } let localList = getPWASavedWords(); if (localList.length === 0) { alert("백업할 취약 단어가 없습니다."); return; } requestGoogleAuth(async () => { const loadingOverlay = document.getElementById('loading-overlay'); const loadingText = document.getElementById('loading-text'); loadingText.innerText = "구글 드라이브와 병합(Merge) 중..."; loadingOverlay.classList.remove('hidden'); try { const fileName = 'pongcrush_sync_data.json'; const res = await gapi.client.drive.files.list({ q: `name = '${fileName}' and trashed = false`, fields: 'files(id, name)', spaces: 'drive' }); const files = res.result.files; let mergedList = [...localList]; let addedCount = 0; if (files && files.length > 0) { const fileData = await gapi.client.drive.files.get({ fileId: files[0].id, alt: 'media' }); const existingList = typeof fileData.body === 'string' ? JSON.parse(fileData.body) : fileData.body; if (Array.isArray(existingList)) { existingList.forEach(existingItem => { const matchKo = sanitizeForMatch(existingItem.ko); const matchEn = sanitizeForMatch(existingItem.en); const localIndex = mergedList.findIndex(w => sanitizeForMatch(w.ko) === matchKo && sanitizeForMatch(w.en) === matchEn); if (localIndex > -1) { mergedList[localIndex].vagueCount = Math.max(mergedList[localIndex].vagueCount || 1, existingItem.vagueCount || 1); } else { mergedList.push(existingItem); addedCount++; } }); } const fileContent = new Blob([JSON.stringify(mergedList, null, 2)], { type: 'application/json' }); await fetch(`https://www.googleapis.com/upload/drive/v3/files/${files[0].id}?uploadType=media`, { method: 'PATCH', headers: { Authorization: `Bearer ${gapi.client.getToken().access_token}`, 'Content-Type': 'application/json' }, body: fileContent }); localStorage.setItem(PWA_VAGUE_STORAGE_KEY, JSON.stringify(mergedList)); updatePWAReviewButtonUI(); alert(`✅ 구글 드라이브와 기존 데이터 병합 완료!\n(기존 파일에서 로컬로 추가로 가져온 단어: ${addedCount}개)`); } else { const fileContent = new Blob([JSON.stringify(mergedList, null, 2)], { type: 'application/json' }); const metadata = { name: fileName, mimeType: 'application/json' }; const form = new FormData(); form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' })); form.append('file', fileContent); await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { Authorization: `Bearer ${gapi.client.getToken().access_token}` }, body: form }); alert('✅ 구글 드라이브에 새 백업 파일이 생성되었습니다!'); } closeDataModal(); } catch (err) { alert('❌ 구글 동기화 실패: ' + err.message); } finally { loadingOverlay.classList.add('hidden'); loadingText.innerText = "단어장 데이터를 가져오는 중..."; } }); };
-    window.loadFromGoogleDrive = async function() { if (!GOOGLE_CLIENT_ID) { alert("스크립트 상단에 GOOGLE_CLIENT_ID를 먼저 입력해야 합니다."); return; } requestGoogleAuth(async () => { const loadingOverlay = document.getElementById('loading-overlay'); const loadingText = document.getElementById('loading-text'); loadingText.innerText = "구글 드라이브에서 데이터 불러오는 중..."; loadingOverlay.classList.remove('hidden'); try { const fileName = 'pongcrush_sync_data.json'; const res = await gapi.client.drive.files.list({ q: `name = '${fileName}' and trashed = false`, fields: 'files(id, name)', spaces: 'drive' }); const files = res.result.files; if (!files || files.length === 0) { alert('⚠️ 구글 드라이브에 저장된 백업 파일이 없습니다.'); return; } const fileData = await gapi.client.drive.files.get({ fileId: files[0].id, alt: 'media' }); const importedList = typeof fileData.body === 'string' ? JSON.parse(fileData.body) : fileData.body; await processImportedData(importedList); closeDataModal(); } catch (err) { alert('❌ 불러오기 실패: ' + err.message); } finally { loadingOverlay.classList.add('hidden'); loadingText.innerText = "단어장 데이터를 가져오는 중..."; } }); };
+    
+    // 통합 데이터 GDrive 동기화 저장
+    window.syncToGoogleDrive = async function() { 
+        if (!GOOGLE_CLIENT_ID) { alert("스크립트 상단에 GOOGLE_CLIENT_ID를 먼저 입력해야 합니다."); return; } 
+        
+        let localList = getPWASavedWords();
+        let localSpkData = JSON.parse(localStorage.getItem('pongcrush_spk_data') || '[]');
+
+        if (localList.length === 0 && localSpkData.length === 0) {
+            alert("백업할 취약 단어나 스피킹 데이터가 없습니다."); return;
+        }
+
+        requestGoogleAuth(async () => { 
+            const loadingOverlay = document.getElementById('loading-overlay'); 
+            const loadingText = document.getElementById('loading-text'); 
+            loadingText.innerText = "구글 드라이브와 병합(Merge) 중..."; 
+            loadingOverlay.classList.remove('hidden'); 
+            
+            try { 
+                const fileName = 'pongcrush_sync_data.json'; 
+                const res = await gapi.client.drive.files.list({ q: `name = '${fileName}' and trashed = false`, fields: 'files(id, name)', spaces: 'drive' }); 
+                const files = res.result.files; 
+                
+                let mergedList = [...localList]; 
+                let mergedSpk = [...localSpkData];
+                let addedCount = 0; 
+                
+                if (files && files.length > 0) { 
+                    const fileData = await gapi.client.drive.files.get({ fileId: files[0].id, alt: 'media' }); 
+                    const existingData = typeof fileData.body === 'string' ? JSON.parse(fileData.body) : fileData.body; 
+                    
+                    let existingWords = Array.isArray(existingData) ? existingData : (existingData.words || []);
+                    let existingSpk = Array.isArray(existingData) ? [] : (existingData.speaking || []);
+
+                    if (Array.isArray(existingWords)) { 
+                        existingWords.forEach(existingItem => { 
+                            const matchKo = sanitizeForMatch(existingItem.ko); 
+                            const matchEn = sanitizeForMatch(existingItem.en); 
+                            const localIndex = mergedList.findIndex(w => sanitizeForMatch(w.ko) === matchKo && sanitizeForMatch(w.en) === matchEn); 
+                            if (localIndex > -1) { 
+                                mergedList[localIndex].vagueCount = Math.max(mergedList[localIndex].vagueCount || 1, existingItem.vagueCount || 1); 
+                            } else { 
+                                mergedList.push(existingItem); 
+                                addedCount++; 
+                            } 
+                        }); 
+                    } 
+                    
+                    if (mergedSpk.length === 0 && existingSpk.length > 0) {
+                        mergedSpk = existingSpk;
+                        localStorage.setItem('pongcrush_spk_data', JSON.stringify(mergedSpk));
+                    }
+
+                    const finalUploadData = { type: "pongcrush_combined", words: mergedList, speaking: mergedSpk };
+                    const fileContent = new Blob([JSON.stringify(finalUploadData, null, 2)], { type: 'application/json' }); 
+                    
+                    await fetch(`https://www.googleapis.com/upload/drive/v3/files/${files[0].id}?uploadType=media`, { method: 'PATCH', headers: { Authorization: `Bearer ${gapi.client.getToken().access_token}`, 'Content-Type': 'application/json' }, body: fileContent }); 
+                    
+                    localStorage.setItem(PWA_VAGUE_STORAGE_KEY, JSON.stringify(mergedList)); 
+                    updatePWAReviewButtonUI(); 
+                    alert(`✅ 구글 드라이브와 기존 데이터 병합 완료!\n(기존 파일에서 로컬로 추가로 가져온 단어: ${addedCount}개)`); 
+                } else { 
+                    const finalUploadData = { type: "pongcrush_combined", words: mergedList, speaking: mergedSpk };
+                    const fileContent = new Blob([JSON.stringify(finalUploadData, null, 2)], { type: 'application/json' }); 
+                    const metadata = { name: fileName, mimeType: 'application/json' }; 
+                    const form = new FormData(); 
+                    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' })); 
+                    form.append('file', fileContent); 
+                    
+                    await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { Authorization: `Bearer ${gapi.client.getToken().access_token}` }, body: form }); 
+                    alert('✅ 구글 드라이브에 새 백업 파일이 생성되었습니다!'); 
+                } 
+                closeDataModal(); 
+            } catch (err) { alert('❌ 구글 동기화 실패: ' + err.message); } 
+            finally { loadingOverlay.classList.add('hidden'); loadingText.innerText = "단어장 데이터를 가져오는 중..."; } 
+        }); 
+    };
+    
+    // 통합 데이터 GDrive 불러오기
+    window.loadFromGoogleDrive = async function() { 
+        if (!GOOGLE_CLIENT_ID) { alert("스크립트 상단에 GOOGLE_CLIENT_ID를 먼저 입력해야 합니다."); return; } 
+        requestGoogleAuth(async () => { 
+            const loadingOverlay = document.getElementById('loading-overlay'); 
+            const loadingText = document.getElementById('loading-text'); 
+            loadingText.innerText = "구글 드라이브에서 데이터 불러오는 중..."; 
+            loadingOverlay.classList.remove('hidden'); 
+            try { 
+                const fileName = 'pongcrush_sync_data.json'; 
+                const res = await gapi.client.drive.files.list({ q: `name = '${fileName}' and trashed = false`, fields: 'files(id, name)', spaces: 'drive' }); 
+                const files = res.result.files; 
+                
+                if (!files || files.length === 0) { alert('⚠️ 구글 드라이브에 저장된 백업 파일이 없습니다.'); return; } 
+                
+                const fileData = await gapi.client.drive.files.get({ fileId: files[0].id, alt: 'media' }); 
+                const importedData = typeof fileData.body === 'string' ? JSON.parse(fileData.body) : fileData.body; 
+                
+                if (Array.isArray(importedData)) {
+                    await processImportedData(importedData);
+                } else {
+                    if (importedData.speaking && importedData.speaking.length > 0) {
+                        localStorage.setItem('pongcrush_spk_data', JSON.stringify(importedData.speaking));
+                    }
+                    await processImportedData(importedData.words || []);
+                }
+                closeDataModal(); 
+            } catch (err) { alert('❌ 불러오기 실패: ' + err.message); } 
+            finally { loadingOverlay.classList.add('hidden'); loadingText.innerText = "단어장 데이터를 가져오는 중..."; } 
+        }); 
+    };
     function requestGoogleAuth(callback) { if (!gapiInited || !gisInited) { alert("구글 API가 아직 준비되지 않았습니다. 잠시 후 시도해주세요."); return; } tokenClient.callback = async (resp) => { if (resp.error !== undefined) { localStorage.setItem('gdrive_connected', 'false'); throw resp; } localStorage.setItem('gdrive_connected', 'true'); if (callback) callback(); }; if (localStorage.getItem('gdrive_connected') === 'true') { tokenClient.requestAccessToken({prompt: ''}); } else { tokenClient.requestAccessToken({prompt: 'consent'}); } }
     function handleAutoplayBtnClick() { if (isAutoplay) { isAutoplay = false; clearAutoplayTimer(); releaseWakeLock(); const btn = document.getElementById('autoplay-btn'); const btnLabel = document.getElementById('autoplay-btn-label'); if (btn && btnLabel) { btn.classList.remove('active'); btnLabel.innerHTML = "🖐️<span class='hide-on-mobile'> 수동</span>"; } } else { openAutoplayModal(); } }
     function toggleInfiniteLoop() { if (wordList.length === 0) return; if (isInfiniteLoop) { isInfiniteLoop = false; stopTTS(); updateInfiniteButtonUI(); } else { isInfiniteLoop = true; if (!showAnswers) { showAnswers = true; wrapperEl.classList.add('show-answers'); updateButtonsUI(); } if (isAutoplay) { isAutoplay = false; clearAutoplayTimer(); releaseWakeLock(); const btn = document.getElementById('autoplay-btn'); const btnLabel = document.getElementById('autoplay-btn-label'); if (btn && btnLabel) { btn.classList.remove('active'); btnLabel.innerHTML = "🖐️<span class='hide-on-mobile'> 수동</span>"; } } updateInfiniteButtonUI(); playInfiniteSpeech(); } }
@@ -1041,36 +1268,197 @@ function renderVoiceListUI() {
     function startStudyTimer() { sessionStartTimeMs = Date.now(); if (sessionTimerInterval) clearInterval(sessionTimerInterval); const trailEl = document.getElementById('nyan-trail'); if (trailEl) trailEl.style.width = `0%`; const timerTextEl = document.getElementById('study-timer-text'); if (timerTextEl) { timerTextEl.innerText = "07:00"; timerTextEl.classList.remove('overtime'); } sessionTimerInterval = setInterval(() => { const elapsed = Date.now() - sessionStartTimeMs; const elapsedSec = Math.floor(elapsed / 1000); const maxSec = 420; let pct = (elapsedSec / maxSec) * 100; if (pct > 100) pct = 100; if (trailEl) trailEl.style.width = `${pct}%`; if (timerTextEl) { if (elapsedSec <= maxSec) { const remainSec = maxSec - elapsedSec; timerTextEl.innerText = `${String(Math.floor(remainSec / 60)).padStart(2, '0')}:${String(remainSec % 60).padStart(2, '0')}`; timerTextEl.classList.remove('overtime'); } else { const overSec = elapsedSec - maxSec; timerTextEl.innerText = `${String(Math.floor(overSec / 60)).padStart(2, '0')}:${String(overSec % 60).padStart(2, '0')}`; timerTextEl.classList.add('overtime'); } } let newImgNum = pct >= 75 ? 4 : (pct >= 50 ? 3 : (pct >= 25 ? 2 : 1)); if (currentImgNum !== newImgNum) { currentImgNum = newImgNum; updateKoCardBackground(); } }, 1000); }
     function stopStudyTimer() { if (sessionTimerInterval) { clearInterval(sessionTimerInterval); sessionTimerInterval = null; } }
     function updateProgressUI() { if (wordList.length === 0) return; const cardProgEl = document.getElementById('card-progress'); if (cardProgEl) cardProgEl.innerText = `${currentStartIndex + 1} / ${wordList.length}`; }
-    function loadShortcutUrl(url) { if (url.includes("1ElLraPc80Uez8innH6RfXOBz36IV9ARXnkAiUembWH0")) { const modal = document.getElementById('life-notice-modal'); if (modal) { pendingLifeUrl = url; modal.classList.remove('hidden'); return; } } window.isAllDbLoaded = false; loadExcelFromUrl(url); }
-    function closeLifeNoticeModal() { const modal = document.getElementById('life-notice-modal'); if (modal) modal.classList.add('hidden'); pendingLifeUrl = ''; }
-    function loadCachedLifeData() { if (pendingLifeUrl) { window.isAllDbLoaded = false; loadExcelFromUrl(pendingLifeUrl, false); closeLifeNoticeModal(); } } function loadFreshLifeData() { if (pendingLifeUrl) { window.isAllDbLoaded = false; loadExcelFromUrl(pendingLifeUrl, true); closeLifeNoticeModal(); } }
+    function loadShortcutUrl(url) { window.isAllDbLoaded = false; loadExcelFromUrl(url); }
+    
     async function fetchSheetData(url, bypassCache = false) { let exportUrl = url; if (exportUrl.includes("docs.google.com/spreadsheets")) { if (exportUrl.includes("/edit")) exportUrl = exportUrl.split('/edit')[0] + '/export?format=xlsx'; else if (!exportUrl.includes("/export")) exportUrl = exportUrl + '/export?format=xlsx'; } if (bypassCache && 'caches' in window) { try { const cacheNames = await caches.keys(); for (const name of cacheNames) { if (name.startsWith('pongcrush')) { const cache = await caches.open(name); await cache.delete(exportUrl); } } } catch(e) {} } let response; try { response = await fetch(exportUrl, bypassCache ? { cache: 'reload' } : {}); } catch (e) { console.warn(e); } if (!response || !response.ok) throw new Error("파일 로드 실패. 링크 공유 권한을 확인하세요."); const data = new Uint8Array(await response.arrayBuffer()); const workbook = XLSX.read(data, { type: 'array' }); const worksheet = workbook.Sheets[workbook.SheetNames[0]]; const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }); return jsonData.filter(row => row && row[0] && row[1]).map(row => ({ ko: formatWordText(row[0]), en: formatWordText(row[1]), exEn: formatWordText(row[2] || ''), exKo: formatWordText(row[3] || ''), synonyms: (row[4] || '').toString().trim() })); }
-    async function loadExcelFromUrl(targetUrl, bypassCache = false) { let url = targetUrl || ''; if (!url) { statusEl.classList.add('error'); statusEl.innerText = "URL이 선택되지 않았습니다."; return; } if (url.includes("1m7KXifCB6txkKEOHqApMWOR4MQwqb6Ji1Dm-hRJYzLc")) { currentCategory = "스피킹"; perDayCount = 30; } else if (url.includes("1UYTEv88wdKsSS2kkB-UylHAfQAlV6yrvjwVNecG6m64")) { currentCategory = "라이팅"; perDayCount = 40; } else if (url.includes("1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U")) { currentCategory = "초록이"; perDayCount = 60; } else if (url.includes("1ElLraPc80Uez8innH6RfXOBz36IV9ARXnkAiUembWH0")) { currentCategory = "라잎"; perDayCount = 15; } else { currentCategory = "단어암기"; perDayCount = 30; } statusEl.classList.remove('error'); statusEl.innerText = ""; const loadingModal = document.getElementById('loading-overlay'); if (loadingModal) loadingModal.classList.remove('hidden'); try { const tempExtractList = await fetchSheetData(url, bypassCache); if (tempExtractList.length === 0) throw new Error("유효한 단어 데이터(1열 한국어, 2열 영어)가 없습니다."); loadedRawWordList = tempExtractList; if (loadingModal) loadingModal.classList.add('hidden'); openDayModal(); } catch (error) { if (loadingModal) loadingModal.classList.add('hidden'); statusEl.classList.add('error'); statusEl.innerText = "에러: " + error.message; } }
+    async function loadExcelFromUrl(targetUrl, bypassCache = false) { let url = targetUrl || ''; if (!url) { statusEl.classList.add('error'); statusEl.innerText = "URL이 선택되지 않았습니다."; return; } if (url.includes("1m7KXifCB6txkKEOHqApMWOR4MQwqb6Ji1Dm-hRJYzLc")) { currentCategory = "스피킹"; perDayCount = 30; } else if (url.includes("1UYTEv88wdKsSS2kkB-UylHAfQAlV6yrvjwVNecG6m64")) { currentCategory = "라이팅"; perDayCount = 40; } else if (url.includes("1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U")) { currentCategory = "초록이"; perDayCount = 60; } else { currentCategory = "단어암기"; perDayCount = 30; } statusEl.classList.remove('error'); statusEl.innerText = ""; const loadingModal = document.getElementById('loading-overlay'); if (loadingModal) loadingModal.classList.remove('hidden'); try { const tempExtractList = await fetchSheetData(url, bypassCache); if (tempExtractList.length === 0) throw new Error("유효한 단어 데이터(1열 한국어, 2열 영어)가 없습니다."); loadedRawWordList = tempExtractList; if (loadingModal) loadingModal.classList.add('hidden'); openDayModal(); } catch (error) { if (loadingModal) loadingModal.classList.add('hidden'); statusEl.classList.add('error'); statusEl.innerText = "에러: " + error.message; } }
     function openDayModal() { const modal = document.getElementById('day-modal'); if (!modal) return; const titleEl = document.getElementById('day-modal-title'); if (titleEl) titleEl.innerText = `📅 ${currentCategory} 시험 Day 선택`; modal.classList.remove('hidden'); renderDayButtonsUI(); }
     function closeDayModal() { const modal = document.getElementById('day-modal'); if (modal) modal.classList.add('hidden'); }
     function renderDayButtonsUI() { const titleEl = document.getElementById('day-list-title'); const gridEl = document.getElementById('day-buttons-grid'); if (!gridEl) return; const totalWords = loadedRawWordList.length; if (titleEl) titleEl.innerText = `📌 학습할 Day 선택 (총 ${totalWords}개 단어 / Day당 ${perDayCount}개)`; const totalDays = Math.ceil(totalWords / perDayCount); let html = `<button class="sec-btn" style="grid-column: span 3; background:#e0f2fe; color:#0369a1; border-color:#0284c7;" onclick="selectDayRange(-1)">🔥 전체 단어 복습 (1 ~ ${totalWords}번)</button>`; for (let i = 0; i < totalDays; i++) { const startIdx = i * perDayCount + 1; const endIdx = Math.min((i + 1) * perDayCount, totalWords); html += `<button class="sec-btn" onclick="selectDayRange(${i})">Day ${i + 1}<br><span style="font-size:11px; opacity:0.8; font-weight:normal;">(${startIdx}~${endIdx})</span></button>`; } gridEl.innerHTML = html; }
     function selectDayRange(dayIndex) { closeDayModal(); let selectedSubset = []; currentDayIndex = dayIndex; isWeakReviewMode = false; if (dayIndex === -1) selectedSubset = [...loadedRawWordList]; else { const start = dayIndex * perDayCount; selectedSubset = loadedRawWordList.slice(start, Math.min((dayIndex + 1) * perDayCount, loadedRawWordList.length)); } if (selectedSubset.length === 0) return; originalWordList = shuffleArray(selectedSubset); wordList = [...originalWordList]; vagueWords = []; currentStartIndex = 0; showAnswers = false; resetDefaultSessionSettings(); document.getElementById('setup-area').classList.add('hidden'); document.getElementById('summary-area').classList.add('hidden'); document.getElementById('network-status-container').classList.add('hidden'); document.getElementById('app-footer').classList.add('hidden'); document.getElementById('game-area').classList.remove('hidden'); document.body.classList.add('game-active'); const types = ['type1', 'type2', 'type3']; currentImageType = types[Math.floor(Math.random() * types.length)]; currentImgNum = 1; startStudyTimer(); renderCards(); }
     function openWeakReviewModal() { const modal = document.getElementById('weak-review-modal'); if (!modal) return; modal.classList.remove('hidden'); renderWeakReviewModalUI(); } function closeWeakReviewModal() { const modal = document.getElementById('weak-review-modal'); if (modal) modal.classList.add('hidden'); }
-    function renderWeakReviewModalUI() { const savedList = getPWASavedWords(); const allBtn = document.getElementById('weak-review-all-btn'); if (allBtn) allBtn.innerText = `🔥 전체 취약 단어 복습 (${savedList.length}개)`; const spkWords = savedList.filter(w => w.category === '스피킹'); const wrtWords = savedList.filter(w => w.category === '라이팅'); const grnWords = savedList.filter(w => w.category === '초록이'); const lifeWords = savedList.filter(w => w.category === '라잎'); document.getElementById('col-cnt-speaking').innerText = `(${spkWords.length}개)`; document.getElementById('col-cnt-writing').innerText = `(${wrtWords.length}개)`; document.getElementById('col-cnt-green').innerText = `(${grnWords.length}개)`; document.getElementById('col-cnt-life').innerText = `(${lifeWords.length}개)`; renderWeakDayList('speaking', '스피킹', spkWords); renderWeakDayList('writing', '라이팅', wrtWords); renderWeakDayList('green', '초록이', grnWords); renderWeakDayList('life', '라잎', lifeWords); }
+    function renderWeakReviewModalUI() { const savedList = getPWASavedWords(); const allBtn = document.getElementById('weak-review-all-btn'); if (allBtn) allBtn.innerText = `🔥 전체 취약 단어 복습 (${savedList.length}개)`; const spkWords = savedList.filter(w => w.category === '스피킹'); const wrtWords = savedList.filter(w => w.category === '라이팅'); const grnWords = savedList.filter(w => w.category === '초록이'); document.getElementById('col-cnt-speaking').innerText = `(${spkWords.length}개)`; document.getElementById('col-cnt-writing').innerText = `(${wrtWords.length}개)`; document.getElementById('col-cnt-green').innerText = `(${grnWords.length}개)`; renderWeakDayList('speaking', '스피킹', spkWords); renderWeakDayList('writing', '라이팅', wrtWords); renderWeakDayList('green', '초록이', grnWords); }
     function renderWeakDayList(elementIdSuffix, categoryName, wordList) { const container = document.getElementById(`weak-day-list-${elementIdSuffix}`); if (!container) return; if (wordList.length === 0) { container.innerHTML = `<div style="text-align:center; padding:12px 0; color:#94a3b8; font-size:11px;">없음</div>`; return; } const dayMap = {}; wordList.forEach(w => { const dayIdx = w.dayIndex !== undefined ? w.dayIndex : -1; if (!dayMap[dayIdx]) dayMap[dayIdx] = 0; dayMap[dayIdx]++; }); let html = ''; Object.keys(dayMap).sort((a,b) => a - b).forEach(dayIdxStr => { const dayIdx = parseInt(dayIdxStr); const count = dayMap[dayIdx]; html += `<button class="weak-day-btn" onclick="startWeakReviewSession('DAY', '${categoryName}', ${dayIdx})">${dayIdx >= 0 ? `D${dayIdx + 1}` : '자율'} (${count})</button>`; }); container.innerHTML = html; }
     function startWeakReviewSession(type, category, dayIndex) { closeWeakReviewModal(); const savedList = getPWASavedWords(); let targetWords = []; if (type === 'ALL') { targetWords = [...savedList]; currentWeakReviewTitle = '전체 영역'; } else if (type === 'CAT') { targetWords = savedList.filter(w => w.category === category); currentWeakReviewTitle = `${category} 전체`; } else if (type === 'DAY') { targetWords = savedList.filter(w => w.category === category && w.dayIndex === dayIndex); currentWeakReviewTitle = `${category} ${dayIndex >= 0 ? `D${dayIndex + 1}` : '자율'}`; } if (targetWords.length === 0) return; isWeakReviewMode = true; testedWeakWordsInSession = [...targetWords]; originalWordList = shuffleArray(targetWords); wordList = [...originalWordList]; vagueWords = []; currentStartIndex = 0; showAnswers = false; resetDefaultSessionSettings(); document.getElementById('setup-area').classList.add('hidden'); document.getElementById('summary-area').classList.add('hidden'); document.getElementById('network-status-container').classList.add('hidden'); document.getElementById('app-footer').classList.add('hidden'); document.getElementById('game-area').classList.remove('hidden'); document.body.classList.add('game-active'); const types = ['type1', 'type2', 'type3']; currentImageType = types[Math.floor(Math.random() * types.length)]; currentImgNum = 1; startStudyTimer(); renderCards(); }
     function updateButtonsUI() { if (wordList.length === 0) return; const targetItem = wordList[currentStartIndex]; const vagueTextEl = document.getElementById('vague-btn-text'); const actionTextEl = document.getElementById('action-btn-text'); vagueBtn.classList.remove('btn-state-yellow', 'btn-state-red', 'btn-state-green'); if (isCurrentCardChecked) { if (vagueTextEl) vagueTextEl.innerText = "체크 완료 ✓"; vagueBtn.classList.add('btn-state-green'); } else if (isWeakReviewMode) { if (!showAnswers) { if (vagueTextEl) vagueTextEl.innerText = "또 몰라요 ❓"; vagueBtn.classList.add('btn-state-yellow'); } else { if (vagueTextEl) vagueTextEl.innerText = "또 틀렸어요 ❌"; vagueBtn.classList.add('btn-state-red'); } } else { const savedList = getPWASavedWords(); const isVague = vagueWords.some(item => item.ko === targetItem.ko && item.en === targetItem.en); if (isVague) { if (vagueTextEl) vagueTextEl.innerText = "체크 완료 ✓"; vagueBtn.classList.add('btn-state-green'); } else if (!showAnswers) { if (vagueTextEl) vagueTextEl.innerText = "몰라요 ❓"; vagueBtn.classList.add('btn-state-yellow'); } else { if (vagueTextEl) vagueTextEl.innerText = "틀렸어요 ❌"; vagueBtn.classList.add('btn-state-red'); } } if (!showAnswers) { if (actionTextEl) actionTextEl.innerText = "정답 확인 👁️"; } else { if (actionTextEl) actionTextEl.innerText = "다음 단어 ▶"; } const prevBtn = document.getElementById('prev-btn'); if (prevBtn) { if (currentStartIndex === 0) { prevBtn.disabled = true; prevBtn.style.opacity = '0.4'; prevBtn.style.cursor = 'not-allowed'; } else { prevBtn.disabled = false; prevBtn.style.opacity = '1'; prevBtn.style.cursor = 'pointer'; } } }
     function getCardCheckCount(item) { if (!item) return 0; const savedList = getPWASavedWords(); const matchedSaved = savedList.find(w => w.ko === item.ko && w.en === item.en); return matchedSaved ? (matchedSaved.vagueCount || 0) : 0; }
     function renderCheckBadgesHtml(countVal) { if (countVal <= 0) return ''; let html = ''; for (let i = 0; i < countVal; i++) html += `<span class="check-icon-badge" title="${i + 1}회 체크">✔</span>`; return html; }
     function updateCardCheckBadges(item) { const container = document.getElementById('card-check-badges-container'); if (!container) return; container.innerHTML = renderCheckBadgesHtml(getCardCheckCount(item)); }
-    function renderCards() { isInfiniteLoop = false; if (wordList.length === 0) return; wrapperEl.innerHTML = ''; showAnswers = false; isCurrentCardChecked = false; wrapperEl.classList.remove('show-answers'); if (currentStartIndex < wordList.length) { const item = wordList[currentStartIndex]; const wordClass = item.ko.replace(/<[^>]*>/g, '').length >= 45 ? 'card-word long-text' : 'card-word'; const formattedExKo = formatContextInText(item.exKo); const exampleKoHtml = formattedExKo ? `<div class="ex-ko">${formattedExKo}</div>` : ''; const exampleEnHtml = item.exEn ? `<div class="ex-en">${item.exEn}</div>` : ''; const synonymsHtml = item.synonyms ? `<div class="card-synonyms">${item.synonyms}</div>` : ''; const speakingTargetTextToUse = item.exEn ? item.exEn : item.en; const speakingTypeToUse = item.exEn ? 'sentence' : 'word'; const countVal = getCardCheckCount(item); const badgesHtml = `<div id="card-check-badges-container" class="vague-check-badges-wrap">${renderCheckBadgesHtml(countVal)}</div>`; let testInfoText = isWeakReviewMode ? `🔥 취약 복습 (${currentWeakReviewTitle})` : (currentDayIndex === -1 ? `${currentCategory} 전체 복습` : `${currentCategory} Day ${currentDayIndex + 1}`); const testInfoHtml = `<div class="current-test-badge">${testInfoText}</div>`; const displayKo = item.ko; const cardHtml = ` <div class="card"> <div class="card-section section-ko"> <div class="card-top-left-info">${testInfoHtml}${badgesHtml}</div> <div class="card-top-actions-ko"> <button type="button" class="writing-test-trigger-btn" title="영작 테스트 (T)" onclick="event.stopPropagation(); openWritingModalFromCard();"> ✍️ 영작 테스트 <span class="desktop-shortcut">(T)</span> </button> </div> <div class="card-content-center"> <div class="${wordClass}">${displayKo}</div> <div class="card-example">${exampleKoHtml}</div> </div> </div> <div class="card-section section-en" onclick="if(showAnswers) speakCurrentWord();"> <div class="card-top-actions"> <button type="button" class="card-action-btn card-speaking-btn" title="스피킹 연습 (Z)" onclick="event.stopPropagation(); openSpeakingModal('${speakingTypeToUse}', '${speakingTargetTextToUse.replace(/'/g, "\\'")}');"> 🎙️ <span class="desktop-shortcut">(Z)</span> </button> <button type="button" class="card-action-btn card-repeat-btn" title="다시 듣기 (Space, ↑)" onclick="event.stopPropagation(); speakCurrentWord();"> 🔁 <span class="desktop-shortcut">(Space, ↑)</span> </button> <button type="button" id="infinite-loop-btn" class="card-action-btn card-infinite-btn" title="무 무한 반복 (Shift)" onclick="event.stopPropagation(); toggleInfiniteLoop();"> ♾️ <span class="desktop-shortcut">(Shift)</span> </button> </div> <div class="card-content-center"> <div class="placeholder">?</div> <div class="${wordClass}">${item.en}</div> ${item.exEn || item.synonyms ? `<div class="card-example">${exampleEnHtml}${synonymsHtml}</div>` : ''} </div> </div> </div> `; wrapperEl.insertAdjacentHTML('beforeend', cardHtml); } updateProgressUI(); updateButtonsUI(); updateKoCardBackground(); if (isAutoplay) startAutoplayLoopForCurrentCard(); }
+    function renderCards() { 
+        isInfiniteLoop = false; 
+        if (wordList.length === 0) return; 
+        wrapperEl.innerHTML = ''; 
+        showAnswers = false; 
+        isCurrentCardChecked = false; 
+        wrapperEl.classList.remove('show-answers'); 
+        
+        if (currentStartIndex < wordList.length) { 
+            const item = wordList[currentStartIndex]; 
+            const wordClass = item.ko.replace(/<[^>]*>/g, '').length >= 45 ? 'card-word long-text' : 'card-word'; 
+            const formattedExKo = formatContextInText(item.exKo); 
+            const exampleKoHtml = formattedExKo ? `<div class="ex-ko">${formattedExKo}</div>` : ''; 
+            const exampleEnHtml = item.exEn ? `<div class="ex-en">${item.exEn}</div>` : ''; 
+            const synonymsHtml = item.synonyms ? `<div class="card-synonyms">${item.synonyms}</div>` : ''; 
+            const speakingTargetTextToUse = item.exEn ? item.exEn : item.en; 
+            const speakingTypeToUse = item.exEn ? 'sentence' : 'word'; 
+            const countVal = getCardCheckCount(item); 
+            const badgesHtml = `<div id="card-check-badges-container" class="vague-check-badges-wrap">${renderCheckBadgesHtml(countVal)}</div>`; 
+            
+            let testInfoText = isWeakReviewMode ? `🔥 취약 복습 (${currentWeakReviewTitle})` : (currentDayIndex === -1 ? `${currentCategory} 전체 복습` : `${currentCategory} Day ${currentDayIndex + 1}`); 
+            const testInfoHtml = `<div class="current-test-badge">${testInfoText}</div>`; 
+            const displayKo = item.ko; 
+            
+            const cardHtml = ` 
+            <div class="card"> 
+                <div class="card-section section-ko"> 
+                    <div class="card-top-left-info">${testInfoHtml}${badgesHtml}</div> 
+                    <div class="card-top-actions-ko"> 
+                        <button type="button" class="writing-test-trigger-btn" title="영작 테스트 (T)" onclick="event.stopPropagation(); openWritingModalFromCard();"> 
+                            ✍️ 영작 테스트 <span class="desktop-shortcut">(T)</span> 
+                        </button> 
+                    </div> 
+                    <div class="card-content-center"> 
+                        <div class="${wordClass}">${displayKo}</div> 
+                        <div class="card-example">${exampleKoHtml}</div> 
+                    </div> 
+                </div> 
+                <div class="card-section section-en" onclick="if(showAnswers) speakCurrentWord();"> 
+                    <div class="card-top-actions"> 
+                        <button type="button" class="card-action-btn card-speaking-btn" title="스피킹 연습 (Z)" onclick="event.stopPropagation(); openSpeakingModal('${speakingTypeToUse}', '${speakingTargetTextToUse.replace(/'/g, "\\'")}');"> 
+                            🎙️ <span class="desktop-shortcut">(Z)</span> 
+                        </button> 
+                        <button type="button" class="card-action-btn card-repeat-btn" title="다시 듣기 (Space, ↑)" onclick="event.stopPropagation(); speakCurrentWord();"> 
+                            🔁 <span class="desktop-shortcut">(Space, ↑)</span> 
+                        </button> 
+                        <button type="button" id="infinite-loop-btn" class="card-action-btn card-infinite-btn" title="무한 반복 (Shift)" onclick="event.stopPropagation(); toggleInfiniteLoop();"> 
+                            ♾️ <span class="desktop-shortcut">(Shift)</span> 
+                        </button> 
+                    </div> 
+                    <div class="card-content-center"> 
+                        <div class="placeholder">?</div> 
+                        <div class="${wordClass}">${item.en}</div> 
+                        ${item.exEn || item.synonyms ? `<div class="card-example">${exampleEnHtml}${synonymsHtml}</div>` : ''} 
+                    </div> 
+                </div> 
+            </div> `; 
+            wrapperEl.insertAdjacentHTML('beforeend', cardHtml); 
+        } 
+        
+        updateProgressUI(); 
+        updateButtonsUI(); 
+        updateKoCardBackground(); 
+        if (isAutoplay) startAutoplayLoopForCurrentCard(); 
+    }
+    
     function handlePrevAction() { stopTTS(); clearAutoplayTimer(); if (isInfiniteLoop) { isInfiniteLoop = false; updateInfiniteButtonUI(); } if (isAutoplay) { isAutoplay = false; releaseWakeLock(); const btn = document.getElementById('autoplay-btn'); const btnLabel = document.getElementById('autoplay-btn-label'); if (btn && btnLabel) { btn.classList.remove('active'); btnLabel.innerHTML = "🖐️<span class='hide-on-mobile'> 수동</span>"; } } if (wordList.length === 0) return; if (currentStartIndex > 0) { currentStartIndex -= cardsPerPage; renderCards(); } }
     function handleVagueAction(targetIndex) { clearAutoplayTimer(); if (wordList.length === 0) return; if (targetIndex < wordList.length) { const targetItem = wordList[targetIndex]; if (!isCurrentCardChecked) { if (!vagueWords.some(item => item.ko === targetItem.ko && item.en === targetItem.en)) vagueWords.push(targetItem); addWordToPWAStorage(targetItem); isCurrentCardChecked = true; updateCardCheckBadges(targetItem); } } if (!showAnswers) { showAnswers = true; wrapperEl.classList.add('show-answers'); speakCurrentWord(() => { if (isAutoplay) handlePrimaryAction(); }); } updateButtonsUI(); }
     function handlePrimaryAction() { clearAutoplayTimer(); if (wordList.length === 0) return; if (!showAnswers) { showAnswers = true; wrapperEl.classList.add('show-answers'); updateButtonsUI(); speakCurrentWord(() => { if (isAutoplay) handlePrimaryAction(); }); } else { stopTTS(); if (isInfiniteLoop) { isInfiniteLoop = false; updateInfiniteButtonUI(); } if (currentStartIndex + cardsPerPage < wordList.length) { currentStartIndex += cardsPerPage; renderCards(); } else { showSummaryNotes(); } } }
-    function showSummaryNotes() { stopTTS(); stopStudyTimer(); document.getElementById('game-area').classList.add('hidden'); const summaryArea = document.getElementById('summary-area'); const tbody = document.getElementById('summary-tbody'); const titleText = document.getElementById('summary-title-text'); const actionTh = document.getElementById('summary-action-th'); tbody.innerHTML = ''; const targetDisplayList = isWeakReviewMode ? [...testedWeakWordsInSession] : [...vagueWords]; const savedList = getPWASavedWords(); targetDisplayList.sort((a, b) => { const savedA = savedList.find(w => w.ko === a.ko && w.en === a.en); const savedB = savedList.find(w => w.ko === b.ko && w.en === b.en); return (savedB ? (savedB.vagueCount || 0) : 0) - (savedA ? (savedA.vagueCount || 0) : 0); }); if (isWeakReviewMode) { if (titleText) titleText.innerText = "🔥 취약 단어 복습 완료 리스트"; if (actionTh) actionTh.classList.remove('hidden'); } else { if (titleText) titleText.innerText = "📋 복습 리스트"; if (actionTh) actionTh.classList.add('hidden'); } document.getElementById('summary-count').innerText = `복습할 단어: ${targetDisplayList.length}개`; if (targetDisplayList.length === 0) { tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--slack-blue); font-weight:700; padding:40px 0;">🎉 완벽합니다! 복습할 단어가 없습니다.</td></tr>`; } else { targetDisplayList.forEach(item => { let enCellContent = `<div style="color: var(--slack-blue); font-weight: bold;">${item.en}</div>`; if (item.exEn || item.exKo) { const formattedSummaryExKo = formatContextInText(item.exKo); enCellContent += ` <div style="font-size: 13px; color: #4b5563; font-weight: normal; margin-top: 4px; line-height: 1.4;"> ${item.exEn ? `<div>${item.exEn}</div>` : ''} ${item.exKo ? `<div style="color: #6b7280; font-size: 12px; margin-top: 2px;">${formattedSummaryExKo}</div>` : ''} </div> `; } const matchedSaved = savedList.find(w => w.ko === item.ko && w.en === item.en); const countVal = matchedSaved ? (matchedSaved.vagueCount || 0) : 0; const koCellContent = ` <div style="font-weight: 700; color: var(--text-main); display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap;"> <span>${item.ko}</span> ${countVal > 0 ? `<span style="font-size: 11px; color: #16a34a; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 2px 6px; border-radius: 12px; font-weight: 800; white-space: nowrap;">⚠️ ${countVal}회 체크</span>` : ''} </div> `; const actionTdHtml = isWeakReviewMode ? `<td style="text-align: center;"><button class="row-del-btn" onclick="deleteSingleWeakWordFromTable('${item.ko.replace(/'/g, "\\'")}', '${item.en.replace(/'/g, "\\'")}', this)">🗑️ 삭제</button></td>` : '<td class="hidden"></td>'; tbody.insertAdjacentHTML('beforeend', `<tr><td>${koCellContent}</td><td>${enCellContent}</td>${actionTdHtml}</tr>`); }); } summaryArea.classList.remove('hidden'); playFanfareSound(); }
+    
+    function showSummaryNotes() { 
+        stopTTS(); 
+        stopStudyTimer(); 
+        document.getElementById('game-area').classList.add('hidden'); 
+        const summaryArea = document.getElementById('summary-area'); 
+        const tbody = document.getElementById('summary-tbody'); 
+        const titleText = document.getElementById('summary-title-text'); 
+        const actionTh = document.getElementById('summary-action-th'); 
+        tbody.innerHTML = ''; 
+        
+        const targetDisplayList = isWeakReviewMode ? [...testedWeakWordsInSession] : [...vagueWords]; 
+        const savedList = getPWASavedWords(); 
+        
+        targetDisplayList.sort((a, b) => { 
+            const savedA = savedList.find(w => w.ko === a.ko && w.en === a.en); 
+            const savedB = savedList.find(w => w.ko === b.ko && w.en === b.en); 
+            return (savedB ? (savedB.vagueCount || 0) : 0) - (savedA ? (savedA.vagueCount || 0) : 0); 
+        }); 
+        
+        if (isWeakReviewMode) { 
+            if (titleText) titleText.innerText = "🔥 취약 단어 복습 완료 리스트"; 
+            if (actionTh) actionTh.classList.remove('hidden'); 
+        } else { 
+            if (titleText) titleText.innerText = "📋 복습 리스트"; 
+            if (actionTh) actionTh.classList.add('hidden'); 
+        } 
+        
+        document.getElementById('summary-count').innerText = `복습할 단어: ${targetDisplayList.length}개`; 
+        
+        if (targetDisplayList.length === 0) { 
+            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--slack-blue); font-weight:700; padding:40px 0;">🎉 완벽합니다! 복습할 단어가 없습니다.</td></tr>`; 
+        } else { 
+            targetDisplayList.forEach(item => { 
+                let enCellContent = `<div style="color: var(--slack-blue); font-weight: bold;">${item.en}</div>`; 
+                if (item.exEn || item.exKo) { 
+                    const formattedSummaryExKo = formatContextInText(item.exKo); 
+                    enCellContent += ` <div style="font-size: 13px; color: #4b5563; font-weight: normal; margin-top: 4px; line-height: 1.4;"> ${item.exEn ? `<div>${item.exEn}</div>` : ''} ${item.exKo ? `<div style="color: #6b7280; font-size: 12px; margin-top: 2px;">${formattedSummaryExKo}</div>` : ''} </div> `; 
+                } 
+                const matchedSaved = savedList.find(w => w.ko === item.ko && w.en === item.en); 
+                const countVal = matchedSaved ? (matchedSaved.vagueCount || 0) : 0; 
+                const koCellContent = ` <div style="font-weight: 700; color: var(--text-main); display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap;"> <span>${item.ko}</span> ${countVal > 0 ? `<span style="font-size: 11px; color: #16a34a; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 2px 6px; border-radius: 12px; font-weight: 800; white-space: nowrap;">⚠️ ${countVal}회 체크</span>` : ''} </div> `; 
+                const actionTdHtml = isWeakReviewMode ? `<td style="text-align: center;"><button class="row-del-btn" onclick="deleteSingleWeakWordFromTable('${item.ko.replace(/'/g, "\\'")}', '${item.en.replace(/'/g, "\\'")}', this)">🗑️ 삭제</button></td>` : '<td class="hidden"></td>'; 
+                tbody.insertAdjacentHTML('beforeend', `<tr><td>${koCellContent}</td><td>${enCellContent}</td>${actionTdHtml}</tr>`); 
+            }); 
+        } 
+        summaryArea.classList.remove('hidden'); 
+        playFanfareSound(); 
+    }
+    
     function deleteSingleWeakWordFromTable(ko, en, btnEl) { removeWordFromPWAStorage({ ko, en }); testedWeakWordsInSession = testedWeakWordsInSession.filter(w => !(w.ko === ko && w.en === en)); const row = btnEl.closest('tr'); if (row) { row.style.opacity = '0'; row.style.transform = 'scale(0.95)'; row.style.transition = 'all 0.2s ease'; setTimeout(() => { row.remove(); document.getElementById('summary-count').innerText = `복습할 단어: ${testedWeakWordsInSession.length}개`; }, 200); } }
     function goToHome() { stopTTS(); stopStudyTimer(); releaseWakeLock(); document.getElementById('game-area').classList.add('hidden'); document.getElementById('summary-area').classList.add('hidden'); document.getElementById('setup-area').classList.remove('hidden'); document.getElementById('network-status-container').classList.remove('hidden'); document.getElementById('app-footer').classList.remove('hidden'); document.body.classList.remove('game-active'); updatePWAReviewButtonUI(); }
     function reviewVagueWords() { const targetList = isWeakReviewMode ? testedWeakWordsInSession : vagueWords; if (targetList.length === 0) return; wordList = shuffleArray(targetList); vagueWords = []; currentStartIndex = 0; document.getElementById('summary-area').classList.add('hidden'); document.getElementById('game-area').classList.remove('hidden'); startStudyTimer(); renderCards(); }
     function restartFullGame() { wordList = shuffleArray(originalWordList); vagueWords = []; currentStartIndex = 0; document.getElementById('summary-area').classList.add('hidden'); document.getElementById('game-area').classList.remove('hidden'); startStudyTimer(); renderCards(); }
-    function openSpeakingModal(type, targetText) { if (isAutoplay) { isAutoplay = false; clearAutoplayTimer(); releaseWakeLock(); const btn = document.getElementById('autoplay-btn'); const btnLabel = document.getElementById('autoplay-btn-label'); if (btn && btnLabel) { btn.classList.remove('active'); btnLabel.innerHTML = "🖐️<span class='hide-on-mobile'> 수동</span>"; } } if (isInfiniteLoop) { isInfiniteLoop = false; updateInfiniteButtonUI(); } speakingType = type; speakingTargetText = targetText ? targetText.replace(/<[^>]*>/g, '').replace(/#/g, ' ').trim() : ''; speakingStep = 1; speakingSpeechSpeed = 1.0; isSpeakingTextVisible = false; speakingRecordedTranscript = ''; const modal = document.getElementById('speaking-modal'); if (modal) modal.classList.remove('hidden'); renderSpeakingModalUI(); speakTargetTextInModal(); }
-    function closeSpeakingModal() { stopTTS(); stopSpeakingRecording(); const modal = document.getElementById('speaking-modal'); if (modal) modal.classList.add('hidden'); } function toggleSpeakingSpeechSpeed() { speakingSpeechSpeed = (speakingSpeechSpeed === 1.0) ? 0.75 : 1.0; renderSpeakingModalUI(); speakTargetTextInModal(); } function toggleSpeakingTextVisibility() { isSpeakingTextVisible = !isSpeakingTextVisible; renderSpeakingModalUI(); }
+    
+    function openSpeakingModal(type, targetText) { 
+        if (isAutoplay) { isAutoplay = false; clearAutoplayTimer(); releaseWakeLock(); const btn = document.getElementById('autoplay-btn'); const btnLabel = document.getElementById('autoplay-btn-label'); if (btn && btnLabel) { btn.classList.remove('active'); btnLabel.innerHTML = "🖐️<span class='hide-on-mobile'> 수동</span>"; } } 
+        if (isInfiniteLoop) { isInfiniteLoop = false; updateInfiniteButtonUI(); } 
+        speakingType = type; 
+        speakingTargetText = targetText ? targetText.replace(/<[^>]*>/g, '').replace(/#/g, ' ').trim() : ''; 
+        speakingStep = 1; 
+        speakingSpeechSpeed = 1.0; 
+        isSpeakingTextVisible = false; 
+        speakingRecordedTranscript = ''; 
+        const modal = document.getElementById('speaking-modal'); 
+        if (modal) modal.classList.remove('hidden'); 
+        renderSpeakingModalUI(); 
+        speakTargetTextInModal(); 
+    }
+    
+    function closeSpeakingModal() { stopTTS(); stopSpeakingRecording(); const modal = document.getElementById('speaking-modal'); if (modal) modal.classList.add('hidden'); } 
+    function toggleSpeakingSpeechSpeed() { speakingSpeechSpeed = (speakingSpeechSpeed === 1.0) ? 0.75 : 1.0; renderSpeakingModalUI(); speakTargetTextInModal(); } 
+    function toggleSpeakingTextVisibility() { isSpeakingTextVisible = !isSpeakingTextVisible; renderSpeakingModalUI(); }
     function speakTargetTextInModal() { stopTTS(); setTimeout(() => { if (!('speechSynthesis' in window) || !speakingTargetText) return; const utter = new SpeechSynthesisUtterance(speakingTargetText); utter.pitch = 1.0; utter.rate = 1.0 * speakingSpeechSpeed; const voiceObj = getRandomOrSelectedVoice(); if (voiceObj) { utter.voice = voiceObj; utter.lang = voiceObj.lang || 'en-US'; } else utter.lang = 'en-US'; window.speechSynthesis.speak(utter); }, 60); }
-    function setupMicVolumeVisualizer() { const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent); if (isMobile) { startMobileWaveformSimulation(); return; } if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return; navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => { window.speakingAudioStream = stream; try { const AudioContext = window.AudioContext || window.webkitAudioContext; micAudioContext = new AudioContext(); const source = micAudioContext.createMediaStreamSource(stream); micAnalyser = micAudioContext.createAnalyser(); micAnalyser.fftSize = 64; source.connect(micAnalyser); const dataArray = new Uint8Array(micAnalyser.frequencyBinCount); function updateWaveVisual() { if (!isSpeakingRecording) return; micAnalyser.getByteFrequencyData(dataArray); let sum = 0; for (let i = 0; i < dataArray.length; i++) sum += dataArray[i]; let average = sum / dataArray.length; const NOISE_GATE_THRESHOLD = 18; document.querySelectorAll('.speaking-wave-bar').forEach((bar, index) => { if (average < NOISE_GATE_THRESHOLD) bar.style.height = '12px'; else bar.style.height = `${Math.min(80, Math.max(12, (average - NOISE_GATE_THRESHOLD) * (1.2 + (index % 3) * 0.4)))}px`; }); micAnimFrameId = requestAnimationFrame(updateWaveVisual); } updateWaveVisual(); } catch(e) {} }).catch(err => { startMobileWaveformSimulation(); }); }
+    
+    function setupMicVolumeVisualizer() { 
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent); 
+        if (isMobile) { startMobileWaveformSimulation(); return; } 
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return; 
+        navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => { 
+            window.speakingAudioStream = stream; 
+            try { 
+                const AudioContext = window.AudioContext || window.webkitAudioContext; 
+                micAudioContext = new AudioContext(); 
+                const source = micAudioContext.createMediaStreamSource(stream); 
+                micAnalyser = micAudioContext.createAnalyser(); 
+                micAnalyser.fftSize = 64; source.connect(micAnalyser); 
+                const dataArray = new Uint8Array(micAnalyser.frequencyBinCount); 
+                function updateWaveVisual() { 
+                    if (!isSpeakingRecording) return; 
+                    micAnalyser.getByteFrequencyData(dataArray); 
+                    let sum = 0; 
+                    for (let i = 0; i < dataArray.length; i++) sum += dataArray[i]; 
+                    let average = sum / dataArray.length; 
+                    const NOISE_GATE_THRESHOLD = 18; 
+                    document.querySelectorAll('.speaking-wave-bar').forEach((bar, index) => { 
+                        if (average < NOISE_GATE_THRESHOLD) bar.style.height = '12px'; 
+                        else bar.style.height = `${Math.min(80, Math.max(12, (average - NOISE_GATE_THRESHOLD) * (1.2 + (index % 3) * 0.4)))}px`; 
+                    }); 
+                    micAnimFrameId = requestAnimationFrame(updateWaveVisual); 
+                } 
+                updateWaveVisual(); 
+            } catch(e) {} 
+        }).catch(err => { startMobileWaveformSimulation(); }); 
+    }
+    
     function startMobileWaveformSimulation() { 
         function updateSimulatedWave() { 
             if (!isSpeakingRecording) return; 
@@ -1267,7 +1655,6 @@ function renderVoiceListUI() {
             closeAISettingsModal(); 
             closeModelSelectModal(); 
             closeAIFeedbackModal(); 
-            closeLifeNoticeModal(); 
             closeDataModal(); 
             closeReleaseNoteModal(); 
             closeDevResetModal();
