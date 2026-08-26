@@ -499,81 +499,81 @@
 
 
 <div id="data-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeDataModal()">
-    <div class="modal-card">
+    <!-- 💡 padding과 gap을 줄여 모달 전체 크기를 압축 -->
+    <div class="modal-card" style="padding: 18px 20px; gap: 10px;">
         <div class="modal-header">
             <span>💾 데이터 백업 및 복원</span>
             <button onclick="closeDataModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button>
         </div>
         
-        <div class="sec-select-area">
-            <div class="sec-select-title">☁️ 구글 드라이브 연동</div>
-            <div style="font-size:12.5px; color:var(--text-muted); line-height:1.4; margin-bottom:4px;">
-                구글 계정에 로그인하여 내 드라이브와 데이터를 수동으로 안전하게 동기화할 수 있습니다.
+        <div class="sec-select-area" style="gap: 4px;">
+            <div class="sec-select-title" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                <span style="font-size: 13.5px;">☁️ 구글 드라이브 연동</span>
+                <button onclick="openGDriveHistoryModal()" style="background: #f1f5f9; border: 1px solid #cbd5e1; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; color: #475569; cursor: pointer; transition: all 0.15s ease;">🕒 히스토리</button>
             </div>
             
-            <div style="display:flex; gap:8px; margin-top:2px; margin-bottom:12px;">
-                <button class="base-btn" style="flex:1; background:#10b981; font-size:14px; padding:12px;" onclick="syncToGoogleDrive()">☁️ G드라이브 병합 저장</button>
-                <button class="base-btn" style="flex:1; background:#8b5cf6; font-size:14px; padding:12px;" onclick="loadFromGoogleDrive()">☁️ G드라이브 불러오기</button>
+            <!-- 💡 텍스트 크기와 줄간격을 줄여 공간 확보 -->
+            <div style="font-size:11.5px; color:var(--text-muted); line-height:1.3; margin-bottom:4px; letter-spacing: -0.2px;">
+                현재 학습 상태를 구글 드라이브에 안전하게 보관합니다.<br>
+                <span style="font-size: 11px; color: #0284c7; font-weight: 600;">※ 백업 시 <b>새로운 파일</b> 생성, 복원 시 <b>최근 백업</b>을 가져옵니다.</span>
+            </div>
+            
+            <!-- 💡 버튼 패딩(12px -> 10px) 및 폰트 크기(14px -> 13px) 축소 -->
+            <div style="display:flex; gap:6px; margin-top:2px; margin-bottom:6px;">
+                <button class="base-btn" style="flex:1; background:#10b981; font-size:13px; padding:10px;" onclick="syncToGoogleDrive()">☁️ 새 백업 만들기</button>
+                <button class="base-btn" style="flex:1; background:#8b5cf6; font-size:13px; padding:10px;" onclick="loadFromGoogleDrive()">☁️ 최신 복원</button>
             </div>
 
-            <details class="sync-details" style="margin: 0 0 8px 0; border: 1px solid var(--border-color); border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
-                <summary class="sync-summary" style="padding: 10px 12px; display: flex; align-items: flex-start; gap: 8px; background: #ffffff;">
-                    <span style="font-size: 11px; font-weight: 800; color: #16a34a; background: #dcfce7; padding: 3px 0; width: 36px; text-align: center; border-radius: 4px; border: 1px solid #bbf7d0; flex-shrink: 0; margin-top: 1px;">Perf</span>
-                    <span class="rn-title">단어 400개 기준 네트워크 사용량</span>
+            <!-- 💡 아코디언 마진(8px -> 4px) 및 패딩(10px -> 8px) 축소 -->
+            <details class="sync-details" style="margin: 0 0 4px 0; border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); overflow: hidden;">
+                <summary class="sync-summary" style="padding: 8px 10px; display: flex; align-items: center; gap: 6px; background: #ffffff;">
+                    <span style="font-size: 10px; font-weight: 800; color: #16a34a; background: #dcfce7; padding: 2px 0; width: 32px; text-align: center; border-radius: 4px; border: 1px solid #bbf7d0; flex-shrink: 0;">Perf</span>
+                    <span class="rn-title" style="font-size: 12.5px;">단어 400개 기준 네트워크 사용량</span>
                 </summary>
-                <div class="sync-content" style="background: #f8fafc; padding: 12px; border-top: 1px dashed var(--border-color);">
-                    <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-                        <div style="padding: 8px 10px; background: #f1f5f9; border-bottom: 1px dashed #cbd5e1; font-size: 12px; font-weight: 900; color: var(--slack-blue); display: flex; align-items: center; gap: 6px;">👨‍💻 Tech Note</div>
-                        <div style="padding: 10px; display: flex; flex-direction: column; gap: 12px;">
-                            <div style="border-radius: 6px; border: 1px solid var(--border-color); overflow: hidden; margin-top: 2px;">
-                                <table class="tech-table" style="margin: 0; background: #ffffff;">
-                                    <tbody>
-                                        <tr><th style="width: 45%; background: #f8fafc; font-size: 11.5px; padding: 6px 8px;">순수 텍스트(JSON) 데이터</th><td style="font-size: 12px; font-weight: 600; color: var(--slack-blue); padding: 6px 8px;">~ 100 KB</td></tr>
-                                        <tr><th style="width: 45%; background: #f8fafc; font-size: 11.5px; padding: 6px 8px;">네트워크 헤더 및 오버헤드</th><td style="font-size: 12px; font-weight: 600; color: var(--slack-blue); padding: 6px 8px;">~ 5 KB</td></tr>
-                                        <tr><th style="width: 45%; background: #f8fafc; font-size: 11.5px; padding: 6px 8px;">1회 통신 총합</th><td style="font-size: 12px; font-weight: 600; color: #2563eb; padding: 6px 8px;">~ 105 KB</td></tr>
-                                        <tr><th style="width: 45%; background: #f8fafc; font-size: 11.5px; padding: 6px 8px;">월 100회 동기화 시</th><td style="font-size: 12px; font-weight: 600; color: #16a34a; padding: 6px 8px;">~ 10.5 MB</td></tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                <div class="sync-content" style="background: #f8fafc; padding: 10px; border-top: 1px dashed var(--border-color);">
+                    <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                        <div style="padding: 6px 8px; background: #f1f5f9; border-bottom: 1px dashed #cbd5e1; font-size: 11.5px; font-weight: 900; color: var(--slack-blue);">👨‍💻 Tech Note</div>
+                        <div style="padding: 8px;">
+                            <table class="tech-table" style="margin: 0; background: #ffffff; border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; display: block;">
+                                <tbody>
+                                    <tr><th style="width: 45%; font-size: 11px; padding: 4px 6px;">순수 텍스트(JSON) 데이터</th><td style="font-size: 11px; padding: 4px 6px;">~ 100 KB</td></tr>
+                                    <tr><th style="width: 45%; font-size: 11px; padding: 4px 6px;">1회 통신 총합</th><td style="font-size: 11px; padding: 4px 6px; color: #2563eb;">~ 105 KB</td></tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </details>
 
-            <details class="sync-details" style="margin: 0 0 8px 0; border: 1px solid var(--border-color); border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
-                <summary class="sync-summary" style="padding: 10px 12px; display: flex; align-items: flex-start; gap: 8px; background: #ffffff;">
-                    <span style="font-size: 11px; font-weight: 800; color: #ea580c; background: #ffedd5; padding: 3px 0; width: 36px; text-align: center; border-radius: 4px; border: 1px solid #fed7aa; flex-shrink: 0; margin-top: 1px;">Arch</span>
-                    <span class="rn-title">브라우저 직접 동기화 방식 및 권한 격리 보호</span>
+            <details class="sync-details" style="margin: 0 0 4px 0; border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); overflow: hidden;">
+                <summary class="sync-summary" style="padding: 8px 10px; display: flex; align-items: center; gap: 6px; background: #ffffff;">
+                    <span style="font-size: 10px; font-weight: 800; color: #ea580c; background: #ffedd5; padding: 2px 0; width: 32px; text-align: center; border-radius: 4px; border: 1px solid #fed7aa; flex-shrink: 0;">Arch</span>
+                    <span class="rn-title" style="font-size: 12.5px;">직접 동기화 방식 및 권한 격리 보호</span>
                 </summary>
-                <div class="sync-content" style="background: #f8fafc; padding: 12px; border-top: 1px dashed var(--border-color);">
-                    <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-                        <div style="padding: 8px 10px; background: #f1f5f9; border-bottom: 1px dashed #cbd5e1; font-size: 12px; font-weight: 900; color: var(--slack-blue); display: flex; align-items: center; gap: 6px;">👨‍💻 Tech Note</div>
-                        <div style="padding: 10px; display: flex; flex-direction: column; gap: 12px;">
-                            <ul class="tech-list" style="color: #334155; line-height: 1.5; font-size: 12.5px; font-weight: 500;">
-                                <li style="margin-bottom: 4px; word-break: keep-all;"><strong>OAuth 2.0 Implicit Grant:</strong> 백엔드 서버 없이 Google Identity Services를 사용하여 클라이언트 브라우저에서 직접 인증 토큰을 획득하고 통신합니다.</li>
-                                <li style="margin-bottom: 4px; word-break: keep-all;"><strong>보안 격리 (drive.file):</strong> 애플리케이션이 <strong>직접 생성한 파일에만 접근 가능</strong>하므로, 타 개인 문서나 사진을 읽을 권한이 원천적으로 차단됩니다.</li>
-                                <li style="margin-bottom: 4px; word-break: keep-all;"><strong>메모리 볼라틸리티:</strong> Access Token은 디스크(Local Storage)가 아닌 브라우저 메모리에만 일시 보관되어 XSS 탈취 위험을 최소화합니다.</li>
+                <div class="sync-content" style="background: #f8fafc; padding: 10px; border-top: 1px dashed var(--border-color);">
+                    <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                        <div style="padding: 6px 8px; background: #f1f5f9; border-bottom: 1px dashed #cbd5e1; font-size: 11.5px; font-weight: 900; color: var(--slack-blue);">👨‍💻 Tech Note</div>
+                        <div style="padding: 8px;">
+                            <ul class="tech-list" style="color: #334155; line-height: 1.4; font-size: 11.5px; padding-left: 14px; margin: 0;">
+                                <li style="margin-bottom: 2px;"><strong>보안 격리:</strong> 앱이 직접 생성한 파일에만 접근 가능합니다.</li>
+                                <li style="margin-bottom: 0;"><strong>메모리 볼라틸리티:</strong> 토큰을 메모리에만 보관하여 해킹을 방지합니다.</li>
                             </ul>
                         </div>
                     </div>
                 </div>
             </details>
 
-            <details class="sync-details" style="margin: 0 0 8px 0; border: 1px solid var(--border-color); border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
-                <summary class="sync-summary" style="padding: 10px 12px; display: flex; align-items: flex-start; gap: 8px; background: #ffffff;">
-                    <span style="font-size: 11px; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 3px 0; width: 36px; text-align: center; border-radius: 4px; border: 1px solid #bae6fd; flex-shrink: 0; margin-top: 1px;">Auth</span>
-                    <span class="rn-title">자동 로그인 및 백그라운드 동기화가 불가능한 이유</span>
+            <details class="sync-details" style="margin: 0; border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); overflow: hidden;">
+                <summary class="sync-summary" style="padding: 8px 10px; display: flex; align-items: center; gap: 6px; background: #ffffff;">
+                    <span style="font-size: 10px; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 2px 0; width: 32px; text-align: center; border-radius: 4px; border: 1px solid #bae6fd; flex-shrink: 0;">Auth</span>
+                    <span class="rn-title" style="font-size: 12.5px;">백그라운드 동기화가 불가능한 이유</span>
                 </summary>
-                <div class="sync-content" style="background: #f8fafc; padding: 12px; border-top: 1px dashed var(--border-color);">
-                    <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-                        <div style="padding: 8px 10px; background: #f1f5f9; border-bottom: 1px dashed #cbd5e1; font-size: 12px; font-weight: 900; color: var(--slack-blue); display: flex; align-items: center; gap: 6px;">👨‍💻 Tech Note</div>
-                        <div style="padding: 10px; display: flex; flex-direction: column; gap: 12px;">
-                            <div style="font-size: 12.5px; color: #0369a1; line-height: 1.5; padding: 10px; background: #f0f9ff; border-radius: 8px; border: 1px solid #bae6fd; font-weight: 600;">💡 Junior's Note: 왜 사용자가 앱을 켤 때마다 알아서 로그인하고 뒤에서 동기화해주지 못할까요? 프론트엔드(Client-Side) 생태계의 보안과 구조적 한계 때문입니다!</div>
-                            <ul class="tech-list" style="color: #334155; line-height: 1.5; font-size: 12.5px; font-weight: 500;">
-                                <li style="margin-bottom: 4px; word-break: keep-all;"><strong style="color:var(--text-main);">1. 짧은 수명의 출입증 (Access Token):</strong> API에 접근하기 위한 토큰은 보안상 수명이 약 1시간으로 매우 짧습니다.</li>
-                                <li style="margin-bottom: 4px; word-break: keep-all;"><strong style="color:var(--text-main);">2. Refresh Token의 브라우저 저장 위험:</strong> 만료된 토큰을 연장하는 무제한 토큰(Refresh Token)을 브라우저에 저장하면, XSS 해킹 시 영구 권한이 탈취될 수 있어 구글이 이를 프론트 환경에서는 발급하지 않습니다.</li>
-                                <li style="margin-bottom: 4px; word-break: keep-all;"><strong style="color:var(--text-main);">3. 서드파티 쿠키 차단 (ITP 정책):</strong> 과거 유행하던 iframe 기반 백그라운드 토큰 갱신(Silent Refresh) 꼼수는 모던 브라우저의 프라이버시 정책 강화로 전부 차단되었습니다.</li>
-                                <li style="margin-bottom: 4px; word-break: keep-all;"><strong style="color:var(--text-main);">4. 서버리스(Serverless)의 한계:</strong> 앱이 꺼진 동안 동기화를 수행해 줄 24시간 가동 서버가 현재 아키텍처에는 존재하지 않습니다.</li>
+                <div class="sync-content" style="background: #f8fafc; padding: 10px; border-top: 1px dashed var(--border-color);">
+                    <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                        <div style="padding: 6px 8px; background: #f1f5f9; border-bottom: 1px dashed #cbd5e1; font-size: 11.5px; font-weight: 900; color: var(--slack-blue);">👨‍💻 Tech Note</div>
+                        <div style="padding: 8px;">
+                            <ul class="tech-list" style="color: #334155; line-height: 1.4; font-size: 11.5px; padding-left: 14px; margin: 0;">
+                                <li style="margin-bottom: 2px;">토큰 수명이 짧고, 자동 갱신(Refresh Token)은 브라우저 환경에서 보안상 차단됩니다.</li>
                             </ul>
                         </div>
                     </div>
@@ -581,56 +581,68 @@
             </details>
         </div>
         
-        <div style="width: 100%; height: 1px; background: var(--border-color); margin: 6px 0;"></div>
+        <div style="width: 100%; height: 1px; background: var(--border-color); margin: 2px 0;"></div>
         
-        <div class="sec-select-area">
-            <div class="sec-select-title">📁 로컬 파일 다운로드/복원 (Offline-First)</div>
-            <div style="font-size:12.5px; color:var(--text-muted); line-height:1.4; margin-bottom:4px;">
-                네트워크 연결이 없는 오프라인 환경에서도 학습 기록을 JSON 파일로 직접 내보내거나 가져와 완벽하게 복원할 수 있습니다.
+        <div class="sec-select-area" style="gap: 4px;">
+            <div class="sec-select-title" style="margin-bottom: 2px; font-size: 13.5px;">📁 로컬 파일 다운로드/복원</div>
+            <div style="font-size:11.5px; color:var(--text-muted); line-height:1.3; margin-bottom:4px; letter-spacing: -0.2px;">
+                인터넷 연결이 없어도 학습 기록을 직접 내보내거나 가져옵니다.
             </div>
 
-            <div style="display:flex; gap:8px; margin-top:2px; margin-bottom:12px;">
-                <button class="base-btn" style="flex:1; background:#f8fafc; color:#475569; border:1px solid #cbd5e1; font-size:14px; padding:12px;" onclick="backupWeakWords()">⬇️ 로컬 백업</button>
-                <button class="base-btn" style="flex:1; background:#f8fafc; color:#475569; border:1px solid #cbd5e1; font-size:14px; padding:12px;" onclick="restoreWeakWords()">⬆️ 로컬 복원</button>
+            <div style="display:flex; gap:6px; margin-top:2px; margin-bottom:6px;">
+                <button class="base-btn" style="flex:1; background:#f8fafc; color:#475569; border:1px solid #cbd5e1; font-size:13px; padding:10px;" onclick="backupWeakWords()">⬇️ 로컬 백업</button>
+                <button class="base-btn" style="flex:1; background:#f8fafc; color:#475569; border:1px solid #cbd5e1; font-size:13px; padding:10px;" onclick="restoreWeakWords()">⬆️ 로컬 복원</button>
             </div>
 
-            <details class="sync-details" style="margin: 0 0 8px 0; border: 1px solid var(--border-color); border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
-                <summary class="sync-summary" style="padding: 10px 12px; display: flex; align-items: flex-start; gap: 8px; background: #ffffff;">
-                    <span style="font-size: 11px; font-weight: 800; color: #ea580c; background: #ffedd5; padding: 3px 0; width: 36px; text-align: center; border-radius: 4px; border: 1px solid #fed7aa; flex-shrink: 0; margin-top: 1px;">Arch</span>
-                    <span class="rn-title">오프라인 환경에서 로컬 백업이 필수적인 이유</span>
+            <details class="sync-details" style="margin: 0 0 4px 0; border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); overflow: hidden;">
+                <summary class="sync-summary" style="padding: 8px 10px; display: flex; align-items: center; gap: 6px; background: #ffffff;">
+                    <span style="font-size: 10px; font-weight: 800; color: #ea580c; background: #ffedd5; padding: 2px 0; width: 32px; text-align: center; border-radius: 4px; border: 1px solid #fed7aa; flex-shrink: 0;">Arch</span>
+                    <span class="rn-title" style="font-size: 12.5px;">오프라인 백업이 필수적인 이유</span>
                 </summary>
-                <div class="sync-content" style="background: #f8fafc; padding: 12px; border-top: 1px dashed var(--border-color);">
-                    <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-                        <div style="padding: 8px 10px; background: #f1f5f9; border-bottom: 1px dashed #cbd5e1; font-size: 12px; font-weight: 900; color: var(--slack-blue); display: flex; align-items: center; gap: 6px;">👨‍💻 Tech Note</div>
-                        <div style="padding: 10px; display: flex; flex-direction: column; gap: 12px;">
-                            <ul class="tech-list" style="color: #334155; line-height: 1.5; font-size: 12.5px; font-weight: 500;">
-                                <li style="margin-bottom: 4px; word-break: keep-all;"><strong>Zero Network Dependency:</strong> 외부 API나 클라우드 인증 없이 브라우저 내장 <code>Blob</code> 및 <code>FileReader API</code>만으로 파일 I/O를 처리하여 비행기 모드에서도 작동합니다.</li>
-                                <li style="margin-bottom: 4px; word-break: keep-all;"><strong>Storage Eviction 대응:</strong> 모바일 OS(특히 iOS Safari)는 용량 부족 시 7일 이상 미사용한 사이트의 LocalStorage를 경고 없이 삭제합니다. 물리적 파일 다운로드는 이를 방어하는 가장 확실한 수단입니다.</li>
-                            </ul>
+                <div class="sync-content" style="background: #f8fafc; padding: 10px; border-top: 1px dashed var(--border-color);">
+                    <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                        <div style="padding: 6px 8px; background: #f1f5f9; border-bottom: 1px dashed #cbd5e1; font-size: 11.5px; font-weight: 900; color: var(--slack-blue);">👨‍💻 Tech Note</div>
+                        <div style="padding: 8px; font-size: 11.5px; color: #334155; line-height: 1.4;">
+                            모바일 OS는 용량 부족 시 경고 없이 로컬 스토리지를 삭제할 수 있으므로, 물리적 파일 다운로드가 가장 안전합니다.
                         </div>
                     </div>
                 </div>
             </details>
 
-            <details class="sync-details" style="margin: 0; border: 1px solid var(--border-color); border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
-                <summary class="sync-summary" style="padding: 10px 12px; display: flex; align-items: flex-start; gap: 8px; background: #ffffff;">
-                    <span style="font-size: 11px; font-weight: 800; color: #4f46e5; background: #e0e7ff; padding: 3px 0; width: 36px; text-align: center; border-radius: 4px; border: 1px solid #c7d2fe; flex-shrink: 0; margin-top: 1px;">Data</span>
-                    <span class="rn-title">타 플랫폼 이식성(Portability) 및 파싱 엔진</span>
+            <details class="sync-details" style="margin: 0; border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); overflow: hidden;">
+                <summary class="sync-summary" style="padding: 8px 10px; display: flex; align-items: center; gap: 6px; background: #ffffff;">
+                    <span style="font-size: 10px; font-weight: 800; color: #4f46e5; background: #e0e7ff; padding: 2px 0; width: 32px; text-align: center; border-radius: 4px; border: 1px solid #c7d2fe; flex-shrink: 0;">Data</span>
+                    <span class="rn-title" style="font-size: 12.5px;">타 플랫폼 이식성(Portability)</span>
                 </summary>
-                <div class="sync-content" style="background: #f8fafc; padding: 12px; border-top: 1px dashed var(--border-color);">
-                    <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-                        <div style="padding: 8px 10px; background: #f1f5f9; border-bottom: 1px dashed #cbd5e1; font-size: 12px; font-weight: 900; color: var(--slack-blue); display: flex; align-items: center; gap: 6px;">👨‍💻 Tech Note</div>
-                        <div style="padding: 10px; display: flex; flex-direction: column; gap: 12px;">
-                            <ul class="tech-list" style="color: #334155; line-height: 1.5; font-size: 12.5px; font-weight: 500;">
-                                <li style="margin-bottom: 4px; word-break: keep-all;"><strong>Data Portability:</strong> Anki나 Quizlet 같은 타 암기 앱으로 언제든 이전할 수 있도록 표준 JSON / TSV 형식 호환을 보장합니다.</li>
-                                <li style="margin-bottom: 4px; word-break: keep-all;"><strong>Robust Parser:</strong> 탭(`\t`), 쉼표(`,`), 연속 공백 등으로 구분된 비정형 텍스트 파일도 정규식 폴백(Fallback) 파서가 자동 감지하여 오류 없이 안전하게 병합합니다.</li>
-                            </ul>
+                <div class="sync-content" style="background: #f8fafc; padding: 10px; border-top: 1px dashed var(--border-color);">
+                    <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                        <div style="padding: 6px 8px; background: #f1f5f9; border-bottom: 1px dashed #cbd5e1; font-size: 11.5px; font-weight: 900; color: var(--slack-blue);">👨‍💻 Tech Note</div>
+                        <div style="padding: 8px; font-size: 11.5px; color: #334155; line-height: 1.4;">
+                            Anki나 Quizlet 같은 타 암기 앱으로 언제든 이전할 수 있도록 표준 JSON / TSV 형식 호환을 보장합니다.
                         </div>
                     </div>
                 </div>
             </details>
         </div>
-        <button class="base-btn" style="background:var(--slack-purple); width:100%; padding:12px; margin-top:12px;" onclick="closeDataModal()">닫기</button>
+        <button class="base-btn" style="background:var(--slack-purple); width:100%; padding:12px; margin-top:8px; font-size: 14px;" onclick="closeDataModal()">닫기</button>
+    </div>
+</div>
+
+<!-- 구글 드라이브 백업 히스토리 모달 -->
+<div id="gdrive-history-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeGDriveHistoryModal()" style="z-index: 25000;">
+    <div class="modal-card">
+        <div class="modal-header">
+            <span>🕒 백업 히스토리</span>
+            <button onclick="closeGDriveHistoryModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button>
+        </div>
+        <div style="font-size:12.5px; color:var(--text-muted); line-height:1.4; margin-bottom:12px;">
+            구글 드라이브에 누적된 과거 백업 목록입니다. (최신순 정렬)
+        </div>
+        
+        <!-- 히스토리 리스트가 렌더링 될 영역 -->
+        <div id="gdrive-history-list" style="max-height: 50vh; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 4px;"></div>
+        
+        <button class="base-btn" style="background:var(--slack-purple); width:100%; padding:12px; margin-top:16px;" onclick="closeGDriveHistoryModal()">닫기</button>
     </div>
 </div>
 
@@ -687,7 +699,7 @@
     </div>
 </div>
 
-<div class="app-version" onclick="openReleaseNoteModal()" title="릴리즈 노트 보기">v7.0.2 (Update Log)</div>
+<div class="app-version" onclick="openReleaseNoteModal()" title="릴리즈 노트 보기">v7.0.3 (Update Log)</div>
 <div id="toast-notification" class="toast-notification"></div>
 
 <script>
@@ -1276,83 +1288,53 @@ function renderVoiceListUI() {
     }
     
     function restoreWeakWords() { const input = document.createElement('input'); input.type = 'file'; input.accept = ".json,.txt,text/plain,application/json,*/*"; input.style.display = 'none'; input.onchange = function(event) { const file = event.target.files && event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = async function(e) { try { await processImportedData(e.target.result); closeDataModal(); } catch (err) { alert("파일 복원 실패: " + err.message); } }; reader.onerror = function() { alert("파일을 읽는 중 에러가 발생했습니다."); }; reader.readAsText(file, 'UTF-8'); }; document.body.appendChild(input); input.click(); setTimeout(() => { document.body.removeChild(input); }, 1000); }
-    
-    // 통합 데이터 GDrive 동기화 저장
+
     window.syncToGoogleDrive = async function() { 
-        if (!GOOGLE_CLIENT_ID) { alert("스크립트 상단에 GOOGLE_CLIENT_ID를 먼저 입력해야 합니다."); return; } 
+    if (!GOOGLE_CLIENT_ID) { alert("스크립트 상단에 GOOGLE_CLIENT_ID를 먼저 입력해야 합니다."); return; } 
+    
+    let localList = getPWASavedWords();
+    let localSpkData = JSON.parse(localStorage.getItem('pongcrush_spk_data') || '[]');
+
+    if (localList.length === 0 && localSpkData.length === 0) {
+        alert("백업할 취약 단어나 스피킹 데이터가 없습니다."); return;
+    }
+
+    requestGoogleAuth(async () => { 
+        const loadingOverlay = document.getElementById('loading-overlay'); 
+        const loadingText = document.getElementById('loading-text'); 
+        loadingText.innerText = "구글 드라이브에 새 백업 생성 중..."; 
+        loadingOverlay.classList.remove('hidden'); 
         
-        let localList = getPWASavedWords();
-        let localSpkData = JSON.parse(localStorage.getItem('pongcrush_spk_data') || '[]');
-
-        if (localList.length === 0 && localSpkData.length === 0) {
-            alert("백업할 취약 단어나 스피킹 데이터가 없습니다."); return;
-        }
-
-        requestGoogleAuth(async () => { 
-            const loadingOverlay = document.getElementById('loading-overlay'); 
-            const loadingText = document.getElementById('loading-text'); 
-            loadingText.innerText = "구글 드라이브와 병합(Merge) 중..."; 
-            loadingOverlay.classList.remove('hidden'); 
+        try { 
+            // 💡 파일명에 생성 시간(Timestamp)을 포함하여 겹치지 않게 생성
+            const now = new Date();
+            const timestamp = now.toISOString().replace(/[:.]/g, '-'); // 예: 2026-08-26T06-20-38-123Z
+            const fileName = `pongcrush_sync_data_${timestamp}.json`; 
             
-            try { 
-                const fileName = 'pongcrush_sync_data.json'; 
-                const res = await gapi.client.drive.files.list({ q: `name = '${fileName}' and trashed = false`, fields: 'files(id, name)', spaces: 'drive' }); 
-                const files = res.result.files; 
-                
-                let mergedList = [...localList]; 
-                let mergedSpk = [...localSpkData];
-                let addedCount = 0; 
-                
-                if (files && files.length > 0) { 
-                    const fileData = await gapi.client.drive.files.get({ fileId: files[0].id, alt: 'media' }); 
-                    const existingData = typeof fileData.body === 'string' ? JSON.parse(fileData.body) : fileData.body; 
-                    
-                    let existingWords = Array.isArray(existingData) ? existingData : (existingData.words || []);
-                    let existingSpk = Array.isArray(existingData) ? [] : (existingData.speaking || []);
-
-                    if (Array.isArray(existingWords)) { 
-                        existingWords.forEach(existingItem => { 
-                            const matchKo = sanitizeForMatch(existingItem.ko); 
-                            const matchEn = sanitizeForMatch(existingItem.en); 
-                            const localIndex = mergedList.findIndex(w => sanitizeForMatch(w.ko) === matchKo && sanitizeForMatch(w.en) === matchEn); 
-                            if (localIndex > -1) { 
-                                mergedList[localIndex].vagueCount = Math.max(mergedList[localIndex].vagueCount || 1, existingItem.vagueCount || 1); 
-                            } else { 
-                                mergedList.push(existingItem); 
-                                addedCount++; 
-                            } 
-                        }); 
-                    } 
-                    
-                    if (mergedSpk.length === 0 && existingSpk.length > 0) {
-                        mergedSpk = existingSpk;
-                        localStorage.setItem('pongcrush_spk_data', JSON.stringify(mergedSpk));
-                    }
-
-                    const finalUploadData = { type: "pongcrush_combined", words: mergedList, speaking: mergedSpk };
-                    const fileContent = new Blob([JSON.stringify(finalUploadData, null, 2)], { type: 'application/json' }); 
-                    
-                    await fetch(`https://www.googleapis.com/upload/drive/v3/files/${files[0].id}?uploadType=media`, { method: 'PATCH', headers: { Authorization: `Bearer ${gapi.client.getToken().access_token}`, 'Content-Type': 'application/json' }, body: fileContent }); 
-                    
-                    localStorage.setItem(PWA_VAGUE_STORAGE_KEY, JSON.stringify(mergedList)); 
-                    updatePWAReviewButtonUI(); 
-                    alert(`✅ 구글 드라이브와 기존 데이터 병합 완료!\n(기존 파일에서 로컬로 추가로 가져온 단어: ${addedCount}개)`); 
-                } else { 
-                    const finalUploadData = { type: "pongcrush_combined", words: mergedList, speaking: mergedSpk };
-                    const fileContent = new Blob([JSON.stringify(finalUploadData, null, 2)], { type: 'application/json' }); 
-                    const metadata = { name: fileName, mimeType: 'application/json' }; 
-                    const form = new FormData(); 
-                    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' })); 
-                    form.append('file', fileContent); 
-                    
-                    await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { Authorization: `Bearer ${gapi.client.getToken().access_token}` }, body: form }); 
-                    alert('✅ 구글 드라이브에 새 백업 파일이 생성되었습니다!'); 
-                } 
-                closeDataModal(); 
-            } catch (err) { alert('❌ 구글 동기화 실패: ' + err.message); } 
-            finally { loadingOverlay.classList.add('hidden'); loadingText.innerText = "단어장 데이터를 가져오는 중..."; } 
-        }); 
-    };
+            const finalUploadData = { type: "pongcrush_combined", words: localList, speaking: localSpkData };
+            const fileContent = new Blob([JSON.stringify(finalUploadData, null, 2)], { type: 'application/json' }); 
+            const metadata = { name: fileName, mimeType: 'application/json' }; 
+            const form = new FormData(); 
+            form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' })); 
+            form.append('file', fileContent); 
+            
+            // 💡 이전 파일을 조회할 필요 없이 바로 새 파일 업로드(POST)
+            await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { 
+                method: 'POST', 
+                headers: { Authorization: `Bearer ${gapi.client.getToken().access_token}` }, 
+                body: form 
+            }); 
+            
+            alert(`✅ 구글 드라이브에 새 백업 파일(${fileName})이 생성되었습니다!`); 
+            closeDataModal(); 
+        } catch (err) { 
+            alert('❌ 구글 백업 실패: ' + err.message); 
+        } finally { 
+            loadingOverlay.classList.add('hidden'); 
+            loadingText.innerText = "단어장 데이터를 가져오는 중..."; 
+        } 
+    }); 
+};
     
     // 통합 데이터 GDrive 불러오기
     window.loadFromGoogleDrive = async function() { 
@@ -1360,16 +1342,23 @@ function renderVoiceListUI() {
         requestGoogleAuth(async () => { 
             const loadingOverlay = document.getElementById('loading-overlay'); 
             const loadingText = document.getElementById('loading-text'); 
-            loadingText.innerText = "구글 드라이브에서 데이터 불러오는 중..."; 
+            loadingText.innerText = "구글 드라이브에서 최신 백업 불러오는 중..."; 
             loadingOverlay.classList.remove('hidden'); 
             try { 
-                const fileName = 'pongcrush_sync_data.json'; 
-                const res = await gapi.client.drive.files.list({ q: `name = '${fileName}' and trashed = false`, fields: 'files(id, name)', spaces: 'drive' }); 
+                // 💡 파일명 패턴으로 검색하고, 생성일(createdTime) 기준 내림차순(desc) 정렬
+                const res = await gapi.client.drive.files.list({ 
+                    q: `name contains 'pongcrush_sync_data' and trashed = false`, 
+                    orderBy: 'createdTime desc',
+                    fields: 'files(id, name, createdTime)', 
+                    spaces: 'drive' 
+                }); 
                 const files = res.result.files; 
                 
                 if (!files || files.length === 0) { alert('⚠️ 구글 드라이브에 저장된 백업 파일이 없습니다.'); return; } 
                 
-                const fileData = await gapi.client.drive.files.get({ fileId: files[0].id, alt: 'media' }); 
+                // 💡 정렬된 리스트의 첫 번째 파일이 가장 최신 파일
+                const latestFile = files[0];
+                const fileData = await gapi.client.drive.files.get({ fileId: latestFile.id, alt: 'media' }); 
                 const importedData = typeof fileData.body === 'string' ? JSON.parse(fileData.body) : fileData.body; 
                 
                 if (Array.isArray(importedData)) {
@@ -1380,11 +1369,98 @@ function renderVoiceListUI() {
                     }
                     await processImportedData(importedData.words || []);
                 }
+                alert(`✅ 최신 백업 파일(${latestFile.name}) 복원 완료!`);
                 closeDataModal(); 
             } catch (err) { alert('❌ 불러오기 실패: ' + err.message); } 
             finally { loadingOverlay.classList.add('hidden'); loadingText.innerText = "단어장 데이터를 가져오는 중..."; } 
         }); 
     };
+
+    // 구글 드라이브 백업 히스토리 모달 열기
+    window.openGDriveHistoryModal = function() {
+        if (!GOOGLE_CLIENT_ID) { alert("스크립트 상단에 GOOGLE_CLIENT_ID를 먼저 입력해야 합니다."); return; } 
+        
+        const modal = document.getElementById('gdrive-history-modal');
+        const container = document.getElementById('gdrive-history-list');
+        
+        if (modal) modal.classList.remove('hidden');
+        
+        // 로딩 UI 렌더링
+        container.innerHTML = '<div style="text-align:center; padding:30px 20px; color:var(--text-muted); font-size:13px; font-weight:700;"><div class="spinner" style="border-top-color:#3b82f6; margin-bottom:12px;"></div><br>백업 기록을 불러오는 중입니다...</div>';
+        
+        requestGoogleAuth(async () => {
+            try {
+                // 앱 생성 파일 최신순 조회
+                const res = await gapi.client.drive.files.list({
+                    q: "trashed = false", 
+                    orderBy: 'createdTime desc',
+                    fields: 'files(id, name, createdTime, size)',
+                    spaces: 'drive'
+                });
+                
+                const files = res.result.files;
+                
+                if (!files || files.length === 0) {
+                    container.innerHTML = '<div style="text-align:center; padding:30px 20px; color:var(--text-muted); font-size:13px; font-weight:700;">📂 저장된 백업 내역이 없습니다.</div>';
+                    return;
+                }
+                
+                let html = '';
+                files.forEach((file, index) => {
+                    const dateObj = new Date(file.createdTime);
+                    const dateStr = dateObj.toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+                    const kbSize = file.size ? Math.round(file.size / 1024).toLocaleString() + ' KB' : '알 수 없음';
+                    const isLatest = index === 0;
+                    
+                    html += `
+                        <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:8px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                            <div style="font-weight:800; color:var(--text-main); font-size:13.5px; word-break:break-all; display:flex; align-items:center; gap:6px;">
+                                📄 ${file.name}
+                                ${isLatest ? '<span style="font-size:10px; background:#dcfce7; color:#16a34a; padding:2px 6px; border-radius:6px; font-weight:900;">최신</span>' : ''}
+                            </div>
+                            <div style="display:flex; justify-content:space-between; font-size:12px; color:#64748b; font-weight:600;">
+                                <span>🗓️ ${dateStr}</span>
+                                <span>💾 ${kbSize}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+                
+            } catch(err) {
+                container.innerHTML = `<div style="text-align:center; padding:30px 20px; color:#dc2626; font-size:13px; font-weight:800;">❌ 내역을 불러오지 못했습니다.<br><span style="font-size:11px; font-weight:500; margin-top:6px; display:block;">${err.message}</span></div>`;
+            }
+        });
+    };
+
+    // 히스토리 모달 닫기
+    window.closeGDriveHistoryModal = function() {
+        const modal = document.getElementById('gdrive-history-modal');
+        if (modal) modal.classList.add('hidden');
+    };
+
+    window.getGoogleDriveBackupList = async function() {
+    return new Promise((resolve, reject) => {
+        requestGoogleAuth(async () => {
+            try {
+                // 내림차순 정렬된 전체 백업 파일 리스트 호출
+                const res = await gapi.client.drive.files.list({ 
+                    q: `name contains 'pongcrush_sync_data' and trashed = false`, 
+                    orderBy: 'createdTime desc',
+                    fields: 'files(id, name, createdTime, size)', 
+                    spaces: 'drive' 
+                }); 
+                
+                // 파일 배열 반환 (UI에서 forEach로 버튼을 생성하는 데 사용 가능)
+                resolve(res.result.files || []); 
+            } catch (err) {
+                reject(err);
+            }
+        });
+    });
+};
+
+
     function requestGoogleAuth(callback) { if (!gapiInited || !gisInited) { alert("구글 API가 아직 준비되지 않았습니다. 잠시 후 시도해주세요."); return; } tokenClient.callback = async (resp) => { if (resp.error !== undefined) { localStorage.setItem('gdrive_connected', 'false'); throw resp; } localStorage.setItem('gdrive_connected', 'true'); if (callback) callback(); }; if (localStorage.getItem('gdrive_connected') === 'true') { tokenClient.requestAccessToken({prompt: ''}); } else { tokenClient.requestAccessToken({prompt: 'consent'}); } }
     function handleAutoplayBtnClick() { if (isAutoplay) { isAutoplay = false; clearAutoplayTimer(); releaseWakeLock(); const btn = document.getElementById('autoplay-btn'); const btnLabel = document.getElementById('autoplay-btn-label'); if (btn && btnLabel) { btn.classList.remove('active'); btnLabel.innerHTML = "🖐️<span class='hide-on-mobile'> 수동</span>"; } } else { openAutoplayModal(); } }
     function toggleInfiniteLoop() { if (wordList.length === 0) return; if (isInfiniteLoop) { isInfiniteLoop = false; stopTTS(); updateInfiniteButtonUI(); } else { isInfiniteLoop = true; if (!showAnswers) { showAnswers = true; wrapperEl.classList.add('show-answers'); updateButtonsUI(); } if (isAutoplay) { isAutoplay = false; clearAutoplayTimer(); releaseWakeLock(); const btn = document.getElementById('autoplay-btn'); const btnLabel = document.getElementById('autoplay-btn-label'); if (btn && btnLabel) { btn.classList.remove('active'); btnLabel.innerHTML = "🖐️<span class='hide-on-mobile'> 수동</span>"; } } updateInfiniteButtonUI(); playInfiniteSpeech(); } }
