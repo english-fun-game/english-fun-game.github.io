@@ -1,14 +1,17 @@
-const CACHE_NAME = 'pongcrush-v6.1'; // 버전업 (새로운 SW 설치 유도)
+const CACHE_NAME = 'pongcrush-v6.3'; // 버전업
 
 // 캐싱할 정적, 미디어 자원 및 엑셀 파일 리스트
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
+    './speaking.html',       // 📌 스피킹 HTML 추가
+    './privacy.html',        // 📌 개인정보처리방침 HTML 추가
     './favicon.png',
+    './profile.jpg',         // 📌 프로필 이미지 캐싱
     'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',
     'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',
     
-    // 📌 고정 단어장 엑셀 파일 URL 캐싱 (라잎 단어장 포함)
+    // 📌 고정 단어장 엑셀 파일 URL 캐싱
     'https://docs.google.com/spreadsheets/d/1m7KXifCB6txkKEOHqApMWOR4MQwqb6Ji1Dm-hRJYzLc/export?format=xlsx',
     'https://docs.google.com/spreadsheets/d/1UYTEv88wdKsSS2kkB-UylHAfQAlV6yrvjwVNecG6m64/export?format=xlsx',
     'https://docs.google.com/spreadsheets/d/1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U/export?format=xlsx',
@@ -74,7 +77,7 @@ self.addEventListener('fetch', (event) => {
     );
 });
 
-// 🔔 알림 클릭 이벤트 처리 (앱 열기 및 파라미터 전달)
+// 🔔 알림 클릭 이벤트 처리
 self.addEventListener('notificationclick', function(event) {
     event.notification.close();
     const targetUrl = event.notification.data.url;
