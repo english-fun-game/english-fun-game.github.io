@@ -111,21 +111,53 @@
         }
 
         .question-prompt {
-            font-size: 20px; font-weight: 900; color: #0f172a; line-height: 1.3;
+            font-size: 19px; font-weight: 900; color: #0f172a; line-height: 1.3;
             padding: 0 0 10px 0; border-bottom: 2.5px solid var(--border-strong);
             flex-shrink: 0; letter-spacing: -0.3px;
+        }
+        .q-prompt-hover {
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .q-prompt-hover:hover {
+            color: var(--slack-blue);
         }
 
         .answer-box {
             flex: 1; background: transparent; padding: 4px 0; overflow-y: auto; display: flex; flex-direction: column;
         }
-        .sentence-row { margin-bottom: 12px; line-height: 1.6; }
+        
+        .sentence-row {
+            position: relative; 
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+        
+        .sentence-number-bubble {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            background: #334155; 
+            color: #ffffff; 
+            width: 14px;
+            height: 14px;
+            border-radius: 3px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8.5px;
+            font-weight: 900;
+            z-index: 10;
+            user-select: none;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+        }
         
         .chunk {
             display: block; width: 100%; box-sizing: border-box;
-            padding: 10px 14px; border-radius: 8px; 
+            padding: 10px 14px 10px 22px; 
+            border-radius: 8px; 
             background: #ffffff; border: 1.5px solid var(--border-color); 
-            font-size: 17px; font-weight: 800; color: #1e293b; 
+            font-size: 19px; font-weight: 800; color: #1e293b; 
             margin-bottom: 4px; cursor: pointer; transition: all 0.2s;
             box-shadow: 0 2px 4px rgba(0,0,0,0.02); letter-spacing: -0.2px;
             line-height: 1.5;
@@ -141,8 +173,8 @@
         /* 시험 모드 용 인풋 및 결과 디스플레이 스타일 */
         .test-input {
             width: 100%;
-            padding: 10px 14px;
-            font-size: 17px;
+            padding: 10px 14px 10px 22px; 
+            font-size: 19px;
             font-weight: 600;
             font-family: inherit;
             border: 2px solid var(--border-strong);
@@ -152,6 +184,11 @@
             background: #ffffff;
             color: #1e293b;
             transition: border-color 0.2s;
+            resize: none;
+            overflow-y: hidden;
+            line-height: 1.5;
+            min-height: 50px;
+            max-height: 84px;
         }
         .test-input:focus {
             border-color: var(--slack-blue);
@@ -160,18 +197,33 @@
         }
         
         .user-answer-disp {
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 600;
             color: #475569; 
             margin-top: 2px;
-            padding-left: 4px;
+            padding-left: 22px; 
             margin-bottom: 12px;
+            line-height: 1.5;
         }
         .wrong-word {
             text-decoration: line-through;
             text-decoration-color: #ef4444;
             text-decoration-thickness: 2.5px;
             color: #ef4444; 
+        }
+
+        /* 누락된 단어를 표시하는 글자 단위 사각형 영역 */
+        .missing-word-container {
+            display: inline-flex;
+            gap: 2px;
+            margin: 0 4px;
+            vertical-align: middle;
+        }
+        .missing-char-block {
+            width: 8px;
+            height: 14px;
+            background-color: #cbd5e1;
+            border-radius: 1.5px;
         }
 
         /* 우측 패널 */
@@ -288,98 +340,23 @@
         .list-item-text { font-size: 15px; font-weight: 800; color: #0f172a; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .json-textarea { width: 100%; height: 260px; padding: 12px; border-radius: 8px; border: 1.5px solid var(--border-strong); font-family: monospace; font-size: 13.5px; background: #f8fafc; box-sizing: border-box; resize: vertical; }
 
-        /* ---------------------------------------------------- */
-        /* ★ 모바일 반응형 지원 (요청사항 100% 반영) ★             */
-        /* ---------------------------------------------------- */
         @media (max-width: 768px) {
-            body {
-                padding: 12px 4vw;
-                height: 100dvh;
-                overflow-y: auto; /* 전체 스크롤 허용 */
-            }
-
-            /* 1. 상단 컨트롤 바 한 줄 유지 (얼굴, 문제번호 | 목록, 읽기) */
-            .top-bar {
-                flex-direction: row;
-                flex-wrap: nowrap;
-                align-items: center;
-                justify-content: space-between;
-                padding-bottom: 12px;
-            }
-
-            /* 2. 글로벌 페르소나 얼굴 & 문제번호만 노출 */
-            .meta-header {
-                gap: 8px;
-                width: auto;
-                flex: 0 0 auto;
-            }
-            .btn-global-persona {
-                padding: 0;
-                background: transparent;
-                border: none;
-            }
-            .profile-img-header {
-                width: 28px;
-                height: 28px;
-            }
-            /* 필요 없는 텍스트와 뱃지, 구분선 숨김 */
-            .persona-name-text,
-            .bc-arrow,
-            .specific-persona-tag,
-            .type-segmented-control,
-            .badge-topic-category,
-            .divider-line {
-                display: none !important;
-            }
-
-            /* 3. 목록, 읽기, 읽기 설정(음성) 버튼 노출 */
+            body { padding: 12px 4vw; height: 100dvh; overflow-y: auto; }
+            .top-bar { flex-direction: row; flex-wrap: nowrap; align-items: center; justify-content: space-between; padding-bottom: 12px; }
+            .meta-header { gap: 8px; width: auto; flex: 0 0 auto; }
+            .btn-global-persona { padding: 0; background: transparent; border: none; }
+            .profile-img-header { width: 28px; height: 28px; }
+            .persona-name-text, .bc-arrow, .specific-persona-tag, .type-segmented-control, .badge-topic-category, .divider-line { display: none !important; }
             .controls { gap: 6px; }
             .controls .shortcut-key { display: none !important; }
-            /* 목록, 읽기, 읽기 설정이 아닌 버튼들만 숨김 처리 */
-            .controls .ctrl-btn:not([onclick="openListModal()"]):not([onclick="playAll()"]):not([onclick="openVoiceModal()"]) {
-                display: none !important;
-            }
-
-            .ctrl-btn {
-                padding: 8px 14px;
-                font-size: 14px;
-            }
-
-            /* 4. 워크스페이스 세로 배치 */
-            .workspace-2to1 {
-                flex-direction: column;
-                height: auto;
-                gap: 20px;
-                overflow: visible;
-                padding-bottom: 30px;
-            }
-            .panel-left-2 {
-                flex: none;
-                height: auto;
-            }
-            .answer-box {
-                overflow: visible; /* 본문 내용에 맞춰 자연스럽게 늘어남 */
-            }
-
-            /* 5. 논리 흐름 표(Canvas) 크기 대폭 확대 */
-            .panel-right-1 {
-                flex: none;
-                height: 650px; /* 캔버스 공간 넉넉하게 확보하여 깨짐 방지 */
-                margin-bottom: 20px;
-            }
-
-            /* 6. 모달 꽉 차게 */
-            .modal-content-giant[style], 
-            #voice-modal > div[style], 
-            #edit-modal > div[style], 
-            #add-modal > div[style], 
-            #list-modal > div[style] {
-                width: 95% !important;
-                padding: 20px !important;
-                max-height: 90vh !important;
-            }
+            .controls .ctrl-btn:not([onclick="openListModal()"]):not([onclick="playAll()"]):not([onclick="openVoiceModal()"]) { display: none !important; }
+            .ctrl-btn { padding: 8px 14px; font-size: 14px; }
+            .workspace-2to1 { flex-direction: column; height: auto; gap: 20px; overflow: visible; padding-bottom: 30px; }
+            .panel-left-2 { flex: none; height: auto; }
+            .answer-box { overflow: visible; }
+            .panel-right-1 { flex: none; height: 650px; margin-bottom: 20px; }
+            .modal-content-giant[style], #voice-modal > div[style], #edit-modal > div[style], #add-modal > div[style], #list-modal > div[style] { width: 95% !important; padding: 20px !important; max-height: 90vh !important; }
             #voice-modal > div[style] { padding: 0 !important; }
-            
             .profile-hero-extended { flex-direction: column; text-align: center; gap: 12px; }
             .identity-chips { justify-content: center; }
             .topics-grid { grid-template-columns: 1fr; overflow-y: auto; padding-bottom: 20px; }
@@ -420,7 +397,7 @@
 
     <main class="workspace-2to1">
         <section class="panel-left-2">
-            <div class="question-prompt" id="q-prompt">Loading...</div>
+            <div id="q-prompt">Loading...</div>
             <div class="answer-box"><div id="script-container"></div></div>
         </section>
 
@@ -620,40 +597,7 @@
       }
     };
 
-    const defaultSpkData = [
-        {
-            meta: {
-                type: "경험",
-                topic_category: "라이프스타일,건강",
-                specific_persona: "아침 요가와 다이어리 성찰 루틴"
-            },
-            question: "Do you agree or disagree with the following statement? It is important to have a regular morning routine to have a productive day.",
-            script_rows: [
-                [ { text: "I strongly agree that having a regular morning routine is essential for a productive day." } ],
-                [ { text: "To begin with, it helps me maintain mental grit and inner peace." } ],
-                [ { text: "For instance, I practice morning yoga stretches every single day before I start my schedule." } ],
-                [ { text: "This consistent physical training not only wakes up my body but also sharpens my focus, preventing any impulsive or unplanned decisions later on." } ],
-                [ { text: "Furthermore, keeping this strict self-discipline allows me to reflect on my daily goals and emotions just like when I write my diary at night." } ],
-                [ { text: "Therefore, sticking to a well-organized morning routine is the foundation of my productivity." } ]
-            ],
-            vocab_list: [
-                { expr: "regular morning routine", meaning: "규칙적인 아침 루틴" },
-                { expr: "mental grit", meaning: "정신적 회복탄력성, 내면의 끈기" },
-                { expr: "inner peace", meaning: "내면의 평화/평정" },
-                { expr: "morning yoga stretches", meaning: "아침 요가 스트레칭" },
-                { expr: "impulsive or unplanned decisions", meaning: "충동적이거나 계획되지 않은 결정" },
-                { expr: "strict self-discipline", meaning: "엄격한 자기 규율" },
-                { expr: "reflect on", meaning: "~을 성찰하다, 되돌아보다" }
-            ],
-            logic_flow_steps: [
-                { tag: "1. 서두 (도입)", keyword: "strongly agree", desc: "규칙적인 아침 루틴의 중요성에 대한 강력 동의" },
-                { tag: "2. 첫 번째 근거", keyword: "mental grit", desc: "멘탈 유지와 내면의 평정을 돕는다는 핵심 이유" },
-                { tag: "3. 상세 설명(경험)", keyword: "morning yoga", desc: "매일 실천하는 아침 요가 스트레칭 경험 언급" },
-                { tag: "4. 의미 확장 (가치)", keyword: "strict self-discipline", desc: "충동 억제 및 자기 규율로 이어짐 강조" },
-                { tag: "5. 결론 (마무리)", keyword: "foundation of productivity", desc: "루틴이 곧 생산성의 근간이 됨을 요약" }
-            ]
-        }
-    ];
+    const defaultSpkData = []; 
 
     let currentIndex = 0;
     let isPlaying = false;
@@ -858,19 +802,22 @@
             try { 
                 spkData = JSON.parse(saved); 
                 if (!Array.isArray(spkData)) throw new Error("데이터 타입 오류");
-                if (spkData.length > 0 && (!spkData[0].meta || !spkData[0].script_rows)) {
-                    throw new Error("데이터 구조 깨짐");
-                }
-            } 
-            catch (e) { 
-                console.warn("데이터 구조 이상으로 기본 데이터를 불러옵니다.");
-                spkData = JSON.parse(JSON.stringify(defaultSpkData)); 
+            } catch (e) { 
+                spkData = []; 
                 localStorage.setItem('pongcrush_spk_data', JSON.stringify(spkData));
             }
         } else {
-            spkData = JSON.parse(JSON.stringify(defaultSpkData));
+            spkData = [];
             localStorage.setItem('pongcrush_spk_data', JSON.stringify(spkData));
         }
+        
+        currentIndex = parseInt(localStorage.getItem('pongcrush_spk_last_index')) || 0;
+        if (currentIndex >= spkData.length && spkData.length > 0) currentIndex = 0;
+        if (spkData.length === 0) currentIndex = 0;
+    }
+
+    function saveCurrentIndex() {
+        localStorage.setItem('pongcrush_spk_last_index', currentIndex);
     }
 
     function switchTab(tabName) {
@@ -1012,6 +959,8 @@
         if (!spkData || spkData.length === 0) {
             document.getElementById('meta-header').innerHTML = `<span class="badge-topic-category" style="background:#fef2f2; color:#ef4444; border-color:#fca5a5;">데이터 없음</span>`;
             document.getElementById('q-prompt').innerText = "저장된 문제가 없습니다. [추가] 버튼을 눌러 새로운 문제를 등록해주세요.";
+            document.getElementById('q-prompt').className = "question-prompt";
+            document.getElementById('q-prompt').onclick = null;
             document.getElementById('script-container').innerHTML = '<div style="color:#64748b; padding:20px 0;">화면 상단의 추가(A) 버튼을 눌러 JSON 데이터를 입력하세요.</div>';
             document.getElementById('vocab-table-body').innerHTML = '';
             const canvas = document.getElementById('logic-canvas');
@@ -1022,7 +971,10 @@
             return;
         }
 
-        if (currentIndex >= spkData.length) currentIndex = 0;
+        if (currentIndex >= spkData.length) {
+            currentIndex = 0;
+            saveCurrentIndex();
+        }
         const data = spkData[currentIndex];
         
         const types = ["경험", "선택", "열린"];
@@ -1032,7 +984,6 @@
 
         const topicLabel = data.meta.topic_category ? `📚 ${data.meta.topic_category}` : "📚 미분류";
 
-        // 모바일 최적화를 위해 이름 부분에 persona-name-text 클래스 부여
         document.getElementById('meta-header').innerHTML = `
             <button class="btn-global-persona" onclick="openPersonaModal()">
                 <img src="profile.jpg" class="profile-img-header" alt="Profile" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2NiZDVlMSI+PHBhdGggZD0iTTEyIDJhNSA1IDAgMSAwIDAgMTAgNSA1IDAgMCAwIDAtMTB6bTAtMmMzLjg2NiAwIDcgMy4xMzQgNyA3cy0zLjEzNCA3LTcgNy03LTMuMTM0LTctNyAzLjEzNC03IDctN3ptMCAxOGM1LjUyMyAwIDEwIDIuMjM5IDEwIDV2Mkgydi0yYz0yLjc2MSA0LjQ3Ny01IDEwLTV6Ii8+PC9zdmc+='">
@@ -1048,7 +999,10 @@
             <div class="badge-topic-category">${topicLabel}</div>
         `;
 
-        document.getElementById('q-prompt').innerText = data.question;
+        const qPrompt = document.getElementById('q-prompt');
+        qPrompt.innerText = data.question;
+        qPrompt.className = "question-prompt q-prompt-hover";
+        qPrompt.onclick = () => playSingle(data.question);
 
         const scriptContainer = document.getElementById('script-container');
         scriptContainer.innerHTML = '';
@@ -1057,13 +1011,19 @@
             const rowDiv = document.createElement('div');
             rowDiv.className = 'sentence-row';
             
+            // 모서리에 위치하는 타이트한 absolute 숫자 버블
+            const bubble = document.createElement('div');
+            bubble.className = 'sentence-number-bubble';
+            bubble.innerText = rIdx + 1;
+            rowDiv.appendChild(bubble);
+
             const combinedText = row.map(c => c.text).join(' ');
-            
             const span = document.createElement('span');
             span.className = 'chunk';
             span.innerHTML = highlightVocabInHtml(combinedText, data.vocab_list);
             span.id = `chunk-${rIdx}`;
-            span.onclick = () => playSingle(combinedText);
+            
+            span.onclick = () => playChunk(rIdx, combinedText);
             
             rowDiv.appendChild(span);
             scriptContainer.appendChild(rowDiv);
@@ -1104,11 +1064,27 @@
         scriptContainer.innerHTML = '';
         
         data.script_rows.forEach((row, rIdx) => {
-            const input = document.createElement('input');
-            input.type = 'text';
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'sentence-row';
+
+            const bubble = document.createElement('div');
+            bubble.className = 'sentence-number-bubble';
+            bubble.innerText = rIdx + 1;
+            rowDiv.appendChild(bubble);
+
+            const input = document.createElement('textarea');
             input.className = 'test-input';
+            input.rows = 1;
+            input.spellcheck = false;
             input.placeholder = `문장 ${rIdx + 1}을(를) 작성하세요...`;
-            scriptContainer.appendChild(input);
+            input.oninput = function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 84) + 'px';
+                this.style.overflowY = this.scrollHeight > 84 ? 'auto' : 'hidden';
+            };
+
+            rowDiv.appendChild(input);
+            scriptContainer.appendChild(rowDiv);
         });
 
         const firstInput = scriptContainer.querySelector('.test-input');
@@ -1124,24 +1100,69 @@
         renderUI();
     }
 
-    function diffSentences(correct, user) {
-        const cWords = correct.trim().split(/\s+/);
-        const uWords = user.trim().split(/\s+/);
-        let resultHtml = '';
-        
-        for(let i = 0; i < Math.max(cWords.length, uWords.length); i++) {
-            const uW = uWords[i] || '';
-            const cW = cWords[i] || '';
-            
-            const cClean = cW.replace(/[.,?!;:'"]/g, '').toLowerCase();
-            const uClean = uW.replace(/[.,?!;:'"]/g, '').toLowerCase();
-            
-            if (!uW) continue; 
-            
-            if (cClean !== uClean) {
-                resultHtml += `<span class="wrong-word">${uW}</span> `;
+    function diffSentences(correctText, userText) {
+        const C = correctText.trim().split(/\s+/).filter(w => w);
+        const U = userText.trim().split(/\s+/).filter(w => w);
+
+        const cClean = C.map(w => w.replace(/[.,?!;:'"]/g, '').toLowerCase());
+        const uClean = U.map(w => w.replace(/[.,?!;:'"]/g, '').toLowerCase());
+
+        const dp = Array(C.length + 1).fill(null).map(() => Array(U.length + 1).fill(0));
+        for(let i = 1; i <= C.length; i++) {
+            for(let j = 1; j <= U.length; j++) {
+                if (cClean[i-1] === uClean[j-1]) {
+                    dp[i][j] = dp[i-1][j-1] + 1;
+                } else {
+                    dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+                }
+            }
+        }
+
+        let i = C.length, j = U.length;
+        const matchPairs = [];
+        while(i > 0 && j > 0) {
+            if (cClean[i-1] === uClean[j-1]) {
+                matchPairs.unshift([i-1, j-1]);
+                i--; j--;
+            } else if (dp[i-1][j] > dp[i][j-1]) {
+                i--;
             } else {
-                resultHtml += `${uW} `;
+                j--;
+            }
+        }
+
+        let resultHtml = '';
+        let c_idx = 0;
+        let u_idx = 0;
+
+        while (c_idx < C.length || u_idx < U.length) {
+            let match = matchPairs.find(p => p[0] === c_idx && p[1] === u_idx);
+
+            if (match) {
+                // 일치하는 단어는 모두 일관되게 회색 표시
+                resultHtml += `<span style="color: #475569;">${U[u_idx]}</span> `; 
+                c_idx++;
+                u_idx++;
+            } else {
+                let nextC_match = matchPairs.find(p => p[0] === c_idx);
+                let nextU_match = matchPairs.find(p => p[1] === u_idx);
+
+                if (!nextU_match && u_idx < U.length) {
+                    // 잘못 입력한 단어 (빨간색 취소선)
+                    resultHtml += `<span class="wrong-word">${U[u_idx]}</span> `; 
+                    u_idx++;
+                } else if (!nextC_match && c_idx < C.length) {
+                    // 누락된 정답 단어 (글자 수만큼의 회색 작은 사각형 생성)
+                    let missingLen = cClean[c_idx].length || 1;
+                    let blocksHtml = Array(missingLen).fill('<span class="missing-char-block"></span>').join('');
+                    resultHtml += `<span class="missing-word-container">${blocksHtml}</span> `;
+                    c_idx++;
+                } else {
+                    if (u_idx < U.length) {
+                        resultHtml += `<span class="wrong-word">${U[u_idx]}</span> `;
+                        u_idx++;
+                    }
+                }
             }
         }
         return resultHtml.trim();
@@ -1168,6 +1189,11 @@
             const rowDiv = document.createElement('div');
             rowDiv.className = 'sentence-row';
             
+            const bubble = document.createElement('div');
+            bubble.className = 'sentence-number-bubble';
+            bubble.innerText = rIdx + 1;
+            rowDiv.appendChild(bubble);
+
             const origDiv = document.createElement('div');
             let fullOriginalText = row.map(c => c.text).join(' ');
             
@@ -1241,6 +1267,7 @@
             }
             
             currentIndex = spkData.length - addedCount; 
+            saveCurrentIndex();
             
             localStorage.setItem('pongcrush_spk_data', JSON.stringify(spkData));
             alert('저장되었습니다!');
@@ -1295,7 +1322,7 @@
             
             div.onclick = (e) => { 
                 if(e.target.tagName !== 'BUTTON') {
-                    stopAudio(); currentIndex = i; renderUI(); closeModal('list-modal'); 
+                    stopAudio(); currentIndex = i; saveCurrentIndex(); renderUI(); closeModal('list-modal'); 
                 }
             };
             listBody.appendChild(div);
@@ -1308,9 +1335,12 @@
             spkData.splice(index, 1);
             localStorage.setItem('pongcrush_spk_data', JSON.stringify(spkData));
             
-            if (currentIndex >= spkData.length) {
+            if (spkData.length === 0) {
+                currentIndex = 0;
+            } else if (currentIndex >= spkData.length) {
                 currentIndex = Math.max(0, spkData.length - 1);
             }
+            saveCurrentIndex();
             
             renderUI(); 
             renderQuestionList();
@@ -1358,9 +1388,30 @@
         isPlaying = false;
     }
 
-    function playSingle(text) {
+    function playChunk(index, text) {
+        stopAudio();
+        document.querySelectorAll('.chunk').forEach(c => c.classList.remove('active-highlight'));
+        const chunk = document.getElementById(`chunk-${index}`);
+        if(chunk) chunk.classList.add('active-highlight');
+
         if ('speechSynthesis' in window) {
-            stopAudio();
+            const utter = new SpeechSynthesisUtterance(text);
+            const voiceObj = getRandomOrSelectedVoice();
+            if (voiceObj) {
+                utter.voice = voiceObj;
+                utter.lang = voiceObj.lang || 'en-US';
+            } else {
+                utter.lang = 'en-US';
+            }
+            utter.onend = () => { if(chunk) chunk.classList.remove('active-highlight'); };
+            utter.onerror = () => { if(chunk) chunk.classList.remove('active-highlight'); };
+            window.speechSynthesis.speak(utter);
+        }
+    }
+
+    function playSingle(text) {
+        stopAudio();
+        if ('speechSynthesis' in window) {
             const utter = new SpeechSynthesisUtterance(text);
             const voiceObj = getRandomOrSelectedVoice();
             if (voiceObj) {
@@ -1377,6 +1428,7 @@
         if (!spkData || spkData.length === 0) return;
         stopAudio();
         currentIndex = (currentIndex + 1) % spkData.length;
+        saveCurrentIndex();
         renderUI();
     }
 
@@ -1415,7 +1467,9 @@
         }
 
         if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') {
-            if (isTestMode && key === 'Enter') { e.preventDefault(); submitTest(); }
+            if (isTestMode && key === 'Enter') { 
+                if (!e.shiftKey) { e.preventDefault(); submitTest(); }
+            }
             else if (key === 'Escape') { 
                 if(isTestMode) e.preventDefault(); cancelTestMode(); 
                 closeModal('persona-modal'); closeModal('list-modal'); 
@@ -1435,6 +1489,16 @@
         if (isTestSubmitted) {
             if (keyLower === 'enter') { e.preventDefault(); finishTest(); }
             return;
+        }
+
+        const num = parseInt(key);
+        if (num >= 1 && num <= 9 && spkData && spkData.length > 0) {
+            const data = spkData[currentIndex];
+            if (data && data.script_rows && num <= data.script_rows.length) {
+                const combinedText = data.script_rows[num-1].map(c => c.text).join(' ');
+                playChunk(num-1, combinedText);
+                return;
+            }
         }
 
         if (keyLower === 'a') { e.preventDefault(); openAddModal(); }
