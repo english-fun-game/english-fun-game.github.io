@@ -93,6 +93,14 @@
         .shortcut-key { color: #94a3b8; font-size: 11px; margin-left: 2px; font-weight: 900; }
         .ctrl-btn.primary .shortcut-key { color: #cbd5e1; }
 
+        /* 음성 모달 내부 스타일 */
+        .voice-list-container { display: flex; flex-direction: column; gap: 8px; padding-bottom: 8px; }
+        .voice-item { display: flex; justify-content: space-between; align-items: center; background: #ffffff; border: 1.5px solid var(--border-color); padding: 10px 12px; border-radius: 8px; gap: 8px; cursor: pointer; transition: all 0.15s ease; }
+        .voice-item.selected { border-color: #f97316; background: #fff7ed; box-shadow: 0 2px 6px rgba(249, 115, 22, 0.15); }
+        .voice-info { display: flex; flex-direction: column; overflow: hidden; text-align: left; flex: 1; min-width: 0; padding-right: 4px; }
+        .voice-name { font-size: 14px; font-weight: 800; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+        .voice-badge { background: #e2e8f0; color: #334155; font-size: 10px; padding: 1px 5px; border-radius: 4px; font-weight: 700; flex-shrink: 0; }
+
         /* 2:1 레이아웃 워크스페이스 */
         .workspace-2to1 { 
             display: flex; gap: 20px; flex: 1; min-height: 0; margin-top: 8px;
@@ -304,6 +312,7 @@
             <button class="ctrl-btn" onclick="openEditModal()">수정 <span class="shortcut-key">(S)</span></button>
             <button class="ctrl-btn" onclick="openListModal()">목록 <span class="shortcut-key">(D)</span></button>
             <button class="ctrl-btn" onclick="playAll()">읽기 <span class="shortcut-key">(F)</span></button>
+            <button class="ctrl-btn" onclick="openVoiceModal()">읽기 설정 <span class="shortcut-key">(V)</span></button>
             <button class="ctrl-btn primary" onclick="loadNext()">다음 <span class="shortcut-key">(G)</span></button>
         </div>
 
@@ -343,6 +352,25 @@
         </section>
     </main>
 
+    <!-- 음성 설정 모달 -->
+    <div id="voice-modal" class="modal-overlay" onclick="if(event.target === this) closeVoiceModal()" style="display: none;">
+        <div class="modal-content-giant" style="width: 520px; height: 85vh; max-height: 85vh; display: flex; flex-direction: column; padding: 0 !important; overflow: hidden;" onclick="event.stopPropagation()">
+            <div style="padding: 20px 20px 10px 20px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid var(--border-color);">
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <span style="font-size: 18px; font-weight: 900;">🎙️ 읽기 음성 설정</span>
+                    <span style="font-size: 11.5px; font-weight: 600; color: var(--text-muted);">(미선택 시 전체 랜덤 반복)</span>
+                </div>
+                <button class="modal-close" style="position: static; font-size: 22px;" onclick="closeVoiceModal()">&times; <span class="modal-close-esc">(ESC)</span></button>
+            </div>
+            
+            <div id="voice-modal-content-area" style="flex: 1; display: flex; flex-direction: column; min-height: 0; padding: 16px 20px; overflow-y: auto;"></div>
+            
+            <div style="padding: 16px 20px; border-top: 1.5px solid var(--border-color); background: #ffffff; flex-shrink: 0; z-index: 10;">
+                <button class="ctrl-btn primary" style="width: 100%; margin: 0; font-size: 15px; padding: 12px;" onclick="confirmVoiceSettings()">저장 및 확인하기 (Enter)</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 현재 문제 수정 모달 -->
     <div class="modal-overlay" id="edit-modal" onclick="closeModal('edit-modal')">
         <div class="modal-content-giant" style="width: 780px; height: auto;" onclick="event.stopPropagation()">
@@ -356,13 +384,12 @@
         </div>
     </div>
 
-<!-- 데이터 추가 모달 -->
+    <!-- 데이터 추가 모달 -->
     <div class="modal-overlay" id="add-modal" onclick="closeModal('add-modal')">
         <div class="modal-content-giant" style="width: 780px; height: auto;" onclick="event.stopPropagation()">
             <button class="modal-close" onclick="closeModal('add-modal')">&times; <span class="modal-close-esc">(ESC)</span></button>
             <h3 style="margin-top: 0; font-size: 18px; margin-bottom: 14px; color: var(--text-main);">문제 데이터 추가 (JSON)</h3>
             
-            <!-- 제미나이 젬 가이드 -->
             <div class="gemini-guide-banner" style="margin-bottom: 12px;">
                 <div class="gemini-guide-title">✨ JSON 데이터 생성 가이드</div>
                 <div class="gemini-guide-desc" style="display: flex; flex-direction: column; gap: 8px; margin-top: 4px; margin-bottom: 4px;">
@@ -390,7 +417,6 @@
                 </div>
             </div>
 
-            <!-- 데이터 안심 저장 안내 -->
             <p class="motto-text" style="margin-bottom: 16px; font-weight: 700;">
                 💾 <strong>안심 저장 안내:</strong> 추가되는 데이터는 단어장과 마찬가지로 브라우저(로컬 스토리지)에 즉시 안전하게 저장됩니다. 또한 백업을 원할 시, 기존의 <strong>로컬 및 구글 드라이브 백업 기능과 완벽하게 연동</strong>되니 안심하고 사용하세요.
             </p>
@@ -425,13 +451,13 @@
         </div>
     </div>
 
-    <!-- 글로벌 페르소나 모달 (스크롤 없이 1화면 꽉 차게) -->
+    <!-- 글로벌 페르소나 모달 -->
     <div class="modal-overlay" id="persona-modal" onclick="closeModal('persona-modal')">
         <div class="modal-content-giant" onclick="event.stopPropagation()">
             <button class="modal-close" onclick="closeModal('persona-modal')">&times; <span class="modal-close-esc">(ESC)</span></button>
             
             <div class="profile-hero-extended">
-                <img src="profile.jpg" class="profile-hero-img-extended" alt="Zuri Harris" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2NiZDVlMSI+PHBhdGggZD0iTTEyIDJhNSA1IDAgMSAwIDAgMTAgNSA1IDAgMCAwIDAtMTB6bTAtMmMzLjg2NiAwIDcgMy4xMzQgNyA3cy0zLjEzNCA3LTcgNy03LTMuMTM0LTctNyAzLjEzNC03IDctN3ptMCAxOGM1LjUyMyAwIDEwIDIuMjM5IDEwIDV2Mkgydi0yYzAtMi43NjEgNC40NzctNSAxMC01eiIvPjwvc3ZnPg=='">
+                <img src="profile.jpg" class="profile-hero-img-extended" alt="Zuri Harris" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2NiZDVlMSI+PHBhdGggZD0iTTEyIDJhNSA1IDAgMSAwIDAgMTAgNSA1IDAgMCAwIDAtMTB6bTAtMmMzLjg2NiAwIDcgMy4xMzQgNyA3cy0zLjEzNCA3LTcgNy03LTMuMTM0LTctNyAzLjEzNC03IDctN3ptMCAxOGM1LjUyMyAwIDEwIDIuMjM5IDEwIDV2Mkgydi0yYz0yLjc2MSA0LjQ3Ny01IDEwLTV6Ii8+PC9zdmc+='">
                 <div class="profile-hero-info-extended">
                     <h2>Zuri Harris — Conservative & Disciplined Sophomore</h2>
                     <div class="identity-chips">
@@ -543,6 +569,196 @@
     let isTestSubmitted = false; 
     let spkData = [];
     let currentFlowsGlobal = [];
+
+    // 음성 설정 관련 변수들
+    let availableVoices = [];
+    let currentFixedVoiceURIs = [];
+    let tempFixedVoiceURIs = [];
+    let currentFixedVoiceIndex = 0;
+    let lastVoiceURI = '';
+    const SELECTED_FIXED_VOICE_KEY = 'pongcrush_spk_fixed_voice_uri_v4';
+
+    function initVoiceEngine() { 
+        if ('speechSynthesis' in window) { 
+            availableVoices = window.speechSynthesis.getVoices(); 
+            window.speechSynthesis.onvoiceschanged = () => { 
+                availableVoices = window.speechSynthesis.getVoices(); 
+            }; 
+        } 
+    }
+    
+    function loadSavedVoiceSettings() {
+        try {
+            const savedURIs = localStorage.getItem('pongcrush_spk_fixed_voice_uris_v5');
+            currentFixedVoiceURIs = savedURIs ? JSON.parse(savedURIs) : [];
+        } catch(e) { currentFixedVoiceURIs = []; }
+        
+        if (currentFixedVoiceURIs.length === 0 && localStorage.getItem(SELECTED_FIXED_VOICE_KEY)) {
+            currentFixedVoiceURIs = [localStorage.getItem(SELECTED_FIXED_VOICE_KEY)];
+        }
+    }
+
+    function openVoiceModal() {
+        tempFixedVoiceURIs = [...currentFixedVoiceURIs];
+        const modal = document.getElementById('voice-modal');
+        if (modal) modal.style.display = 'flex';
+        renderVoiceListUI();
+    }
+
+    function closeVoiceModal() {
+        const modal = document.getElementById('voice-modal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    function toggleTempFixedVoice(uri) {
+        const container = document.getElementById('voice-modal-content-area');
+        const scrollPos = container ? container.scrollTop : 0;
+        
+        const idx = tempFixedVoiceURIs.indexOf(uri);
+        if (idx > -1) {
+            tempFixedVoiceURIs.splice(idx, 1);
+        } else {
+            tempFixedVoiceURIs.push(uri);
+        }
+        renderVoiceListUI();
+        
+        const newContainer = document.getElementById('voice-modal-content-area');
+        if (newContainer) newContainer.scrollTop = scrollPos;
+    }
+
+    function confirmVoiceSettings() {
+        currentFixedVoiceURIs = [...tempFixedVoiceURIs];
+        localStorage.setItem('pongcrush_spk_fixed_voice_uris_v5', JSON.stringify(currentFixedVoiceURIs));
+        currentFixedVoiceIndex = 0;
+        closeVoiceModal();
+    }
+
+    function testVoice(uri, event) {
+        if (event) event.stopPropagation();
+        stopAudio();
+        setTimeout(() => {
+            const voice = getEnVoices().find(v => v.voiceURI === uri);
+            if (!voice) return;
+            const utter = new SpeechSynthesisUtterance("I strongly agree that having a regular morning routine is essential.");
+            utter.voice = voice;
+            utter.lang = voice.lang || 'en-US';
+            utter.rate = 1.0;
+            utter.pitch = 1.0;
+            window.speechSynthesis.speak(utter);
+        }, 60);
+    }
+    
+    function getEnVoices() {
+        if (!('speechSynthesis' in window)) return [];
+        let voices = window.speechSynthesis.getVoices();
+        if (voices.length === 0 && availableVoices.length > 0) voices = availableVoices;
+        
+        return voices.filter(v => {
+            const lang = (v.lang || '').replace(/_/g, '-').toLowerCase();
+            return lang.startsWith('en-') || lang === 'en';
+        });
+    }
+
+    function getEngineCompany(name) {
+        const lower = name.toLowerCase();
+        if (lower.includes('google')) return { name: 'Google', color: '#ea4335' };
+        if (lower.includes('microsoft')) return { name: 'Microsoft', color: '#00a4ef' };
+        if (lower.includes('apple') || lower.includes('siri') || lower.includes('mac')) return { name: 'Apple', color: '#555555' };
+        if (lower.includes('samsung') || lower.includes('bixby')) return { name: 'Samsung', color: '#1428a0' };
+        if (lower.includes('amazon')) return { name: 'Amazon', color: '#ff9900' };
+        return { name: 'OS/System', color: '#64748b' };
+    }
+
+    function getCountryName(lang) {
+        const l = lang.toLowerCase();
+        if (l.includes('us')) return '미국';
+        if (l.includes('gb') || l.includes('uk')) return '영국';
+        if (l.includes('au')) return '호주';
+        if (l.includes('ca')) return '캐나다';
+        if (l.includes('in')) return '인도';
+        if (l.includes('ie')) return '아일랜드';
+        if (l.includes('za')) return '남아공';
+        if (l.includes('nz')) return '뉴질랜드';
+        if (l.includes('sg')) return '싱가포르';
+        if (l.includes('ph')) return '필리핀';
+        if (l.includes('ng')) return '나이지리아';
+        if (l.startsWith('en')) return '글로벌';
+        return '기타';
+    }
+
+    function renderVoiceListUI() {
+        const area = document.getElementById('voice-modal-content-area');
+        if (!area) return;
+        const enVoices = getEnVoices();
+        
+        let html = `<div class="voice-list-container">`;
+        
+        if (enVoices.length === 0) {
+            html += '<div style="padding:20px; text-align:center; color:#64748b; font-weight:800; font-size:13px;">지원되는 영어 음성 엔진이 없습니다.</div>';
+        } else {
+            enVoices.forEach(voice => {
+                const isSelected = tempFixedVoiceURIs.includes(voice.voiceURI);
+                const orderIndex = tempFixedVoiceURIs.indexOf(voice.voiceURI);
+                const orderBadge = isSelected ? `<span style="background:#ea580c; color:#fff; border-radius:50%; width:16px; height:16px; display:inline-flex; align-items:center; justify-content:center; font-size:10px; margin-right:6px; flex-shrink:0;">${orderIndex + 1}</span>` : '';
+                
+                const company = getEngineCompany(voice.name);
+                let cleanName = voice.name.replace(/(Google|Microsoft|Apple|Siri|Samsung|Amazon|Bixby|Cortana)\s*-?\s*/gi, '').replace(/english/gi, '').replace(/\(\s*\)/g, '').replace(/\s{2,}/g, ' ').trim() || 'Voice';
+                
+                const nameChip = `<span style="background:${company.color}15; color:${company.color}; padding:3px 6px; border-radius:6px; font-size:10px; font-weight:900; border:1px solid ${company.color}30; white-space:nowrap; flex-shrink:0;">${company.name}</span>`;
+                
+                const countryName = getCountryName(voice.lang);
+                const countryChip = `<span class="voice-badge" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:2px 6px; font-weight:800; flex-shrink:0;">🌍 ${countryName}</span>`;
+                const localChip = `<span class="voice-badge" style="background:${voice.localService ? '#dcfce7' : '#fce7f3'}; color:${voice.localService ? '#16a34a' : '#db2777'}; border:1px solid ${voice.localService ? '#bbf7d0' : '#fbcfe8'}; font-weight:800; flex-shrink:0;">${voice.localService ? '로컬' : '네트워크'}</span>`;
+
+                html += `
+                    <div class="voice-item ${isSelected ? 'selected' : ''}" onclick="toggleTempFixedVoice('${voice.voiceURI.replace(/'/g, "\\'")}')">
+                        <div class="voice-info">
+                            <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px; overflow:hidden;">
+                                ${orderBadge}
+                                ${nameChip}
+                                <span class="voice-name">${cleanName}</span>
+                            </div>
+                            <div style="display:flex; gap:4px;">
+                                ${countryChip}
+                                ${localChip}
+                            </div>
+                        </div>
+                        <button class="ctrl-btn" style="background:#e2e8f0; color:#0f172a; padding:6px 10px; font-size:13px; border:none; box-shadow:0 1px 2px rgba(0,0,0,0.1); flex-shrink:0;" onclick="testVoice('${voice.voiceURI.replace(/'/g, "\\'")}', event)">▶️ 테스트</button>
+                    </div>`;
+            });
+        }
+        
+        html += `</div>`;
+        area.innerHTML = html;
+    }
+
+    function getRandomOrSelectedVoice() {
+        const enVoices = getEnVoices();
+        if (enVoices.length === 0) return null;
+        
+        if (currentFixedVoiceURIs.length > 0) {
+            const validVoices = currentFixedVoiceURIs.map(uri => enVoices.find(v => v.voiceURI === uri)).filter(Boolean);
+            if (validVoices.length > 0) {
+                const voice = validVoices[currentFixedVoiceIndex % validVoices.length];
+                currentFixedVoiceIndex++;
+                return voice;
+            }
+        }
+
+        let pool = enVoices;
+        if (pool.length > 1 && lastVoiceURI) {
+            const candidates = pool.filter(v => v.voiceURI !== lastVoiceURI);
+            if (candidates.length > 0) {
+                const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+                lastVoiceURI = chosen.voiceURI;
+                return chosen;
+            }
+        }
+
+        const chosen = pool[Math.floor(Math.random() * pool.length)] || enVoices[0];
+        if (chosen) lastVoiceURI = chosen.voiceURI;
+        return chosen;
+    }
 
     // 수정 완료된 데이터 구조 검증 및 초기화 로직
     function initLocalStorageData() {
@@ -712,7 +928,6 @@
 
         const topicLabel = data.meta.topic_category ? `📚 ${data.meta.topic_category}` : "📚 미분류";
 
-        // 수정 완료된 무한 루프 방지 이미지 적용
         document.getElementById('meta-header').innerHTML = `
             <button class="btn-global-persona" onclick="openPersonaModal()">
                 <img src="profile.jpg" class="profile-img-header" alt="Profile" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2NiZDVlMSI+PHBhdGggZD0iTTEyIDJhNSA1IDAgMSAwIDAgMTAgNSA1IDAgMCAwIDAtMTB6bTAtMmMzLjg2NiAwIDcgMy4xMzQgNyA3cy0zLjEzNCA3LTcgNy03LTMuMTM0LTctNyAzLjEzNC03IDctN3ptMCAxOGM1LjUyMyAwIDEwIDIuMjM5IDEwIDV2Mkgydi0yYzAtMi43NjEgNC40NzctNSAxMC01eiIvPjwvc3ZnPg=='">
@@ -959,8 +1174,16 @@
     function speakPromise(text) {
         return new Promise((resolve) => {
             const utter = new SpeechSynthesisUtterance(text);
-            utter.lang = 'en-US'; utter.rate = 1.0;
-            utter.onend = resolve; utter.onerror = resolve;
+            const voiceObj = getRandomOrSelectedVoice();
+            if (voiceObj) {
+                utter.voice = voiceObj;
+                utter.lang = voiceObj.lang || 'en-US';
+            } else {
+                utter.lang = 'en-US';
+            }
+            utter.rate = 1.0;
+            utter.onend = resolve; 
+            utter.onerror = resolve;
             window.speechSynthesis.speak(utter);
         });
     }
@@ -992,7 +1215,14 @@
         if ('speechSynthesis' in window) {
             stopAudio();
             const utter = new SpeechSynthesisUtterance(text);
-            utter.lang = 'en-US'; window.speechSynthesis.speak(utter);
+            const voiceObj = getRandomOrSelectedVoice();
+            if (voiceObj) {
+                utter.voice = voiceObj;
+                utter.lang = voiceObj.lang || 'en-US';
+            } else {
+                utter.lang = 'en-US';
+            }
+            window.speechSynthesis.speak(utter);
         }
     }
 
@@ -1030,12 +1260,18 @@
             }
         }
 
+        if (key === 'Enter' && document.getElementById('voice-modal').style.display === 'flex') {
+            e.preventDefault();
+            confirmVoiceSettings();
+            return;
+        }
+
         if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') {
             if (isTestMode && key === 'Enter') { e.preventDefault(); submitTest(); }
             else if (key === 'Escape') { 
                 if(isTestMode) e.preventDefault(); cancelTestMode(); 
                 closeModal('persona-modal'); closeModal('list-modal'); 
-                closeModal('add-modal'); closeModal('edit-modal'); 
+                closeModal('add-modal'); closeModal('edit-modal'); closeVoiceModal();
             }
             return; 
         } 
@@ -1057,15 +1293,21 @@
         else if (keyLower === 's') { e.preventDefault(); openEditModal(); }
         else if (keyLower === 'd') { e.preventDefault(); openListModal(); }
         else if (keyLower === 'f') { e.preventDefault(); playAll(); }
+        else if (keyLower === 'v') { e.preventDefault(); openVoiceModal(); }
         else if (keyLower === 'g') { e.preventDefault(); loadNext(); }
         else if (keyLower === 't') { e.preventDefault(); toggleTestMode(); }
         else if (keyLower === 'escape') { 
             closeModal('persona-modal'); closeModal('list-modal'); 
-            closeModal('add-modal'); closeModal('edit-modal'); 
+            closeModal('add-modal'); closeModal('edit-modal'); closeVoiceModal();
         }
     });
 
-    window.onload = () => { initLocalStorageData(); renderUI(); };
+    window.onload = () => { 
+        initVoiceEngine();
+        loadSavedVoiceSettings();
+        initLocalStorageData(); 
+        renderUI(); 
+    };
 </script>
 </body>
 </html>
