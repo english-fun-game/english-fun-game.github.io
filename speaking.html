@@ -361,7 +361,7 @@
             <button class="modal-close" onclick="closeModal('add-modal')">&times; <span class="modal-close-esc">(ESC)</span></button>
             <h3 style="margin-top: 0; font-size: 18px; margin-bottom: 14px; color: var(--text-main);">문제 데이터 추가 (JSON)</h3>
             
-            <!-- 제미나이 젬 가이드 (기존 gemini-guide 및 list-item-type 스타일 활용) -->
+            <!-- 제미나이 젬 가이드 -->
             <div class="gemini-guide-banner" style="margin-bottom: 12px;">
                 <div class="gemini-guide-title">✨ JSON 데이터 생성 가이드</div>
                 <div class="gemini-guide-desc" style="display: flex; flex-direction: column; gap: 8px; margin-top: 4px; margin-bottom: 4px;">
@@ -389,7 +389,7 @@
                 </div>
             </div>
 
-            <!-- 데이터 안심 저장 안내 (기존 motto-text 스타일 100% 활용) -->
+            <!-- 데이터 안심 저장 안내 -->
             <p class="motto-text" style="margin-bottom: 16px; font-weight: 700;">
                 💾 <strong>안심 저장 안내:</strong> 추가되는 데이터는 단어장과 마찬가지로 브라우저(로컬 스토리지)에 즉시 안전하게 저장됩니다. 또한 백업을 원할 시, 기존의 <strong>로컬 및 구글 드라이브 백업 기능과 완벽하게 연동</strong>되니 안심하고 사용하세요.
             </p>
@@ -430,7 +430,7 @@
             <button class="modal-close" onclick="closeModal('persona-modal')">&times; <span class="modal-close-esc">(ESC)</span></button>
             
             <div class="profile-hero-extended">
-                <img src="profile.jpg" class="profile-hero-img-extended" alt="Zuri Harris" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2NiZDVlMSI+PHBhdGggZD0iTTEyIDJhNSA1IDAgMSAwIDAgMTAgNSA1IDAgMCAwIDAtMTB6bTAtMmMzLjg2NiAwIDcgMy.xMzQgNyA3cy0zLjEzNCA3LTcgNy03LTMuMTM0LTctNyAzLjEzNC03IDctN3ptMCAxOGM1LjUyMyAwIDEwIDIuMjM5IDEwIDV2Mkgydi0yYzAtMi43NjEgNC40NzctNSAxMC01eiIvPjwvc3ZnPg=='">
+                <img src="profile.jpg" class="profile-hero-img-extended" alt="Zuri Harris" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2NiZDVlMSI+PHBhdGggZD0iTTEyIDJhNSA1IDAgMSAwIDAgMTAgNSA1IDAgMCAwIDAtMTB6bTAtMmMzLjg2NiAwIDcgMy4xMzQgNyA3cy0zLjEzNCA3LTcgNy03LTMuMTM0LTctNyAzLjEzNC03IDctN3ptMCAxOGM1LjUyMyAwIDEwIDIuMjM5IDEwIDV2Mkgydi0yYzAtMi43NjEgNC40NzctNSAxMC01eiIvPjwvc3ZnPg=='">
                 <div class="profile-hero-info-extended">
                     <h2>Zuri Harris — Conservative & Disciplined Sophomore</h2>
                     <div class="identity-chips">
@@ -543,14 +543,18 @@
     let spkData = [];
     let currentFlowsGlobal = [];
 
+    // 수정 완료된 데이터 구조 검증 및 초기화 로직
     function initLocalStorageData() {
         const saved = localStorage.getItem('pongcrush_spk_data');
         if (saved) {
             try { 
                 spkData = JSON.parse(saved); 
-                if(!spkData || spkData.length === 0) throw new Error("Empty Data");
+                if(!spkData || spkData.length === 0 || !spkData[0].meta || !spkData[0].script_rows) {
+                    throw new Error("Invalid Data Structure");
+                }
             } 
             catch (e) { 
+                console.warn("데이터 구조가 맞지 않아 기본 데이터로 초기화합니다.");
                 spkData = JSON.parse(JSON.stringify(defaultSpkData)); 
                 localStorage.setItem('pongcrush_spk_data', JSON.stringify(spkData));
             }
@@ -707,9 +711,10 @@
 
         const topicLabel = data.meta.topic_category ? `📚 ${data.meta.topic_category}` : "📚 미분류";
 
+        // 수정 완료된 무한 루프 방지 이미지 적용
         document.getElementById('meta-header').innerHTML = `
             <button class="btn-global-persona" onclick="openPersonaModal()">
-                <img src="profile.jpg" class="profile-img-header" alt="Profile" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2NiZDVlMSI+PHBhdGggZD0iTTEyIDJhNSA1IDAgMSAwIDAgMTAgNSA1IDAgMCAwIDAtMTB6bTAtMmMzLjg2NiAwIDcgMy.xMzQgNyA3cy0zLjEzNCA3LTcgNy03LTMuMTM0LTctNyAzLjEzNC03IDctN3ptMCAxOGM1LjUyMyAwIDEwIDIuMjM5IDEwIDV2Mkgydi0yYzAtMi43NjEgNC40NzctNSAxMC01eiIvPjwvc3ZnPg=='">
+                <img src="profile.jpg" class="profile-img-header" alt="Profile" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2NiZDVlMSI+PHBhdGggZD0iTTEyIDJhNSA1IDAgMSAwIDAgMTAgNSA1IDAgMCAwIDAtMTB6bTAtMmMzLjg2NiAwIDcgMy4xMzQgNyA3cy0zLjEzNCA3LTcgNy03LTMuMTM0LTctNyAzLjEzNC03IDctN3ptMCAxOGM1LjUyMyAwIDEwIDIuMjM5IDEwIDV2Mkgydi0yYzAtMi43NjEgNC40NzctNSAxMC01eiIvPjwvc3ZnPg=='">
                 <span>Zuri Harris</span>
             </button>
             <span class="bc-arrow">❯</span>
