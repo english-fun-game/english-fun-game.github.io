@@ -760,18 +760,18 @@
         return chosen;
     }
 
-    // 수정 완료된 데이터 구조 검증 및 초기화 로직
     function initLocalStorageData() {
         const saved = localStorage.getItem('pongcrush_spk_data');
         if (saved) {
             try { 
                 spkData = JSON.parse(saved); 
-                if(!spkData || spkData.length === 0 || !spkData[0].meta || !spkData[0].script_rows) {
-                    throw new Error("Invalid Data Structure");
+                if (!Array.isArray(spkData)) throw new Error("데이터 타입 오류");
+                if (spkData.length > 0 && (!spkData[0].meta || !spkData[0].script_rows)) {
+                    throw new Error("데이터 구조 깨짐");
                 }
             } 
             catch (e) { 
-                console.warn("데이터 구조가 맞지 않아 기본 데이터로 초기화합니다.");
+                console.warn("데이터 구조 이상으로 기본 데이터를 불러옵니다.");
                 spkData = JSON.parse(JSON.stringify(defaultSpkData)); 
                 localStorage.setItem('pongcrush_spk_data', JSON.stringify(spkData));
             }
@@ -917,7 +917,19 @@
     }
 
     function renderUI() {
-        if (spkData.length === 0) return;
+        if (!spkData || spkData.length === 0) {
+            document.getElementById('meta-header').innerHTML = `<span class="badge-topic-category" style="background:#fef2f2; color:#ef4444; border-color:#fca5a5;">데이터 없음</span>`;
+            document.getElementById('q-prompt').innerText = "저장된 문제가 없습니다. [추가] 버튼을 눌러 새로운 문제를 등록해주세요.";
+            document.getElementById('script-container').innerHTML = '<div style="color:#64748b; padding:20px 0;">화면 상단의 추가(A) 버튼을 눌러 JSON 데이터를 입력하세요.</div>';
+            document.getElementById('vocab-table-body').innerHTML = '';
+            const canvas = document.getElementById('logic-canvas');
+            if(canvas) {
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+            return;
+        }
+
         if (currentIndex >= spkData.length) currentIndex = 0;
         const data = spkData[currentIndex];
         
@@ -930,7 +942,7 @@
 
         document.getElementById('meta-header').innerHTML = `
             <button class="btn-global-persona" onclick="openPersonaModal()">
-                <img src="profile.jpg" class="profile-img-header" alt="Profile" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2NiZDVlMSI+PHBhdGggZD0iTTEyIDJhNSA1IDAgMSAwIDAgMTAgNSA1IDAgMCAwIDAtMTB6bTAtMmMzLjg2NiAwIDcgMy4xMzQgNyA3cy0zLjEzNCA3LTcgNy03LTMuMTM0LTctNyAzLjEzNC03IDctN3ptMCAxOGM1LjUyMyAwIDEwIDIuMjM5IDEwIDV2Mkgydi0yYzAtMi43NjEgNC40NzctNSAxMC01eiIvPjwvc3ZnPg=='">
+                <img src="profile.jpg" class="profile-img-header" alt="Profile" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2NiZDVlMSI+PHBhdGggZD0iTTEyIDJhNSA1IDAgMSAwIDAgMTAgNSA1IDAgMCAwIDAtMTB6bTAtMmMzLjg2NiAwIDcgMy4xMzQgNyA3cy0zLjEzNCA3LTcgNy03LTMuMTM0LTctNyAzLjEzNC03IDctN3ptMCAxOGM1LjUyMyAwIDEwIDIuMjM5IDEwIDV2Mkgydi0yYz0yLjc2MSA0LjQ3Ny01IDEwLTV6Ii8+PC9zdmc+='">
                 <span>Zuri Harris</span>
             </button>
             <span class="bc-arrow">❯</span>
@@ -986,6 +998,7 @@
     });
 
     function toggleTestMode() {
+        if (!spkData || spkData.length === 0) return;
         stopAudio();
         isTestMode = true;
         isTestSubmitted = false;
@@ -1088,7 +1101,7 @@
     }
 
     function openEditModal() {
-        if (spkData.length === 0) return;
+        if (!spkData || spkData.length === 0) { alert('수정할 데이터가 없습니다.'); return; }
         document.getElementById('edit-json-input').value = JSON.stringify(spkData[currentIndex], null, 2);
         document.getElementById('edit-modal').style.display = 'flex';
         setTimeout(() => document.getElementById('edit-json-input').focus(), 10);
@@ -1101,7 +1114,16 @@
             spkData[currentIndex] = JSON.parse(text);
             localStorage.setItem('pongcrush_spk_data', JSON.stringify(spkData));
             alert('수정되었습니다!');
-            closeModal('edit-modal'); renderUI();
+            closeModal('edit-modal'); 
+            
+            stopAudio();
+            isTestMode = false;
+            isTestSubmitted = false;
+            document.getElementById('normal-controls').style.display = 'flex';
+            document.getElementById('test-controls').style.display = 'none';
+            document.getElementById('test-result-controls').style.display = 'none';
+            
+            renderUI();
         } catch (e) { alert('오류: \n' + e.message); }
     }
 
@@ -1116,11 +1138,21 @@
         if (!text) { alert('JSON 데이터를 입력해주세요.'); return; }
         try {
             const parsed = JSON.parse(text);
-            if (Array.isArray(parsed)) spkData = spkData.concat(parsed);
-            else spkData.push(parsed);
+            let addedCount = 1;
+            
+            if (Array.isArray(parsed)) {
+                spkData = spkData.concat(parsed);
+                addedCount = parsed.length;
+            } else {
+                spkData.push(parsed);
+            }
+            
+            currentIndex = spkData.length - addedCount; 
+            
             localStorage.setItem('pongcrush_spk_data', JSON.stringify(spkData));
             alert('저장되었습니다!');
-            closeModal('add-modal'); renderUI();
+            closeModal('add-modal'); 
+            renderUI();
         } catch (e) { alert('오류: \n' + e.message); }
     }
 
@@ -1165,10 +1197,31 @@
                 <span class="list-item-badge">#${i + 1}</span>
                 <span class="list-item-type">${item.meta?.type || '미지정'}</span>
                 <span class="list-item-topic">${item.meta?.topic_category || '미분류'}</span>
-                <span class="list-item-text">${item.question}</span>`;
-            div.onclick = () => { stopAudio(); currentIndex = i; renderUI(); closeModal('list-modal'); };
+                <span class="list-item-text">${item.question}</span>
+                <button class="ctrl-btn" style="padding: 4px 10px; font-size: 12.5px; color: #ef4444; border-color: #fca5a5; margin-left: auto; background: #fef2f2;" onclick="deleteQuestion(${i}, event)">삭제</button>`;
+            
+            div.onclick = (e) => { 
+                if(e.target.tagName !== 'BUTTON') {
+                    stopAudio(); currentIndex = i; renderUI(); closeModal('list-modal'); 
+                }
+            };
             listBody.appendChild(div);
         });
+    }
+
+    function deleteQuestion(index, event) {
+        event.stopPropagation();
+        if(confirm('⚠️ 정말 이 문제를 삭제하시겠습니까?\n삭제 후에는 복구할 수 없으며 즉시 저장됩니다.')) {
+            spkData.splice(index, 1);
+            localStorage.setItem('pongcrush_spk_data', JSON.stringify(spkData));
+            
+            if (currentIndex >= spkData.length) {
+                currentIndex = Math.max(0, spkData.length - 1);
+            }
+            
+            renderUI(); 
+            renderQuestionList();
+        }
     }
 
     function speakPromise(text) {
@@ -1196,6 +1249,7 @@
 
     async function playAll() {
         if (!('speechSynthesis' in window)) return;
+        if (!spkData || spkData.length === 0) return;
         if (isPlaying) { stopAudio(); return; }
         isPlaying = true; window.speechSynthesis.cancel();
 
@@ -1227,6 +1281,7 @@
     }
 
     function loadNext() {
+        if (!spkData || spkData.length === 0) return;
         stopAudio();
         currentIndex = (currentIndex + 1) % spkData.length;
         renderUI();
