@@ -128,33 +128,13 @@
         }
         
         .sentence-row {
-            position: relative; 
             margin-bottom: 12px;
             line-height: 1.6;
         }
         
-        .sentence-number-bubble {
-            position: absolute;
-            top: 3px;
-            left: 3px;
-            background: #334155; 
-            color: #ffffff; 
-            width: 14px;
-            height: 14px;
-            border-radius: 3px; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 8.5px;
-            font-weight: 900;
-            z-index: 10;
-            user-select: none;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.15);
-        }
-        
         .chunk {
             display: block; width: 100%; box-sizing: border-box;
-            padding: 10px 14px 10px 22px; 
+            padding: 10px 14px; 
             border-radius: 8px; 
             background: #ffffff; border: 1.5px solid var(--border-color); 
             font-size: 19px; font-weight: 800; color: #1e293b; 
@@ -173,7 +153,7 @@
         /* 시험 모드 용 인풋 및 결과 디스플레이 스타일 */
         .test-input {
             width: 100%;
-            padding: 10px 14px 10px 22px; 
+            padding: 10px 14px; 
             font-size: 19px;
             font-weight: 600;
             font-family: inherit;
@@ -197,33 +177,20 @@
         }
         
         .user-answer-disp {
-            font-size: 17px;
-            font-weight: 600;
+            font-size: 19px;
+            font-weight: 800;
             color: #475569; 
-            margin-top: 2px;
-            padding-left: 22px; 
-            margin-bottom: 12px;
+            margin-top: 6px;
+            padding-left: 4px; 
+            margin-bottom: 16px;
             line-height: 1.5;
+            letter-spacing: -0.2px;
         }
         .wrong-word {
             text-decoration: line-through;
             text-decoration-color: #ef4444;
             text-decoration-thickness: 2.5px;
             color: #ef4444; 
-        }
-
-        /* 누락된 단어를 표시하는 글자 단위 사각형 영역 */
-        .missing-word-container {
-            display: inline-flex;
-            gap: 2px;
-            margin: 0 4px;
-            vertical-align: middle;
-        }
-        .missing-char-block {
-            width: 8px;
-            height: 14px;
-            background-color: #cbd5e1;
-            border-radius: 1.5px;
         }
 
         /* 우측 패널 */
@@ -340,6 +307,59 @@
         .list-item-text { font-size: 15px; font-weight: 800; color: #0f172a; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .json-textarea { width: 100%; height: 260px; padding: 12px; border-radius: 8px; border: 1.5px solid var(--border-strong); font-family: monospace; font-size: 13.5px; background: #f8fafc; box-sizing: border-box; resize: vertical; }
 
+        /* 단축키 코치마크 (Coachmark) UI */
+        .onboarding-backdrop {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(15, 23, 42, 0.65); /* 주변 Dim 처리 */
+            z-index: 9000;
+            opacity: 0; pointer-events: none; 
+            transition: opacity 0.3s ease;
+        }
+        .onboarding-backdrop.show {
+            opacity: 1; pointer-events: auto;
+        }
+
+        .coachmark-tooltip {
+            position: fixed;
+            background: #ffffff;
+            color: #1e293b;
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-size: 14.5px;
+            font-weight: 800;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 9002;
+            width: 260px;
+            line-height: 1.5;
+            pointer-events: none; 
+            transform: translateY(-10px);
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+        }
+        .onboarding-backdrop.show .coachmark-tooltip {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        /* 말풍선 위쪽 꼬리 (문장 아래에 배치됨) */
+        .coachmark-tooltip::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 20px;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 8px solid #ffffff;
+        }
+
+        /* Dim 상태에서 타겟 UI 팝업 (Highlight) */
+        .highlight-target {
+            position: relative;
+            z-index: 9001 !important; /* 배경 위로 올림 */
+            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.9), 0 0 20px rgba(79, 70, 229, 0.6) !important;
+            border-color: #4f46e5 !important;
+        }
+
         @media (max-width: 768px) {
             body { padding: 12px 4vw; height: 100dvh; overflow-y: auto; }
             .top-bar { flex-direction: row; flex-wrap: nowrap; align-items: center; justify-content: space-between; padding-bottom: 12px; }
@@ -364,6 +384,8 @@
             .filter-select { width: 100%; margin-left: 0 !important; }
             .question-list-item { flex-wrap: wrap; }
             .list-item-text { width: 100%; margin-top: 4px; white-space: normal; }
+            
+            .coachmark-tooltip { width: auto; max-width: calc(100vw - 40px); }
         }
     </style>
 </head>
@@ -420,6 +442,15 @@
             </div>
         </section>
     </main>
+
+    <!-- 온보딩 안내 코치마크 (Dim Backdrop & Tooltip) -->
+    <div id="coachmark-backdrop" class="onboarding-backdrop" onclick="closeCoachmark()">
+        <div id="coachmark-tooltip" class="coachmark-tooltip">
+            <div style="color: #4f46e5; font-size: 13px; margin-bottom: 4px;">✨ 파워 유저 팁</div>
+            마우스 클릭 대신 키보드 <strong>숫자키(1~9)</strong>를 누르면 해당 순서의 문장을 바로 읽어줘요!
+            <div style="margin-top: 10px; font-size: 12px; color: #94a3b8; font-weight: 600; text-align: right;">화면을 클릭해 닫기</div>
+        </div>
+    </div>
 
     <!-- 음성 설정 모달 -->
     <div id="voice-modal" class="modal-overlay" onclick="if(event.target === this) closeVoiceModal()" style="display: none;">
@@ -605,6 +636,7 @@
     let isTestSubmitted = false; 
     let spkData = [];
     let currentFlowsGlobal = [];
+    let chunkClickCount = 0; 
 
     // 음성 설정 관련 변수들
     let availableVoices = [];
@@ -1010,12 +1042,6 @@
         data.script_rows.forEach((row, rIdx) => {
             const rowDiv = document.createElement('div');
             rowDiv.className = 'sentence-row';
-            
-            // 모서리에 위치하는 타이트한 absolute 숫자 버블
-            const bubble = document.createElement('div');
-            bubble.className = 'sentence-number-bubble';
-            bubble.innerText = rIdx + 1;
-            rowDiv.appendChild(bubble);
 
             const combinedText = row.map(c => c.text).join(' ');
             const span = document.createElement('span');
@@ -1066,11 +1092,6 @@
         data.script_rows.forEach((row, rIdx) => {
             const rowDiv = document.createElement('div');
             rowDiv.className = 'sentence-row';
-
-            const bubble = document.createElement('div');
-            bubble.className = 'sentence-number-bubble';
-            bubble.innerText = rIdx + 1;
-            rowDiv.appendChild(bubble);
 
             const input = document.createElement('textarea');
             input.className = 'test-input';
@@ -1132,39 +1153,15 @@
         }
 
         let resultHtml = '';
-        let c_idx = 0;
-        let u_idx = 0;
-
-        while (c_idx < C.length || u_idx < U.length) {
-            let match = matchPairs.find(p => p[0] === c_idx && p[1] === u_idx);
-
-            if (match) {
-                // 일치하는 단어는 모두 일관되게 회색 표시
-                resultHtml += `<span style="color: #475569;">${U[u_idx]}</span> `; 
-                c_idx++;
-                u_idx++;
+        for (let u_idx = 0; u_idx < U.length; u_idx++) {
+            let isMatch = matchPairs.some(p => p[1] === u_idx);
+            if (isMatch) {
+                resultHtml += `${U[u_idx]} `; 
             } else {
-                let nextC_match = matchPairs.find(p => p[0] === c_idx);
-                let nextU_match = matchPairs.find(p => p[1] === u_idx);
-
-                if (!nextU_match && u_idx < U.length) {
-                    // 잘못 입력한 단어 (빨간색 취소선)
-                    resultHtml += `<span class="wrong-word">${U[u_idx]}</span> `; 
-                    u_idx++;
-                } else if (!nextC_match && c_idx < C.length) {
-                    // 누락된 정답 단어 (글자 수만큼의 회색 작은 사각형 생성)
-                    let missingLen = cClean[c_idx].length || 1;
-                    let blocksHtml = Array(missingLen).fill('<span class="missing-char-block"></span>').join('');
-                    resultHtml += `<span class="missing-word-container">${blocksHtml}</span> `;
-                    c_idx++;
-                } else {
-                    if (u_idx < U.length) {
-                        resultHtml += `<span class="wrong-word">${U[u_idx]}</span> `;
-                        u_idx++;
-                    }
-                }
+                resultHtml += `<span class="wrong-word">${U[u_idx]}</span> `; 
             }
         }
+
         return resultHtml.trim();
     }
 
@@ -1188,11 +1185,6 @@
         data.script_rows.forEach((row, rIdx) => {
             const rowDiv = document.createElement('div');
             rowDiv.className = 'sentence-row';
-            
-            const bubble = document.createElement('div');
-            bubble.className = 'sentence-number-bubble';
-            bubble.innerText = rIdx + 1;
-            rowDiv.appendChild(bubble);
 
             const origDiv = document.createElement('div');
             let fullOriginalText = row.map(c => c.text).join(' ');
@@ -1388,11 +1380,49 @@
         isPlaying = false;
     }
 
+    // 클릭된 특정 문장(인덱스)을 기준으로 코치마크 활성화
+    function showCoachmark(index) {
+        const targetChunk = document.getElementById(`chunk-${index}`);
+        if (!targetChunk) return;
+
+        // 배경 Dim 띄우기
+        const backdrop = document.getElementById('coachmark-backdrop');
+        backdrop.classList.add('show');
+        
+        // 타겟 요소 하이라이트
+        targetChunk.classList.add('highlight-target');
+
+        // 말풍선 위치 계산 (타겟 문장 바로 아래)
+        const rect = targetChunk.getBoundingClientRect();
+        const tooltip = document.getElementById('coachmark-tooltip');
+        tooltip.style.top = (rect.bottom + 15) + 'px';
+        tooltip.style.left = Math.max(10, rect.left + 20) + 'px';
+
+        localStorage.setItem('pongcrush_spk_num_shortcut_guided', 'true');
+    }
+
+    // 코치마크 닫기
+    function closeCoachmark() {
+        const backdrop = document.getElementById('coachmark-backdrop');
+        backdrop.classList.remove('show');
+        
+        const highlighted = document.querySelectorAll('.highlight-target');
+        highlighted.forEach(el => el.classList.remove('highlight-target'));
+    }
+
     function playChunk(index, text) {
         stopAudio();
         document.querySelectorAll('.chunk').forEach(c => c.classList.remove('active-highlight'));
         const chunk = document.getElementById(`chunk-${index}`);
         if(chunk) chunk.classList.add('active-highlight');
+
+        // 문장 클릭 카운트 증가 및 3회 달성 시 코치마크 온보딩 노출 로직
+        chunkClickCount++;
+        if (chunkClickCount === 3) {
+            if (!localStorage.getItem('pongcrush_spk_num_shortcut_guided')) {
+                showCoachmark(index);
+            }
+        }
 
         if ('speechSynthesis' in window) {
             const utter = new SpeechSynthesisUtterance(text);
@@ -1448,6 +1478,12 @@
     // 단축키 이벤트 리스너
     document.addEventListener('keydown', (e) => {
         const key = e.key;
+
+        // 코치마크 떠있을 때 아무 키나 누르면 닫기
+        const backdrop = document.getElementById('coachmark-backdrop');
+        if (backdrop && backdrop.classList.contains('show')) {
+            closeCoachmark();
+        }
 
         if (key === 'PageUp') { e.preventDefault(); switchTab('vocab'); return; }
         if (key === 'PageDown') { e.preventDefault(); switchTab('strategy'); return; }
