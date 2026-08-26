@@ -332,13 +332,14 @@
                 display: none !important;
             }
 
-            /* 3. 목록, 읽기 버튼만 노출 */
+            /* 3. 목록, 읽기, 읽기 설정(음성) 버튼 노출 */
             .controls { gap: 6px; }
             .controls .shortcut-key { display: none !important; }
-            /* 목록 모달열기, 전체읽기 기능이 아닌 버튼들은 모두 숨김 */
-            .controls .ctrl-btn:not([onclick="openListModal()"]):not([onclick="playAll()"]) {
+            /* 목록, 읽기, 읽기 설정이 아닌 버튼들만 숨김 처리 */
+            .controls .ctrl-btn:not([onclick="openListModal()"]):not([onclick="playAll()"]):not([onclick="openVoiceModal()"]) {
                 display: none !important;
             }
+
             .ctrl-btn {
                 padding: 8px 14px;
                 font-size: 14px;
