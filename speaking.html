@@ -233,40 +233,32 @@
         .modal-close:hover { color: #0f172a; }
         .modal-close-esc { font-size: 12px; font-weight: 700; color: #94a3b8; margin-top: 4px; }
         
-        /* ---------------------------------------------------- */
-        /* ★ 글로벌 페르소나 모달 1화면 꽉 차게 완벽 조정 ★ */
-        /* ---------------------------------------------------- */
+        /* 글로벌 페르소나 모달 스타일 */
         #persona-modal .modal-content-giant {
             height: 94vh; max-height: 94vh; max-width: 1450px; padding: 28px 32px;
             box-sizing: border-box; 
         }
-        
         .profile-hero-extended { 
             display: flex; align-items: center; gap: 20px; padding-bottom: 16px; 
             border-bottom: 2px solid var(--border-color); margin-bottom: 16px; flex-shrink: 0; 
         }
-        
         .profile-hero-img-extended { 
             width: 86px; height: 86px; border-radius: 50%; object-fit: cover; 
             border: 3px solid var(--slack-blue); box-shadow: 0 4px 12px rgba(18, 100, 163, 0.15); 
         }
         .profile-hero-info-extended { display: flex; flex-direction: column; flex: 1; justify-content: center; }
-        
         .profile-hero-info-extended h2 { margin: 0 0 8px 0; font-size: 22px; font-weight: 900; color: #0f172a; letter-spacing: -0.5px; }
-        
         .identity-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
         .id-chip { background: #f8fafc; border: 1.5px solid #e2e8f0; padding: 6px 12px; border-radius: 8px; font-size: 14px; font-weight: 700; color: #334155; line-height: 1.3; }
-        
         .motto-text { 
             margin: 0; font-size: 14px; color: var(--slack-blue); font-weight: 800; 
             background: #f0f9ff; padding: 10px 14px; border-radius: 8px; border: 1.5px solid #bae6fd; line-height: 1.4; 
         }
         
-        /* 본문 및 7대 주제 (스크롤 제거 목적) */
+        /* 본문 및 7대 주제 */
         .persona-giant-body { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
         .section-title-topic { margin: 0 0 12px 0; font-size: 18px; font-weight: 900; color: #0f172a; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
         .topics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; flex: 1; min-height: 0; align-items: start; } 
-        
         .topic-card-item { 
             background: #ffffff; border: 2px solid var(--border-color); border-radius: 12px; 
             padding: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; flex-direction: column; 
@@ -274,7 +266,6 @@
         }
         .topic-card-title { font-size: 16px; font-weight: 900; color: #0f172a; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 2px; }
         .topic-card-subs { font-size: 13px; color: var(--text-muted); line-height: 1.4; font-weight: 600; }
-        
         .topic-badge-container { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
         .topic-badge-giant { 
             background: #e0f2fe; color: #0369a1; font-size: 12px; font-weight: 800; 
@@ -296,6 +287,106 @@
         .list-item-topic { background: #e0f2fe; color: #0369a1; font-size: 12px; font-weight: 800; padding: 3px 8px; border-radius: 4px; }
         .list-item-text { font-size: 15px; font-weight: 800; color: #0f172a; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .json-textarea { width: 100%; height: 260px; padding: 12px; border-radius: 8px; border: 1.5px solid var(--border-strong); font-family: monospace; font-size: 13.5px; background: #f8fafc; box-sizing: border-box; resize: vertical; }
+
+        /* ---------------------------------------------------- */
+        /* ★ 모바일 반응형 지원 (요청사항 100% 반영) ★             */
+        /* ---------------------------------------------------- */
+        @media (max-width: 768px) {
+            body {
+                padding: 12px 4vw;
+                height: 100dvh;
+                overflow-y: auto; /* 전체 스크롤 허용 */
+            }
+
+            /* 1. 상단 컨트롤 바 한 줄 유지 (얼굴, 문제번호 | 목록, 읽기) */
+            .top-bar {
+                flex-direction: row;
+                flex-wrap: nowrap;
+                align-items: center;
+                justify-content: space-between;
+                padding-bottom: 12px;
+            }
+
+            /* 2. 글로벌 페르소나 얼굴 & 문제번호만 노출 */
+            .meta-header {
+                gap: 8px;
+                width: auto;
+                flex: 0 0 auto;
+            }
+            .btn-global-persona {
+                padding: 0;
+                background: transparent;
+                border: none;
+            }
+            .profile-img-header {
+                width: 28px;
+                height: 28px;
+            }
+            /* 필요 없는 텍스트와 뱃지, 구분선 숨김 */
+            .persona-name-text,
+            .bc-arrow,
+            .specific-persona-tag,
+            .type-segmented-control,
+            .badge-topic-category,
+            .divider-line {
+                display: none !important;
+            }
+
+            /* 3. 목록, 읽기 버튼만 노출 */
+            .controls { gap: 6px; }
+            .controls .shortcut-key { display: none !important; }
+            /* 목록 모달열기, 전체읽기 기능이 아닌 버튼들은 모두 숨김 */
+            .controls .ctrl-btn:not([onclick="openListModal()"]):not([onclick="playAll()"]) {
+                display: none !important;
+            }
+            .ctrl-btn {
+                padding: 8px 14px;
+                font-size: 14px;
+            }
+
+            /* 4. 워크스페이스 세로 배치 */
+            .workspace-2to1 {
+                flex-direction: column;
+                height: auto;
+                gap: 20px;
+                overflow: visible;
+                padding-bottom: 30px;
+            }
+            .panel-left-2 {
+                flex: none;
+                height: auto;
+            }
+            .answer-box {
+                overflow: visible; /* 본문 내용에 맞춰 자연스럽게 늘어남 */
+            }
+
+            /* 5. 논리 흐름 표(Canvas) 크기 대폭 확대 */
+            .panel-right-1 {
+                flex: none;
+                height: 650px; /* 캔버스 공간 넉넉하게 확보하여 깨짐 방지 */
+                margin-bottom: 20px;
+            }
+
+            /* 6. 모달 꽉 차게 */
+            .modal-content-giant[style], 
+            #voice-modal > div[style], 
+            #edit-modal > div[style], 
+            #add-modal > div[style], 
+            #list-modal > div[style] {
+                width: 95% !important;
+                padding: 20px !important;
+                max-height: 90vh !important;
+            }
+            #voice-modal > div[style] { padding: 0 !important; }
+            
+            .profile-hero-extended { flex-direction: column; text-align: center; gap: 12px; }
+            .identity-chips { justify-content: center; }
+            .topics-grid { grid-template-columns: 1fr; overflow-y: auto; padding-bottom: 20px; }
+            .list-filter-bar { flex-direction: column; align-items: stretch; }
+            .filter-select { width: 100%; margin-left: 0 !important; }
+            .question-list-item { flex-wrap: wrap; }
+            .list-item-text { width: 100%; margin-top: 4px; white-space: normal; }
+        }
     </style>
 </head>
 <body>
@@ -940,10 +1031,11 @@
 
         const topicLabel = data.meta.topic_category ? `📚 ${data.meta.topic_category}` : "📚 미분류";
 
+        // 모바일 최적화를 위해 이름 부분에 persona-name-text 클래스 부여
         document.getElementById('meta-header').innerHTML = `
             <button class="btn-global-persona" onclick="openPersonaModal()">
                 <img src="profile.jpg" class="profile-img-header" alt="Profile" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2NiZDVlMSI+PHBhdGggZD0iTTEyIDJhNSA1IDAgMSAwIDAgMTAgNSA1IDAgMCAwIDAtMTB6bTAtMmMzLjg2NiAwIDcgMy4xMzQgNyA3cy0zLjEzNCA3LTcgNy03LTMuMTM0LTctNyAzLjEzNC03IDctN3ptMCAxOGM1LjUyMyAwIDEwIDIuMjM5IDEwIDV2Mkgydi0yYz0yLjc2MSA0LjQ3Ny01IDEwLTV6Ii8+PC9zdmc+='">
-                <span>Zuri Harris</span>
+                <span class="persona-name-text">Zuri Harris</span>
             </button>
             <span class="bc-arrow">❯</span>
             <span class="specific-persona-tag">${data.meta.specific_persona || '기본 전략'}</span>
