@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="icon" href="favicon.png">
     <title>퐁크러쉬 - 토플 스피킹 마스터</title>
     <style>
@@ -18,6 +18,11 @@
             --highlight-green-bg: #d1fae5;
         }
         
+        /* 브라우저 기본 스와이프 뒤로가기 제스처 원천 차단 */
+        html, body { 
+            overscroll-behavior-x: none; 
+        }
+
         body { 
             font-family: 'Pretendard', -apple-system, sans-serif; 
             background-color: var(--slack-bg); 
@@ -81,16 +86,16 @@
             background: #e0f2fe; padding: 4px 10px; border-radius: 8px; border: 1.5px solid #bae6fd;
         }
         
-        .controls { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+        .controls { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
         .ctrl-btn {
             background: #ffffff; border: 1.5px solid var(--border-strong); color: var(--text-main);
-            padding: 6px 10px; border-radius: 6px; font-size: 13px; font-weight: 800;
+            padding: 5px 8px; border-radius: 6px; font-size: 13px; font-weight: 800;
             cursor: pointer; transition: all 0.2s ease; white-space: nowrap;
         }
         .ctrl-btn:hover { background: #f1f5f9; border-color: var(--slack-blue); }
         .ctrl-btn.primary { background: #1e293b; color: white; border-color: #0f172a; }
         .ctrl-btn.primary:hover { background: #334155; }
-        .shortcut-key { color: #94a3b8; font-size: 11px; margin-left: 2px; font-weight: 900; }
+        .shortcut-key { color: #94a3b8; font-size: 9.5px; margin-left: 1px; font-weight: 800; }
         .ctrl-btn.primary .shortcut-key { color: #cbd5e1; }
 
         /* 음성 모달 내부 스타일 */
@@ -233,6 +238,55 @@
             display: block; width: 100%; height: 100%;
         }
 
+        /* 애플 스타일 미니멀 & 폴리모피즘 Pull-to-action UI */
+        .pull-indicator {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%) scale(0.92);
+            width: 0;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 8px 32px 0 rgba(15, 23, 42, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            pointer-events: none;
+            overflow: hidden;
+            opacity: 0;
+            transition: width 0.05s cubic-bezier(0.1, 0.9, 0.2, 1), opacity 0.2s, transform 0.2s;
+        }
+        #pull-left-indicator {
+            left: 12px;
+            border-radius: 32px;
+        }
+        #pull-right-indicator {
+            right: 12px;
+            border-radius: 32px;
+        }
+        .pull-indicator.active {
+            opacity: 1;
+            transform: translateY(-50%) scale(1);
+        }
+        .pull-indicator-icon {
+            font-size: 18px;
+            font-weight: 900;
+            color: #0f172a;
+            opacity: 0;
+            transition: opacity 0.2s, transform 0.2s;
+            transform: scale(0.8);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .pull-indicator-icon.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
         /* 모달 공통 스타일 */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -298,7 +352,9 @@
         .gemini-link-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: #4f46e5; color: #ffffff; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 900; text-decoration: none; width: fit-content; }
         .list-filter-bar { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
         .filter-select { padding: 6px 10px; border-radius: 8px; border: 1.5px solid var(--border-strong); font-size: 13.5px; font-weight: 700; background: #ffffff; color: var(--text-main); }
-        .question-list-container { max-height: 52vh; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .question-list-container { max-height: 52vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        
+        /* 데스크탑 기본 문제 목록 스타일 */
         .question-list-item { background: #f8fafc; border: 1.5px solid var(--border-color); border-radius: 10px; padding: 14px 16px; cursor: pointer; display: flex; align-items: center; gap: 14px; transition: all 0.2s; }
         .question-list-item:hover { background: #f1f5f9; border-color: var(--slack-blue); }
         .list-item-badge { background: #0f172a; color: white; font-size: 13px; font-weight: 900; padding: 3px 8px; border-radius: 6px; }
@@ -311,7 +367,7 @@
         .onboarding-backdrop {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(15, 23, 42, 0.65); /* 주변 Dim 처리 */
+            background: rgba(15, 23, 42, 0.65);
             z-index: 9000;
             opacity: 0; pointer-events: none; 
             transition: opacity 0.3s ease;
@@ -341,7 +397,6 @@
             transform: translateY(0);
             opacity: 1;
         }
-        /* 말풍선 위쪽 꼬리 (문장 아래에 배치됨) */
         .coachmark-tooltip::before {
             content: '';
             position: absolute;
@@ -352,14 +407,26 @@
             border-bottom: 8px solid #ffffff;
         }
 
+        /* 모바일 최초 스와이프 안내 코치마크 (화면 중앙) */
+        .mobile-swipe-tooltip {
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            width: 82vw !important;
+            max-width: 320px !important;
+            text-align: center;
+        }
+        .mobile-swipe-tooltip::before { display: none !important; }
+
         /* Dim 상태에서 타겟 UI 팝업 (Highlight) */
         .highlight-target {
             position: relative;
-            z-index: 9001 !important; /* 배경 위로 올림 */
+            z-index: 9001 !important;
             box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.9), 0 0 20px rgba(79, 70, 229, 0.6) !important;
             border-color: #4f46e5 !important;
         }
 
+        /* 모바일 전용 UI 스타일링 */
         @media (max-width: 768px) {
             body { padding: 12px 4vw; height: 100dvh; overflow-y: auto; }
             .top-bar { flex-direction: row; flex-wrap: nowrap; align-items: center; justify-content: space-between; padding-bottom: 12px; }
@@ -367,23 +434,82 @@
             .btn-global-persona { padding: 0; background: transparent; border: none; }
             .profile-img-header { width: 28px; height: 28px; }
             .persona-name-text, .bc-arrow, .specific-persona-tag, .type-segmented-control, .badge-topic-category, .divider-line { display: none !important; }
-            .controls { gap: 6px; }
+            
+            /* 모바일 버튼 3개 구성: 설정, 목록, 읽기 (읽기는 2배 너비 + 블랙 배경) */
+            .controls { display: flex; gap: 8px; width: 62%; justify-content: flex-end; }
             .controls .shortcut-key { display: none !important; }
-            .controls .ctrl-btn:not([onclick="openListModal()"]):not([onclick="playAll()"]):not([onclick="openVoiceModal()"]) { display: none !important; }
-            .ctrl-btn { padding: 8px 14px; font-size: 14px; }
+            .controls .ctrl-btn { display: none !important; }
+            .controls .ctrl-btn.btn-m-setting,
+            .controls .ctrl-btn.btn-m-list,
+            .controls .ctrl-btn.btn-m-play {
+                display: inline-flex !important;
+                justify-content: center;
+                align-items: center;
+                padding: 9px 0;
+                font-size: 13.5px;
+                border-radius: 8px;
+            }
+            .controls .ctrl-btn.btn-m-setting { flex: 1; }
+            .controls .ctrl-btn.btn-m-list { flex: 1; }
+            .controls .ctrl-btn.btn-m-play { 
+                flex: 2; 
+                background: #1e293b !important; 
+                color: #ffffff !important; 
+                border-color: #0f172a !important; 
+                box-shadow: 0 2px 6px rgba(15, 23, 42, 0.15);
+            }
+
             .workspace-2to1 { flex-direction: column; height: auto; gap: 20px; overflow: visible; padding-bottom: 30px; }
             .panel-left-2 { flex: none; height: auto; }
             .answer-box { overflow: visible; }
             .panel-right-1 { flex: none; height: 650px; margin-bottom: 20px; }
-            .modal-content-giant[style], #voice-modal > div[style], #edit-modal > div[style], #add-modal > div[style], #list-modal > div[style] { width: 95% !important; padding: 20px !important; max-height: 90vh !important; }
+            .modal-content-giant[style], #voice-modal > div[style], #edit-modal > div[style], #add-modal > div[style], #list-modal > div[style] { width: 95% !important; padding: 18px !important; max-height: 90vh !important; }
             #voice-modal > div[style] { padding: 0 !important; }
             .profile-hero-extended { flex-direction: column; text-align: center; gap: 12px; }
             .identity-chips { justify-content: center; }
             .topics-grid { grid-template-columns: 1fr; overflow-y: auto; padding-bottom: 20px; }
-            .list-filter-bar { flex-direction: column; align-items: stretch; }
+            .list-filter-bar { flex-direction: column; align-items: stretch; gap: 8px; }
             .filter-select { width: 100%; margin-left: 0 !important; }
-            .question-list-item { flex-wrap: wrap; }
-            .list-item-text { width: 100%; margin-top: 4px; white-space: normal; }
+            
+            /* 모바일 특화 목록 카드 UI 리디자인 */
+            .question-list-container { max-height: 60vh; gap: 12px; }
+            .question-list-item { 
+                flex-direction: column; 
+                align-items: flex-start; 
+                padding: 14px 16px; 
+                border-radius: 12px; 
+                background: #ffffff;
+                border: 1.5px solid var(--border-color);
+                box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+                gap: 8px;
+            }
+            .list-item-top-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                width: 100%;
+            }
+            .list-item-meta-tags {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .list-item-text { 
+                width: 100%; 
+                font-size: 15px; 
+                font-weight: 700; 
+                line-height: 1.45; 
+                color: #0f172a;
+                white-space: normal;
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+            .list-item-delete-btn {
+                font-size: 11px !important;
+                padding: 2px 6px !important;
+            }
             
             .coachmark-tooltip { width: auto; max-width: calc(100vw - 40px); }
         }
@@ -391,20 +517,30 @@
 </head>
 <body>
 
+    <!-- 미니멀 & 글래스모피즘 Pull-to-action UI -->
+    <div id="pull-left-indicator" class="pull-indicator">
+        <span class="pull-indicator-icon" id="pull-left-icon">‹ 이전 문제</span>
+    </div>
+    <div id="pull-right-indicator" class="pull-indicator">
+        <span class="pull-indicator-icon" id="pull-right-icon">다음 문제 ›</span>
+    </div>
+
     <!-- 상단 컨트롤 바 -->
     <header class="top-bar">
         <div class="meta-header" id="meta-header">
             <!-- JS 렌더링 -->
         </div>
         
+        <!-- 데스크탑 단축키 및 모바일 3버튼 구조 (설정/목록/읽기) -->
         <div class="controls" id="normal-controls">
-            <button class="ctrl-btn" onclick="toggleTestMode()">테스트 <span class="shortcut-key">(T)</span></button>
+            <button class="ctrl-btn" onclick="toggleTestMode()">시험 <span class="shortcut-key">(T)</span></button>
             <button class="ctrl-btn" onclick="openAddModal()">추가 <span class="shortcut-key">(A)</span></button>
             <button class="ctrl-btn" onclick="openEditModal()">수정 <span class="shortcut-key">(S)</span></button>
-            <button class="ctrl-btn" onclick="openListModal()">목록 <span class="shortcut-key">(D)</span></button>
-            <button class="ctrl-btn" onclick="playAll()">읽기 <span class="shortcut-key">(F)</span></button>
-            <button class="ctrl-btn" onclick="openVoiceModal()">읽기 설정 <span class="shortcut-key">(V)</span></button>
-            <button class="ctrl-btn primary" onclick="loadNext()">다음 <span class="shortcut-key">(G)</span></button>
+            <button class="ctrl-btn btn-m-setting" onclick="openVoiceModal()">설정 <span class="shortcut-key">(F)</span></button>
+            <button class="ctrl-btn btn-m-list" onclick="openListModal()">목록 <span class="shortcut-key">(D)</span></button>
+            <button class="ctrl-btn btn-m-play primary" onclick="playAll()">읽기 <span class="shortcut-key">(↑)</span></button>
+            <button class="ctrl-btn" onclick="loadPrev()">이전 <span class="shortcut-key">(←)</span></button>
+            <button class="ctrl-btn primary" onclick="loadNext()">다음 <span class="shortcut-key">(→)</span></button>
         </div>
 
         <div class="controls" id="test-controls" style="display: none;">
@@ -446,9 +582,8 @@
     <!-- 온보딩 안내 코치마크 (Dim Backdrop & Tooltip) -->
     <div id="coachmark-backdrop" class="onboarding-backdrop" onclick="closeCoachmark()">
         <div id="coachmark-tooltip" class="coachmark-tooltip">
-            <div style="color: #4f46e5; font-size: 13px; margin-bottom: 4px;">✨ 파워 유저 팁</div>
-            마우스 클릭 대신 키보드 <strong>숫자키(1~9)</strong>를 누르면 해당 순서의 문장을 바로 읽어줘요!
-            <div style="margin-top: 10px; font-size: 12px; color: #94a3b8; font-weight: 600; text-align: right;">화면을 클릭해 닫기</div>
+            <div id="coachmark-content"></div>
+            <div style="margin-top: 10px; font-size: 12px; color: #94a3b8; font-weight: 600; text-align: right;">화면을 탭해 닫기</div>
         </div>
     </div>
 
@@ -628,8 +763,6 @@
       }
     };
 
-    const defaultSpkData = []; 
-
     let currentIndex = 0;
     let isPlaying = false;
     let isTestMode = false; 
@@ -638,7 +771,7 @@
     let currentFlowsGlobal = [];
     let chunkClickCount = 0; 
 
-    // 음성 설정 관련 변수들
+    // 음성 설정 관련 변수
     let availableVoices = [];
     let currentFixedVoiceURIs = [];
     let tempFixedVoiceURIs = [];
@@ -1055,12 +1188,14 @@
             scriptContainer.appendChild(rowDiv);
         });
 
+        // 괄호 제거 정규식 적용된 단어장 렌더링
         const vocabTableBody = document.getElementById('vocab-table-body');
         vocabTableBody.innerHTML = '';
         const vocabList = (data.vocab_list && data.vocab_list.length > 0) ? data.vocab_list : [];
         vocabList.forEach(item => {
             const tr = document.createElement('tr');
-            tr.innerHTML = `<td class="vocab-col-left">${item.expr}</td><td class="vocab-col-right">${item.meaning}</td>`;
+            const cleanMeaning = item.meaning.replace(/\s*\([^)]*\)/g, '').trim();
+            tr.innerHTML = `<td class="vocab-col-left">${item.expr}</td><td class="vocab-col-right">${cleanMeaning}</td>`;
             vocabTableBody.appendChild(tr);
         });
 
@@ -1134,7 +1269,7 @@
                 if (cClean[i-1] === uClean[j-1]) {
                     dp[i][j] = dp[i-1][j-1] + 1;
                 } else {
-                    dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+                    dp[i][j] = Math.max(dp[i-1][j], dp[i-1][j-1]);
                 }
             }
         }
@@ -1300,17 +1435,22 @@
             return matchType && matchTopic;
         });
 
-        if (filtered.length === 0) { listBody.innerHTML = `<div style="text-align:center; padding:20px;">조건에 맞는 문제가 없습니다.</div>`; return; }
+        if (filtered.length === 0) { listBody.innerHTML = `<div style="text-align:center; padding:20px; color:#64748b; font-weight:700;">조건에 맞는 문제가 없습니다.</div>`; return; }
 
         filtered.forEach(({ item, i }) => {
             const div = document.createElement('div');
             div.className = 'question-list-item';
             div.innerHTML = `
-                <span class="list-item-badge">#${i + 1}</span>
-                <span class="list-item-type">${item.meta?.type || '미지정'}</span>
-                <span class="list-item-topic">${item.meta?.topic_category || '미분류'}</span>
-                <span class="list-item-text">${item.question}</span>
-                <button class="ctrl-btn" style="padding: 4px 10px; font-size: 12.5px; color: #ef4444; border-color: #fca5a5; margin-left: auto; background: #fef2f2;" onclick="deleteQuestion(${i}, event)">삭제</button>`;
+                <div class="list-item-top-row">
+                    <div class="list-item-meta-tags">
+                        <span class="list-item-badge">#${i + 1}</span>
+                        <span class="list-item-type">${item.meta?.type || '미지정'}</span>
+                        <span class="list-item-topic">${item.meta?.topic_category || '미분류'}</span>
+                    </div>
+                    <button class="ctrl-btn list-item-delete-btn" style="color: #ef4444; border-color: #fca5a5; background: #fef2f2;" onclick="deleteQuestion(${i}, event)">삭제</button>
+                </div>
+                <div class="list-item-text">${item.question}</div>
+            `;
             
             div.onclick = (e) => { 
                 if(e.target.tagName !== 'BUTTON') {
@@ -1380,28 +1520,54 @@
         isPlaying = false;
     }
 
-    // 클릭된 특정 문장(인덱스)을 기준으로 코치마크 활성화
+    // 데스크탑 숫자키 코치마크 활성화
     function showCoachmark(index) {
         const targetChunk = document.getElementById(`chunk-${index}`);
         if (!targetChunk) return;
 
-        // 배경 Dim 띄우기
+        const content = document.getElementById('coachmark-content');
+        content.innerHTML = `
+            <div style="color: #4f46e5; font-size: 13px; margin-bottom: 4px;">✨ 파워 유저 팁</div>
+            마우스 클릭 대신 키보드 <strong>숫자키(1~9)</strong>를 누르면 해당 순서의 문장을 바로 읽어줘요!
+        `;
+
         const backdrop = document.getElementById('coachmark-backdrop');
         backdrop.classList.add('show');
         
-        // 타겟 요소 하이라이트
         targetChunk.classList.add('highlight-target');
 
-        // 말풍선 위치 계산 (타겟 문장 바로 아래)
         const rect = targetChunk.getBoundingClientRect();
         const tooltip = document.getElementById('coachmark-tooltip');
+        tooltip.className = 'coachmark-tooltip';
         tooltip.style.top = (rect.bottom + 15) + 'px';
         tooltip.style.left = Math.max(10, rect.left + 20) + 'px';
 
         localStorage.setItem('pongcrush_spk_num_shortcut_guided', 'true');
     }
 
-    // 코치마크 닫기
+    // 모바일 진입 시 스와이프 안내 코치마크
+    function checkMobileSwipeCoachmark() {
+        if (window.innerWidth <= 768) {
+            if (!localStorage.getItem('pongcrush_spk_mobile_swipe_guided')) {
+                setTimeout(() => {
+                    const content = document.getElementById('coachmark-content');
+                    content.innerHTML = `
+                        <div style="color: #4f46e5; font-size: 14px; margin-bottom: 6px; font-weight: 900;">👆 좌우 스와이프 안내</div>
+                        화면을 <strong>좌우로 밀어서</strong> 이전 문제와 다음 문제로 편리하게 이동할 수 있습니다!
+                    `;
+
+                    const backdrop = document.getElementById('coachmark-backdrop');
+                    backdrop.classList.add('show');
+                    
+                    const tooltip = document.getElementById('coachmark-tooltip');
+                    tooltip.className = 'coachmark-tooltip mobile-swipe-tooltip';
+                    
+                    localStorage.setItem('pongcrush_spk_mobile_swipe_guided', 'true');
+                }, 400);
+            }
+        }
+    }
+
     function closeCoachmark() {
         const backdrop = document.getElementById('coachmark-backdrop');
         backdrop.classList.remove('show');
@@ -1416,9 +1582,8 @@
         const chunk = document.getElementById(`chunk-${index}`);
         if(chunk) chunk.classList.add('active-highlight');
 
-        // 문장 클릭 카운트 증가 및 3회 달성 시 코치마크 온보딩 노출 로직
         chunkClickCount++;
-        if (chunkClickCount === 3) {
+        if (chunkClickCount === 3 && window.innerWidth > 768) {
             if (!localStorage.getItem('pongcrush_spk_num_shortcut_guided')) {
                 showCoachmark(index);
             }
@@ -1462,6 +1627,14 @@
         renderUI();
     }
 
+    function loadPrev() {
+        if (!spkData || spkData.length === 0) return;
+        stopAudio();
+        currentIndex = (currentIndex - 1 + spkData.length) % spkData.length;
+        saveCurrentIndex();
+        renderUI();
+    }
+
     function openPersonaModal() {
         const topicsHtml = spk_global_persona.global_persona.universal_topic_coverage.map(t => `
             <div class="topic-card-item">
@@ -1475,11 +1648,97 @@
 
     function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
 
+    // 모바일 스와이프 제스처 핸들러
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let isSwiping = false;
+
+    document.addEventListener('touchstart', e => {
+        touchStartX = e.touches[0].screenX;
+        touchStartY = e.touches[0].screenY;
+        isSwiping = false;
+        
+        const pullLeft = document.getElementById('pull-left-indicator');
+        const pullRight = document.getElementById('pull-right-indicator');
+        if(pullLeft) pullLeft.style.transition = 'width 0.05s ease-out';
+        if(pullRight) pullRight.style.transition = 'width 0.05s ease-out';
+    }, {passive: false});
+
+    document.addEventListener('touchmove', e => {
+        if (isTestMode) return;
+        const openModals = document.querySelectorAll('.modal-overlay[style*="display: flex"]');
+        if (openModals.length > 0) return;
+        
+        let deltaX = e.touches[0].screenX - touchStartX;
+        let deltaY = e.touches[0].screenY - touchStartY;
+        
+        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 6) {
+            e.preventDefault(); // 기본 뒤로가기 가로챔 방지
+            isSwiping = true;
+            
+            let pullDistance = Math.min(Math.abs(deltaX) * 0.45, 110); 
+            
+            if (deltaX > 0) { // 왼쪽 -> 이전 문제
+                const pullLeft = document.getElementById('pull-left-indicator');
+                pullLeft.classList.add('active');
+                pullLeft.style.width = `${pullDistance}px`;
+                
+                const icon = document.getElementById('pull-left-icon');
+                if (pullDistance > 50) {
+                    icon.classList.add('visible');
+                } else {
+                    icon.classList.remove('visible');
+                }
+            } else { // 오른쪽 -> 다음 문제
+                const pullRight = document.getElementById('pull-right-indicator');
+                pullRight.classList.add('active');
+                pullRight.style.width = `${pullDistance}px`;
+                
+                const icon = document.getElementById('pull-right-icon');
+                if (pullDistance > 50) {
+                    icon.classList.add('visible');
+                } else {
+                    icon.classList.remove('visible');
+                }
+            }
+        }
+    }, {passive: false});
+
+    document.addEventListener('touchend', e => {
+        if (!isSwiping) return;
+        
+        let deltaX = e.changedTouches[0].screenX - touchStartX;
+        const SWIPE_THRESHOLD = 65; 
+        
+        const pullLeft = document.getElementById('pull-left-indicator');
+        const pullRight = document.getElementById('pull-right-indicator');
+        const iconLeft = document.getElementById('pull-left-icon');
+        const iconRight = document.getElementById('pull-right-icon');
+        
+        if(pullLeft) pullLeft.style.transition = 'width 0.3s cubic-bezier(0.1, 0.9, 0.2, 1), opacity 0.3s';
+        if(pullRight) pullRight.style.transition = 'width 0.3s cubic-bezier(0.1, 0.9, 0.2, 1), opacity 0.3s';
+        
+        if(pullLeft) { pullLeft.classList.remove('active'); pullLeft.style.width = '0px'; }
+        if(pullRight) { pullRight.classList.remove('active'); pullRight.style.width = '0px'; }
+        if(iconLeft) iconLeft.classList.remove('visible');
+        if(iconRight) iconRight.classList.remove('visible');
+        
+        if (deltaX < -SWIPE_THRESHOLD) {
+            loadNext();
+        } else if (deltaX > SWIPE_THRESHOLD) {
+            loadPrev();
+        }
+        
+        isSwiping = false;
+    });
+
     // 단축키 이벤트 리스너
     document.addEventListener('keydown', (e) => {
+        // 브라우저 기본 조합키(Ctrl+Shift+R 등) 유지
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
+
         const key = e.key;
 
-        // 코치마크 떠있을 때 아무 키나 누르면 닫기
         const backdrop = document.getElementById('coachmark-backdrop');
         if (backdrop && backdrop.classList.contains('show')) {
             closeCoachmark();
@@ -1537,13 +1796,15 @@
             }
         }
 
+        // 키 매핑: A(추가), S(수정), D(목록), F(설정), T(시험), ArrowUp(읽기), ArrowRight(다음), ArrowLeft(이전)
         if (keyLower === 'a') { e.preventDefault(); openAddModal(); }
         else if (keyLower === 's') { e.preventDefault(); openEditModal(); }
         else if (keyLower === 'd') { e.preventDefault(); openListModal(); }
-        else if (keyLower === 'f') { e.preventDefault(); playAll(); }
-        else if (keyLower === 'v') { e.preventDefault(); openVoiceModal(); }
-        else if (keyLower === 'g') { e.preventDefault(); loadNext(); }
+        else if (keyLower === 'f') { e.preventDefault(); openVoiceModal(); }
         else if (keyLower === 't') { e.preventDefault(); toggleTestMode(); }
+        else if (key === 'ArrowUp') { e.preventDefault(); playAll(); }
+        else if (key === 'ArrowRight') { e.preventDefault(); loadNext(); }
+        else if (key === 'ArrowLeft') { e.preventDefault(); loadPrev(); }
         else if (keyLower === 'escape') { 
             closeModal('persona-modal'); closeModal('list-modal'); 
             closeModal('add-modal'); closeModal('edit-modal'); closeVoiceModal();
@@ -1555,6 +1816,7 @@
         loadSavedVoiceSettings();
         initLocalStorageData(); 
         renderUI(); 
+        checkMobileSwipeCoachmark();
     };
 </script>
 </body>
