@@ -897,6 +897,17 @@
     </div>
 
 <script>
+
+    // 👉 1. 서비스 워커 등록 함수 추가 (index.html과 동일한 로직)
+    function registerServiceWorker() { 
+        if ('serviceWorker' in navigator) { 
+            navigator.serviceWorker.register('./sw.js')
+            .then(reg => { console.log('SW Registered (speaking.html)'); })
+            .catch(err => { console.warn('SW Registration Failed', err); }); 
+        } 
+    }
+
+
     const spk_global_persona = {
       "global_persona": {
         "identity": {
@@ -2344,6 +2355,9 @@
         initLocalStorageData(); 
         renderUI(); 
         checkMobileSwipeCoachmark();
+        
+        // 👉 2. 페이지 로드 시 서비스 워커 등록 함수 호출
+        registerServiceWorker();
     };
 
     // ==========================================
@@ -2808,6 +2822,10 @@
         const voiceObj = getRandomOrSelectedVoice();
         playHybridTTS(text, voiceObj);
     }
+
+
+
+
 </script>
 </body>
 </html>
