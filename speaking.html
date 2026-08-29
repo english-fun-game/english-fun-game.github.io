@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="icon" href="favicon.png">
     <title>퐁크러쉬 - 토플 스피킹 마스터</title>
+    <!-- ZIP 압축/해제 라이브러리 추가 -->
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <!-- Azure Speech SDK 추가 -->
+    <script src="https://cdn.jsdelivr.net/npm/microsoft-cognitiveservices-speech-sdk@latest/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle-min.js"></script>
     <style>
         :root {
             --slack-blue: #1264a3;
@@ -112,7 +116,7 @@
         }
 
         .panel-left-2 {
-            flex: 2; display: flex; flex-direction: column; gap: 12px; min-width: 0;
+            flex: 2; display: flex; flex-direction: column; gap: 10px; min-width: 0;
         }
 
         .question-prompt {
@@ -133,7 +137,7 @@
         }
         
         .sentence-row {
-            margin-bottom: 12px;
+            margin-bottom: 8px; 
             line-height: 1.6;
         }
         
@@ -155,16 +159,16 @@
             font-weight: 900;
         }
 
-        /* 시험 모드 용 인풋 및 결과 디스플레이 스타일 */
+        /* 시험 모드 용 인풋, 음성 녹음 버튼, 결과 디스플레이 스타일 */
         .test-input {
             width: 100%;
-            padding: 10px 14px; 
-            font-size: 19px;
+            padding: 8px 12px; 
+            font-size: 18px;
             font-weight: 600;
             font-family: inherit;
             border: 2px solid var(--border-strong);
             border-radius: 8px;
-            margin-bottom: 10px;
+            margin-bottom: 4px;
             box-sizing: border-box;
             background: #ffffff;
             color: #1e293b;
@@ -172,30 +176,65 @@
             resize: none;
             overflow-y: hidden;
             line-height: 1.5;
-            min-height: 50px;
-            max-height: 84px;
+            min-height: 46px;
         }
         .test-input:focus {
             border-color: var(--slack-blue);
             outline: none;
             box-shadow: 0 0 0 3px rgba(18, 100, 163, 0.1);
         }
+
+        .btn-record {
+            background: #f8fafc; border: 1.5px solid var(--border-strong); color: var(--text-main);
+            padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 800;
+            cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 4px;
+        }
+        .btn-record:hover { background: #f1f5f9; border-color: var(--slack-blue); }
+        .btn-record.recording-active {
+            background: #fee2e2 !important; color: #ef4444 !important; border-color: #fca5a5 !important;
+            animation: pulse-record 1.5s infinite;
+        }
+        @keyframes pulse-record {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .timer-badge {
+            background: #e2e8f0; color: #334155; padding: 2px 6px; border-radius: 6px; 
+            font-size: 11px; font-weight: 900; margin-left: 4px; font-variant-numeric: tabular-nums;
+        }
+        .recording-active .timer-badge {
+            background: #ef4444; color: #fff;
+        }
+
+        /* 45초 카운트다운 프로그레시브 바 */
+        .progress-bar-bg {
+            width: 100%; height: 6px; background: #e2e8f0; 
+            border-radius: 3px; overflow: hidden; margin-bottom: 8px;
+            display: none;
+        }
+        .progress-bar-fill {
+            height: 100%; width: 100%; background: #3b82f6; 
+            transition: width 0.1s linear, background-color 0.3s;
+        }
+        .progress-bar-fill.warning { background: #eab308; }
+        .progress-bar-fill.danger { background: #ef4444; }
         
         .user-answer-disp {
             font-size: 19px;
             font-weight: 800;
             color: #475569; 
-            margin-top: 6px;
+            margin-top: 4px;
             padding-left: 4px; 
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             line-height: 1.5;
             letter-spacing: -0.2px;
         }
         .wrong-word {
-            text-decoration: line-through;
-            text-decoration-color: #ef4444;
-            text-decoration-thickness: 2.5px;
             color: #ef4444; 
+            font-weight: 900;
+            text-decoration: none; 
         }
 
         /* 우측 패널 */
@@ -354,7 +393,6 @@
         .filter-select { padding: 6px 10px; border-radius: 8px; border: 1.5px solid var(--border-strong); font-size: 13.5px; font-weight: 700; background: #ffffff; color: var(--text-main); }
         .question-list-container { max-height: 52vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
         
-        /* 데스크탑 기본 문제 목록 스타일 (수정됨) */
         .question-list-item { background: #f8fafc; border: 1.5px solid var(--border-color); border-radius: 10px; padding: 12px 16px; cursor: pointer; display: flex; align-items: center; gap: 14px; transition: all 0.2s; }
         .question-list-item:hover { background: #f1f5f9; border-color: var(--slack-blue); }
         .list-item-meta-tags { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
@@ -409,7 +447,6 @@
             border-bottom: 8px solid #ffffff;
         }
 
-        /* 모바일 최초 스와이프 안내 코치마크 (화면 중앙) */
         .mobile-swipe-tooltip {
             top: 50% !important;
             left: 50% !important;
@@ -420,7 +457,6 @@
         }
         .mobile-swipe-tooltip::before { display: none !important; }
 
-        /* Dim 상태에서 타겟 UI 팝업 (Highlight) */
         .highlight-target {
             position: relative;
             z-index: 9001 !important;
@@ -428,98 +464,131 @@
             border-color: #4f46e5 !important;
         }
 
-        /* 모바일 전용 UI 스타일링 */
-        @media (max-width: 768px) {
-            body { padding: 12px 4vw; height: 100dvh; overflow-y: auto; }
-            .top-bar { flex-direction: row; flex-wrap: nowrap; align-items: center; justify-content: space-between; padding-bottom: 12px; }
-            .meta-header { gap: 8px; width: auto; flex: 0 0 auto; }
-            .btn-global-persona { padding: 0; background: transparent; border: none; }
-            .profile-img-header { width: 28px; height: 28px; }
-            .persona-name-text, .bc-arrow, .specific-persona-tag, .type-segmented-control, .badge-topic-category, .divider-line { display: none !important; }
-            
-            /* 모바일 버튼 3개 구성: 설정, 목록, 읽기 (읽기는 2배 너비 + 블랙 배경) */
-            .controls { display: flex; gap: 8px; width: 62%; justify-content: flex-end; }
-            .controls .shortcut-key { display: none !important; }
-            .controls .ctrl-btn { display: none !important; }
-            .controls .ctrl-btn.btn-m-setting,
-            .controls .ctrl-btn.btn-m-list,
-            .controls .ctrl-btn.btn-m-play {
-                display: inline-flex !important;
-                justify-content: center;
-                align-items: center;
-                padding: 9px 0;
-                font-size: 13.5px;
-                border-radius: 8px;
-            }
-            .controls .ctrl-btn.btn-m-setting { flex: 1; }
-            .controls .ctrl-btn.btn-m-list { flex: 1; }
-            .controls .ctrl-btn.btn-m-play { 
-                flex: 2; 
-                background: #1e293b !important; 
-                color: #ffffff !important; 
-                border-color: #0f172a !important; 
-                box-shadow: 0 2px 6px rgba(15, 23, 42, 0.15);
-            }
+/* ==========================================
+   모바일 전용 최적화 (설정/목록/음성/읽기 4개만 노출)
+   ========================================== */
+@media (max-width: 768px) {
+    body { padding: 8px 3.5vw; height: 100dvh; overflow-y: auto; }
+    
+    .top-bar { 
+        flex-direction: row !important; 
+        flex-wrap: nowrap !important;
+        align-items: center !important; 
+        justify-content: space-between !important; 
+        padding-bottom: 8px !important; 
+        margin-bottom: 6px !important;
+        gap: 6px !important; 
+    }
+    
+    /* 좌측: 아바타 + 번호 */
+    .meta-header { 
+        display: flex !important; 
+        align-items: center !important; 
+        gap: 4px !important; 
+        flex-shrink: 0 !important; 
+    }
+    .btn-global-persona { padding: 0 !important; background: transparent !important; border: none !important; }
+    .profile-img-header { width: 24px !important; height: 24px !important; }
+    .question-badge-top { font-size: 11.5px !important; padding: 3px 6px !important; border-radius: 6px !important; }
+    .persona-name-text, .bc-arrow, .specific-persona-tag, .type-segmented-control, .badge-topic-category, .divider-line { display: none !important; }
+    
+    /* 우측 컨트롤 바 */
+    .controls { 
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important; 
+        flex: 1 !important;
+        justify-content: flex-end !important; 
+        gap: 5px !important; 
+        min-width: 0 !important;
+    }
+    .controls[style*="display: none"] {
+        display: none !important;
+    }
 
-            .workspace-2to1 { flex-direction: column; height: auto; gap: 20px; overflow: visible; padding-bottom: 30px; }
-            .panel-left-2 { flex: none; height: auto; }
-            .answer-box { overflow: visible; }
-            .panel-right-1 { flex: none; height: 650px; margin-bottom: 20px; }
-            .modal-content-giant[style], #voice-modal > div[style], #edit-modal > div[style], #add-modal > div[style], #list-modal > div[style] { width: 95% !important; padding: 18px !important; max-height: 90vh !important; }
-            #voice-modal > div[style] { padding: 0 !important; }
-            .profile-hero-extended { flex-direction: column; text-align: center; gap: 12px; }
-            .identity-chips { justify-content: center; }
-            .topics-grid { grid-template-columns: 1fr; overflow-y: auto; padding-bottom: 20px; }
-            .list-filter-bar { flex-direction: column; align-items: stretch; gap: 8px; }
-            .filter-select { width: 100%; margin-left: 0 !important; }
-            
-            /* 모바일 특화 목록 카드 UI 리디자인 (수정됨) */
-            .question-list-container { max-height: 60vh; gap: 12px; }
-            .question-list-item { 
-                flex-wrap: wrap;
-                padding: 14px 16px; 
-                border-radius: 12px; 
-                background: #ffffff;
-                border: 1.5px solid var(--border-color);
-                box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-                gap: 8px 10px;
-            }
-            .list-item-meta-tags {
-                flex: 1;
-                min-width: 0;
-            }
-            .list-item-delete-btn {
-                margin-left: auto;
-                font-size: 11px !important;
-                padding: 4px 8px !important;
-            }
-            .list-item-text { 
-                width: 100%; 
-                font-size: 14.5px; 
-                font-weight: 700; 
-                line-height: 1.45; 
-                color: #0f172a;
-                white-space: normal;
-                display: -webkit-box;
-                -webkit-line-clamp: 3;
-                -webkit-box-orient: vertical;
-                overflow: hidden;
-                margin-top: 2px;
-                flex: none;
-            }
-            
-            .coachmark-tooltip { width: auto; max-width: calc(100vw - 40px); }
-        }
+    .controls .shortcut-key { display: none !important; }
+
+    /* 기본적으로 모바일에서는 컨트롤 내의 모든 버튼을 숨김 */
+    .controls .ctrl-btn { 
+        display: none !important; 
+        justify-content: center !important; 
+        align-items: center !important; 
+        padding: 8px 0 !important; 
+        font-size: 12.5px !important; 
+        border-radius: 6px !important; 
+        flex: 1 1 0 !important; 
+        min-width: 0 !important;
+        width: 0 !important;
+        white-space: nowrap !important;
+    }
+    
+    /* 모바일 기본 화면에서는 [설정, 목록, 음성, 읽기] 4개만 정확히 노출 */
+    #normal-controls #btn-setting,
+    #normal-controls #btn-list,
+    #normal-controls #btn-s-test,
+    #normal-controls #btn-play {
+        display: inline-flex !important;
+    }
+
+    /* 시험 모드 버튼(취소/제출/완료) 활성화 시 정상 노출 */
+    #test-controls .ctrl-btn,
+    #test-result-controls .ctrl-btn {
+        display: inline-flex !important;
+    }
+    
+    .controls .btn-m-play { 
+        background: #1e293b !important; 
+        color: #ffffff !important; 
+        border-color: #0f172a !important; 
+    }
+    
+    /* 모바일 노출 순서: 설정 / 목록 / 음성 / 읽기 */
+    #btn-setting { order: 1; }
+    #btn-list    { order: 2; }
+    #btn-s-test  { order: 3; }
+    #btn-play    { order: 4; }
+
+    .workspace-2to1 { flex-direction: column; height: auto; gap: 12px; overflow: visible; padding-bottom: 24px; margin-top: 4px; }
+    .panel-left-2 { flex: none; height: auto; gap: 8px; }
+    .question-prompt { font-size: 17px; padding-bottom: 8px; }
+    .chunk { font-size: 17px; padding: 8px 12px; }
+    .test-input { font-size: 17px; padding: 8px 10px; }
+    .answer-box { overflow: visible; }
+    .panel-right-1 { flex: none; height: 500px; margin-bottom: 20px; }
+    
+    .modal-content-giant[style], #voice-modal > div[style], #edit-modal > div[style], #add-modal > div[style], #list-modal > div[style] { width: 95% !important; padding: 16px !important; max-height: 90vh !important; }
+    #voice-modal > div[style] { padding: 0 !important; }
+    .profile-hero-extended { flex-direction: column; text-align: center; gap: 12px; }
+    .identity-chips { justify-content: center; }
+    .topics-grid { grid-template-columns: 1fr; overflow-y: auto; padding-bottom: 20px; }
+    .list-filter-bar { flex-direction: column; align-items: stretch; gap: 8px; }
+    .filter-select { width: 100%; margin-left: 0 !important; }
+    
+    .question-list-container { max-height: 60vh; gap: 10px; }
+    .question-list-item { 
+        flex-wrap: wrap; padding: 12px 14px; border-radius: 10px; 
+        background: #ffffff; border: 1.5px solid var(--border-color);
+        gap: 6px 8px;
+    }
+    .list-item-meta-tags { flex: 1; min-width: 0; }
+    .list-item-delete-btn { margin-left: auto; font-size: 11px !important; padding: 3px 6px !important; }
+    .list-item-text { 
+        width: 100%; font-size: 14px; font-weight: 700; line-height: 1.4; color: #0f172a;
+        white-space: normal; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+        overflow: hidden; margin-top: 2px; flex: none;
+    }
+    .coachmark-tooltip { width: auto; max-width: calc(100vw - 40px); }
+}
     </style>
 </head>
 <body>
 
-    <!-- 미니멀 & 글래스모피즘 Pull-to-action UI -->
+    <!-- 미니멀 & 글래스모피즘 Pull-to-action UI (텍스트 제거) -->
     <div id="pull-left-indicator" class="pull-indicator">
-        <span class="pull-indicator-icon" id="pull-left-icon">‹ 이전 문제</span>
+        <span class="pull-indicator-icon" id="pull-left-icon">‹</span>
     </div>
     <div id="pull-right-indicator" class="pull-indicator">
-        <span class="pull-indicator-icon" id="pull-right-icon">다음 문제 ›</span>
+        <span class="pull-indicator-icon" id="pull-right-icon">›</span>
     </div>
 
     <!-- 상단 컨트롤 바 -->
@@ -528,16 +597,15 @@
             <!-- JS 렌더링 -->
         </div>
         
-        <!-- 데스크탑 단축키 및 모바일 3버튼 구조 (설정/목록/읽기) -->
+        <!-- 데스크탑 및 모바일 메뉴 -->
         <div class="controls" id="normal-controls">
-            <button class="ctrl-btn" onclick="toggleTestMode()">시험 <span class="shortcut-key">(T)</span></button>
-            <button class="ctrl-btn" onclick="openAddModal()">추가 <span class="shortcut-key">(A)</span></button>
-            <button class="ctrl-btn" onclick="openEditModal()">수정 <span class="shortcut-key">(S)</span></button>
-            <button class="ctrl-btn btn-m-setting" onclick="openVoiceModal()">설정 <span class="shortcut-key">(F)</span></button>
-            <button class="ctrl-btn btn-m-list" onclick="openListModal()">목록 <span class="shortcut-key">(D)</span></button>
-            <button class="ctrl-btn btn-m-play primary" onclick="playAll()">읽기 <span class="shortcut-key">(↑)</span></button>
-            <button class="ctrl-btn" onclick="loadPrev()">이전 <span class="shortcut-key">(←)</span></button>
-            <button class="ctrl-btn primary" onclick="loadNext()">다음 <span class="shortcut-key">(→)</span></button>
+            <button class="ctrl-btn btn-hide-mobile" id="btn-w-test" onclick="toggleWritingTestMode()">작문 <span class="shortcut-key">(T)</span></button>
+            <button class="ctrl-btn" id="btn-s-test" onclick="toggleSpeakingTestMode()">음성 <span class="shortcut-key">(P)</span></button>
+            <button class="ctrl-btn btn-hide-mobile" onclick="openAddModal()">추가 <span class="shortcut-key">(A)</span></button>
+            <button class="ctrl-btn btn-hide-mobile" onclick="openEditModal()">수정 <span class="shortcut-key">(S)</span></button>
+            <button class="ctrl-btn" id="btn-setting" onclick="openVoiceModal()">설정 <span class="shortcut-key">(F)</span></button>
+            <button class="ctrl-btn" id="btn-list" onclick="openListModal()">목록 <span class="shortcut-key">(D)</span></button>
+            <button class="ctrl-btn primary btn-m-play" id="btn-play" onclick="playAll()">읽기 <span class="shortcut-key">(↑)</span></button>
         </div>
 
         <div class="controls" id="test-controls" style="display: none;">
@@ -576,7 +644,7 @@
         </section>
     </main>
 
-    <!-- 온보딩 안내 코치마크 (Dim Backdrop & Tooltip) -->
+    <!-- 온보딩 안내 코치마크 -->
     <div id="coachmark-backdrop" class="onboarding-backdrop" onclick="closeCoachmark()">
         <div id="coachmark-tooltip" class="coachmark-tooltip">
             <div id="coachmark-content"></div>
@@ -586,11 +654,11 @@
 
     <!-- 음성 설정 모달 -->
     <div id="voice-modal" class="modal-overlay" onclick="if(event.target === this) closeVoiceModal()" style="display: none;">
-        <div class="modal-content-giant" style="width: 520px; height: 85vh; max-height: 85vh; display: flex; flex-direction: column; padding: 0 !important; overflow: hidden;" onclick="event.stopPropagation()">
+        <div class="modal-content-giant" style="width: 540px; height: 85vh; max-height: 85vh; display: flex; flex-direction: column; padding: 0 !important; overflow: hidden;" onclick="event.stopPropagation()">
             <div style="padding: 20px 20px 10px 20px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid var(--border-color);">
                 <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                    <span style="font-size: 18px; font-weight: 900;">🎙️ 읽기 음성 설정</span>
-                    <span style="font-size: 11.5px; font-weight: 600; color: var(--text-muted);">(미선택 시 전체 랜덤 반복)</span>
+                    <span style="font-size: 18px; font-weight: 900;">🎙️ 음성 통신 설정 (읽기 및 채점)</span>
+                    <span style="font-size: 11.5px; font-weight: 600; color: var(--text-muted);">(읽기 미선택 시 로컬 자동 폴백)</span>
                 </div>
                 <button class="modal-close" style="position: static; font-size: 22px;" onclick="closeVoiceModal()">&times; <span class="modal-close-esc">(ESC)</span></button>
             </div>
@@ -762,201 +830,80 @@
 
     let currentIndex = 0;
     let isPlaying = false;
-    let isTestMode = false; 
+    let testMode = null; // null | 'W' (작문) | 'S' (음성)
+    let sTestType = 'all'; // 'all' | 'sentence'
     let isTestSubmitted = false; 
     let spkData = [];
     let currentFlowsGlobal = [];
     let chunkClickCount = 0; 
 
-    // 음성 설정 관련 변수
-    let availableVoices = [];
-    let currentFixedVoiceURIs = [];
-    let tempFixedVoiceURIs = [];
-    let currentFixedVoiceIndex = 0;
-    let lastVoiceURI = '';
-    const SELECTED_FIXED_VOICE_KEY = 'pongcrush_spk_fixed_voice_uri_v4';
-
-    function initVoiceEngine() { 
-        if ('speechSynthesis' in window) { 
-            availableVoices = window.speechSynthesis.getVoices(); 
-            window.speechSynthesis.onvoiceschanged = () => { 
-                availableVoices = window.speechSynthesis.getVoices(); 
-            }; 
-        } 
-    }
+    // Azure STT 및 타이머/메모리 관련 변수
+    let recognizer = null;
+    let isRecording = false;
+    let activeRecordTarget = null;
+    let sttExistingText = "";
     
-    function loadSavedVoiceSettings() {
-        try {
-            const savedURIs = localStorage.getItem('pongcrush_spk_fixed_voice_uris_v5');
-            currentFixedVoiceURIs = savedURIs ? JSON.parse(savedURIs) : [];
-        } catch(e) { currentFixedVoiceURIs = []; }
+    let recMode = 'stream'; 
+    let mediaRecorder = null;
+    let audioChunks = []; 
+    // 문장별/전체별 임시 메모리 저장소 (오로지 RAM에만 의존)
+    let tempMemoryBlobs = {}; 
+    const MAX_RECORD_TIME = 45000; 
+
+    // 발화 시간 기록 변수
+    let recordedTimes = {}; 
+    let recStartTime = 0;
+    let recInterval = null;
+
+    // --- [신규 추가] WebM -> WAV(16kHz PCM) 인메모리 변환기 ---
+    async function convertWebMToWav(blob) {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+        const arrayBuffer = await blob.arrayBuffer();
+        const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+        const channelData = audioBuffer.getChannelData(0); // Mono
         
-        if (currentFixedVoiceURIs.length === 0 && localStorage.getItem(SELECTED_FIXED_VOICE_KEY)) {
-            currentFixedVoiceURIs = [localStorage.getItem(SELECTED_FIXED_VOICE_KEY)];
+        const wavBuffer = new ArrayBuffer(44 + channelData.length * 2);
+        const view = new DataView(wavBuffer);
+        
+        const writeStr = (offset, str) => { for(let i=0; i<str.length; i++) view.setUint8(offset + i, str.charCodeAt(i)); };
+        writeStr(0, 'RIFF'); view.setUint32(4, 36 + channelData.length * 2, true);
+        writeStr(8, 'WAVE'); writeStr(12, 'fmt '); view.setUint32(16, 16, true);
+        view.setUint16(20, 1, true); view.setUint16(22, 1, true);
+        view.setUint32(24, 16000, true); view.setUint32(28, 32000, true);
+        view.setUint16(32, 2, true); view.setUint16(34, 16, true);
+        writeStr(36, 'data'); view.setUint32(40, channelData.length * 2, true);
+        
+        let offset = 44;
+        for (let i = 0; i < channelData.length; i++, offset += 2) {
+            let s = Math.max(-1, Math.min(1, channelData[i]));
+            view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
         }
+        return new Blob([wavBuffer], { type: 'audio/wav' });
     }
 
-    function openVoiceModal() {
-        tempFixedVoiceURIs = [...currentFixedVoiceURIs];
-        const modal = document.getElementById('voice-modal');
-        if (modal) modal.style.display = 'flex';
-        renderVoiceListUI();
-    }
-
-    function closeVoiceModal() {
-        const modal = document.getElementById('voice-modal');
-        if (modal) modal.style.display = 'none';
-    }
-
-    function toggleTempFixedVoice(uri) {
-        const container = document.getElementById('voice-modal-content-area');
-        const scrollPos = container ? container.scrollTop : 0;
+    // --- [신규 추가] Azure REST API 파일 직접 호출 ---
+    async function transcribeOfflineAudioToAzure(blob) {
+        let AZURE_KEY = localStorage.getItem('pongcrush_azure_key');
+        let AZURE_REGION = localStorage.getItem('pongcrush_azure_region');
         
-        const idx = tempFixedVoiceURIs.indexOf(uri);
-        if (idx > -1) {
-            tempFixedVoiceURIs.splice(idx, 1);
-        } else {
-            tempFixedVoiceURIs.push(uri);
-        }
-        renderVoiceListUI();
+        const wavBlob = await convertWebMToWav(blob);
+        const url = `https://${AZURE_REGION}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?language=en-US`;
         
-        const newContainer = document.getElementById('voice-modal-content-area');
-        if (newContainer) newContainer.scrollTop = scrollPos;
-    }
-
-    function confirmVoiceSettings() {
-        currentFixedVoiceURIs = [...tempFixedVoiceURIs];
-        localStorage.setItem('pongcrush_spk_fixed_voice_uris_v5', JSON.stringify(currentFixedVoiceURIs));
-        currentFixedVoiceIndex = 0;
-        closeVoiceModal();
-    }
-
-    function testVoice(uri, event) {
-        if (event) event.stopPropagation();
-        stopAudio();
-        setTimeout(() => {
-            const voice = getEnVoices().find(v => v.voiceURI === uri);
-            if (!voice) return;
-            const utter = new SpeechSynthesisUtterance("I strongly agree that having a regular morning routine is essential.");
-            utter.voice = voice;
-            utter.lang = voice.lang || 'en-US';
-            utter.rate = 1.0;
-            utter.pitch = 1.0;
-            window.speechSynthesis.speak(utter);
-        }, 60);
-    }
-    
-    function getEnVoices() {
-        if (!('speechSynthesis' in window)) return [];
-        let voices = window.speechSynthesis.getVoices();
-        if (voices.length === 0 && availableVoices.length > 0) voices = availableVoices;
-        
-        return voices.filter(v => {
-            const lang = (v.lang || '').replace(/_/g, '-').toLowerCase();
-            return lang.startsWith('en-') || lang === 'en';
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Ocp-Apim-Subscription-Key': AZURE_KEY,
+                'Content-Type': 'audio/wav; codecs=audio/pcm; samplerate=16000',
+                'Accept': 'application/json'
+            },
+            body: wavBlob
         });
-    }
-
-    function getEngineCompany(name) {
-        const lower = name.toLowerCase();
-        if (lower.includes('google')) return { name: 'Google', color: '#ea4335' };
-        if (lower.includes('microsoft')) return { name: 'Microsoft', color: '#00a4ef' };
-        if (lower.includes('apple') || lower.includes('siri') || lower.includes('mac')) return { name: 'Apple', color: '#555555' };
-        if (lower.includes('samsung') || lower.includes('bixby')) return { name: 'Samsung', color: '#1428a0' };
-        if (lower.includes('amazon')) return { name: 'Amazon', color: '#ff9900' };
-        return { name: 'OS/System', color: '#64748b' };
-    }
-
-    function getCountryName(lang) {
-        const l = lang.toLowerCase();
-        if (l.includes('us')) return '미국';
-        if (l.includes('gb') || l.includes('uk')) return '영국';
-        if (l.includes('au')) return '호주';
-        if (l.includes('ca')) return '캐나다';
-        if (l.includes('in')) return '인도';
-        if (l.includes('ie')) return '아일랜드';
-        if (l.includes('za')) return '남아공';
-        if (l.includes('nz')) return '뉴질랜드';
-        if (l.includes('sg')) return '싱가포르';
-        if (l.includes('ph')) return '필리핀';
-        if (l.includes('ng')) return '나이지리아';
-        if (l.startsWith('en')) return '글로벌';
-        return '기타';
-    }
-
-    function renderVoiceListUI() {
-        const area = document.getElementById('voice-modal-content-area');
-        if (!area) return;
-        const enVoices = getEnVoices();
         
-        let html = `<div class="voice-list-container">`;
-        
-        if (enVoices.length === 0) {
-            html += '<div style="padding:20px; text-align:center; color:#64748b; font-weight:800; font-size:13px;">지원되는 영어 음성 엔진이 없습니다.</div>';
-        } else {
-            enVoices.forEach(voice => {
-                const isSelected = tempFixedVoiceURIs.includes(voice.voiceURI);
-                const orderIndex = tempFixedVoiceURIs.indexOf(voice.voiceURI);
-                const orderBadge = isSelected ? `<span style="background:#ea580c; color:#fff; border-radius:50%; width:16px; height:16px; display:inline-flex; align-items:center; justify-content:center; font-size:10px; margin-right:6px; flex-shrink:0;">${orderIndex + 1}</span>` : '';
-                
-                const company = getEngineCompany(voice.name);
-                let cleanName = voice.name.replace(/(Google|Microsoft|Apple|Siri|Samsung|Amazon|Bixby|Cortana)\s*-?\s*/gi, '').replace(/english/gi, '').replace(/\(\s*\)/g, '').replace(/\s{2,}/g, ' ').trim() || 'Voice';
-                
-                const nameChip = `<span style="background:${company.color}15; color:${company.color}; padding:3px 6px; border-radius:6px; font-size:10px; font-weight:900; border:1px solid ${company.color}30; white-space:nowrap; flex-shrink:0;">${company.name}</span>`;
-                
-                const countryName = getCountryName(voice.lang);
-                const countryChip = `<span class="voice-badge" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:2px 6px; font-weight:800; flex-shrink:0;">🌍 ${countryName}</span>`;
-                const localChip = `<span class="voice-badge" style="background:${voice.localService ? '#dcfce7' : '#fce7f3'}; color:${voice.localService ? '#16a34a' : '#db2777'}; border:1px solid ${voice.localService ? '#bbf7d0' : '#fbcfe8'}; font-weight:800; flex-shrink:0;">${voice.localService ? '로컬' : '네트워크'}</span>`;
-
-                html += `
-                    <div class="voice-item ${isSelected ? 'selected' : ''}" onclick="toggleTempFixedVoice('${voice.voiceURI.replace(/'/g, "\\'")}')">
-                        <div class="voice-info">
-                            <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px; overflow:hidden;">
-                                ${orderBadge}
-                                ${nameChip}
-                                <span class="voice-name">${cleanName}</span>
-                            </div>
-                            <div style="display:flex; gap:4px;">
-                                ${countryChip}
-                                ${localChip}
-                            </div>
-                        </div>
-                        <button class="ctrl-btn" style="background:#e2e8f0; color:#0f172a; padding:6px 10px; font-size:13px; border:none; box-shadow:0 1px 2px rgba(0,0,0,0.1); flex-shrink:0;" onclick="testVoice('${voice.voiceURI.replace(/'/g, "\\'")}', event)">▶️ 테스트</button>
-                    </div>`;
-            });
-        }
-        
-        html += `</div>`;
-        area.innerHTML = html;
+        if (!response.ok) throw new Error("Azure API 에러: " + response.status);
+        const result = await response.json();
+        return result.DisplayText || ""; 
     }
-
-    function getRandomOrSelectedVoice() {
-        const enVoices = getEnVoices();
-        if (enVoices.length === 0) return null;
-        
-        if (currentFixedVoiceURIs.length > 0) {
-            const validVoices = currentFixedVoiceURIs.map(uri => enVoices.find(v => v.voiceURI === uri)).filter(Boolean);
-            if (validVoices.length > 0) {
-                const voice = validVoices[currentFixedVoiceIndex % validVoices.length];
-                currentFixedVoiceIndex++;
-                return voice;
-            }
-        }
-
-        let pool = enVoices;
-        if (pool.length > 1 && lastVoiceURI) {
-            const candidates = pool.filter(v => v.voiceURI !== lastVoiceURI);
-            if (candidates.length > 0) {
-                const chosen = candidates[Math.floor(Math.random() * candidates.length)];
-                lastVoiceURI = chosen.voiceURI;
-                return chosen;
-            }
-        }
-
-        const chosen = pool[Math.floor(Math.random() * pool.length)] || enVoices[0];
-        if (chosen) lastVoiceURI = chosen.voiceURI;
-        return chosen;
-    }
+    // -------------------------------------------------------------
 
     function initLocalStorageData() {
         const saved = localStorage.getItem('pongcrush_spk_data');
@@ -1208,11 +1155,31 @@
         }
     });
 
-    function toggleTestMode() {
+    // ========== 시험 모드 공통 헬퍼 ==========
+    function formatTime(ms) {
+        let totalSec = Math.floor(ms / 1000);
+        let min = Math.floor(totalSec / 60).toString().padStart(2, '0');
+        let sec = (totalSec % 60).toString().padStart(2, '0');
+        return `${min}:${sec}`;
+    }
+
+    function getTotalSentenceTime() {
+        let total = 0;
+        for(let key in recordedTimes) {
+            if(key !== 'all') total += recordedTimes[key];
+        }
+        return total;
+    }
+
+    // ========== 시험 모드 전환 (작문_시험) ==========
+    function toggleWritingTestMode() {
         if (!spkData || spkData.length === 0) return;
         stopAudio();
-        isTestMode = true;
+        if(isRecording) stopRecord();
+        testMode = 'W';
         isTestSubmitted = false;
+        recordedTimes = {};
+        
         document.getElementById('normal-controls').style.display = 'none';
         document.getElementById('test-controls').style.display = 'flex';
         document.getElementById('test-result-controls').style.display = 'none';
@@ -1229,7 +1196,8 @@
             input.className = 'test-input';
             input.rows = 1;
             input.spellcheck = false;
-            input.placeholder = `문장 ${rIdx + 1}을(를) 작성하세요...`;
+            input.id = `write-input-${rIdx}`;
+            input.placeholder = `문장 ${rIdx + 1} 작성...`;
             input.oninput = function() {
                 this.style.height = 'auto';
                 this.style.height = Math.min(this.scrollHeight, 84) + 'px';
@@ -1244,9 +1212,329 @@
         if (firstInput) firstInput.focus();
     }
 
-    function cancelTestMode() {
-        isTestMode = false;
+    window.setRecMode = function(mode) {
+        if(isRecording) stopRecord();
+        recMode = mode;
+        // 설정 변경 시 진행 중이던 임시 파일(RAM) 완벽 파기
+        tempMemoryBlobs = {};
+        recordedTimes = {};
+        renderSpeakingTestUI();
+    };
+
+    function setSTestType(type) {
+        if (isRecording) stopRecord(); 
+        sTestType = type;
+        // 설정 변경 시 진행 중이던 임시 파일(RAM) 완벽 파기
+        tempMemoryBlobs = {};
+        recordedTimes = {};
+        renderSpeakingTestUI();
+    }
+
+    // ========== 스피킹 시험 모드 (음성_시험) ==========
+    function toggleSpeakingTestMode() {
+        if (!spkData || spkData.length === 0) return;
+        stopAudio();
+        if(isRecording) stopRecord();
+        testMode = 'S';
         isTestSubmitted = false;
+        recordedTimes = {};
+        tempMemoryBlobs = {}; // 메모리 완전 초기화 (새로고침/모드 진입 시)
+        
+        document.getElementById('normal-controls').style.display = 'none';
+        document.getElementById('test-controls').style.display = 'flex';
+        document.getElementById('test-result-controls').style.display = 'none';
+        
+        renderSpeakingTestUI();
+    }
+
+    function renderSpeakingTestUI() {
+        const data = spkData[currentIndex];
+        const scriptContainer = document.getElementById('script-container');
+        
+        // 스트리밍/오프라인 모드 선택기 추가
+        let html = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px; gap: 8px;">
+                <div style="display:flex; background:#e2e8f0; border-radius:8px; padding:3px; flex:1; max-width: 250px;">
+                    <button class="ctrl-btn ${sTestType === 'all' ? 'primary' : ''}" onclick="setSTestType('all')" style="flex:1; border:none; margin:0; padding:6px 10px; font-size:13px; box-shadow:none;">전체 단위</button>
+                    <button class="ctrl-btn ${sTestType === 'sentence' ? 'primary' : ''}" onclick="setSTestType('sentence')" style="flex:1; border:none; margin:0; padding:6px 10px; font-size:13px; box-shadow:none;">문장 단위</button>
+                </div>
+                <div style="display:flex; background:#e2e8f0; border-radius:8px; padding:3px; flex:1; max-width: 250px;">
+                    <button class="ctrl-btn ${recMode === 'stream' ? 'primary' : ''}" onclick="setRecMode('stream')" style="flex:1; border:none; margin:0; padding:6px; font-size:12px; box-shadow:none;">📡 실시간 STT</button>
+                    <button class="ctrl-btn ${recMode === 'file' ? 'primary' : ''}" onclick="setRecMode('file')" style="flex:1; border:none; margin:0; padding:6px; font-size:12px; box-shadow:none;">💾 사전 녹음</button>
+                </div>
+            </div>
+            
+            <div class="progress-bar-bg" id="progress-bg"><div class="progress-bar-fill" id="progress-fill"></div></div>
+            
+            <div id="s-test-content" style="display:flex; flex-direction:column; gap:6px;"></div>
+        `;
+        
+        scriptContainer.innerHTML = html;
+        const contentDiv = document.getElementById('s-test-content');
+        
+        if (sTestType === 'all') {
+            contentDiv.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                    <span style="font-size:13.5px; font-weight:800; color:#475569; background:#f1f5f9; padding:2px 8px; border-radius:6px;">전체 스크립트</span>
+                    <button id="btn-record-all" class="btn-record" onclick="toggleRecord('all')">🎤 녹음 시작</button>
+                </div>
+                <textarea id="spk-input-all" class="test-input spk-test-textarea" style="min-height:120px;" placeholder="${recMode === 'file' ? '사전 녹음 시 제출 후 텍스트가 표시됩니다...' : '녹음된 전체 텍스트가 이곳에 표시됩니다...'}"></textarea>
+            `;
+        } else {
+            data.script_rows.forEach((row, rIdx) => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'sentence-row';
+                rowDiv.style.marginBottom = '6px';
+                
+                rowDiv.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <span style="font-size:13px; font-weight:800; color:#475569; background:#f1f5f9; padding:2px 8px; border-radius:6px;">문장 ${rIdx + 1}</span>
+                        <button id="btn-record-${rIdx}" class="btn-record" onclick="toggleRecord(${rIdx})">🎤 녹음 시작</button>
+                    </div>
+                    <textarea id="spk-input-${rIdx}" class="test-input spk-test-textarea" style="min-height:42px; margin-bottom:0;" placeholder="${recMode === 'file' ? '사전 녹음 모드' : '텍스트가 이곳에 표시됩니다...'}"></textarea>
+                `;
+                contentDiv.appendChild(rowDiv);
+            });
+        }
+        
+        // --- 45초 음성 네트워크 사용량 및 비용 가이드 UI 추가 ---
+        const usageGuideHtml = `
+            <div style="margin-top: 12px; padding: 12px; border: 1.5px solid var(--border-color); border-radius: 8px; background: #ffffff;">
+                <div style="font-size: 12.5px; font-weight: 800; color: #475569; margin-bottom: 8px;">📊 데이터 사용량 및 비용 가이드 (Azure API)</div>
+                <table style="width: 100%; border-collapse: collapse; font-size: 12px; color: #64748b;">
+                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                        <th style="text-align: left; padding: 4px 0; color: #334155; font-weight: 800;">구분</th>
+                        <th style="text-align: right; padding: 4px 0; color: #334155; font-weight: 800;">네트워크 (45초 기준)</th>
+                        <th style="text-align: right; padding: 4px 0; color: #334155; font-weight: 800;">예상 비용 (1시간 누적)</th>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                        <td style="padding: 6px 0;"><b>실시간 (Stream)</b></td>
+                        <td style="text-align: right;">약 <b>1.5 MB</b></td>
+                        <td style="text-align: right;"><b>$1.00</b></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 6px 0;"><b>사전 녹음 (File)</b></td>
+                        <td style="text-align: right;">약 <b>1.4 MB</b></td>
+                        <td style="text-align: right;"><b>$1.00</b></td>
+                    </tr>
+                </table>
+                <div style="font-size: 11px; margin-top: 6px; color: #94a3b8; letter-spacing: -0.2px;">* 16kHz, 16-bit Mono 포맷 기준. 실시간 방식은 패킷 분할 전송 오버헤드로 인해 데이터량이 미세하게 더 높습니다.</div>
+            </div>
+        `;
+        contentDiv.insertAdjacentHTML('beforeend', usageGuideHtml);
+    }
+
+    // ========== Azure STT 및 오프라인 파일 레코딩 (타이머 카운트다운 적용) ==========
+    function toggleRecord(target) {
+        if (recMode === 'stream' && typeof SpeechSDK === 'undefined') {
+            alert("Azure Speech SDK가 로드되지 않았습니다. 인터넷 연결을 확인해주세요.");
+            return;
+        }
+
+        if (isRecording) {
+            if (activeRecordTarget === target) {
+                stopRecord(); 
+            } else {
+                stopRecord(); 
+                setTimeout(() => startRecord(target), 300); // 이전 객체 정리 후 재시작
+            }
+        } else {
+            startRecord(target);
+        }
+    }
+    
+    function startRecord(target) {
+        if (recMode === 'stream') {
+            let AZURE_KEY = localStorage.getItem('pongcrush_azure_key');
+            let AZURE_REGION = localStorage.getItem('pongcrush_azure_region') || 'eastus';
+            
+            if (!AZURE_KEY) {
+                AZURE_KEY = prompt("Azure API Key가 필요합니다 (STT 채점용):");
+                if (!AZURE_KEY) return;
+                AZURE_REGION = prompt("Azure Region (예: eastus):", "eastus") || 'eastus';
+                localStorage.setItem('pongcrush_azure_key', AZURE_KEY); 
+                localStorage.setItem('pongcrush_azure_region', AZURE_REGION);
+            }
+        }
+
+        activeRecordTarget = target;
+        let textarea = document.getElementById(`spk-input-${target}`);
+        sttExistingText = textarea ? textarea.value.trim() : "";
+        
+        // 해당 문장 메모리 초기화
+        audioChunks = [];
+        delete tempMemoryBlobs[target]; 
+        
+        recStartTime = Date.now();
+        recordedTimes[target] = 0; 
+        
+        // 프로그레시브 바 UI 초기화
+        const progressBg = document.getElementById('progress-bg');
+        const progressFill = document.getElementById('progress-fill');
+        if(progressBg) progressBg.style.display = 'block';
+        if(progressFill) {
+            progressFill.style.width = '100%';
+            progressFill.className = 'progress-bar-fill';
+        }
+        
+        if (recInterval) clearInterval(recInterval);
+        
+        // 45초 카운트다운 타이머 
+        recInterval = setInterval(() => {
+            let currentDur = Date.now() - recStartTime;
+            let remainDur = Math.max(0, MAX_RECORD_TIME - currentDur);
+            
+            let timerSpan = document.getElementById(`timer-${target}`);
+            if (timerSpan) timerSpan.innerText = formatTime(remainDur); 
+            
+            if(progressFill) {
+                let percent = (remainDur / MAX_RECORD_TIME) * 100;
+                progressFill.style.width = `${percent}%`;
+                if (percent < 20) progressFill.className = 'progress-bar-fill danger';
+                else if (percent < 50) progressFill.className = 'progress-bar-fill warning';
+                else progressFill.className = 'progress-bar-fill';
+            }
+            
+            if (remainDur <= 0) {
+                stopRecord();
+            }
+        }, 100);
+
+        if (recMode === 'file') {
+            // [오프라인 녹음 모드] 브라우저 내장 MediaRecorder로 메모리에만 임시 적재
+            navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.__stream = stream; // 스트림 보관용
+                mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                    tempMemoryBlobs[target] = blob; // 오직 RAM에만 보관
+                    if(mediaRecorder.__stream) mediaRecorder.__stream.getTracks().forEach(track => track.stop());
+                };
+                mediaRecorder.start(250); // 250ms 단위로 청크 쪼개서 메모리 확보
+                isRecording = true;
+                updateRecordBtnUI(target, true);
+                if (textarea) textarea.placeholder = "오프라인 녹음 중... (제출 시 STT 처리됨)";
+            }).catch(e => {
+                alert("마이크 접근 권한이 거부되었거나 오류가 발생했습니다.");
+                stopRecord(true);
+            });
+        } else {
+            // [스트리밍 모드] 기존 Azure 실시간 STT 로직
+            try {
+                let AZURE_KEY = localStorage.getItem('pongcrush_azure_key');
+                let AZURE_REGION = localStorage.getItem('pongcrush_azure_region') || 'eastus';
+                const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(AZURE_KEY, AZURE_REGION);
+                speechConfig.speechRecognitionLanguage = "en-US";
+                const audioConfig = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
+
+                recognizer = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
+
+                recognizer.recognizing = (s, e) => {
+                    if (activeRecordTarget === target && textarea) {
+                        textarea.value = (sttExistingText + ' ' + e.result.text).trim();
+                        textarea.style.height = 'auto';
+                        textarea.style.height = Math.min(textarea.scrollHeight, 180) + 'px';
+                    }
+                };
+
+                recognizer.recognized = (s, e) => {
+                    if (e.result.reason === SpeechSDK.ResultReason.RecognizedSpeech) {
+                        sttExistingText = (sttExistingText + ' ' + e.result.text).trim();
+                        if (activeRecordTarget === target && textarea) {
+                            textarea.value = sttExistingText;
+                            textarea.style.height = 'auto';
+                            textarea.style.height = Math.min(textarea.scrollHeight, 180) + 'px';
+                        }
+                    }
+                };
+
+                recognizer.canceled = (s, e) => {
+                    if (e.reason === SpeechSDK.CancellationReason.Error) {
+                        alert(`Azure STT 오류: ${e.errorDetails}\nAPI Key와 Region 설정을 다시 확인해주세요.`);
+                        stopRecord(true);
+                    }
+                };
+
+                recognizer.startContinuousRecognitionAsync(
+                    () => {
+                        isRecording = true;
+                        updateRecordBtnUI(target, true);
+                    },
+                    (err) => {
+                        console.error(err);
+                        alert("마이크 접근 권한이 거부되었거나 오류가 발생했습니다.");
+                        stopRecord(true);
+                    }
+                );
+            } catch(e) {
+                console.error(e);
+                alert("Azure STT 초기화 실패: " + e.message);
+                stopRecord(true);
+            }
+        }
+    }
+    
+    function stopRecord(forceClear = false) {
+        if (recInterval) {
+            clearInterval(recInterval);
+            recInterval = null;
+        }
+
+        const progressBg = document.getElementById('progress-bg');
+        if(progressBg) progressBg.style.display = 'none';
+
+        let target = activeRecordTarget; 
+        let actualSpokenTime = Date.now() - recStartTime;
+        actualSpokenTime = Math.min(actualSpokenTime, MAX_RECORD_TIME);
+
+        if (recMode === 'file') {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+        } else {
+            if (recognizer) {
+                recognizer.stopContinuousRecognitionAsync(
+                    () => { if(recognizer) { recognizer.close(); recognizer = null; } },
+                    (err) => { if(recognizer) { recognizer.close(); recognizer = null; } }
+                );
+            }
+        }
+        
+        isRecording = false;
+        if (activeRecordTarget !== null) {
+            recordedTimes[activeRecordTarget] = actualSpokenTime;
+            updateRecordBtnUI(activeRecordTarget, false);
+            activeRecordTarget = null;
+        }
+    }
+    
+    function updateRecordBtnUI(target, isRec) {
+        let btn = document.getElementById(`btn-record-${target}`);
+        if (!btn) return;
+        if (isRec) {
+            btn.innerHTML = `🔴 녹음 중지 <span id="timer-${target}" class="timer-badge">00:45</span>`;
+            btn.classList.add('recording-active');
+        } else {
+            let finalTime = recordedTimes[target] || 0;
+            let label = target === 'all' ? '🎤 전체 녹음' : '🎤 녹음 시작';
+            // 표시되는 뱃지는 실제 녹음된 길이
+            if(finalTime > 0) label = `🎤 재녹음 <span class="timer-badge" style="background:#cbd5e1;color:#334155;">${formatTime(finalTime)}</span>`;
+            btn.innerHTML = label;
+            btn.classList.remove('recording-active');
+        }
+    }
+
+    // ========== 시험 제출 및 채점 (Diffing) 로직 ==========
+    function cancelTestMode() {
+        if(isRecording) stopRecord();
+        testMode = null;
+        isTestSubmitted = false;
+        
+        // 취소 시 메모리 모두 파기
+        tempMemoryBlobs = {};
+        recordedTimes = {};
+
         document.getElementById('normal-controls').style.display = 'flex';
         document.getElementById('test-controls').style.display = 'none';
         document.getElementById('test-result-controls').style.display = 'none';
@@ -1297,52 +1585,216 @@
         return resultHtml.trim();
     }
 
-    function submitTest() {
-        if(!confirm('작성한 답안을 제출하시겠습니까?')) return;
-        
-        const inputs = document.querySelectorAll('.test-input');
-        const userAnswers = Array.from(inputs).map(inp => inp.value);
-        
-        isTestMode = false;
-        isTestSubmitted = true;
+    // 전체 발화 텍스트를 문장 단위로 분할하여 추적 채점
+    function diffGlobalToSentences(scriptRows, userText) {
+        let C = [];
+        scriptRows.forEach((row, rIdx) => {
+            let rowText = row.map(c => c.text).join(' ');
+            let words = rowText.trim().split(/\s+/).filter(w => w);
+            words.forEach(w => { C.push({ word: w, rIdx: rIdx }); });
+        });
+
+        let U = userText.trim().split(/\s+/).filter(w => w);
+        if (U.length === 0) return Array(scriptRows.length).fill('');
+
+        const cClean = C.map(x => x.word.replace(/[.,?!;:'"]/g, '').toLowerCase());
+        const uClean = U.map(w => w.replace(/[.,?!;:'"]/g, '').toLowerCase());
+
+        const dp = Array(C.length + 1).fill(null).map(() => Array(U.length + 1).fill(0));
+        for(let i = 1; i <= C.length; i++) {
+            for(let j = 1; j <= U.length; j++) {
+                if (cClean[i-1] === uClean[j-1]) {
+                    dp[i][j] = dp[i-1][j-1] + 1;
+                } else {
+                    dp[i][j] = Math.max(dp[i-1][j], dp[i-1][j-1]);
+                }
+            }
+        }
+
+        let i = C.length, j = U.length;
+        const matchPairs = [];
+        while(i > 0 && j > 0) {
+            if (cClean[i-1] === uClean[j-1]) {
+                matchPairs.unshift([i-1, j-1]); i--; j--;
+            } else if (dp[i-1][j] > dp[i][j-1]) { i--; } else { j--; }
+        }
+
+        let uTargetRow = Array(U.length).fill(-1);
+        let matchUtoC = {}; 
+        matchPairs.forEach(p => {
+            matchUtoC[p[1]] = p[0];
+            uTargetRow[p[1]] = C[p[0]].rIdx;
+        });
+
+        // 매칭되지 않은(틀린) 단어들을 가장 가까운 문장에 편입
+        for(let u_idx = 0; u_idx < U.length; u_idx++) {
+            if(uTargetRow[u_idx] === -1) {
+                let closestRow = 0;
+                for(let left = u_idx - 1; left >= 0; left--) {
+                    if(uTargetRow[left] !== -1) { closestRow = uTargetRow[left]; break; }
+                }
+                if(closestRow === 0) {
+                    for(let right = u_idx + 1; right < U.length; right++) {
+                        if(uTargetRow[right] !== -1) { closestRow = uTargetRow[right]; break; }
+                    }
+                }
+                uTargetRow[u_idx] = closestRow;
+            }
+        }
+
+        let resultByRow = Array(scriptRows.length).fill('');
+        for(let u_idx = 0; u_idx < U.length; u_idx++) {
+            let rIdx = uTargetRow[u_idx] || 0;
+            let isMatch = matchUtoC.hasOwnProperty(u_idx);
+            if (isMatch) {
+                resultByRow[rIdx] += `${U[u_idx]} `;
+            } else {
+                resultByRow[rIdx] += `<span class="wrong-word">${U[u_idx]}</span> `;
+            }
+        }
+        return resultByRow.map(s => s.trim());
+    }
+
+    async function submitTest() {
+        if(!confirm('제출 후 채점 결과를 확인하시겠습니까?')) return;
+        if(isRecording) stopRecord(); 
         
         document.getElementById('normal-controls').style.display = 'none';
         document.getElementById('test-controls').style.display = 'none';
+
+        // --- [신규 추가] 오프라인 사전녹음 시 Azure REST API 직접 호출 및 메모리 파기 ---
+        if (recMode === 'file') {
+            const data = spkData[currentIndex];
+            
+            const loadingOverlay = document.createElement('div');
+            loadingOverlay.innerHTML = '<div style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.85); backdrop-filter:blur(4px); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:18px; font-weight:900; color:#0f172a;">📡 Azure로 오프라인 음성 전송 중...<br><span style="font-size:14px; color:#64748b; margin-top:8px; font-weight:700;">완료 즉시 브라우저 메모리가 자동 해제됩니다.</span></div>';
+            document.body.appendChild(loadingOverlay);
+
+            try {
+                if (sTestType === 'sentence') {
+                    for (let rIdx = 0; rIdx < data.script_rows.length; rIdx++) {
+                        if (tempMemoryBlobs[rIdx]) {
+                            let text = await transcribeOfflineAudioToAzure(tempMemoryBlobs[rIdx]);
+                            document.getElementById(`spk-input-${rIdx}`).value = text;
+                        }
+                    }
+                } else if (sTestType === 'all') {
+                    if (tempMemoryBlobs['all']) {
+                        let text = await transcribeOfflineAudioToAzure(tempMemoryBlobs['all']);
+                        document.getElementById('spk-input-all').value = text;
+                    }
+                }
+            } catch(e) {
+                alert("Azure STT 직접 통신 실패: " + e.message);
+                document.body.removeChild(loadingOverlay);
+                cancelTestMode();
+                return;
+            }
+            
+            // ⭐️ 호출 완료 즉시 객체를 초기화하여 메모리를 완벽히 파기시킴 (가비지 컬렉터 수집)
+            tempMemoryBlobs = {}; 
+            console.log("✅ Azure 호출 완료 및 임시 음성 메모리(RAM) 해제 성공");
+            document.body.removeChild(loadingOverlay);
+        }
+        // --------------------------------------------------------------------------
+
+        isTestSubmitted = true;
         document.getElementById('test-result-controls').style.display = 'flex';
         
         const data = spkData[currentIndex];
         const scriptContainer = document.getElementById('script-container');
-        scriptContainer.innerHTML = '';
         
-        data.script_rows.forEach((row, rIdx) => {
-            const rowDiv = document.createElement('div');
-            rowDiv.className = 'sentence-row';
+        // 작문 시험(W)이거나 스피킹 시험(S) 중 문장단위 녹음인 경우
+        if (testMode === 'W' || (testMode === 'S' && sTestType === 'sentence')) {
+            const inputs = document.querySelectorAll('.test-input');
+            const userAnswers = Array.from(inputs).map(inp => inp.value);
+            
+            scriptContainer.innerHTML = '';
 
-            const origDiv = document.createElement('div');
-            let fullOriginalText = row.map(c => c.text).join(' ');
+            // S시험 문장단위의 경우 전체 발화 시간 상단 렌더링
+            if (testMode === 'S') {
+                scriptContainer.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding-bottom:8px; border-bottom:1.5px solid #e2e8f0;">
+                        <span style="font-size:14px; font-weight:800; color:#475569;">채점 결과</span>
+                        <span style="font-size:14px; font-weight:900; color:#0f172a;">⏱️ 총 발화 시간: ${formatTime(getTotalSentenceTime())}</span>
+                    </div>`;
+            }
+
+            data.script_rows.forEach((row, rIdx) => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'sentence-row';
+
+                const origDiv = document.createElement('div');
+                let fullOriginalText = row.map(c => c.text).join(' ');
+                
+                const span = document.createElement('span');
+                span.className = 'chunk';
+                span.innerHTML = highlightVocabInHtml(fullOriginalText, data.vocab_list);
+                origDiv.appendChild(span);
+                rowDiv.appendChild(origDiv);
+                
+                const userAnsDiv = document.createElement('div');
+                userAnsDiv.className = 'user-answer-disp';
+                
+                let diffHtml = diffSentences(fullOriginalText, userAnswers[rIdx] || '');
+                // 텍스트 인라인 끝부분에 시간 뱃지 삽입
+                if (testMode === 'S') {
+                    let t = formatTime(recordedTimes[rIdx] || 0);
+                    diffHtml += ` <span style="display:inline-block; font-size:11.5px; font-weight:800; color:#64748b; background:#f1f5f9; padding:2px 6px; border-radius:6px; margin-left:4px; vertical-align:middle; white-space:nowrap;">⏱️ ${t}</span>`;
+                }
+                userAnsDiv.innerHTML = diffHtml;
+                rowDiv.appendChild(userAnsDiv);
+                
+                scriptContainer.appendChild(rowDiv);
+            });
+        } 
+        // 스피킹 시험(S) 중 전체단위 녹음인 경우 (문장별 분할 채점 적용)
+        else if (testMode === 'S' && sTestType === 'all') {
+            const userInput = document.getElementById('spk-input-all').value;
+            const diffResults = diffGlobalToSentences(data.script_rows, userInput);
             
-            const span = document.createElement('span');
-            span.className = 'chunk';
-            span.innerHTML = highlightVocabInHtml(fullOriginalText, data.vocab_list);
-            origDiv.appendChild(span);
-            rowDiv.appendChild(origDiv);
+            scriptContainer.innerHTML = '';
             
-            const userAnsDiv = document.createElement('div');
-            userAnsDiv.className = 'user-answer-disp';
-            userAnsDiv.innerHTML = diffSentences(fullOriginalText, userAnswers[rIdx] || '');
-            rowDiv.appendChild(userAnsDiv);
-            
-            scriptContainer.appendChild(rowDiv);
-        });
+            scriptContainer.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding-bottom:8px; border-bottom:1.5px solid #e2e8f0;">
+                    <span style="font-size:14px; font-weight:800; color:#475569;">채점 결과 (전체 분할)</span>
+                    <span style="font-size:14px; font-weight:900; color:#0f172a;">⏱️ 총 발화 시간: ${formatTime(recordedTimes['all']||0)}</span>
+                </div>`;
+
+            data.script_rows.forEach((row, rIdx) => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'sentence-row';
+
+                const origDiv = document.createElement('div');
+                let fullOriginalText = row.map(c => c.text).join(' ');
+                
+                const span = document.createElement('span');
+                span.className = 'chunk';
+                span.innerHTML = highlightVocabInHtml(fullOriginalText, data.vocab_list);
+                origDiv.appendChild(span);
+                rowDiv.appendChild(origDiv);
+                
+                const userAnsDiv = document.createElement('div');
+                userAnsDiv.className = 'user-answer-disp';
+                userAnsDiv.innerHTML = diffResults[rIdx] || '<span style="color:#94a3b8; font-size:14px; font-weight:600;">(인식된 음성 없음)</span>';
+                rowDiv.appendChild(userAnsDiv);
+                
+                scriptContainer.appendChild(rowDiv);
+            });
+        }
     }
 
     function finishTest() {
+        testMode = null;
         isTestSubmitted = false;
+        tempMemoryBlobs = {}; // 메모리 완전 해제
+        
         document.getElementById('test-result-controls').style.display = 'none';
         document.getElementById('normal-controls').style.display = 'flex';
         renderUI(); 
     }
 
+    // ========== 나머지 유틸리티 함수 ==========
     function openEditModal() {
         if (!spkData || spkData.length === 0) { alert('수정할 데이터가 없습니다.'); return; }
         document.getElementById('edit-json-input').value = JSON.stringify(spkData[currentIndex], null, 2);
@@ -1360,7 +1812,7 @@
             closeModal('edit-modal'); 
             
             stopAudio();
-            isTestMode = false;
+            testMode = null;
             isTestSubmitted = false;
             document.getElementById('normal-controls').style.display = 'flex';
             document.getElementById('test-controls').style.display = 'none';
@@ -1474,48 +1926,6 @@
         }
     }
 
-    function speakPromise(text) {
-        return new Promise((resolve) => {
-            const utter = new SpeechSynthesisUtterance(text);
-            const voiceObj = getRandomOrSelectedVoice();
-            if (voiceObj) {
-                utter.voice = voiceObj;
-                utter.lang = voiceObj.lang || 'en-US';
-            } else {
-                utter.lang = 'en-US';
-            }
-            utter.rate = 1.0;
-            utter.onend = resolve; 
-            utter.onerror = resolve;
-            window.speechSynthesis.speak(utter);
-        });
-    }
-
-    function stopAudio() {
-        isPlaying = false;
-        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-        document.querySelectorAll('.chunk').forEach(el => el.classList.remove('active-highlight'));
-    }
-
-    async function playAll() {
-        if (!('speechSynthesis' in window)) return;
-        if (!spkData || spkData.length === 0) return;
-        if (isPlaying) { stopAudio(); return; }
-        isPlaying = true; window.speechSynthesis.cancel();
-
-        const chunks = Array.from(document.querySelectorAll('.chunk'));
-        for (let i = 0; i < chunks.length; i++) {
-            if (!isPlaying) break; 
-            chunks.forEach(c => c.classList.remove('active-highlight'));
-            chunks[i].classList.add('active-highlight');
-            chunks[i].scrollIntoView({ behavior: 'smooth', block: 'center' });
-            await speakPromise(chunks[i].innerText);
-        }
-        chunks.forEach(c => c.classList.remove('active-highlight'));
-        isPlaying = false;
-    }
-
-    // 데스크탑 숫자키 코치마크 활성화
     function showCoachmark(index) {
         const targetChunk = document.getElementById(`chunk-${index}`);
         if (!targetChunk) return;
@@ -1540,7 +1950,6 @@
         localStorage.setItem('pongcrush_spk_num_shortcut_guided', 'true');
     }
 
-    // 모바일 진입 시 스와이프 안내 코치마크
     function checkMobileSwipeCoachmark() {
         if (window.innerWidth <= 768) {
             if (!localStorage.getItem('pongcrush_spk_mobile_swipe_guided')) {
@@ -1569,49 +1978,6 @@
         
         const highlighted = document.querySelectorAll('.highlight-target');
         highlighted.forEach(el => el.classList.remove('highlight-target'));
-    }
-
-    function playChunk(index, text) {
-        stopAudio();
-        document.querySelectorAll('.chunk').forEach(c => c.classList.remove('active-highlight'));
-        const chunk = document.getElementById(`chunk-${index}`);
-        if(chunk) chunk.classList.add('active-highlight');
-
-        chunkClickCount++;
-        if (chunkClickCount === 3 && window.innerWidth > 768) {
-            if (!localStorage.getItem('pongcrush_spk_num_shortcut_guided')) {
-                showCoachmark(index);
-            }
-        }
-
-        if ('speechSynthesis' in window) {
-            const utter = new SpeechSynthesisUtterance(text);
-            const voiceObj = getRandomOrSelectedVoice();
-            if (voiceObj) {
-                utter.voice = voiceObj;
-                utter.lang = voiceObj.lang || 'en-US';
-            } else {
-                utter.lang = 'en-US';
-            }
-            utter.onend = () => { if(chunk) chunk.classList.remove('active-highlight'); };
-            utter.onerror = () => { if(chunk) chunk.classList.remove('active-highlight'); };
-            window.speechSynthesis.speak(utter);
-        }
-    }
-
-    function playSingle(text) {
-        stopAudio();
-        if ('speechSynthesis' in window) {
-            const utter = new SpeechSynthesisUtterance(text);
-            const voiceObj = getRandomOrSelectedVoice();
-            if (voiceObj) {
-                utter.voice = voiceObj;
-                utter.lang = voiceObj.lang || 'en-US';
-            } else {
-                utter.lang = 'en-US';
-            }
-            window.speechSynthesis.speak(utter);
-        }
     }
 
     function loadNext() {
@@ -1660,7 +2026,7 @@
     }, {passive: false});
 
     document.addEventListener('touchmove', e => {
-        if (isTestMode) return;
+        if (testMode) return;
         const openModals = document.querySelectorAll('.modal-overlay[style*="display: flex"]');
         if (openModals.length > 0) return;
         
@@ -1668,12 +2034,12 @@
         let deltaY = e.touches[0].screenY - touchStartY;
         
         if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 6) {
-            e.preventDefault(); // 기본 뒤로가기 가로챔 방지
+            e.preventDefault(); 
             isSwiping = true;
             
             let pullDistance = Math.min(Math.abs(deltaX) * 0.45, 110); 
             
-            if (deltaX > 0) { // 왼쪽 -> 이전 문제
+            if (deltaX > 0) { 
                 const pullLeft = document.getElementById('pull-left-indicator');
                 pullLeft.classList.add('active');
                 pullLeft.style.width = `${pullDistance}px`;
@@ -1684,7 +2050,7 @@
                 } else {
                     icon.classList.remove('visible');
                 }
-            } else { // 오른쪽 -> 다음 문제
+            } else { 
                 const pullRight = document.getElementById('pull-right-indicator');
                 pullRight.classList.add('active');
                 pullRight.style.width = `${pullDistance}px`;
@@ -1727,9 +2093,8 @@
         isSwiping = false;
     });
 
-    // 단축키 이벤트 리스너
+    // 단축키 이벤트 리스너 통합 관리
     document.addEventListener('keydown', (e) => {
-        // 브라우저 기본 조합키(Ctrl+Shift+R 등) 유지
         if (e.ctrlKey || e.metaKey || e.altKey) return;
 
         const key = e.key;
@@ -1744,24 +2109,20 @@
 
         if (key === 'Enter' && document.getElementById('add-modal').style.display === 'flex') {
             if (!e.shiftKey) { 
-                e.preventDefault();
-                saveNewData();
-                return;
+                e.preventDefault(); saveNewData(); return;
             }
         }
 
         if (key === 'Enter' && document.getElementById('voice-modal').style.display === 'flex') {
-            e.preventDefault();
-            confirmVoiceSettings();
-            return;
+            e.preventDefault(); confirmVoiceSettings(); return;
         }
 
         if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') {
-            if (isTestMode && key === 'Enter') { 
+            if (testMode && key === 'Enter') { 
                 if (!e.shiftKey) { e.preventDefault(); submitTest(); }
             }
             else if (key === 'Escape') { 
-                if(isTestMode) e.preventDefault(); cancelTestMode(); 
+                if(testMode) e.preventDefault(); cancelTestMode(); 
                 closeModal('persona-modal'); closeModal('list-modal'); 
                 closeModal('add-modal'); closeModal('edit-modal'); closeVoiceModal();
             }
@@ -1770,7 +2131,7 @@
         
         const keyLower = key.toLowerCase();
         
-        if (isTestMode) {
+        if (testMode) {
             if (keyLower === 'escape') { e.preventDefault(); cancelTestMode(); }
             else if (keyLower === 'enter') { e.preventDefault(); submitTest(); }
             return;
@@ -1791,12 +2152,12 @@
             }
         }
 
-        // 키 매핑: A(추가), S(수정), D(목록), F(설정), T(시험), ArrowUp(읽기), ArrowRight(다음), ArrowLeft(이전)
         if (keyLower === 'a') { e.preventDefault(); openAddModal(); }
         else if (keyLower === 's') { e.preventDefault(); openEditModal(); }
         else if (keyLower === 'd') { e.preventDefault(); openListModal(); }
         else if (keyLower === 'f') { e.preventDefault(); openVoiceModal(); }
-        else if (keyLower === 't') { e.preventDefault(); toggleTestMode(); }
+        else if (keyLower === 't') { e.preventDefault(); toggleWritingTestMode(); }
+        else if (keyLower === 'p') { e.preventDefault(); toggleSpeakingTestMode(); }
         else if (key === 'ArrowUp') { e.preventDefault(); playAll(); }
         else if (key === 'ArrowRight') { e.preventDefault(); loadNext(); }
         else if (key === 'ArrowLeft') { e.preventDefault(); loadPrev(); }
@@ -1813,6 +2174,469 @@
         renderUI(); 
         checkMobileSwipeCoachmark();
     };
+
+    // ==========================================
+    // 1. IndexedDB 기반 오디오 캐싱 엔진
+    // ==========================================
+    const AUDIO_DB_NAME = 'PongcrushAudioDB';
+    const AUDIO_STORE_NAME = 'audioStore';
+
+    function openAudioDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(AUDIO_DB_NAME, 1);
+            request.onupgradeneeded = (e) => {
+                if (!e.target.result.objectStoreNames.contains(AUDIO_STORE_NAME)) {
+                    e.target.result.createObjectStore(AUDIO_STORE_NAME);
+                }
+            };
+            request.onsuccess = (e) => resolve(e.target.result);
+            request.onerror = (e) => reject(e.target.error);
+        });
+    }
+
+    async function setAudioCache(key, blob) {
+        const db = await openAudioDB();
+        return new Promise((resolve) => {
+            const tx = db.transaction(AUDIO_STORE_NAME, 'readwrite');
+            tx.objectStore(AUDIO_STORE_NAME).put(blob, key);
+            tx.oncomplete = () => resolve();
+        });
+    }
+
+    async function getAudioCache(key) {
+        const db = await openAudioDB();
+        return new Promise((resolve) => {
+            const tx = db.transaction(AUDIO_STORE_NAME, 'readonly');
+            const request = tx.objectStore(AUDIO_STORE_NAME).get(key);
+            request.onsuccess = () => resolve(request.result);
+        });
+    }
+
+    function playAudioBlob(blob, onEnd) {
+        if (currentAzureAudio) { currentAzureAudio.pause(); currentAzureAudio = null; }
+        const url = URL.createObjectURL(blob);
+        currentAzureAudio = new Audio(url);
+        currentAzureAudio.onended = () => { URL.revokeObjectURL(url); if (onEnd) onEnd(); };
+        currentAzureAudio.play().catch(e => { URL.revokeObjectURL(url); if (onEnd) onEnd(); });
+    }
+
+    // ==========================================
+    // 2. 음성 설정 변수 및 하이브리드 엔진
+    // ==========================================
+    let availableVoices = [];
+    let currentFixedVoiceURIs = [];
+    let tempFixedVoiceURIs = [];
+    let currentFixedVoiceIndex = 0;
+    let lastVoiceURI = '';
+    let currentAzureAudio = null;
+    const SELECTED_FIXED_VOICE_KEY = 'pongcrush_spk_fixed_voice_uri_v4';
+
+    let azureVoicesList = [];
+    try {
+        const cachedVoices = localStorage.getItem('pongcrush_azure_voices_v1');
+        if (cachedVoices) azureVoicesList = JSON.parse(cachedVoices);
+    } catch(e) {}
+    
+    if (azureVoicesList.length === 0) {
+        azureVoicesList = [
+            { voiceURI: 'Azure-en-US-AriaNeural', name: 'Microsoft Aria (US Female)', lang: 'en-US', isKo: false, localService: false, isAzure: true },
+            { voiceURI: 'Azure-en-US-GuyNeural', name: 'Microsoft Guy (US Male)', lang: 'en-US', isKo: false, localService: false, isAzure: true },
+            { voiceURI: 'Azure-en-US-JennyNeural', name: 'Microsoft Jenny (US Female)', lang: 'en-US', isKo: false, localService: false, isAzure: true }
+        ];
+    }
+
+    async function fetchAzureVoices() {
+        let AZURE_KEY = localStorage.getItem('pongcrush_azure_key');
+        let AZURE_REGION = localStorage.getItem('pongcrush_azure_region') || 'eastus';
+        
+        if (!AZURE_KEY) {
+            AZURE_KEY = prompt("Azure Speech API Key를 입력하세요:");
+            if (!AZURE_KEY) return;
+            AZURE_REGION = prompt("Azure Region (예: eastus):", "eastus") || 'eastus';
+            localStorage.setItem('pongcrush_azure_key', AZURE_KEY); localStorage.setItem('pongcrush_azure_region', AZURE_REGION);
+        }
+
+        const btn = document.getElementById('btn-fetch-azure');
+        if (btn) btn.innerText = '🔄 클라우드 통신 중...';
+
+        try {
+            const response = await fetch(`https://${AZURE_REGION}.tts.speech.microsoft.com/cognitiveservices/voices/list`, {
+                method: 'GET', headers: { 'Ocp-Apim-Subscription-Key': AZURE_KEY }
+            });
+
+            if (!response.ok) {
+                if (response.status === 401) { localStorage.removeItem('pongcrush_azure_key'); throw new Error("API Key 유효하지 않음"); }
+                throw new Error("Azure API 통신 실패");
+            }
+
+            const data = await response.json();
+            const newAzureVoices = [];
+            data.forEach(v => {
+                if (v.Locale.startsWith('en-') || v.Locale.startsWith('ko-')) {
+                    newAzureVoices.push({
+                        voiceURI: `Azure-${v.ShortName}`, name: `Azure ${v.LocalName} (${v.Locale} ${v.Gender})`,
+                        lang: v.Locale, isKo: v.Locale.startsWith('ko-'), localService: false, isAzure: true
+                    });
+                }
+            });
+
+            azureVoicesList = newAzureVoices;
+            localStorage.setItem('pongcrush_azure_voices_v1', JSON.stringify(azureVoicesList));
+            alert(`✅ ${newAzureVoices.length}개의 가용한 Azure 클라우드 음성을 동기화했습니다!`);
+            renderVoiceListUI();
+        } catch (e) {
+            alert('❌ 검색 실패: ' + e.message);
+            if (btn) btn.innerText = '☁️ Azure 클라우드 가용 음성 전체 검색 및 동기화';
+        }
+    }
+
+    function initVoiceEngine() { 
+        if ('speechSynthesis' in window) { 
+            availableVoices = window.speechSynthesis.getVoices(); 
+            window.speechSynthesis.onvoiceschanged = () => availableVoices = window.speechSynthesis.getVoices(); 
+        } 
+    }
+    
+    function loadSavedVoiceSettings() {
+        try { currentFixedVoiceURIs = JSON.parse(localStorage.getItem('pongcrush_spk_fixed_voice_uris_v5') || '[]'); } catch(e) { currentFixedVoiceURIs = []; }
+        if (currentFixedVoiceURIs.length === 0 && localStorage.getItem(SELECTED_FIXED_VOICE_KEY)) { currentFixedVoiceURIs = [localStorage.getItem(SELECTED_FIXED_VOICE_KEY)]; }
+    }
+
+    function openVoiceModal() { tempFixedVoiceURIs = [...currentFixedVoiceURIs]; document.getElementById('voice-modal').style.display = 'flex'; renderVoiceListUI(); }
+    function closeVoiceModal() { document.getElementById('voice-modal').style.display = 'none'; }
+    function toggleTempFixedVoice(uri) {
+        const container = document.getElementById('voice-modal-content-area');
+        const scrollPos = container ? container.scrollTop : 0;
+        const idx = tempFixedVoiceURIs.indexOf(uri);
+        if (idx > -1) tempFixedVoiceURIs.splice(idx, 1); else tempFixedVoiceURIs.push(uri);
+        renderVoiceListUI();
+        if (container) document.getElementById('voice-modal-content-area').scrollTop = scrollPos;
+    }
+    function confirmVoiceSettings() { currentFixedVoiceURIs = [...tempFixedVoiceURIs]; localStorage.setItem('pongcrush_spk_fixed_voice_uris_v5', JSON.stringify(currentFixedVoiceURIs)); currentFixedVoiceIndex = 0; closeVoiceModal(); }
+
+    function getEnVoices() {
+        let voices = [];
+        if ('speechSynthesis' in window) {
+            let osVoices = window.speechSynthesis.getVoices();
+            if (osVoices.length === 0 && availableVoices && availableVoices.length > 0) osVoices = availableVoices;
+            osVoices.forEach(v => {
+                const lang = (v.lang || '').replace(/_/g, '-').toLowerCase();
+                if (lang.startsWith('en-') || lang === 'en') {
+                    voices.push({ voiceURI: v.voiceURI, name: v.name, lang: v.lang, localService: v.localService, isAzure: false, osVoice: v });
+                }
+            });
+        }
+        azureVoicesList.filter(v => !v.isKo).forEach(v => voices.push(v));
+        
+        voices.sort((a, b) => {
+            const isAAndrew = a.name.toLowerCase().includes('andrew') || a.name.includes('앤드류');
+            const isBAndrew = b.name.toLowerCase().includes('andrew') || b.name.includes('앤드류');
+            
+            if (isAAndrew && !isBAndrew) return -1;
+            if (!isAAndrew && isBAndrew) return 1;
+            
+            return a.name.localeCompare(b.name);
+        });
+        return voices;
+    }
+
+    function getEngineCompany(name) {
+        const lower = name.toLowerCase();
+        if (lower.includes('google')) return { name: 'Google', color: '#ea4335' };
+        if (lower.includes('microsoft')) return { name: 'Microsoft', color: '#00a4ef' };
+        if (lower.includes('apple') || lower.includes('siri') || lower.includes('mac')) return { name: 'Apple', color: '#555555' };
+        if (lower.includes('samsung') || lower.includes('bixby')) return { name: 'Samsung', color: '#1428a0' };
+        if (lower.includes('amazon')) return { name: 'Amazon', color: '#ff9900' };
+        return { name: 'OS/System', color: '#64748b' };
+    }
+
+    function getCountryName(lang) {
+        const l = lang.toLowerCase();
+        if (l.includes('us')) return '미국'; if (l.includes('gb') || l.includes('uk')) return '영국';
+        if (l.includes('au')) return '호주'; if (l.includes('ca')) return '캐나다';
+        if (l.includes('in')) return '인도'; if (l.includes('ie')) return '아일랜드';
+        if (l.includes('za')) return '남아공'; if (l.includes('nz')) return '뉴질랜드';
+        if (l.includes('sg')) return '싱가포르'; if (l.includes('ph')) return '필리핀';
+        if (l.includes('ng')) return '나이지리아'; if (l.startsWith('en')) return '글로벌';
+        return '기타';
+    }
+
+    function renderVoiceListUI() {
+        const area = document.getElementById('voice-modal-content-area');
+        if (!area) return;
+        const enVoices = getEnVoices();
+        
+        let html = `
+            <div style="flex:1; display:flex; flex-direction:column; gap:14px; margin-top: 8px;">
+                
+                <!-- 스마트 음성 재생 우선순위 안내 패널 -->
+                <div style="background:#f8fafc; padding:14px; border-radius:12px; border:1.5px solid #cbd5e1; font-size:13.5px; font-weight:700; line-height:1.5; word-break:keep-all; display:flex; flex-direction:column; gap:10px; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+                    <div style="font-size:15px; font-weight:900; color:#0f172a; display:flex; align-items:center; gap:6px;">
+                        <span>💡</span> <span>스마트 음성 재생 우선순위</span>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:8px; color:#334155; margin-top:2px;">
+                        <div style="display:flex; gap:8px; align-items:flex-start;">
+                            <span style="background:#e0f2fe; color:#0369a1; padding:3px 8px; border-radius:6px; font-weight:900; font-size:11.5px; flex-shrink:0; margin-top:1px;">1순위</span>
+                            <span><b>캐시된 음성 (최우선):</b> 온/오프라인 무관, 이미 한 번 실행되어 기기에 저장된 고품질 캐시 음성이 있다면 최우선으로 즉시 재생합니다.</span>
+                        </div>
+                        <div style="display:flex; gap:8px; align-items:flex-start;">
+                            <span style="background:#fef08a; color:#854d0e; padding:3px 8px; border-radius:6px; font-weight:900; font-size:11.5px; flex-shrink:0; margin-top:1px;">2순위</span>
+                            <span><b>설정한 음성:</b> 유저가 하단 목록에서 선택하여 지정해둔 음성 엔진을 통해 실시간으로 생성합니다.</span>
+                        </div>
+                        <div style="display:flex; gap:8px; align-items:flex-start;">
+                            <span style="background:#f1f5f9; color:#475569; padding:3px 8px; border-radius:6px; font-weight:900; font-size:11.5px; flex-shrink:0; margin-top:1px;">3순위</span>
+                            <span><b>로컬 폴백 (Fallback):</b> 아무 설정이 없거나 외부 통신 오류 시, <b>기기에 내장된 로컬 오프라인 음성</b>으로 자동 대체되어 작동합니다.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="btn-fetch-azure" style="background:#0ea5e9; color:white; border:none; border-radius:10px; padding:12px; font-size:13.5px; font-weight:900; cursor:pointer; width:100%; box-shadow:0 2px 4px rgba(0,0,0,0.1); transition:all 0.2s;" onclick="fetchAzureVoices()">☁️ Azure 클라우드 가용 음성 전체 검색 및 동기화</button>
+                
+                <div class="voice-list-container" style="flex:1; overflow-y:auto; min-height:0; padding: 4px 0; border:none; background:transparent; display:flex; flex-direction:column; gap:20px;">
+        `;
+        
+        if (enVoices.length === 0) { 
+            html += '<div style="padding:20px; text-align:center; color:#64748b; font-weight:800;">지원되는 영어 음성 엔진이 없습니다.</div>'; 
+        } 
+        else {
+            const externalAPI = enVoices.filter(v => v.isAzure);
+            const osLocal = enVoices.filter(v => !v.isAzure && v.localService);
+            const osNetwork = enVoices.filter(v => !v.isAzure && !v.localService);
+
+            const generateItems = (voicesArray) => {
+                if(voicesArray.length === 0) return '<div style="font-size:13px; color:#94a3b8; padding:10px 12px; background:#f8fafc; border-radius:8px; border:1.5px dashed #cbd5e1; font-weight:600;">해당하는 음성이 없습니다.</div>';
+    
+                // 아이템 3개 정도의 높이에 맞춰 max-height를 235px로 제한하고, 넘어갈 경우 세로 스크롤(overflow-y: auto)을 생성합니다.
+                let groupHtml = '<div style="display:flex; flex-direction:column; gap:8px; max-height:235px; overflow-y:auto; padding-right:4px;">';
+                voicesArray.forEach(voice => {
+                    const isSelected = tempFixedVoiceURIs.includes(voice.voiceURI);
+                    const orderIndex = tempFixedVoiceURIs.indexOf(voice.voiceURI);
+                    const orderBadge = isSelected ? `<span style="background:#ea580c; color:#fff; border-radius:50%; width:18px; height:18px; display:inline-flex; align-items:center; justify-content:center; font-size:11px; margin-right:6px; flex-shrink:0;">${orderIndex + 1}</span>` : '';
+                    const company = getEngineCompany(voice.name);
+                    let cleanName = voice.name.replace(/(Google|Microsoft|Apple|Siri|Samsung|Amazon|Bixby|Cortana)\s*-?\s*/gi, '').replace(/english/gi, '').replace(/\(\s*\)/g, '').replace(/\s{2,}/g, ' ').trim() || 'Voice';
+                    
+                    const nameChip = `<span style="background:${company.color}15; color:${company.color}; padding:3px 6px; border-radius:6px; font-size:10px; font-weight:900; border:1px solid ${company.color}30; flex-shrink:0;">${company.name}</span>`;
+                    const countryChip = `<span class="voice-badge" style="background:#f8fafc; color:#475569; border:1px solid #cbd5e1; padding:3px 6px;">🌍 ${getCountryName(voice.lang)}</span>`;
+                    
+                    groupHtml += `
+                        <div class="voice-item ${isSelected ? 'selected' : ''}" style="display:flex; flex-direction:column; align-items:flex-start; gap:8px; padding:12px;" onclick="toggleTempFixedVoice('${voice.voiceURI.replace(/'/g, "\\'")}')">
+                            <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+                                <div style="display:flex; align-items:center; gap:6px; overflow:hidden;">
+                                    ${orderBadge}${nameChip}
+                                    <span class="voice-name" style="font-size:14.5px; font-weight:${isSelected?'900':'700'}; color:${isSelected?'#c2410c':'var(--text-main)'}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${cleanName}</span>
+                                </div>
+                                <button class="ctrl-btn" style="background:#e2e8f0; color:#0f172a; border:none; padding:6px 12px; border-radius:8px; font-size:13px; flex-shrink:0;" onclick="testVoice('${voice.voiceURI.replace(/'/g, "\\'")}', event)">▶️ 테스트</button>
+                            </div>
+                            <div style="display:flex; flex-wrap:wrap; gap:5px; width:100%; margin-left:${isSelected?'24px':'0'};">
+                                ${countryChip}
+                            </div>
+                        </div>`;
+                });
+                groupHtml += '</div>';
+                return groupHtml;
+            };
+
+            html += `
+                <div class="voice-section">
+                    <div style="font-size:15px; font-weight:900; color:#1e293b; margin-bottom:10px; display:flex; align-items:center; gap:6px;">☁️ 외부 통신형 <span style="font-size:12.5px; font-weight:800; color:#0369a1; background:#e0f2fe; padding:3px 8px; border-radius:6px; border:1px solid #bae6fd;">캐시 지원</span></div>
+                    ${generateItems(externalAPI)}
+                </div>
+                <div class="voice-section">
+                    <div style="font-size:15px; font-weight:900; color:#1e293b; margin-bottom:10px; display:flex; align-items:center; gap:6px;">💻 OS 자체 연산 (로컬) <span style="font-size:12.5px; font-weight:800; color:#475569; background:#f1f5f9; padding:3px 8px; border-radius:6px; border:1px solid #cbd5e1;">폴백 지원</span></div>
+                    ${generateItems(osLocal)}
+                </div>
+                <div class="voice-section">
+                    <div style="font-size:15px; font-weight:900; color:#1e293b; margin-bottom:10px; display:flex; align-items:center; gap:6px;">📡 OS 네트워크 의존형 <span style="font-size:12.5px; font-weight:800; color:#ef4444; background:#fee2e2; padding:3px 8px; border-radius:6px; border:1px solid #fecaca;">캐시 X</span></div>
+                    ${generateItems(osNetwork)}
+                </div>
+            `;
+        }
+        html += `</div></div>`;
+        area.innerHTML = html;
+    }
+
+    function playHybridTTS(text, voiceObj, onEnd, speed = 1.0) {
+        if (!text) { if(onEnd) onEnd(); return; }
+        if (currentAzureAudio) { currentAzureAudio.pause(); currentAzureAudio = null; }
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+
+        const rateStr = speed === 1.0 ? '+0%' : `${Math.round((speed - 1) * 100)}%`; 
+        
+        // 🔥 1순위: 어떤 음성을 지정했는지 여부와 무관하게 글로벌 캐시(텍스트 자체 기준) 먼저 확인
+        const globalCacheKey = `global_cached_${rateStr}_${text}`;
+
+        getAudioCache(globalCacheKey).then(cachedBlob => {
+            if (cachedBlob) {
+                console.log("✅ 1순위: 로컬/Azure 지정 상관없이 저장된 캐시 우선 실행");
+                playAudioBlob(cachedBlob, onEnd);
+                return;
+            }
+            
+            // 2순위: 지정한 엔진(Azure) 실행
+            if (voiceObj && voiceObj.isAzure) {
+                let AZURE_KEY = localStorage.getItem('pongcrush_azure_key');
+                let AZURE_REGION = localStorage.getItem('pongcrush_azure_region') || 'eastus';
+                if (!AZURE_KEY) {
+                    AZURE_KEY = prompt("Azure Speech API Key를 입력하세요:");
+                    if (!AZURE_KEY) {
+                        // 키가 없으면 3순위 실행
+                        executeLocalFallback(text, speed, onEnd);
+                        return;
+                    }
+                    AZURE_REGION = prompt("Azure Region (예: eastus):", "eastus") || 'eastus';
+                    localStorage.setItem('pongcrush_azure_key', AZURE_KEY); localStorage.setItem('pongcrush_azure_region', AZURE_REGION);
+                }
+
+                const azureVoiceName = voiceObj.voiceURI.replace('Azure-', '');
+                const ssml = `<speak version='1.0' xml:lang='${azureVoiceName.substring(0, 5)}'><voice xml:lang='${azureVoiceName.substring(0, 5)}' name='${azureVoiceName}'><prosody rate='${rateStr}'>${text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</prosody></voice></speak>`;
+                
+                fetch(`https://${AZURE_REGION}.tts.speech.microsoft.com/cognitiveservices/v1`, {
+                    method: 'POST',
+                    headers: { 'Ocp-Apim-Subscription-Key': AZURE_KEY, 'Content-Type': 'application/ssml+xml', 'X-Microsoft-OutputFormat': 'audio-16khz-32kbitrate-mono-mp3' },
+                    body: ssml
+                }).then(async response => {
+                    if (response.status === 401) {
+                        alert("Azure API Key 오류. 설정을 초기화합니다."); localStorage.removeItem('pongcrush_azure_key');
+                        // 인증 실패 시 3순위 로컬 폴백
+                        executeLocalFallback(text, speed, onEnd);
+                        return;
+                    }
+                    if (!response.ok) throw new Error("Azure TTS 통신 실패");
+                    const blob = await response.blob();
+                    await setAudioCache(globalCacheKey, blob);
+                    console.log("✅ 2순위: Azure 클라우드 통신 후 캐시 저장 및 실행");
+                    playAudioBlob(blob, onEnd);
+                }).catch(e => { 
+                    console.warn(e); 
+                    console.log("⚠️ 통신 실패로 인한 3순위(로컬 폴백) 자동 전환");
+                    // 통신 실패 시 3순위 로컬 폴백
+                    executeLocalFallback(text, speed, onEnd); 
+                });
+            } else {
+                // 2순위가 이미 로컬 지정인 경우 이 자체가 2/3순위 역할 수행
+                executeLocalFallback(text, speed, onEnd, voiceObj);
+            }
+        });
+    }
+
+    // 3순위 로컬 폴백 전용 함수 분리
+    function executeLocalFallback(text, speed, onEnd, preferredVoiceObj = null) {
+        if (!('speechSynthesis' in window)) {
+            if(onEnd) onEnd();
+            return;
+        }
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.rate = speed;
+
+        if (preferredVoiceObj && preferredVoiceObj.osVoice) {
+            utter.voice = preferredVoiceObj.osVoice;
+            utter.lang = preferredVoiceObj.osVoice.lang || 'en-US';
+            console.log("✅ 2/3순위: 지정된 OS 자체 로컬 음성으로 실행");
+        } else {
+            // 완전한 3순위 폴백 (지정 없거나 오류 났을 때 기기 내장 음성 중 오프라인(localService)을 강제 탐색)
+            const enVoices = getEnVoices();
+            const localFallbackVoices = enVoices.filter(v => !v.isAzure && v.localService);
+            if (localFallbackVoices.length > 0) {
+                const fallbackVoice = localFallbackVoices[Math.floor(Math.random() * localFallbackVoices.length)];
+                utter.voice = fallbackVoice.osVoice;
+                utter.lang = fallbackVoice.lang || 'en-US';
+                console.log("✅ 3순위: 비상 로컬 폴백(Offline) 음성 자동 할당 후 실행");
+            } else {
+                utter.lang = 'en-US';
+            }
+        }
+
+        if (onEnd) { utter.onend = onEnd; utter.onerror = onEnd; }
+        window.speechSynthesis.speak(utter);
+    }
+
+    function getRandomOrSelectedVoice() {
+        const enVoices = getEnVoices();
+        if (enVoices.length === 0) return null;
+        
+        if (currentFixedVoiceURIs.length > 0) {
+            const validVoices = currentFixedVoiceURIs.map(uri => enVoices.find(v => v.voiceURI === uri)).filter(Boolean);
+            if (validVoices.length > 0) {
+                const voice = validVoices[currentFixedVoiceIndex % validVoices.length];
+                currentFixedVoiceIndex++; return voice;
+            }
+        }
+        
+        // 아무 설정도 안 된 경우 3순위 로컬 폴백을 기본값으로 반환
+        const localFallbackVoices = enVoices.filter(v => !v.isAzure && v.localService);
+        if (localFallbackVoices.length > 0) {
+            const fallbackVoice = localFallbackVoices[Math.floor(Math.random() * localFallbackVoices.length)];
+            lastVoiceURI = fallbackVoice.voiceURI;
+            return fallbackVoice;
+        }
+
+        const chosen = enVoices[0];
+        lastVoiceURI = chosen.voiceURI;
+        return chosen;
+    }
+
+    function testVoice(uri, event) {
+        if (event) event.stopPropagation();
+        stopAudio();
+        setTimeout(() => {
+            const voiceObj = getEnVoices().find(v => v.voiceURI === uri);
+            playHybridTTS("I strongly agree that having a regular morning routine is essential.", voiceObj);
+        }, 60);
+    }
+
+    function speakPromise(text) {
+        return new Promise((resolve) => {
+            const voiceObj = getRandomOrSelectedVoice();
+            playHybridTTS(text, voiceObj, resolve);
+        });
+    }
+
+    function stopAudio() {
+        isPlaying = false;
+        if (currentAzureAudio) { currentAzureAudio.pause(); currentAzureAudio = null; }
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+        document.querySelectorAll('.chunk').forEach(el => el.classList.remove('active-highlight'));
+    }
+
+    async function playAll() {
+        if (!spkData || spkData.length === 0) return;
+        if (isPlaying) { stopAudio(); return; }
+        isPlaying = true;
+
+        const chunks = Array.from(document.querySelectorAll('.chunk'));
+        for (let i = 0; i < chunks.length; i++) {
+            if (!isPlaying) break; 
+            chunks.forEach(c => c.classList.remove('active-highlight'));
+            chunks[i].classList.add('active-highlight');
+            chunks[i].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            await speakPromise(chunks[i].innerText);
+        }
+        chunks.forEach(c => c.classList.remove('active-highlight'));
+        isPlaying = false;
+    }
+
+    function playChunk(index, text) {
+        stopAudio();
+        document.querySelectorAll('.chunk').forEach(c => c.classList.remove('active-highlight'));
+        const chunk = document.getElementById(`chunk-${index}`);
+        if(chunk) chunk.classList.add('active-highlight');
+
+        chunkClickCount++;
+        if (chunkClickCount === 3 && window.innerWidth > 768 && !localStorage.getItem('pongcrush_spk_num_shortcut_guided')) {
+            showCoachmark(index);
+        }
+
+        const voiceObj = getRandomOrSelectedVoice();
+        playHybridTTS(text, voiceObj, () => {
+            if(chunk) chunk.classList.remove('active-highlight');
+        });
+    }
+
+    function playSingle(text) {
+        stopAudio();
+        const voiceObj = getRandomOrSelectedVoice();
+        playHybridTTS(text, voiceObj);
+    }
 </script>
 </body>
 </html>

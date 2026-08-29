@@ -7,6 +7,7 @@
     <title>퐁크러쉬</title>
     <link rel="icon" href="favicon.png">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
     <script>
         const GOOGLE_CLIENT_ID = '65017724884-99h4uk45vt2809cq3a2ohnedkmor1001.apps.googleusercontent.com'; 
         const GOOGLE_API_KEY = 'AIzaSyBQmE5nsOTvC57Ij_cBisXmS1QmtR5QOrQ'; 
@@ -348,12 +349,92 @@
             .step-title { font-size: 10.5px; } .step-desc { font-size: 9px; } .modal-card, .modal-card.tall-modal, .ai-modal-card { height: 90vh !important; max-height: 90vh !important; }
             .card-top-left-info { top: 6px !important; left: 6px !important; gap: 4px !important; max-width: calc(100% - 12px) !important; } .current-test-badge { font-size: 10px !important; padding: 2px 6px !important; border-radius: 6px !important; letter-spacing: -0.5px !important; } .vague-check-badges-wrap { gap: 3px !important; } .check-icon-badge { width: 16px !important; height: 16px !important; font-size: 9px !important; border: 1px solid var(--check-green-border) !important; }
         }
+    /* 백업 프로그레시브 모바일 최적화 */
+        @media (max-width: 650px) {
+            .desktop-only-desc { display: none !important; }
+            .progress-bar-wrap { width: 70px !important; }
+            #loading-card-inner { padding: 20px 16px !important; }
+            .progress-row { gap: 8px !important; }
+        }
     </style>
 </head>
 <body>
 
-<!-- AI & Release Note & Settings & Other Modals -->
-<div id="loading-overlay" class="loading-overlay hidden"><div class="loading-card"><div class="spinner"></div><div class="loading-title" id="loading-text">단어장 데이터를 가져오는 중...</div></div></div>
+    <div id="loading-overlay" class="loading-overlay hidden" style="z-index: 35000;">
+    <div class="loading-card" id="loading-card-inner" style="width: 90vw; max-width: 520px; text-align: left; padding: 24px;">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+            <div class="spinner" style="border-top-color: var(--slack-purple); width: 22px; height: 22px; flex-shrink: 0;"></div>
+            <div class="loading-title" id="loading-text" style="font-size: 18px; color: var(--text-main); font-weight: 900; line-height: 1.3;">작업을 준비 중입니다...</div>
+        </div>
+        
+        <!-- 개별 작업별 멀티 프로그레시브 바 대시보드 (백업/복원 전용) -->
+        <div id="multi-progress-container" class="hidden" style="display: flex; flex-direction: column; gap: 12px; background: #f8fafc; padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+            
+            <!-- 1. 텍스트 스캔 -->
+            <div class="progress-row" style="display: flex; align-items: center; gap: 12px;">
+                <div style="flex: 1; display: flex; flex-direction: column;">
+                    <span style="font-size: 13.5px; font-weight: 800; color: #475569;">📄 JSON Serialization</span>
+                    <span class="desktop-only-desc" style="font-size: 11px; color: #94a3b8; font-weight: 600;">단어장/스피킹 텍스트 메타데이터 병합</span>
+                </div>
+                <div class="progress-bar-wrap" style="width: 120px; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;"><div id="bar-step-text" style="height: 100%; width: 0%; background: #3b82f6; transition: width 0.3s;"></div></div>
+                <div style="width: 38px; text-align: right; font-size: 12.5px; font-weight: 900; color: #3b82f6;" id="pct-step-text">0%</div>
+            </div>
+
+            <!-- 2. 단어장 오디오 -->
+            <div class="progress-row" style="display: flex; align-items: center; gap: 12px;">
+                <div style="flex: 1; display: flex; flex-direction: column;">
+                    <span style="font-size: 13.5px; font-weight: 800; color: #475569;">🔊 Vocab DB Extraction</span>
+                    <span class="desktop-only-desc" style="font-size: 11px; color: #94a3b8; font-weight: 600;">단어장 IndexedDB 오디오 Blob 추출</span>
+                </div>
+                <div class="progress-bar-wrap" style="width: 120px; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;"><div id="bar-step-vocab" style="height: 100%; width: 0%; background: #10b981; transition: width 0.3s;"></div></div>
+                <div style="width: 38px; text-align: right; font-size: 12.5px; font-weight: 900; color: #10b981;" id="pct-step-vocab">0%</div>
+            </div>
+
+            <!-- 3. 스피킹 오디오 -->
+            <div class="progress-row" style="display: flex; align-items: center; gap: 12px;">
+                <div style="flex: 1; display: flex; flex-direction: column;">
+                    <span style="font-size: 13.5px; font-weight: 800; color: #475569;">🗣️ Speaking DB Extraction</span>
+                    <span class="desktop-only-desc" style="font-size: 11px; color: #94a3b8; font-weight: 600;">스피킹 IndexedDB 오디오 Blob 추출</span>
+                </div>
+                <div class="progress-bar-wrap" style="width: 120px; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;"><div id="bar-step-spk" style="height: 100%; width: 0%; background: #f59e0b; transition: width 0.3s;"></div></div>
+                <div style="width: 38px; text-align: right; font-size: 12.5px; font-weight: 900; color: #f59e0b;" id="pct-step-spk">0%</div>
+            </div>
+
+            <!-- 4. JSZip 단일 압축 -->
+            <div class="progress-row" style="display: flex; align-items: center; gap: 12px;">
+                <div style="flex: 1; display: flex; flex-direction: column;">
+                    <span style="font-size: 13.5px; font-weight: 800; color: #475569;">📦 Deflate Compression</span>
+                    <span class="desktop-only-desc" style="font-size: 11px; color: #94a3b8; font-weight: 600;">단일 무손실 압축 및 메모리 버퍼링</span>
+                </div>
+                <div class="progress-bar-wrap" style="width: 120px; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;"><div id="bar-step-zip" style="height: 100%; width: 0%; background: #8b5cf6; transition: width 0.2s;"></div></div>
+                <div style="width: 38px; text-align: right; font-size: 12.5px; font-weight: 900; color: #8b5cf6;" id="pct-step-zip">0%</div>
+            </div>
+
+            <!-- 5. 클라우드 전송 / 로컬 다운로드 -->
+            <div class="progress-row" style="display: flex; align-items: center; gap: 12px;">
+                <div style="flex: 1; display: flex; flex-direction: column;">
+                    <span style="font-size: 13.5px; font-weight: 800; color: #475569;" id="lbl-step-net">☁️ Secure Transmission</span>
+                    <span class="desktop-only-desc" id="lbl-desc-net" style="font-size: 11px; color: #94a3b8; font-weight: 600;">구글 드라이브 SSL 암호화 터널링</span>
+                </div>
+                <div class="progress-bar-wrap" style="width: 120px; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;"><div id="bar-step-net" style="height: 100%; width: 0%; background: #ec4899; transition: width 0.3s;"></div></div>
+                <div style="width: 38px; text-align: right; font-size: 12.5px; font-weight: 900; color: #ec4899;" id="pct-step-net">0%</div>
+            </div>
+        </div>
+
+        <!-- Total Progress Bar -->
+        <div id="total-progress-container" class="hidden" style="margin-top: 18px; padding-top: 16px; border-top: 2px dashed #e2e8f0;">
+            <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 900; margin-bottom: 8px;">
+                <span style="color: var(--text-main);">Pipeline Total Execution</span>
+                <span id="total-progress-pct" style="color: var(--slack-purple); font-size: 15px;">0%</span>
+            </div>
+            <div style="width: 100%; height: 14px; background: #e2e8f0; border-radius: 7px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
+                <div id="total-progress-fill" style="height: 100%; width: 0%; background: linear-gradient(90deg, #6366f1, #a855f7); transition: width 0.3s;"></div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
 <div id="ai-loading-overlay" class="loading-overlay hidden" style="z-index: 25000;"><div class="loading-card" style="max-width: 320px; text-align: center; padding: 24px 32px;"><div class="loading-title" id="ai-loading-text" style="color: #1264a3; margin-top: 8px;">🤖 AI 엔진 준비 중...</div><div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-top: 12px;"><div id="ai-loading-progress-fill" style="height: 100%; width: 0%; background: #1264a3; transition: width 0.3s ease;"></div></div><div style="font-size: 12px; color: var(--text-muted); line-height: 1.4; margin-top: 12px;">최초 실행 시 브라우저에 AI 모델을 다운로드하여 캐시에 저장합니다.<br>네트워크 환경에 따라 수 분이 소요될 수 있습니다.</div></div></div>
 <div id="release-note-modal" class="modal-overlay release-modal-overlay hidden" style="z-index: 30000;" onclick="if(event.target === this) closeReleaseNoteModal()"><div class="release-modal-card"><div style="padding: 16px; border-bottom: 1px solid var(--border-color); background: #ffffff; flex-shrink: 0; text-align: center; border-radius: 20px 20px 0 0;"><span style="font-size: 16px; font-weight: 900; color: var(--text-main);">🎉 릴리즈 노트 & 테크 블로그</span></div><div id="release-note-content" style="flex: 1; overflow-y: auto; background: #f1f5f9; padding: 16px; min-height: 0;"></div><div style="padding: 14px 20px; background: #ffffff; border-top: 1px solid var(--border-color); flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: calc(14px + env(safe-area-inset-bottom));"><label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; color: var(--text-muted); cursor: pointer; margin: 0;"><input type="checkbox" id="release-hide-checkbox" style="width: 18px; height: 18px; margin: 0; cursor: pointer;">최신 버전 보지 않기</label><button class="base-btn" style="background:var(--slack-purple); padding: 12px 24px; font-size: 15px; font-weight: 900; width: auto; margin: 0; border-radius: 10px;" onclick="closeReleaseNoteModal()">닫기 (Enter)</button></div></div></div>
 
@@ -699,7 +780,7 @@
     </div>
 </div>
 
-<div class="app-version" onclick="openReleaseNoteModal()" title="릴리즈 노트 보기">v7.1.0 (Update Log)</div>
+<div class="app-version" onclick="openReleaseNoteModal()" title="릴리즈 노트 보기">v7.1.1 (Update Log)</div>
 <div id="toast-notification" class="toast-notification"></div>
 
 <script>
@@ -758,7 +839,7 @@
         }, 3500);
     };
 
-    function renderReleaseNotes(releases) { const container = document.getElementById('release-note-content'); let html = ''; function getShortCategory(cat) { const lower = cat.toLowerCase(); if(lower.includes('arch')) return '구조'; if(lower.includes('perf')) return '성능'; if(lower.includes('bug')) return '버그'; if(lower.includes('ux') || lower.includes('ui')) return 'UX'; return '기타'; } releases.forEach((release, index) => { const isLatest = index === 0; const safeVer = release.version.replace(/\./g, '-'); html += `<div style="border: 1px solid var(--border-color); border-radius: 12px; background: #ffffff; overflow: hidden; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);"><div style="padding: 10px 14px; background: ${isLatest ? '#f0f9ff' : '#f8fafc'}; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 5;"><span style="font-weight: 900; color: ${isLatest ? '#0284c7' : 'var(--text-main)'}; font-size: 15px;">${release.version} ${isLatest ? '<span style="font-size:9px; background:#bae6fd; color:#0369a1; padding:2px 5px; border-radius:4px; margin-left:4px; font-weight:800;">LATEST</span>' : ''}</span><div style="display: flex; align-items: center; gap: 6px;"><button type="button" class="ai-ask-btn" onclick="copyReleaseNoteForAI(${index}, '${release.version}')" title="AI 챗봇에게 이 업데이트의 개발 원리를 물어봅니다">AI 질문 복사</button><button type="button" onclick="toggleAllAccordions('${safeVer}', this)" style="background: #e2e8f0; border: none; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; color: #475569; cursor: pointer; transition: all 0.15s ease;">모두 열기</button><span style="font-size: 12px; color: var(--text-muted); font-weight: 700; margin-left:2px;">${release.date}</span></div></div><div style="padding: 8px; display: flex; flex-direction: column; gap: 6px; background: #fdfdfd;">`; release.changes.forEach(change => { const badgeColor = change.categoryColor || '#64748b'; const shortCat = getShortCategory(change.category); html += `<details class="sync-details rn-detail-${safeVer}" style="margin: 0; border: 1px solid var(--border-color); border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;"><summary class="sync-summary" style="padding: 10px 12px; display: flex; align-items: flex-start; gap: 8px; background: #ffffff; line-height: 1.3;"><span style="font-size: 11px; font-weight: 800; color: ${badgeColor}; background: ${badgeColor}15; padding: 3px 0; width: 28px; text-align: center; border-radius: 4px; border: 1px solid ${badgeColor}30; flex-shrink: 0; margin-top: 1px;">${shortCat}</span><span class="rn-title">${change.title}</span></summary><div class="sync-content" style="background: #f8fafc; padding: 12px; border-top: 1px dashed var(--border-color); font-size: 13px; color: #475569;">`; if (change.description) { html += `<div style="line-height: 1.5; margin-bottom: ${change.techNotes ? '10px' : '0'}; color: var(--text-main); font-weight: 500; word-break: keep-all;">${change.description}</div>`; } if (change.techNotes && change.techNotes.length > 0) { html += `<div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02);"><div style="padding: 8px 10px; background: #f1f5f9; border-bottom: 1px dashed #cbd5e1; font-size: 12px; font-weight: 900; color: var(--slack-blue); display: flex; align-items: center; gap: 6px;">👨‍💻 Tech Note</div><div style="padding: 10px; display: flex; flex-direction: column; gap: 12px;">`; change.techNotes.forEach(note => { html += `<div style="display: flex; flex-direction: column; gap: 6px;">`; if (note.title) { html += `<div style="font-weight: 900; font-size: 13px; color: var(--text-main); border-left: 3px solid var(--slack-blue); padding-left: 6px; line-height: 1.3;">${note.title}</div>`; } if (note.type === 'table' && note.rows) { html += `<div style="border-radius: 6px; border: 1px solid var(--border-color); overflow: hidden; margin-top: 2px;"><table class="tech-table" style="margin: 0; background: #ffffff;"><tbody>`; note.rows.forEach(row => { html += `<tr><th style="width: 35%; background: #f8fafc; font-size: 11.5px; padding: 6px 8px;">${row.key}</th><td style="font-size: 12px; font-weight: 600; color: var(--slack-blue); line-height: 1.4; word-break: keep-all; padding: 6px 8px;">${row.val}</td></tr>`; }); html += `</tbody></table></div>`; } else if (note.type === 'list' && note.items) { html += `<ul class="tech-list" style="margin: 0; padding-left: 16px; color: #334155; line-height: 1.5; font-size: 12.5px; font-weight: 500;">`; note.items.forEach(item => { html += `<li style="margin-bottom: 4px; word-break: keep-all;">${item}</li>`; }); html += `</ul>`; } else if (note.type === 'note' && note.content) { html += `<div style="font-size: 12.5px; color: #0369a1; line-height: 1.5; padding: 10px; background: #f0f9ff; border-radius: 8px; border: 1px solid #bae6fd; font-weight: 600; word-break: keep-all;">💡 ${note.content}</div>`; } html += `</div>`; }); html += `</div></div>`; } html += `</div></details>`; }); html += `</div></div>`; }); container.innerHTML = html; }
+    function renderReleaseNotes(releases) { const container = document.getElementById('release-note-content'); let html = ''; function getShortCategory(cat) { const lower = cat.toLowerCase(); if(lower.includes('arch')) return '구조'; if(lower.includes('perf')) return '성능'; if(lower.includes('bug')) return '버그'; if(lower.includes('ux') || lower.includes('ui')) return 'UX'; return '기타'; } releases.forEach((release, index) => { const isLatest = index === 0; const safeVer = release.version.replace(/\./g, '-'); html += `<div style="border: 1px solid var(--border-color); border-radius: 12px; background: #ffffff; overflow: hidden; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);"><div style="padding: 10px 14px; background: ${isLatest ? '#f0f9ff' : '#f8fafc'}; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 5;"><span style="font-weight: 900; color: ${isLatest ? '#0284c7' : 'var(--text-main)'}; font-size: 15px;">${release.version} ${isLatest ? '<span style="font-size:9px; background:#bae6fd; color:#0369a1; padding:2px 5px; border-radius:4px; margin-left:4px; font-weight:800;">LATEST</span>' : ''}</span><div style="display: flex; align-items: center; gap: 6px;"><button type="button" class="ai-ask-btn" onclick="copyReleaseNoteForAI(${index}, '${release.version}')" title="AI 챗봇에게 이 업데이트의 개발 원리를 물어봅니다">질문 복사</button><button type="button" onclick="toggleAllAccordions('${safeVer}', this)" style="background: #e2e8f0; border: none; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; color: #475569; cursor: pointer; transition: all 0.15s ease;">모두 열기</button><span style="font-size: 12px; color: var(--text-muted); font-weight: 700; margin-left:2px;">${release.date}</span></div></div><div style="padding: 8px; display: flex; flex-direction: column; gap: 6px; background: #fdfdfd;">`; release.changes.forEach(change => { const badgeColor = change.categoryColor || '#64748b'; const shortCat = getShortCategory(change.category); html += `<details class="sync-details rn-detail-${safeVer}" style="margin: 0; border: 1px solid var(--border-color); border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;"><summary class="sync-summary" style="padding: 10px 12px; display: flex; align-items: flex-start; gap: 8px; background: #ffffff; line-height: 1.3;"><span style="font-size: 11px; font-weight: 800; color: ${badgeColor}; background: ${badgeColor}15; padding: 3px 0; width: 28px; text-align: center; border-radius: 4px; border: 1px solid ${badgeColor}30; flex-shrink: 0; margin-top: 1px;">${shortCat}</span><span class="rn-title">${change.title}</span></summary><div class="sync-content" style="background: #f8fafc; padding: 12px; border-top: 1px dashed var(--border-color); font-size: 13px; color: #475569;">`; if (change.description) { html += `<div style="line-height: 1.5; margin-bottom: ${change.techNotes ? '10px' : '0'}; color: var(--text-main); font-weight: 500; word-break: keep-all;">${change.description}</div>`; } if (change.techNotes && change.techNotes.length > 0) { html += `<div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02);"><div style="padding: 8px 10px; background: #f1f5f9; border-bottom: 1px dashed #cbd5e1; font-size: 12px; font-weight: 900; color: var(--slack-blue); display: flex; align-items: center; gap: 6px;">👨‍💻 Tech Note</div><div style="padding: 10px; display: flex; flex-direction: column; gap: 12px;">`; change.techNotes.forEach(note => { html += `<div style="display: flex; flex-direction: column; gap: 6px;">`; if (note.title) { html += `<div style="font-weight: 900; font-size: 13px; color: var(--text-main); border-left: 3px solid var(--slack-blue); padding-left: 6px; line-height: 1.3;">${note.title}</div>`; } if (note.type === 'table' && note.rows) { html += `<div style="border-radius: 6px; border: 1px solid var(--border-color); overflow: hidden; margin-top: 2px;"><table class="tech-table" style="margin: 0; background: #ffffff;"><tbody>`; note.rows.forEach(row => { html += `<tr><th style="width: 35%; background: #f8fafc; font-size: 11.5px; padding: 6px 8px;">${row.key}</th><td style="font-size: 12px; font-weight: 600; color: var(--slack-blue); line-height: 1.4; word-break: keep-all; padding: 6px 8px;">${row.val}</td></tr>`; }); html += `</tbody></table></div>`; } else if (note.type === 'list' && note.items) { html += `<ul class="tech-list" style="margin: 0; padding-left: 16px; color: #334155; line-height: 1.5; font-size: 12.5px; font-weight: 500;">`; note.items.forEach(item => { html += `<li style="margin-bottom: 4px; word-break: keep-all;">${item}</li>`; }); html += `</ul>`; } else if (note.type === 'note' && note.content) { html += `<div style="font-size: 12.5px; color: #0369a1; line-height: 1.5; padding: 10px; background: #f0f9ff; border-radius: 8px; border: 1px solid #bae6fd; font-weight: 600; word-break: keep-all;">💡 ${note.content}</div>`; } html += `</div>`; }); html += `</div></div>`; } html += `</div></details>`; }); html += `</div></div>`; }); container.innerHTML = html; }
 </script>
 
 <script type="module">
@@ -782,6 +863,237 @@
 </script>
 
 <script>
+
+    
+
+    // ==========================================
+    // IndexedDB 기반 단어장 전용 오디오 캐싱 엔진 (독립된 DB 사용)
+    // ==========================================
+    const AUDIO_DB_NAME = 'PongcrushVocabAudioDB'; // speaking.html과 분리된 이름
+    const AUDIO_STORE_NAME = 'vocabAudioStore';
+
+    function openAudioDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(AUDIO_DB_NAME, 1);
+            request.onupgradeneeded = (e) => {
+                if (!e.target.result.objectStoreNames.contains(AUDIO_STORE_NAME)) {
+                    e.target.result.createObjectStore(AUDIO_STORE_NAME);
+                }
+            };
+            request.onsuccess = (e) => resolve(e.target.result);
+            request.onerror = (e) => reject(e.target.error);
+        });
+    }
+    
+    // (이하 setAudioCache, getAudioCache 등 DB 관련 함수들은 동일하게 유지하시면 
+    // 위 상수를 참조하여 자동으로 새 DB에 저장/조회합니다.)
+
+    async function setAudioCache(key, blob) {
+        const db = await openAudioDB();
+        return new Promise((resolve) => {
+            const tx = db.transaction(AUDIO_STORE_NAME, 'readwrite');
+            tx.objectStore(AUDIO_STORE_NAME).put(blob, key);
+            tx.oncomplete = () => resolve();
+        });
+    }
+
+    async function getAudioCache(key) {
+        const db = await openAudioDB();
+        return new Promise((resolve) => {
+            const tx = db.transaction(AUDIO_STORE_NAME, 'readonly');
+            const request = tx.objectStore(AUDIO_STORE_NAME).get(key);
+            request.onsuccess = () => resolve(request.result);
+        });
+    }
+
+    // ZIP 백업을 위한 전체 오디오 추출
+    async function getAllAudioCache() {
+        const db = await openAudioDB();
+        return new Promise((resolve) => {
+            const tx = db.transaction(AUDIO_STORE_NAME, 'readonly');
+            const store = tx.objectStore(AUDIO_STORE_NAME);
+            const request = store.getAll();
+            const keysRequest = store.getAllKeys();
+            
+            request.onsuccess = () => {
+                keysRequest.onsuccess = () => {
+                    const result = {};
+                    keysRequest.result.forEach((key, i) => {
+                        result[key] = request.result[i];
+                    });
+                    resolve(result);
+                }
+            };
+        });
+    }
+
+    // 항목 삭제 시 연관된 오디오 캐시 동시 청소 (요청사항 8)
+    async function deleteAudioCacheByText(text) {
+        if(!text) return;
+        const db = await openAudioDB();
+        const tx = db.transaction(AUDIO_STORE_NAME, 'readwrite');
+        const store = tx.objectStore(AUDIO_STORE_NAME);
+        const request = store.getAllKeys();
+        request.onsuccess = () => {
+            request.result.forEach(key => {
+                // 키(캐시 이름)에 해당 텍스트가 포함되어 있으면 삭제
+                if(typeof key === 'string' && key.includes(text)) {
+                    store.delete(key);
+                }
+            });
+        };
+    }
+
+    let currentAzureAudio = null;
+    function playAudioBlob(blob, onEnd) {
+        if (currentAzureAudio) { currentAzureAudio.pause(); currentAzureAudio = null; }
+        const url = URL.createObjectURL(blob);
+        currentAzureAudio = new Audio(url);
+        currentAzureAudio.onended = () => { URL.revokeObjectURL(url); if (onEnd) onEnd(); };
+        currentAzureAudio.play().catch(e => { URL.revokeObjectURL(url); if (onEnd) onEnd(); });
+    }
+
+// ==========================================
+    // 1순위 전용: 지정된 음성 종류와 무관하게 텍스트로 캐시 무조건 탐색
+    // ==========================================
+    async function findCachedAudioByText(text) {
+        const db = await openAudioDB();
+        return new Promise((resolve) => {
+            const tx = db.transaction(AUDIO_STORE_NAME, 'readonly');
+            const store = tx.objectStore(AUDIO_STORE_NAME);
+            const request = store.getAllKeys();
+            request.onsuccess = () => {
+                const keys = request.result;
+                // 키 값의 끝부분이 해당 텍스트와 일치하는 캐시가 있는지 탐색
+                const matchedKey = keys.find(k => typeof k === 'string' && k.endsWith(`_${text}`));
+                if (matchedKey) {
+                    const getReq = store.get(matchedKey);
+                    getReq.onsuccess = () => resolve(getReq.result);
+                } else {
+                    resolve(null);
+                }
+            };
+            request.onerror = () => resolve(null);
+        });
+    }
+
+    // ==========================================
+    // 완벽한 3단계 폴백 적용: 하이브리드 TTS 엔진
+    // ==========================================
+    async function playHybridTTS(text, voiceObj, onEnd, speed = 1.0) {
+        if (!text) { if(onEnd) onEnd(); return; }
+        if (currentAzureAudio) { currentAzureAudio.pause(); currentAzureAudio = null; }
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+
+        // 🟢 [1단계]: 캐시된 고품질 음성 확인 (현재 선택된 음성 설정과 무관하게 무조건 최우선 재생)
+        const cachedBlob = await findCachedAudioByText(text);
+        if (cachedBlob) {
+            console.log("🟢 [1순위 동작] 캐시된 오디오 즉시 재생:", text);
+            playAudioBlob(cachedBlob, onEnd);
+            return;
+        }
+
+        // 🟠 [3단계]를 위한 로컬 폴백(Fallback) 함수 정의 (2단계 실패 시 호출됨)
+        const playLocalFallback = () => {
+            console.log("🟠 [3순위 동작] 네트워크 오류 등 발생 - 기기 내장 로컬 음성 폴백:", text);
+            if ('speechSynthesis' in window) {
+                const enVoices = getEnVoices();
+                // 우선순위: Azure가 아니면서 로컬 서비스가 가능한 음성 찾기
+                const localVoices = enVoices.filter(v => !v.isAzure && v.localService);
+                const fallbackVoice = localVoices.length > 0 ? localVoices[0] : (enVoices.length > 0 ? enVoices[0] : null);
+
+                let isFired = false;
+                const safeCallback = () => { if (!isFired) { isFired = true; if (onEnd) onEnd(); } };
+                const utter = new SpeechSynthesisUtterance(text);
+                utter.rate = speed;
+                
+                if (fallbackVoice && fallbackVoice.osVoice) {
+                    utter.voice = fallbackVoice.osVoice;
+                    utter.lang = fallbackVoice.osVoice.lang || 'en-US';
+                } else {
+                    utter.lang = 'en-US';
+                }
+                
+                utter.onend = safeCallback; utter.onerror = safeCallback;
+                window.ttsUtterances.push(utter);
+                if (window.ttsUtterances.length > 10) window.ttsUtterances.shift();
+                window.speechSynthesis.speak(utter);
+            } else {
+                if(onEnd) onEnd();
+            }
+        };
+
+        // 🔵 [2단계]: 사용자가 지정한 엔진 실행
+        if (voiceObj && voiceObj.isAzure) {
+            console.log("🔵 [2순위 동작] Azure 클라우드 실시간 합성 요청:", text);
+            const rateStr = speed === 1.0 ? '+0%' : `${Math.round((speed - 1) * 100)}%`; 
+            const azureVoiceName = voiceObj.voiceURI.replace('Azure-', '');
+            const cacheKey = `azure_${azureVoiceName}_${rateStr}_${text}`; 
+
+            let AZURE_KEY = localStorage.getItem('pongcrush_azure_key');
+            let AZURE_REGION = localStorage.getItem('pongcrush_azure_region') || 'eastus';
+            
+            // 키가 없으면 통신 불가이므로 즉시 3단계 폴백
+            if (!AZURE_KEY) {
+                playLocalFallback();
+                return;
+            }
+
+            const ssml = `<speak version='1.0' xml:lang='${azureVoiceName.substring(0, 5)}'><voice xml:lang='${azureVoiceName.substring(0, 5)}' name='${azureVoiceName}'><prosody rate='${rateStr}'>${text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</prosody></voice></speak>`;
+            
+            fetch(`https://${AZURE_REGION}.tts.speech.microsoft.com/cognitiveservices/v1`, {
+                method: 'POST',
+                headers: { 
+                    'Ocp-Apim-Subscription-Key': AZURE_KEY, 
+                    'Content-Type': 'application/ssml+xml', 
+                    'X-Microsoft-OutputFormat': 'audio-16khz-32kbitrate-mono-mp3' 
+                },
+                body: ssml
+            }).then(async response => {
+                if (response.status === 401) {
+                    console.warn("Azure API Key 유효하지 않음");
+                    localStorage.removeItem('pongcrush_azure_key');
+                    playLocalFallback(); // 3단계 폴백
+                    return;
+                }
+                if (!response.ok) throw new Error("Azure TTS Failed");
+                
+                // 합성 성공 시 캐시에 저장 후 재생
+                const blob = await response.blob();
+                await setAudioCache(cacheKey, blob);
+                playAudioBlob(blob, onEnd);
+            }).catch(e => { 
+                // 오프라인이거나 통신 에러 시 즉시 3단계 폴백
+                console.error("Azure 통신 실패:", e); 
+                playLocalFallback(); 
+            });
+            
+        } else {
+            // 지정한 음성이 Azure가 아닌 일반 OS 음성인 경우 정상 실행
+            console.log("🔵 [2순위 동작] 지정된 OS 음성 실행:", text);
+            if ('speechSynthesis' in window) {
+                let isFired = false;
+                const safeCallback = () => { if (!isFired) { isFired = true; if (onEnd) onEnd(); } };
+                const utter = new SpeechSynthesisUtterance(text);
+                utter.rate = speed;
+                
+                if (voiceObj && voiceObj.osVoice) { 
+                    utter.voice = voiceObj.osVoice; 
+                    utter.lang = voiceObj.osVoice.lang || 'en-US'; 
+                } else {
+                    utter.lang = 'en-US';
+                }
+                
+                utter.onend = safeCallback; utter.onerror = safeCallback;
+                window.ttsUtterances.push(utter);
+                if (window.ttsUtterances.length > 10) window.ttsUtterances.shift();
+                window.speechSynthesis.speak(utter);
+            } else { 
+                if(onEnd) onEnd(); 
+            }
+        }
+    }
+
     function sanitizeForMatch(text) { return text ? String(text).replace(/<[^>]*>/g, '').replace(/#/g, '').replace(/[\s\W_]+/g, '').toLowerCase() : ''; }
     function formatContextInText(text) { return text ? String(text).replace(/(\[.*?\]|\(.*?\))/g, '<span class="context-bracket">$1</span>') : ''; }
     class ClientSpeakingEngine { constructor(minGreenConfidence = 0.82) { this.minGreenConfidence = minGreenConfidence; } normalize(word) { return word ? word.replace(/[^\w\s]/g, '').toLowerCase().trim() : ''; } levenshteinDistance(s1, s2) { if (s1.length < s2.length) return this.levenshteinDistance(s2, s1); if (s2.length === 0) return s1.length; let previousRow = Array.from({ length: s2.length + 1 }, (_, i) => i); for (let i = 0; i < s1.length; i++) { let currentRow = [i + 1]; for (let j = 0; j < s2.length; j++) { let insertions = previousRow[j + 1] + 1; let deletions = currentRow[j] + 1; let substitutions = previousRow[j] + (s1[i] !== s2[j] ? 1 : 0); currentRow.push(Math.min(insertions, deletions, substitutions)); } previousRow = currentRow; } return previousRow[s2.length]; } similarityRatio(s1, s2) { const dist = this.levenshteinDistance(s1, s2); const maxLen = Math.max(s1.length, s2.length); return maxLen === 0 ? 1.0 : 1.0 - (dist / maxLen); } getStem(word) { let w = word.toLowerCase().trim(); if (w.length <= 3) return w; if (w.endsWith('ies')) return w.slice(0, -3) + 'y'; if (w.endsWith('es')) return w.slice(0, -2); if (w.endsWith('s') && !w.endsWith('ss')) return w.slice(0, -1); if (w.endsWith('ied')) return w.slice(0, -3) + 'y'; if (w.endsWith('ed')) { if (w.length > 4 && w[w.length - 3] === w[w.length - 4]) return w.slice(0, -3); return w.slice(0, -2); } if (w.endsWith('ing') && w.length > 4) return w.slice(0, -3); return w; } alignWords(targetWords, sttWords) { const n = targetWords.length; const m = sttWords.length; const dp = Array.from({ length: n + 1 }, () => Array(m + 1).fill(0)); for (let i = 0; i <= n; i++) dp[i][0] = i * -1; for (let j = 0; j <= m; j++) dp[0][j] = j * -1; for (let i = 1; i <= n; i++) { for (let j = 1; j <= m; j++) { const tNorm = this.normalize(targetWords[i - 1]); const sNorm = this.normalize(sttWords[j - 1]); const sim = this.similarityRatio(tNorm, sNorm); const matchScore = sim > 0.85 ? 2 : (sim > 0.5 ? 0.5 : -1); dp[i][j] = Math.max(dp[i - 1][j - 1] + matchScore, dp[i - 1][j] - 1, dp[i][j - 1] - 1); } } const aligned = []; let i = n, j = m; while (i > 0 || j > 0) { if (i > 0 && j > 0) { const tNorm = this.normalize(targetWords[i - 1]); const sNorm = this.normalize(sttWords[j - 1]); const sim = this.similarityRatio(tNorm, sNorm); const matchScore = sim > 0.85 ? 2 : (sim > 0.5 ? 0.5 : -1); if (dp[i][j] === dp[i - 1][j - 1] + matchScore) { aligned.push({ target: targetWords[i - 1], stt: sttWords[j - 1] }); i--; j--; continue; } } if (i > 0 && (j === 0 || dp[i][j] === dp[i - 1][j] - 1)) { aligned.push({ target: targetWords[i - 1], stt: '' }); i--; } else { aligned.push({ target: '', stt: sttWords[j - 1] }); j--; } } return aligned.reverse(); } evaluate(targetSentence, sttTranscript) { const cleanTargetSentence = targetSentence.replace(/[^\w\s]/g, ' '); const cleanSttTranscript = sttTranscript.replace(/[^\w\s]/g, ' '); const targetWords = cleanTargetSentence.trim().split(/\s+/).filter(Boolean); const sttWords = cleanSttTranscript.trim().split(/\s+/).filter(Boolean); if (sttWords.length === 0) { return { overallScore: 0, details: targetWords.map(tw => ({ targetWord: tw, spokenWord: '[미인식]', color: 'RED', score: 0, reason: '단어를 발음하지 않음' })) }; } const alignedPairs = this.alignWords(targetWords, sttWords); const details = []; let totalScore = 0; let validTargetCount = 0; alignedPairs.forEach(pair => { const targetRaw = pair.target; const sttRaw = pair.stt; if (!targetRaw && sttRaw) { details.push({ targetWord: '', spokenWord: sttRaw, color: 'RED', score: 0, reason: `추가 발음: '${sttRaw}'` }); return; } validTargetCount++; const tNorm = this.normalize(targetRaw); const sNorm = this.normalize(sttRaw); let color = 'RED', score = 0, reason = ''; if (!sNorm) { reason = `단어 누락 (원문: '${targetRaw}')`; } else if (tNorm === sNorm) { color = 'GREEN'; score = 100; reason = `정확한 일치 ('${targetRaw}')`; } else { const tStem = this.getStem(tNorm); const sStem = this.getStem(sNorm); const sim = this.similarityRatio(tNorm, sNorm); if (tStem === sStem) { color = 'ORANGE'; score = 50; reason = `단/복수 또는 시제 변형 오류 (원문: '${targetRaw}' ↔ 발음: '${sttRaw}')`; } else if (sim >= 0.55) { color = 'ORANGE'; score = 40; reason = `유사 발음 오독 (원문: '${targetRaw}' ↔ 발음: '${sttRaw}')`; } else { reason = `잘못된 단어 선택 (원문: '${targetRaw}' ↔ 발음: '${sttRaw}')`; } } totalScore += score; details.push({ targetWord: targetRaw, spokenWord: sttRaw || '[미인식]', color: color, score: score, reason: reason }); }); const count = validTargetCount > 0 ? validTargetCount : 1; const overallScore = Math.round(totalScore / count); return { overallScore, details }; } }
@@ -840,7 +1152,18 @@ function addWordToPWAStorage(item) {
     updatePWAReviewButtonUI(); 
 }
 
-    function removeWordFromPWAStorage(item) { let savedList = getPWASavedWords(); savedList = savedList.filter(w => !(w.ko === item.ko && w.en === item.en)); localStorage.setItem(PWA_VAGUE_STORAGE_KEY, JSON.stringify(savedList)); updatePWAReviewButtonUI(); }
+
+    function removeWordFromPWAStorage(item) { 
+        let savedList = getPWASavedWords(); 
+        savedList = savedList.filter(w => !(w.ko === item.ko && w.en === item.en)); 
+        localStorage.setItem(PWA_VAGUE_STORAGE_KEY, JSON.stringify(savedList)); 
+        updatePWAReviewButtonUI(); 
+        
+        // [추가] IndexedDB 오디오 캐시 동시 청소
+        deleteAudioCacheByText(item.en);
+        if(item.exEn) deleteAudioCacheByText(item.exEn);
+    }
+
     function updatePWAReviewButtonUI() { const savedList = getPWASavedWords(); const btn = document.getElementById('pwa-review-btn'); if (btn) { btn.classList.remove('hidden'); btn.innerText = `🔥 취약 단어 복습 (${savedList.length}개)`; } }
     function registerServiceWorker() { if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js').then(reg => { console.log('SW Registered'); }).catch(err => { console.warn('SW Registration Failed', err); }); } }
     function requestPersistentStorage() { if (navigator.storage && navigator.storage.persist) { navigator.storage.persist().then(granted => { console.log("Persistent Storage:", granted); }); } }
@@ -930,16 +1253,48 @@ function addWordToPWAStorage(item) {
             window.speechSynthesis.speak(utter);
         }, 60);
     }
-    
+
     function getEnVoices() {
-        if (!('speechSynthesis' in window)) return [];
-        let voices = window.speechSynthesis.getVoices();
-        if (voices.length === 0 && availableVoices.length > 0) voices = availableVoices;
+        let voices = [];
         
-        return voices.filter(v => {
-            const lang = (v.lang || '').replace(/_/g, '-').toLowerCase();
-            return lang.startsWith('en-') || lang === 'en';
+        // 1. 브라우저/OS 내장 음성 수집
+        if ('speechSynthesis' in window) {
+            let osVoices = window.speechSynthesis.getVoices();
+            if (osVoices.length === 0 && availableVoices && availableVoices.length > 0) {
+                osVoices = availableVoices;
+            }
+            osVoices.forEach(v => {
+                const lang = (v.lang || '').replace(/_/g, '-').toLowerCase();
+                if (lang.startsWith('en-') || lang === 'en') {
+                    voices.push({ 
+                        voiceURI: v.voiceURI, 
+                        name: v.name, 
+                        lang: v.lang, 
+                        localService: v.localService, 
+                        isAzure: false, 
+                        osVoice: v 
+                    });
+                }
+            });
+        }
+        
+        // 2. Azure 통신형 음성 리스트 병합
+        azureVoicesList.filter(v => !v.isKo).forEach(v => voices.push(v));
+        
+        // 3. speaking.html과 동일한 정렬 로직 적용
+        voices.sort((a, b) => {
+            // 특정 선호 음성(Andrew) 최상단 강제 배치
+            const isAAndrew = a.name.toLowerCase().includes('andrew') || a.name.includes('앤드류');
+            const isBAndrew = b.name.toLowerCase().includes('andrew') || b.name.includes('앤드류');
+            
+            if (isAAndrew && !isBAndrew) return -1;
+            if (!isAAndrew && isBAndrew) return 1;
+            
+            // 그 외에는 알파벳 순서대로 정렬
+            return a.name.localeCompare(b.name);
         });
+        
+        return voices;
     }
 
     function getEngineCompany(name) {
@@ -969,6 +1324,66 @@ function addWordToPWAStorage(item) {
         return '기타';
     }
 
+let azureVoicesList = [];
+    try {
+        const cachedVoices = localStorage.getItem('pongcrush_azure_voices_v1');
+        if (cachedVoices) azureVoicesList = JSON.parse(cachedVoices);
+    } catch(e) {}
+    
+    if (azureVoicesList.length === 0) {
+        azureVoicesList = [
+            { voiceURI: 'Azure-en-US-AriaNeural', name: 'Microsoft Aria (US Female)', lang: 'en-US', isKo: false, localService: false, isAzure: true },
+            { voiceURI: 'Azure-en-US-GuyNeural', name: 'Microsoft Guy (US Male)', lang: 'en-US', isKo: false, localService: false, isAzure: true },
+            { voiceURI: 'Azure-en-US-JennyNeural', name: 'Microsoft Jenny (US Female)', lang: 'en-US', isKo: false, localService: false, isAzure: true }
+        ];
+    }
+
+    async function fetchAzureVoices() {
+        let AZURE_KEY = localStorage.getItem('pongcrush_azure_key');
+        let AZURE_REGION = localStorage.getItem('pongcrush_azure_region') || 'eastus';
+        
+        if (!AZURE_KEY) {
+            AZURE_KEY = prompt("Azure Speech API Key를 입력하세요:");
+            if (!AZURE_KEY) return;
+            AZURE_REGION = prompt("Azure Region (예: eastus):", "eastus") || 'eastus';
+            localStorage.setItem('pongcrush_azure_key', AZURE_KEY); localStorage.setItem('pongcrush_azure_region', AZURE_REGION);
+        }
+
+        const btn = document.getElementById('btn-fetch-azure');
+        if (btn) btn.innerText = '🔄 클라우드 통신 중...';
+
+        try {
+            const response = await fetch(`https://${AZURE_REGION}.tts.speech.microsoft.com/cognitiveservices/voices/list`, {
+                method: 'GET', headers: { 'Ocp-Apim-Subscription-Key': AZURE_KEY }
+            });
+
+            if (!response.ok) {
+                if (response.status === 401) { localStorage.removeItem('pongcrush_azure_key'); throw new Error("API Key 유효하지 않음"); }
+                throw new Error("Azure API 통신 실패");
+            }
+
+            const data = await response.json();
+            const newAzureVoices = [];
+            data.forEach(v => {
+                if (v.Locale.startsWith('en-') || v.Locale.startsWith('ko-')) {
+                    newAzureVoices.push({
+                        voiceURI: `Azure-${v.ShortName}`, name: `Azure ${v.LocalName} (${v.Locale} ${v.Gender})`,
+                        lang: v.Locale, isKo: v.Locale.startsWith('ko-'), localService: false, isAzure: true
+                    });
+                }
+            });
+
+            azureVoicesList = newAzureVoices;
+            localStorage.setItem('pongcrush_azure_voices_v1', JSON.stringify(azureVoicesList));
+            alert(`✅ ${newAzureVoices.length}개의 가용한 Azure 클라우드 음성을 동기화했습니다!`);
+            renderVoiceListUI();
+        } catch (e) {
+            alert('❌ 검색 실패: ' + e.message);
+            if (btn) btn.innerText = '☁️ Azure 클라우드 가용 음성 전체 검색 및 동기화';
+        }
+    }
+
+
 function renderVoiceListUI() {
         const area = document.getElementById('voice-modal-content-area');
         if (!area) return;
@@ -976,157 +1391,94 @@ function renderVoiceListUI() {
         
         let html = `
             <div style="flex:1; display:flex; flex-direction:column; gap:16px; margin-top: 8px;">
-                
-                <!-- 🎓 Tech Blog Accordions (최상단 배치) -->
-                <div class="sec-select-area" style="flex-shrink:0; display:flex; flex-direction:column; gap:8px;">
-                    <div style="font-size: 13.5px; font-weight: 900; color: var(--slack-purple); margin-bottom: 4px; padding-left: 2px;">
-                        🎓 주니어 프론트엔드를 위한 TTS 아키텍처 딥다이브
+                <!-- 🚀 [여기부터 speaking.html 스타일의 Azure 연동 + 캐시 설명 패널 추가] -->
+                <div style="background:#f8fafc; padding:14px; border-radius:12px; border:1.5px solid #cbd5e1; font-size:13.5px; font-weight:700; line-height:1.5; word-break:keep-all; display:flex; flex-direction:column; gap:10px; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+                    <div style="font-size:15px; font-weight:900; color:#0f172a; display:flex; align-items:center; gap:6px;">
+                        <span>💡</span> <span>스마트 음성 재생 우선순위</span>
                     </div>
-
-                    <!-- Accordion 1: 동작 원리 & GC 버그 -->
-                    <details class="sync-details" style="margin: 0; border: 1px solid var(--border-color); border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
-                        <summary class="sync-summary" style="padding: 10px 12px; display: flex; align-items: flex-start; gap: 8px; background: #ffffff;">
-                            <span style="font-size: 11px; font-weight: 800; color: #4f46e5; background: #e0e7ff; padding: 3px 0; width: 44px; text-align: center; border-radius: 4px; border: 1px solid #c7d2fe; flex-shrink: 0; margin-top: 1px;">Arch</span>
-                            <span class="rn-title" style="font-size: 13px; font-weight: 800; color: var(--text-main); margin-top: 1px;">1. Web Speech API: 브라우저와 OS의 보이지 않는 릴레이</span>
-                        </summary>
-                        <div class="sync-content" style="background: #f8fafc; padding: 12px; border-top: 1px dashed var(--border-color);">
-                            <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-                                <div style="padding: 8px 10px; background: #f1f5f9; border-bottom: 1px dashed #cbd5e1; font-size: 12px; font-weight: 900; color: var(--slack-blue); display: flex; align-items: center; gap: 6px;">👨‍💻 Core Pipeline & Call Stack</div>
-                                <div style="padding: 10px; display: flex; flex-direction: column; gap: 10px;">
-                                    <div style="font-size: 12px; font-weight: 600; color: var(--text-main); line-height: 1.5; word-break: keep-all;">
-                                        <code>speechSynthesis.speak()</code>를 호출하면 브라우저는 하드웨어 스피커에 직접 접근하지 못하고 아래와 같은 다단계 릴레이를 거칩니다.
-                                    </div>
-                                    
-                                    <div style="border-radius: 6px; border: 1px solid var(--border-color); overflow: hidden;">
-                                        <table class="tech-table" style="margin: 0; background: #ffffff;">
-                                            <tbody>
-                                                <tr><th style="width: 25%; font-size: 11px;">1. JS Call</th><td style="font-size: 11.5px;"><code>speechSynthesis.speak(utterance)</code> 인스턴스를 큐(Queue)에 등록</td></tr>
-                                                <tr><th style="width: 25%; font-size: 11px;">2. IPC 중계</th><td style="font-size: 11.5px;">샌드박스 렌더러 -> 브라우저 메인 Audio Service 프로세스로 텍스트 전달</td></tr>
-                                                <tr><th style="width: 25%; font-size: 11px;">3. OS 위임</th><td style="font-size: 11.5px;">Windows SAPI / macOS NSSpeechSynthesizer 등의 네이티브 드라이버로 중계</td></tr>
-                                                <tr><th style="width: 25%; font-size: 11px;">4. 비동기 이벤트</th><td style="font-size: 11.5px;">오디오 백그라운드 스레드에서 음소 합성 후 <code>onend</code>, <code>onerror</code>를 메인 스레드로 디스패치</td></tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-
-                                    <ul class="tech-list" style="margin:0; padding-left:16px; color:#334155; line-height:1.5; font-size:12.5px; font-weight:500;">
-                                        <li style="margin-bottom:6px;"><strong>🚨 15초 멈춤 현상(GC Bug):</strong> 긴 문장을 읽을 때 중간에 음성이 뚝 끊기는 치명적인 버그가 있습니다. 함수가 끝나며 <code>utterance</code> 변수의 스코프가 닫히면, JS 가비지 컬렉터(GC)가 음성이 재생 중임에도 객체를 메모리에서 날려버리기 때문입니다.</li>
-                                        <li><strong>💡 Hotfix 패턴:</strong> 본 앱에서는 <code>window.ttsUtterances.push(utter)</code>를 통해 <strong>전역 배열에 강제로 참조(Reference)를 유지</strong>시켜 GC를 방어하고 있습니다. (메모리 누수 방지를 위해 최대 10개 큐로 관리)</li>
-                                    </ul>
-                                </div>
-                            </div>
+                    <div style="display:flex; flex-direction:column; gap:8px; color:#334155; margin-top:2px;">
+                        <div style="display:flex; gap:8px; align-items:flex-start;">
+                            <span style="background:#e0f2fe; color:#0369a1; padding:3px 8px; border-radius:6px; font-weight:900; font-size:11.5px; flex-shrink:0; margin-top:1px;">1순위</span>
+                            <span><b>캐시된 음성 (최우선):</b> 온/오프라인 무관, 이미 한 번 실행되어 기기에 저장된 고품질 캐시 음성이 있다면 최우선으로 즉시 재생합니다.</span>
                         </div>
-                    </details>
-
-                    <!-- Accordion 2: 브라우저 전쟁 & Win11 오프라인 내추럴 팩의 진실 -->
-                    <details class="sync-details" style="margin: 0; border: 1px solid var(--border-color); border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
-                        <summary class="sync-summary" style="padding: 10px 12px; display: flex; align-items: flex-start; gap: 8px; background: #ffffff;">
-                            <span style="font-size: 11px; font-weight: 800; color: #dc2626; background: #fee2e2; padding: 3px 0; width: 44px; text-align: center; border-radius: 4px; border: 1px solid #fecaca; flex-shrink: 0; margin-top: 1px;">Lock-in</span>
-                            <span class="rn-title" style="font-size: 13px; font-weight: 800; color: var(--text-main); margin-top: 1px;">2. 크롬 vs 엣지 전쟁 & Win11 내추럴 팩 오프라인 구동의 진실</span>
-                        </summary>
-                        <div class="sync-content" style="background: #f8fafc; padding: 12px; border-top: 1px dashed var(--border-color);">
-                            <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-                                <div style="padding: 8px 10px; background: #f1f5f9; border-bottom: 1px dashed #cbd5e1; font-size: 12px; font-weight: 900; color: var(--slack-blue); display: flex; align-items: center; gap: 6px;">⚔️ 벤더사별 음성 엔진 격리 비교</div>
-                                <div style="padding: 10px; display: flex; flex-direction: column; gap: 10px;">
-                                    <div style="border-radius: 6px; border: 1px solid var(--border-color); overflow: hidden;">
-                                        <table class="tech-table" style="margin: 0; background: #ffffff;">
-                                            <tbody>
-                                                <tr><th style="width: 25%; font-size: 11px;">Google Chrome</th><td style="font-size: 11.5px; color:#ea4335;">Google Network Voices 내장 (타 브라우저 접근 불가 ❌)</td></tr>
-                                                <tr><th style="width: 25%; font-size: 11px;">MS Edge</th><td style="font-size: 11.5px; color:#00a4ef;">Azure 기반 Natural Voices 온라인 스트리밍 독점 제공 💎</td></tr>
-                                                <tr><th style="width: 25%; font-size: 11px;">Apple Safari</th><td style="font-size: 11.5px; color:#475569;">macOS/iOS Siri 및 Compact 로컬 보이스 사용</td></tr>
-                                                <tr><th style="width: 25%; font-size: 11px;">Windows 기본</th><td style="font-size: 11.5px; color:#d97706;">구형 SAPI 기계음(David, Zira) -> 깡통 로봇 소리 폴백</td></tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-
-                                    <ul class="tech-list" style="margin:0; padding-left:16px; color:#334155; line-height:1.5; font-size:12.5px; font-weight:500;">
-                                        <li style="margin-bottom:6px;"><strong>🤔 윈도우 11 'Natural 음성 팩'을 받으면 오프라인 엣지에서 될까?</strong><br>
-                                        -> <strong>정답은 YES & NO! (반은 맞고 반은 다릅니다)</strong>
-                                        <br>- <strong>온라인 엣지 Natural:</strong> MS Azure 클라우드 대규모 신경망에서 합성해 음질이 압도적이지만 인터넷 끊김 시 즉시 사용 불가합니다.
-                                        <br>- <strong>Win11 설정 다운로드 Natural:</strong> <code>설정 > 시간 및 언어 > 음성</code>에서 '자연스러운 음성(Natural)' 언어 팩을 다운로드하면, Windows OneCore 로컬 신경망 모델이 설치되어 <strong>오프라인 상태의 엣지 및 타 브라우저에서도 고품질 음성을 로컬 연산으로 구동</strong>할 수 있습니다!</li>
-                                        <li><strong>🔒 Vendor Lock-in:</strong> 크롬은 구글 음성을 엣지에게 안 주고, 엣지는 Azure 음성을 크롬에게 안 줍니다. 결국 클라이언트 API만으로는 모든 유저에게 100% 동일한 고품질 음성을 보장할 수 없습니다.</li>
-                                    </ul>
-                                </div>
-                            </div>
+                        <div style="display:flex; gap:8px; align-items:flex-start;">
+                            <span style="background:#fef08a; color:#854d0e; padding:3px 8px; border-radius:6px; font-weight:900; font-size:11.5px; flex-shrink:0; margin-top:1px;">2순위</span>
+                            <span><b>설정한 음성:</b> 유저가 하단 목록에서 선택하여 지정해둔 음성 엔진을 통해 실시간으로 생성합니다.</span>
                         </div>
-                    </details>
-
-                    <!-- Accordion 3: 상용 서비스급 아키텍처 -->
-                    <details class="sync-details" style="margin: 0; border: 1px solid var(--border-color); border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
-                        <summary class="sync-summary" style="padding: 10px 12px; display: flex; align-items: flex-start; gap: 8px; background: #ffffff;">
-                            <span style="font-size: 11px; font-weight: 800; color: #16a34a; background: #dcfce7; padding: 3px 0; width: 44px; text-align: center; border-radius: 4px; border: 1px solid #bbf7d0; flex-shrink: 0; margin-top: 1px;">Pro</span>
-                            <span class="rn-title" style="font-size: 13px; font-weight: 800; color: var(--text-main); margin-top: 1px;">3. 듀오링고, 스픽은 어떻게 상용급 오디오를 안정적으로 제공할까?</span>
-                        </summary>
-                        <div class="sync-content" style="background: #f8fafc; padding: 12px; border-top: 1px dashed var(--border-color);">
-                            <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-                                <div style="padding: 8px 10px; background: #f1f5f9; border-bottom: 1px dashed #cbd5e1; font-size: 12px; font-weight: 900; color: var(--slack-blue); display: flex; align-items: center; gap: 6px;">🚀 Enterprise Zero-Compute Architecture</div>
-                                <div style="padding: 10px; display: flex; flex-direction: column; gap: 10px;">
-                                    <div style="font-size: 12px; font-weight: 600; color: var(--text-main); line-height: 1.5; word-break: keep-all;">
-                                        상용 프로덕트는 브라우저 내장 Web Speech API의 파편화와 버그를 피하기 위해 <strong>Server-side 렌더링 + CDN 캐싱 파이프라인</strong>을 구축합니다.
-                                    </div>
-
-                                    <div style="border-radius: 6px; border: 1px solid var(--border-color); overflow: hidden;">
-                                        <table class="tech-table" style="margin: 0; background: #ffffff;">
-                                            <tbody>
-                                                <tr><th style="width: 25%; font-size: 11px;">1. 결정론적 해시</th><td style="font-size: 11.5px;"><code>SHA-256(Text + VoiceID + Rate)</code>로 고유 Key 추출</td></tr>
-                                                <tr><th style="width: 25%; font-size: 11px;">2. 최초 합성 (Miss)</th><td style="font-size: 11.5px;">AWS Polly / ElevenLabs API 1회 호출 -> MP3 파일 생성 후 S3 적재</td></tr>
-                                                <tr><th style="width: 25%; font-size: 11px;">3. 엣지 캐시 (Hit)</th><td style="font-size: 11.5px;">CloudFront(CDN) 엣지 로케이션에 캐싱 -> <strong>추가 API 비용 0원 & 20ms 이내 서빙</strong></td></tr>
-                                                <tr><th style="width: 25%; font-size: 11px;">4. 3단계 폴백</th><td style="font-size: 11.5px;">CDN MP3 재생 실패 시 -> 브라우저 TTS -> Web Audio API 비프음 폴스루</td></tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-
-                                    <div style="font-size: 12px; color: #0284c7; font-weight: 700; background: #f0f9ff; padding: 8px; border-radius: 6px; line-height: 1.4;">
-                                        🎯 핵심 인사이트: 1,000만 명의 유저가 같은 단어를 1억 번 들어도 최초 1회 API 비용 외에는 서버 연산 비용이 들지 않는 것이 프로덕션 레벨의 오디오 설계 표준입니다.
-                                    </div>
-                                </div>
-                            </div>
+                        <div style="display:flex; gap:8px; align-items:flex-start;">
+                            <span style="background:#f1f5f9; color:#475569; padding:3px 8px; border-radius:6px; font-weight:900; font-size:11.5px; flex-shrink:0; margin-top:1px;">3순위</span>
+                            <span><b>로컬 폴백 (Fallback):</b> 아무 설정이 없거나 외부 통신 오류 시, <b>기기에 내장된 로컬 오프라인 음성</b>으로 자동 대체되어 작동합니다.</span>
                         </div>
-                    </details>
+                    </div>
                 </div>
 
-                <!-- Voice List Section (아코디언 아래 배치) -->
-                <div class="voice-list-container" style="flex:1; overflow-y:auto; min-height:0; opacity: 0.95; padding: 4px; border:none; background:transparent;">
+                <button id="btn-fetch-azure" style="background:#0ea5e9; color:white; border:none; border-radius:10px; padding:12px; font-size:13.5px; font-weight:900; cursor:pointer; width:100%; box-shadow:0 2px 4px rgba(0,0,0,0.1); transition:all 0.2s;" onclick="fetchAzureVoices()">☁️ Azure 클라우드 가용 음성 전체 검색 및 동기화</button>
+                
+                <!-- 🚀 [여기부터 3단계 카테고리로 분리된 음성 목록 생성] -->
+                <div class="voice-list-container" style="flex:1; overflow-y:auto; min-height:0; padding: 4px 0; border:none; background:transparent; display:flex; flex-direction:column; gap:20px;">
         `;
         
-        if (enVoices.length === 0) {
-            html += '<div style="padding:10px; text-align:center; color:#64748b; font-weight:800; font-size:13px;">지원되는 영어 음성 엔진이 없습니다. (시스템 환경 확인 요망)</div>';
-        } else {
-            enVoices.forEach(voice => {
-                const isSelected = tempFixedVoiceURIs.includes(voice.voiceURI);
-                const orderIndex = tempFixedVoiceURIs.indexOf(voice.voiceURI);
-                const orderBadge = isSelected ? `<span style="background:#ea580c; color:#fff; border-radius:50%; width:16px; height:16px; display:inline-flex; align-items:center; justify-content:center; font-size:10px; margin-right:6px; flex-shrink:0;">${orderIndex + 1}</span>` : '';
-                
-                const company = getEngineCompany(voice.name);
-                let cleanName = voice.name.replace(/(Google|Microsoft|Apple|Siri|Samsung|Amazon|Bixby|Cortana)\s*-?\s*/gi, '').replace(/english/gi, '').replace(/\(\s*\)/g, '').replace(/\s{2,}/g, ' ').trim() || 'Voice';
-                
-                const nameChip = `<span style="background:${company.color}15; color:${company.color}; padding:3px 6px; border-radius:6px; font-size:10px; font-weight:900; border:1px solid ${company.color}30; white-space:nowrap; flex-shrink:0;">${company.name}</span>`;
-                
-                const countryName = getCountryName(voice.lang);
-                const countryChip = `<span class="voice-badge" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:2px 6px; font-weight:800; flex-shrink:0;">🌍 ${countryName}</span>`;
-                const localChip = `<span class="voice-badge" style="background:${voice.localService ? '#dcfce7' : '#fce7f3'}; color:${voice.localService ? '#16a34a' : '#db2777'}; border:1px solid ${voice.localService ? '#bbf7d0' : '#fbcfe8'}; font-weight:800; flex-shrink:0;">${voice.localService ? '로컬' : '네트워크'}</span>`;
+        if (enVoices.length === 0) { 
+            html += '<div style="padding:20px; text-align:center; color:#64748b; font-weight:800;">지원되는 영어 음성 엔진이 없습니다. (시스템 환경 확인 요망)</div>'; 
+        } 
+        else {
+            // Azure/외부통신, 로컬, OS 네트워크 의존형 3가지로 필터링
+            const externalAPI = enVoices.filter(v => v.isAzure);
+            const osLocal = enVoices.filter(v => !v.isAzure && v.localService);
+            const osNetwork = enVoices.filter(v => !v.isAzure && !v.localService);
 
-                html += `
-                    <div class="voice-item ${isSelected ? 'selected' : ''}" onclick="toggleTempFixedVoice('${voice.voiceURI.replace(/'/g, "\\'")}')">
-                        <div class="voice-info" style="flex:1; overflow:hidden; min-width:0; padding-right:8px;">
-                            <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px; overflow:hidden;">
-                                ${orderBadge}
-                                ${nameChip}
-                                <span class="voice-name" style="font-size: 14px; font-weight:${isSelected ? '900' : '700'}; color:${isSelected ? '#c2410c' : 'inherit'}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:block;">${cleanName}</span>
+            const generateItems = (voicesArray) => {
+                if(voicesArray.length === 0) return '<div style="font-size:13px; color:#94a3b8; padding:10px 12px; background:#f8fafc; border-radius:8px; border:1.5px dashed #cbd5e1; font-weight:600;">해당하는 음성이 없습니다.</div>';
+                
+                let groupHtml = '<div style="display:flex; flex-direction:column; gap:8px; max-height:235px; overflow-y:auto; padding-right:4px;">';
+                voicesArray.forEach(voice => {
+                    const isSelected = tempFixedVoiceURIs.includes(voice.voiceURI);
+                    const orderIndex = tempFixedVoiceURIs.indexOf(voice.voiceURI);
+                    const orderBadge = isSelected ? `<span style="background:#ea580c; color:#fff; border-radius:50%; width:18px; height:18px; display:inline-flex; align-items:center; justify-content:center; font-size:11px; margin-right:6px; flex-shrink:0;">${orderIndex + 1}</span>` : '';
+                    
+                    const company = getEngineCompany(voice.name);
+                    let cleanName = voice.name.replace(/(Google|Microsoft|Apple|Siri|Samsung|Amazon|Bixby|Cortana)\s*-?\s*/gi, '').replace(/english/gi, '').replace(/\(\s*\)/g, '').replace(/\s{2,}/g, ' ').trim() || 'Voice';
+                    
+                    const nameChip = `<span style="background:${company.color}15; color:${company.color}; padding:3px 6px; border-radius:6px; font-size:10px; font-weight:900; border:1px solid ${company.color}30; flex-shrink:0;">${company.name}</span>`;
+                    const countryChip = `<span class="voice-badge" style="background:#f8fafc; color:#475569; border:1px solid #cbd5e1; padding:3px 6px;">🌍 ${getCountryName(voice.lang)}</span>`;
+                    
+                    groupHtml += `
+                        <div class="voice-item ${isSelected ? 'selected' : ''}" style="display:flex; flex-direction:column; align-items:flex-start; gap:8px; padding:12px;" onclick="toggleTempFixedVoice('${voice.voiceURI.replace(/'/g, "\\'")}')">
+                            <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+                                <div style="display:flex; align-items:center; gap:6px; overflow:hidden;">
+                                    ${orderBadge}${nameChip}
+                                    <span class="voice-name" style="font-size:14.5px; font-weight:${isSelected?'900':'700'}; color:${isSelected?'#c2410c':'var(--text-main)'}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${cleanName}</span>
+                                </div>
+                                <button class="card-action-btn" style="background:#e2e8f0; color:#0f172a; padding:6px 10px; font-size:16px; border:none; box-shadow:0 1px 2px rgba(0,0,0,0.1); margin-left:8px; flex-shrink:0;" onclick="testVoice('${voice.voiceURI.replace(/'/g, "\\'")}', event)" title="테스트 문장 듣기">▶️</button>
                             </div>
-                            <div style="display:flex; gap:4px;">
+                            <div style="display:flex; flex-wrap:wrap; gap:5px; width:100%; margin-left:${isSelected?'24px':'0'};">
                                 ${countryChip}
-                                ${localChip}
                             </div>
-                        </div>
-                        <button class="card-action-btn" style="background:#e2e8f0; color:#0f172a; padding:6px 10px; font-size:16px; border:none; box-shadow:0 1px 2px rgba(0,0,0,0.1); margin-left:8px; flex-shrink:0;" onclick="testVoice('${voice.voiceURI.replace(/'/g, "\\'")}', event)" title="테스트 문장 듣기">▶️</button>
-                    </div>`;
-            });
-        }
-        
-        html += `</div></div>`; // container and wrapper close
-        area.innerHTML = html;
-    }    
+                        </div>`;
+                });
+                groupHtml += '</div>';
+                return groupHtml;
+            };
 
+            // 3가지 분류대로 렌더링
+            html += `
+                <div class="voice-section">
+                    <div style="font-size:15px; font-weight:900; color:#1e293b; margin-bottom:10px; display:flex; align-items:center; gap:6px;">☁️ 외부 통신형 <span style="font-size:12.5px; font-weight:800; color:#0369a1; background:#e0f2fe; padding:3px 8px; border-radius:6px; border:1px solid #bae6fd;">캐시 지원</span></div>
+                    ${generateItems(externalAPI)}
+                </div>
+                <div class="voice-section">
+                    <div style="font-size:15px; font-weight:900; color:#1e293b; margin-bottom:10px; display:flex; align-items:center; gap:6px;">💻 OS 자체 연산 (로컬) <span style="font-size:12.5px; font-weight:800; color:#475569; background:#f1f5f9; padding:3px 8px; border-radius:6px; border:1px solid #cbd5e1;">폴백 지원</span></div>
+                    ${generateItems(osLocal)}
+                </div>
+                <div class="voice-section">
+                    <div style="font-size:15px; font-weight:900; color:#1e293b; margin-bottom:10px; display:flex; align-items:center; gap:6px;">📡 OS 네트워크 의존형 <span style="font-size:12.5px; font-weight:800; color:#ef4444; background:#fee2e2; padding:3px 8px; border-radius:6px; border:1px solid #fecaca;">캐시 X</span></div>
+                    ${generateItems(osNetwork)}
+                </div>
+            `;
+        }
+        html += `</div></div>`;
+        area.innerHTML = html;
+    }
 
     function getRandomOrSelectedVoice() {
         const enVoices = getEnVoices();
@@ -1162,33 +1514,389 @@ function renderVoiceListUI() {
     window.openWritingModalFromCard = function() { const item = wordList[currentStartIndex]; if (!item) return; const modal = document.getElementById('ai-feedback-modal'); if (modal) modal.classList.remove('hidden'); document.getElementById('writing-input-view').classList.remove('hidden'); document.getElementById('writing-result-view').classList.add('hidden'); document.getElementById('modal-sentence-textarea').value = ''; document.getElementById('writing-modal-en-hint').innerText = item.en; const targetKoText = item.exKo ? item.exKo : item.ko; document.getElementById('writing-modal-ko-text').innerText = targetKoText.replace(/<[^>]*>/g, '').replace(/#/g, ' '); setTimeout(() => { document.getElementById('modal-sentence-textarea').focus(); }, 100); }
     function closeAIFeedbackModal() { const modal = document.getElementById('ai-feedback-modal'); if (modal) modal.classList.add('hidden'); if (window.stopAIComputation) window.stopAIComputation(); }
     function submitModalWritingTest() { const userText = document.getElementById('modal-sentence-textarea').value.trim(); if (!userText) { alert("영문장을 입력해주세요."); return; } document.getElementById('writing-input-view').classList.add('hidden'); document.getElementById('writing-result-view').classList.remove('hidden'); const item = wordList[currentStartIndex]; const targetKo = (item.exKo || item.ko).replace(/<[^>]*>/g, '').replace(/#/g, ' '); const targetEn = item.exEn || item.en; document.getElementById('ai-modal-user-text').innerText = userText; document.getElementById('ai-modal-target-text').innerText = targetEn; document.getElementById('streaming-grammar-body').innerText = ""; document.getElementById('ai-center-progress-text').innerText = "AI 분석을 준비 중입니다..."; if (!window.isAIEnabledForWriting) { document.getElementById('streaming-grammar-body').innerText = "🤖 AI 첨삭 기능이 꺼져 있습니다. (상단에서 켜기 가능)"; document.getElementById('streaming-grammar-body').style.display = 'block'; return; } if (window.requestLocalAIStreamingCorrection) { window.requestLocalAIStreamingCorrection(userText, targetKo, (token) => {}); } else { document.getElementById('streaming-grammar-body').innerText = "AI 엔진 로드 오류"; document.getElementById('streaming-grammar-body').style.display = 'block'; } }
-    
-    // 통합 데이터 백업 함수
-    function backupWeakWords() {
-        const savedList = getPWASavedWords();
-        const spkData = JSON.parse(localStorage.getItem('pongcrush_spk_data') || '[]');
-        
-        if(savedList.length === 0 && spkData.length === 0) { 
-            alert("백업할 데이터가 없습니다."); 
-            return; 
-        }
-        
-        const exportData = { type: "pongcrush_combined", words: savedList, speaking: spkData };
-        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const dlAnchorElem = document.createElement('a');
-        dlAnchorElem.href = url;
-        dlAnchorElem.download = "pongcrush_local_backup.json";
-        document.body.appendChild(dlAnchorElem);
-        dlAnchorElem.click();
-        document.body.removeChild(dlAnchorElem);
-        URL.revokeObjectURL(url);
-    }
-    
+   
     function openDataModal() { const modal = document.getElementById('data-modal'); if (modal) modal.classList.remove('hidden'); }
     function closeDataModal() { const modal = document.getElementById('data-modal'); if (modal) modal.classList.add('hidden'); }
     
-    // 통합 데이터 복원 함수
+    // 구글 드라이브 백업 히스토리 모달 열기
+    window.openGDriveHistoryModal = function() {
+        if (!GOOGLE_CLIENT_ID) { alert("스크립트 상단에 GOOGLE_CLIENT_ID를 먼저 입력해야 합니다."); return; } 
+        
+        const modal = document.getElementById('gdrive-history-modal');
+        const container = document.getElementById('gdrive-history-list');
+        
+        if (modal) modal.classList.remove('hidden');
+        
+        // 로딩 UI 렌더링
+        container.innerHTML = '<div style="text-align:center; padding:30px 20px; color:var(--text-muted); font-size:13px; font-weight:700;"><div class="spinner" style="border-top-color:#3b82f6; margin-bottom:12px;"></div><br>백업 기록을 불러오는 중입니다...</div>';
+        
+        requestGoogleAuth(async () => {
+            try {
+                // 앱 생성 파일 최신순 조회
+                const res = await gapi.client.drive.files.list({
+                    q: "trashed = false", 
+                    orderBy: 'createdTime desc',
+                    fields: 'files(id, name, createdTime, size)',
+                    spaces: 'drive'
+                });
+                
+                const files = res.result.files;
+                
+                if (!files || files.length === 0) {
+                    container.innerHTML = '<div style="text-align:center; padding:30px 20px; color:var(--text-muted); font-size:13px; font-weight:700;">📂 저장된 백업 내역이 없습니다.</div>';
+                    return;
+                }
+                
+                let html = '';
+                files.forEach((file, index) => {
+                    const dateObj = new Date(file.createdTime);
+                    const dateStr = dateObj.toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+                    const kbSize = file.size ? Math.round(file.size / 1024).toLocaleString() + ' KB' : '알 수 없음';
+                    const isLatest = index === 0;
+                    
+                    html += `
+                        <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:8px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                            <div style="font-weight:800; color:var(--text-main); font-size:13.5px; word-break:break-all; display:flex; align-items:center; gap:6px;">
+                                📄 ${file.name}
+                                ${isLatest ? '<span style="font-size:10px; background:#dcfce7; color:#16a34a; padding:2px 6px; border-radius:6px; font-weight:900;">최신</span>' : ''}
+                            </div>
+                            <div style="display:flex; justify-content:space-between; font-size:12px; color:#64748b; font-weight:600;">
+                                <span>🗓️ ${dateStr}</span>
+                                <span>💾 ${kbSize}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+                
+            } catch(err) {
+                container.innerHTML = `<div style="text-align:center; padding:30px 20px; color:#dc2626; font-size:13px; font-weight:800;">❌ 내역을 불러오지 못했습니다.<br><span style="font-size:11px; font-weight:500; margin-top:6px; display:block;">${err.message}</span></div>`;
+            }
+        });
+    };
+
+    // 공통: 백업 파일용 JSZip 생성 (OOM 방지 스트리밍)
+    async function createBackupZipFile() {
+        const localList = getPWASavedWords();
+        const localSpkData = JSON.parse(localStorage.getItem('pongcrush_spk_data') || '[]');
+        
+        if (localList.length === 0 && localSpkData.length === 0) {
+            throw new Error("백업할 데이터가 없습니다.");
+        }
+
+        const exportData = { type: "pongcrush_combined", words: localList, speaking: localSpkData };
+        const zip = new JSZip();
+        
+        // 1. JSON 텍스트 데이터 패키징
+        zip.file("data.json", JSON.stringify(exportData, null, 2));
+
+        // 2. IndexedDB 오디오 데이터 패키징
+        const audioData = await getAllAudioCache();
+        const audioFolder = zip.folder("audio");
+        const audioKeys = Object.keys(audioData);
+        
+        for(const key of audioKeys) {
+            audioFolder.file(key, audioData[key]);
+        }
+
+        // 3. 압축 생성 및 UI 프로그레시브 처리
+        const progressContainer = document.getElementById('zip-progress-container');
+        const progressFill = document.getElementById('zip-progress-fill');
+        const progressPct = document.getElementById('zip-progress-pct');
+        const progressDetail = document.getElementById('zip-progress-detail');
+        
+        if (progressContainer) progressContainer.classList.remove('hidden');
+
+        const blob = await zip.generateAsync({type:"blob", compression: "DEFLATE", compressionOptions: { level: 6 }}, function updateCallback(metadata) {
+            if (progressFill) {
+                progressFill.style.width = `${metadata.percent}%`;
+                progressPct.innerText = `${Math.round(metadata.percent)}%`;
+                progressDetail.innerText = metadata.currentFile ? `압축 중: ${metadata.currentFile}` : "패키징 진행 중...";
+            }
+        });
+        
+        if (progressContainer) progressContainer.classList.add('hidden');
+        return blob;
+    }
+
+// ==========================================
+    // 백업/복원 유틸리티 & 프로그레시브 UI 엔진
+    // ==========================================
+    const delay = (ms) => new Promise(res => setTimeout(res, ms));
+
+    function generateHumanReadableFileName(prefix = "Pongcrush_Backup") {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hour = String(now.getHours()).padStart(2, '0');
+        const minute = String(now.getMinutes()).padStart(2, '0');
+        return `${prefix}_${year}년${month}월${day}일_${hour}시${minute}분.zip`;
+    }
+
+    function updateMultiProgress(stepId, taskPct, totalPct) {
+        const bar = document.getElementById(`bar-step-${stepId}`);
+        const pctText = document.getElementById(`pct-step-${stepId}`);
+        if(bar) bar.style.width = `${taskPct}%`;
+        if(pctText) pctText.innerText = `${Math.floor(taskPct)}%`;
+
+        const totalBar = document.getElementById('total-progress-fill');
+        const totalPctText = document.getElementById('total-progress-pct');
+        if(totalBar) totalBar.style.width = `${totalPct}%`;
+        if(totalPctText) totalPctText.innerText = `${Math.floor(totalPct)}%`;
+    }
+
+    function resetMultiProgressUI(isCloud) {
+        document.getElementById('multi-progress-container').classList.remove('hidden');
+        document.getElementById('total-progress-container').classList.remove('hidden');
+        
+        ['text', 'vocab', 'spk', 'zip', 'net'].forEach(id => {
+            updateMultiProgress(id, 0, 0);
+        });
+
+        const netLabel = document.getElementById('lbl-step-net');
+        const netDesc = document.getElementById('lbl-desc-net');
+        if (netLabel) {
+            netLabel.innerText = isCloud ? "☁️ Secure Transmission" : "💾 Local File I/O";
+        }
+        if (netDesc) {
+            netDesc.innerText = isCloud ? "구글 드라이브 SSL 암호화 터널링" : "브라우저 Blob URL 생성 및 다운로드 처리";
+        }
+    }
+
+    // ⭐️ [버그 해결] 특정 DB에서 모든 오디오 데이터를 안전하게 긁어오는 커서(Cursor) 함수
+    async function getAllAudioFromSpecificDB(dbName, storeName) {
+        return new Promise((resolve) => {
+            const request = indexedDB.open(dbName, 1);
+            
+            // DB가 없을 경우 생성만 해둠 (에러 방지)
+            request.onupgradeneeded = (e) => {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains(storeName)) {
+                    db.createObjectStore(storeName);
+                }
+            };
+
+            request.onsuccess = (e) => {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains(storeName)) {
+                    resolve({}); return;
+                }
+                
+                const tx = db.transaction(storeName, 'readonly');
+                const store = tx.objectStore(storeName);
+                const result = {};
+                
+                // Cursor를 이용해 메모리 폭발과 비동기 꼬임(Race condition) 원천 차단
+                const cursorReq = store.openCursor();
+                cursorReq.onsuccess = (ev) => {
+                    const cursor = ev.target.result;
+                    if (cursor) {
+                        result[cursor.key] = cursor.value;
+                        cursor.continue(); // 다음 데이터 탐색
+                    } else {
+                        // 모든 탐색이 끝나면 최종 결과 반환
+                        resolve(result);
+                    }
+                };
+                cursorReq.onerror = () => resolve({});
+            };
+            request.onerror = () => resolve({});
+        });
+    }
+
+    // ==========================================
+    // 메인 백업 파이프라인 엔진 (ZIP 패키징)
+    // ==========================================
+    async function executeBackupPipeline(isCloud = false) {
+        resetMultiProgressUI(isCloud);
+
+        // 1. 텍스트 메타데이터 스캔
+        updateMultiProgress('text', 50, 2);
+        await delay(400); 
+        const localList = getPWASavedWords();
+        const localSpkData = JSON.parse(localStorage.getItem('pongcrush_spk_data') || '[]');
+        if (localList.length === 0 && localSpkData.length === 0) throw new Error("백업할 데이터가 없습니다.");
+        
+        const exportData = { type: "pongcrush_combined", words: localList, speaking: localSpkData };
+        const zip = new JSZip();
+        zip.file("data.json", JSON.stringify(exportData, null, 2));
+        updateMultiProgress('text', 100, 5);
+        await delay(300);
+
+        // 2. 단어장(Vocab) 오디오 DB 추출
+        updateMultiProgress('vocab', 40, 10);
+        const vocabAudioData = await getAllAudioFromSpecificDB('PongcrushVocabAudioDB', 'vocabAudioStore');
+        const vocabAudioFolder = zip.folder("audio_vocab"); 
+        for(const key of Object.keys(vocabAudioData)) {
+            vocabAudioFolder.file(key, vocabAudioData[key]);
+        }
+        updateMultiProgress('vocab', 100, 25);
+        await delay(300);
+
+        // 3. ⭐️ 스피킹(Speaking) 오디오 DB 추출
+        updateMultiProgress('spk', 40, 35);
+        const spkAudioData = await getAllAudioFromSpecificDB('PongcrushAudioDB', 'audioStore');
+        const spkAudioFolder = zip.folder("audio_speaking"); 
+        for(const key of Object.keys(spkAudioData)) {
+            spkAudioFolder.file(key, spkAudioData[key]);
+        }
+        updateMultiProgress('spk', 100, 45);
+        await delay(300);
+
+        // 4. JSZip 단일 압축
+        const blob = await zip.generateAsync(
+            {type:"blob", compression: "DEFLATE", compressionOptions: { level: 6 }}, 
+            (meta) => updateMultiProgress('zip', meta.percent, 45 + (meta.percent * 0.4))
+        );
+        updateMultiProgress('zip', 100, 85);
+        await delay(400);
+
+        return blob;
+    }
+
+    // ==========================================
+    // 로컬 백업 내보내기
+    // ==========================================
+    async function backupWeakWords() {
+        const loadingOverlay = document.getElementById('loading-overlay'); 
+        document.getElementById('loading-text').innerText = "로컬 백업을 준비 중입니다..."; 
+        loadingOverlay.classList.remove('hidden'); 
+
+        try {
+            const blob = await executeBackupPipeline(false);
+            const fileName = generateHumanReadableFileName("Pongcrush_Local_Backup"); 
+            updateMultiProgress('net', 100, 100);
+            await delay(500); 
+
+            const url = URL.createObjectURL(blob);
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.href = url;
+            dlAnchorElem.download = fileName;
+            document.body.appendChild(dlAnchorElem);
+            dlAnchorElem.click();
+            document.body.removeChild(dlAnchorElem);
+            URL.revokeObjectURL(url);
+        } catch(e) {
+            alert(e.message);
+        } finally {
+            loadingOverlay.classList.add('hidden'); 
+        }
+    }
+
+    // ==========================================
+    // 구글 드라이브 동기화
+    // ==========================================
+    window.syncToGoogleDrive = async function() { 
+        if (!GOOGLE_CLIENT_ID) { alert("스크립트 상단에 GOOGLE_CLIENT_ID를 먼저 입력해야 합니다."); return; } 
+        
+        requestGoogleAuth(async () => { 
+            const loadingOverlay = document.getElementById('loading-overlay'); 
+            document.getElementById('loading-text').innerText = "클라우드 동기화 시작..."; 
+            loadingOverlay.classList.remove('hidden'); 
+            
+            try { 
+                const blob = await executeBackupPipeline(true);
+                updateMultiProgress('net', 60, 93);
+                await delay(600);
+                
+                const fileName = generateHumanReadableFileName("pongcrush_sync_data"); 
+                const metadata = { name: fileName, mimeType: 'application/zip' }; 
+                const form = new FormData(); 
+                form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' })); 
+                form.append('file', blob); 
+                
+                await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { 
+                    method: 'POST', 
+                    headers: { Authorization: `Bearer ${gapi.client.getToken().access_token}` }, 
+                    body: form 
+                }); 
+                
+                updateMultiProgress('net', 100, 100);
+                await delay(600); 
+
+                alert(`✅ 구글 드라이브에 새 백업 파일\n[${fileName}]\n안전하게 업로드되었습니다!`); 
+                closeDataModal(); 
+            } catch (err) { 
+                alert('❌ 구글 백업 실패: ' + err.message); 
+            } finally { 
+                loadingOverlay.classList.add('hidden'); 
+            } 
+        }); 
+    };
+
+    // ==========================================
+    // 복원: 다중 오디오 폴더 지원 복원 로직
+    // ==========================================
+    async function processImportedFile(blobOrString) {
+        let jsonText = null;
+        let isZip = false;
+        let zipInstance = null;
+
+        if (typeof blobOrString === 'string') {
+            jsonText = blobOrString;
+        } else if (blobOrString instanceof Blob) {
+            try {
+                zipInstance = await JSZip.loadAsync(blobOrString);
+                isZip = true;
+            } catch(e) {
+                jsonText = await blobOrString.text();
+            }
+        }
+
+        if (isZip) {
+            const dataFile = zipInstance.file("data.json");
+            if (!dataFile) throw new Error("유효한 백업 구조가 아닙니다 (data.json 누락)");
+            jsonText = await dataFile.async("string");
+            
+            // ⭐️ 오디오 폴더 복원 헬퍼 (트랜잭션 에러 및 파일 속성 누락 방지)
+            const restoreAudioFolder = async (folderName, dbName, storeName) => {
+                const folder = zipInstance.folder(folderName);
+                if (!folder) return; 
+                
+                const files = [];
+                folder.forEach((relativePath, file) => {
+                    if (!file.dir) files.push({ key: relativePath, file: file });
+                });
+
+                if (files.length > 0) {
+                    const db = await new Promise((resolve, reject) => {
+                        const req = indexedDB.open(dbName, 1);
+                        req.onupgradeneeded = (e) => {
+                            if (!e.target.result.objectStoreNames.contains(storeName)) {
+                                e.target.result.createObjectStore(storeName);
+                            }
+                        };
+                        req.onsuccess = (e) => resolve(e.target.result);
+                        req.onerror = () => reject(req.error);
+                    });
+                    
+                    for (const item of files) {
+                        const rawBlob = await item.file.async("blob");
+                        // ⭐️ 브라우저가 재생 거부하지 않도록 오디오 MIME 타입 강제 명시
+                        const audioBlob = new Blob([rawBlob], { type: "audio/mpeg" });
+                        
+                        await new Promise((resolve, reject) => {
+                            const tx = db.transaction(storeName, 'readwrite');
+                            const store = tx.objectStore(storeName);
+                            const req = store.put(audioBlob, item.key);
+                            req.onsuccess = resolve;
+                            req.onerror = () => reject(req.error);
+                        });
+                    }
+                    console.log(`✅ [${folderName}] -> ${files.length}개 오디오 복원 완료`);
+                }
+            };
+
+            await restoreAudioFolder("audio", 'PongcrushVocabAudioDB', 'vocabAudioStore');
+            await restoreAudioFolder("audio_vocab", 'PongcrushVocabAudioDB', 'vocabAudioStore');
+            await restoreAudioFolder("audio_speaking", 'PongcrushAudioDB', 'audioStore');
+        }
+
+        await processImportedData(jsonText);
+    }
+
+    // 통합 데이터 복원 함수 (실수로 지워졌던 기존 로직 복구)
     async function processImportedData(rawContent) { 
         let importedList = []; 
         if (typeof rawContent === 'string') { 
@@ -1286,57 +1994,37 @@ function renderVoiceListUI() {
         updatePWAReviewButtonUI(); 
         alert(`백업 데이터에서 ${importedList.length}개 단어를 확인했습니다.\n(신규 추가: ${addedCount}개, 병합 업데이트: ${updatedCount}개 완료)`); 
     }
-    
-    function restoreWeakWords() { const input = document.createElement('input'); input.type = 'file'; input.accept = ".json,.txt,text/plain,application/json,*/*"; input.style.display = 'none'; input.onchange = function(event) { const file = event.target.files && event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = async function(e) { try { await processImportedData(e.target.result); closeDataModal(); } catch (err) { alert("파일 복원 실패: " + err.message); } }; reader.onerror = function() { alert("파일을 읽는 중 에러가 발생했습니다."); }; reader.readAsText(file, 'UTF-8'); }; document.body.appendChild(input); input.click(); setTimeout(() => { document.body.removeChild(input); }, 1000); }
 
-    window.syncToGoogleDrive = async function() { 
-    if (!GOOGLE_CLIENT_ID) { alert("스크립트 상단에 GOOGLE_CLIENT_ID를 먼저 입력해야 합니다."); return; } 
-    
-    let localList = getPWASavedWords();
-    let localSpkData = JSON.parse(localStorage.getItem('pongcrush_spk_data') || '[]');
-
-    if (localList.length === 0 && localSpkData.length === 0) {
-        alert("백업할 취약 단어나 스피킹 데이터가 없습니다."); return;
+    // 로컬 파일에서 복원
+    function restoreWeakWords() { 
+        const input = document.createElement('input'); 
+        input.type = 'file'; 
+        input.accept = ".zip,.json,.txt,text/plain,application/json,application/zip,application/x-zip-compressed,*/*"; 
+        input.style.display = 'none'; 
+        input.onchange = async function(event) { 
+            const file = event.target.files && event.target.files[0]; 
+            if (!file) return; 
+            
+            const loadingOverlay = document.getElementById('loading-overlay'); 
+            const loadingText = document.getElementById('loading-text'); 
+            loadingText.innerText = "백업 파일을 해독하고 복원하는 중..."; 
+            loadingOverlay.classList.remove('hidden'); 
+            
+            try { 
+                await processImportedFile(file); 
+                closeDataModal(); 
+            } catch (err) { 
+                alert("파일 복원 실패: " + err.message); 
+            } finally {
+                loadingOverlay.classList.add('hidden');
+            }
+        }; 
+        document.body.appendChild(input); 
+        input.click(); 
+        setTimeout(() => { document.body.removeChild(input); }, 1000); 
     }
 
-    requestGoogleAuth(async () => { 
-        const loadingOverlay = document.getElementById('loading-overlay'); 
-        const loadingText = document.getElementById('loading-text'); 
-        loadingText.innerText = "구글 드라이브에 새 백업 생성 중..."; 
-        loadingOverlay.classList.remove('hidden'); 
-        
-        try { 
-            // 💡 파일명에 생성 시간(Timestamp)을 포함하여 겹치지 않게 생성
-            const now = new Date();
-            const timestamp = now.toISOString().replace(/[:.]/g, '-'); // 예: 2026-08-26T06-20-38-123Z
-            const fileName = `pongcrush_sync_data_${timestamp}.json`; 
-            
-            const finalUploadData = { type: "pongcrush_combined", words: localList, speaking: localSpkData };
-            const fileContent = new Blob([JSON.stringify(finalUploadData, null, 2)], { type: 'application/json' }); 
-            const metadata = { name: fileName, mimeType: 'application/json' }; 
-            const form = new FormData(); 
-            form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' })); 
-            form.append('file', fileContent); 
-            
-            // 💡 이전 파일을 조회할 필요 없이 바로 새 파일 업로드(POST)
-            await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { 
-                method: 'POST', 
-                headers: { Authorization: `Bearer ${gapi.client.getToken().access_token}` }, 
-                body: form 
-            }); 
-            
-            alert(`✅ 구글 드라이브에 새 백업 파일(${fileName})이 생성되었습니다!`); 
-            closeDataModal(); 
-        } catch (err) { 
-            alert('❌ 구글 백업 실패: ' + err.message); 
-        } finally { 
-            loadingOverlay.classList.add('hidden'); 
-            loadingText.innerText = "단어장 데이터를 가져오는 중..."; 
-        } 
-    }); 
-};
-    
-    // 통합 데이터 GDrive 불러오기
+    // 구글 드라이브에서 복원
     window.loadFromGoogleDrive = async function() { 
         if (!GOOGLE_CLIENT_ID) { alert("스크립트 상단에 GOOGLE_CLIENT_ID를 먼저 입력해야 합니다."); return; } 
         requestGoogleAuth(async () => { 
@@ -1345,7 +2033,7 @@ function renderVoiceListUI() {
             loadingText.innerText = "구글 드라이브에서 최신 백업 불러오는 중..."; 
             loadingOverlay.classList.remove('hidden'); 
             try { 
-                // 💡 파일명 패턴으로 검색하고, 생성일(createdTime) 기준 내림차순(desc) 정렬
+                // 생성일 기준 내림차순(createdTime desc)으로 검색하여 최신 버전 보장
                 const res = await gapi.client.drive.files.list({ 
                     q: `name contains 'pongcrush_sync_data' and trashed = false`, 
                     orderBy: 'createdTime desc',
@@ -1356,81 +2044,24 @@ function renderVoiceListUI() {
                 
                 if (!files || files.length === 0) { alert('⚠️ 구글 드라이브에 저장된 백업 파일이 없습니다.'); return; } 
                 
-                // 💡 정렬된 리스트의 첫 번째 파일이 가장 최신 파일
                 const latestFile = files[0];
-                const fileData = await gapi.client.drive.files.get({ fileId: latestFile.id, alt: 'media' }); 
-                const importedData = typeof fileData.body === 'string' ? JSON.parse(fileData.body) : fileData.body; 
+                loadingText.innerText = `최신 파일(${latestFile.name}) 분석 중...`;
                 
-                if (Array.isArray(importedData)) {
-                    await processImportedData(importedData);
-                } else {
-                    if (importedData.speaking && importedData.speaking.length > 0) {
-                        localStorage.setItem('pongcrush_spk_data', JSON.stringify(importedData.speaking));
-                    }
-                    await processImportedData(importedData.words || []);
-                }
+                // alt: media를 통해 실제 파일 다운로드 (Blob 형태로 받음)
+                const fileRes = await fetch(`https://www.googleapis.com/drive/v3/files/${latestFile.id}?alt=media`, {
+                    headers: { Authorization: `Bearer ${gapi.client.getToken().access_token}` }
+                });
+                
+                if (!fileRes.ok) throw new Error("파일 다운로드 권한이 없거나 실패했습니다.");
+                const blob = await fileRes.blob();
+
+                await processImportedFile(blob);
+                
                 alert(`✅ 최신 백업 파일(${latestFile.name}) 복원 완료!`);
                 closeDataModal(); 
             } catch (err) { alert('❌ 불러오기 실패: ' + err.message); } 
             finally { loadingOverlay.classList.add('hidden'); loadingText.innerText = "단어장 데이터를 가져오는 중..."; } 
         }); 
-    };
-
-    // 구글 드라이브 백업 히스토리 모달 열기
-    window.openGDriveHistoryModal = function() {
-        if (!GOOGLE_CLIENT_ID) { alert("스크립트 상단에 GOOGLE_CLIENT_ID를 먼저 입력해야 합니다."); return; } 
-        
-        const modal = document.getElementById('gdrive-history-modal');
-        const container = document.getElementById('gdrive-history-list');
-        
-        if (modal) modal.classList.remove('hidden');
-        
-        // 로딩 UI 렌더링
-        container.innerHTML = '<div style="text-align:center; padding:30px 20px; color:var(--text-muted); font-size:13px; font-weight:700;"><div class="spinner" style="border-top-color:#3b82f6; margin-bottom:12px;"></div><br>백업 기록을 불러오는 중입니다...</div>';
-        
-        requestGoogleAuth(async () => {
-            try {
-                // 앱 생성 파일 최신순 조회
-                const res = await gapi.client.drive.files.list({
-                    q: "trashed = false", 
-                    orderBy: 'createdTime desc',
-                    fields: 'files(id, name, createdTime, size)',
-                    spaces: 'drive'
-                });
-                
-                const files = res.result.files;
-                
-                if (!files || files.length === 0) {
-                    container.innerHTML = '<div style="text-align:center; padding:30px 20px; color:var(--text-muted); font-size:13px; font-weight:700;">📂 저장된 백업 내역이 없습니다.</div>';
-                    return;
-                }
-                
-                let html = '';
-                files.forEach((file, index) => {
-                    const dateObj = new Date(file.createdTime);
-                    const dateStr = dateObj.toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
-                    const kbSize = file.size ? Math.round(file.size / 1024).toLocaleString() + ' KB' : '알 수 없음';
-                    const isLatest = index === 0;
-                    
-                    html += `
-                        <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:8px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                            <div style="font-weight:800; color:var(--text-main); font-size:13.5px; word-break:break-all; display:flex; align-items:center; gap:6px;">
-                                📄 ${file.name}
-                                ${isLatest ? '<span style="font-size:10px; background:#dcfce7; color:#16a34a; padding:2px 6px; border-radius:6px; font-weight:900;">최신</span>' : ''}
-                            </div>
-                            <div style="display:flex; justify-content:space-between; font-size:12px; color:#64748b; font-weight:600;">
-                                <span>🗓️ ${dateStr}</span>
-                                <span>💾 ${kbSize}</span>
-                            </div>
-                        </div>
-                    `;
-                });
-                container.innerHTML = html;
-                
-            } catch(err) {
-                container.innerHTML = `<div style="text-align:center; padding:30px 20px; color:#dc2626; font-size:13px; font-weight:800;">❌ 내역을 불러오지 못했습니다.<br><span style="font-size:11px; font-weight:500; margin-top:6px; display:block;">${err.message}</span></div>`;
-            }
-        });
     };
 
     // 히스토리 모달 닫기
@@ -1488,7 +2119,34 @@ function renderVoiceListUI() {
         } 
     }
     
-    function speakCurrentWord(onCompleteCallback) { stopTTS(); if (!('speechSynthesis' in window)) { if (onCompleteCallback) onCompleteCallback(); return; } const item = wordList[currentStartIndex]; if (!item) { if (onCompleteCallback) onCompleteCallback(); return; } const cleanWord = item.en ? item.en.replace(/<[^>]*>/g, '').replace(/#/g, ' ').trim() : ''; const cleanExEn = item.exEn ? item.exEn.replace(/<[^>]*>/g, '').replace(/#/g, ' ').trim() : ''; if (!cleanWord) { if (onCompleteCallback) onCompleteCallback(); return; } setTimeout(() => { try { let isFired = false; const safeCallback = () => { if (!isFired) { isFired = true; if (onCompleteCallback) onCompleteCallback(); } }; const wordUtterance = new SpeechSynthesisUtterance(cleanWord); wordUtterance.pitch = 1.0; wordUtterance.rate = 1.0; const voiceObj = getRandomOrSelectedVoice(); if (voiceObj) { wordUtterance.voice = voiceObj; wordUtterance.lang = voiceObj.lang || 'en-US'; } else wordUtterance.lang = 'en-US'; if (cleanExEn) { const exUtterance = new SpeechSynthesisUtterance(cleanExEn); exUtterance.pitch = 1.0; exUtterance.rate = 1.0; if (voiceObj) { exUtterance.voice = voiceObj; exUtterance.lang = voiceObj.lang || 'en-US'; } else exUtterance.lang = 'en-US'; wordUtterance.onend = () => { if (!globalTTSCancelFlag) { window.speechSynthesis.speak(exUtterance); } }; exUtterance.onend = safeCallback; exUtterance.onerror = safeCallback; setTimeout(safeCallback, 10000); window.ttsUtterances.push(wordUtterance, exUtterance); } else { wordUtterance.onend = safeCallback; wordUtterance.onerror = safeCallback; setTimeout(safeCallback, 3500); window.ttsUtterances.push(wordUtterance); } if (window.ttsUtterances.length > 10) window.ttsUtterances.splice(0, window.ttsUtterances.length - 10); window.speechSynthesis.speak(wordUtterance); } catch (e) { if (onCompleteCallback) onCompleteCallback(); } }, 60); }
+
+    async function speakCurrentWord(onCompleteCallback) { 
+        stopTTS(); 
+        const item = wordList[currentStartIndex]; 
+        if (!item) { if (onCompleteCallback) onCompleteCallback(); return; } 
+        
+        const cleanWord = item.en ? item.en.replace(/<[^>]*>/g, '').replace(/#/g, ' ').trim() : ''; 
+        const cleanExEn = item.exEn ? item.exEn.replace(/<[^>]*>/g, '').replace(/#/g, ' ').trim() : ''; 
+        
+        if (!cleanWord) { if (onCompleteCallback) onCompleteCallback(); return; } 
+        
+        // 1. 60ms 대기 (Promise 기반)
+        await new Promise(resolve => setTimeout(resolve, 60));
+        
+        const voiceObj = getRandomOrSelectedVoice(); 
+        
+        // 2. 단어 재생이 끝날 때까지 대기
+        await new Promise(resolve => playHybridTTS(cleanWord, voiceObj, resolve));
+        
+        // 3. 중단되지 않았고 예문이 있다면, 예문 재생이 끝날 때까지 대기
+        if (cleanExEn && !globalTTSCancelFlag) {
+            await new Promise(resolve => playHybridTTS(cleanExEn, voiceObj, resolve));
+        }
+        
+        // 4. 모든 과정이 끝나면 최종 콜백 실행
+        if (onCompleteCallback) onCompleteCallback();
+    }
+
     function getSynthAudioContext() { if (!synthAudioCtx) synthAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (synthAudioCtx.state === 'suspended') synthAudioCtx.resume(); return synthAudioCtx; }
     function unlockAudioContext() { const ctx = getSynthAudioContext(); if (ctx && ctx.state === 'suspended') ctx.resume(); } window.addEventListener('click', unlockAudioContext, { passive: true }); window.addEventListener('touchstart', unlockAudioContext, { passive: true }); window.addEventListener('keydown', unlockAudioContext, { passive: true });
     
@@ -1505,7 +2163,45 @@ function renderVoiceListUI() {
     function loadShortcutUrl(url) { window.isAllDbLoaded = false; loadExcelFromUrl(url); }
     
     async function fetchSheetData(url, bypassCache = false) { let exportUrl = url; if (exportUrl.includes("docs.google.com/spreadsheets")) { if (exportUrl.includes("/edit")) exportUrl = exportUrl.split('/edit')[0] + '/export?format=xlsx'; else if (!exportUrl.includes("/export")) exportUrl = exportUrl + '/export?format=xlsx'; } if (bypassCache && 'caches' in window) { try { const cacheNames = await caches.keys(); for (const name of cacheNames) { if (name.startsWith('pongcrush')) { const cache = await caches.open(name); await cache.delete(exportUrl); } } } catch(e) {} } let response; try { response = await fetch(exportUrl, bypassCache ? { cache: 'reload' } : {}); } catch (e) { console.warn(e); } if (!response || !response.ok) throw new Error("파일 로드 실패. 링크 공유 권한을 확인하세요."); const data = new Uint8Array(await response.arrayBuffer()); const workbook = XLSX.read(data, { type: 'array' }); const worksheet = workbook.Sheets[workbook.SheetNames[0]]; const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }); return jsonData.filter(row => row && row[0] && row[1]).map(row => ({ ko: formatWordText(row[0]), en: formatWordText(row[1]), exEn: formatWordText(row[2] || ''), exKo: formatWordText(row[3] || ''), synonyms: (row[4] || '').toString().trim() })); }
-    async function loadExcelFromUrl(targetUrl, bypassCache = false) { let url = targetUrl || ''; if (!url) { statusEl.classList.add('error'); statusEl.innerText = "URL이 선택되지 않았습니다."; return; } if (url.includes("1m7KXifCB6txkKEOHqApMWOR4MQwqb6Ji1Dm-hRJYzLc")) { currentCategory = "스피킹"; perDayCount = 30; } else if (url.includes("1UYTEv88wdKsSS2kkB-UylHAfQAlV6yrvjwVNecG6m64")) { currentCategory = "라이팅"; perDayCount = 40; } else if (url.includes("1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U")) { currentCategory = "초록이"; perDayCount = 60; } else { currentCategory = "단어암기"; perDayCount = 30; } statusEl.classList.remove('error'); statusEl.innerText = ""; const loadingModal = document.getElementById('loading-overlay'); if (loadingModal) loadingModal.classList.remove('hidden'); try { const tempExtractList = await fetchSheetData(url, bypassCache); if (tempExtractList.length === 0) throw new Error("유효한 단어 데이터(1열 한국어, 2열 영어)가 없습니다."); loadedRawWordList = tempExtractList; if (loadingModal) loadingModal.classList.add('hidden'); openDayModal(); } catch (error) { if (loadingModal) loadingModal.classList.add('hidden'); statusEl.classList.add('error'); statusEl.innerText = "에러: " + error.message; } }
+    
+    
+    async function loadExcelFromUrl(targetUrl, bypassCache = false) { 
+        let url = targetUrl || ''; 
+        if (!url) { statusEl.classList.add('error'); statusEl.innerText = "URL이 선택되지 않았습니다."; return; } 
+        
+        if (url.includes("1m7KXifCB6txkKEOHqApMWOR4MQwqb6Ji1Dm-hRJYzLc")) { currentCategory = "스피킹"; perDayCount = 30; } 
+        else if (url.includes("1UYTEv88wdKsSS2kkB-UylHAfQAlV6yrvjwVNecG6m64")) { currentCategory = "라이팅"; perDayCount = 40; } 
+        else if (url.includes("1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U")) { currentCategory = "초록이"; perDayCount = 60; } 
+        else { currentCategory = "단어암기"; perDayCount = 30; } 
+        
+        statusEl.classList.remove('error'); statusEl.innerText = ""; 
+        
+        const loadingModal = document.getElementById('loading-overlay'); 
+        const loadingText = document.getElementById('loading-text');
+        const multiProgress = document.getElementById('multi-progress-container');
+        const totalProgress = document.getElementById('total-progress-container');
+
+        if (loadingModal) {
+            // 일반 단어장 로딩 시 텍스트 초기화 및 대시보드 완전 숨김 처리
+            if (loadingText) loadingText.innerText = `데이터베이스(${currentCategory})를 불러오는 중입니다...`; 
+            if (multiProgress) multiProgress.classList.add('hidden'); 
+            if (totalProgress) totalProgress.classList.add('hidden'); 
+            loadingModal.classList.remove('hidden'); 
+        } 
+        
+        try { 
+            const tempExtractList = await fetchSheetData(url, bypassCache); 
+            if (tempExtractList.length === 0) throw new Error("유효한 단어 데이터가 없습니다."); 
+            loadedRawWordList = tempExtractList; 
+            
+            if (loadingModal) loadingModal.classList.add('hidden'); 
+            openDayModal(); 
+        } catch (error) { 
+            if (loadingModal) loadingModal.classList.add('hidden'); 
+            statusEl.classList.add('error'); statusEl.innerText = "에러: " + error.message; 
+        } 
+    }
+
     function openDayModal() { const modal = document.getElementById('day-modal'); if (!modal) return; const titleEl = document.getElementById('day-modal-title'); if (titleEl) titleEl.innerText = `📅 ${currentCategory} 시험 Day 선택`; modal.classList.remove('hidden'); renderDayButtonsUI(); }
     function closeDayModal() { const modal = document.getElementById('day-modal'); if (modal) modal.classList.add('hidden'); }
     function renderDayButtonsUI() { const titleEl = document.getElementById('day-list-title'); const gridEl = document.getElementById('day-buttons-grid'); if (!gridEl) return; const totalWords = loadedRawWordList.length; if (titleEl) titleEl.innerText = `📌 학습할 Day 선택 (총 ${totalWords}개 단어 / Day당 ${perDayCount}개)`; const totalDays = Math.ceil(totalWords / perDayCount); let html = `<button class="sec-btn" style="grid-column: span 3; background:#e0f2fe; color:#0369a1; border-color:#0284c7;" onclick="selectDayRange(-1)">🔥 전체 단어 복습 (1 ~ ${totalWords}번)</button>`; for (let i = 0; i < totalDays; i++) { const startIdx = i * perDayCount + 1; const endIdx = Math.min((i + 1) * perDayCount, totalWords); html += `<button class="sec-btn" onclick="selectDayRange(${i})">Day ${i + 1}<br><span style="font-size:11px; opacity:0.8; font-weight:normal;">(${startIdx}~${endIdx})</span></button>`; } gridEl.innerHTML = html; }
@@ -1637,7 +2333,22 @@ function renderVoiceListUI() {
         playFanfareSound(); 
     }
     
-    function deleteSingleWeakWordFromTable(ko, en, btnEl) { removeWordFromPWAStorage({ ko, en }); testedWeakWordsInSession = testedWeakWordsInSession.filter(w => !(w.ko === ko && w.en === en)); const row = btnEl.closest('tr'); if (row) { row.style.opacity = '0'; row.style.transform = 'scale(0.95)'; row.style.transition = 'all 0.2s ease'; setTimeout(() => { row.remove(); document.getElementById('summary-count').innerText = `복습할 단어: ${testedWeakWordsInSession.length}개`; }, 200); } }
+    
+    function deleteSingleWeakWordFromTable(ko, en, btnEl) { 
+        removeWordFromPWAStorage({ ko, en }); 
+        testedWeakWordsInSession = testedWeakWordsInSession.filter(w => !(w.ko === ko && w.en === en)); 
+        const row = btnEl.closest('tr'); 
+        if (row) { 
+            row.style.opacity = '0'; 
+            row.style.transform = 'scale(0.95)'; 
+            row.style.transition = 'all 0.2s ease'; 
+            setTimeout(() => { 
+                row.remove(); 
+                document.getElementById('summary-count').innerText = `복습할 단어: ${testedWeakWordsInSession.length}개`; 
+            }, 200); 
+        } 
+    }
+
     function goToHome() { stopTTS(); stopStudyTimer(); releaseWakeLock(); document.getElementById('game-area').classList.add('hidden'); document.getElementById('summary-area').classList.add('hidden'); document.getElementById('setup-area').classList.remove('hidden'); document.getElementById('network-status-container').classList.remove('hidden'); document.getElementById('app-footer').classList.remove('hidden'); document.body.classList.remove('game-active'); updatePWAReviewButtonUI(); }
     function reviewVagueWords() { const targetList = isWeakReviewMode ? testedWeakWordsInSession : vagueWords; if (targetList.length === 0) return; wordList = shuffleArray(targetList); vagueWords = []; currentStartIndex = 0; document.getElementById('summary-area').classList.add('hidden'); document.getElementById('game-area').classList.remove('hidden'); startStudyTimer(); renderCards(); }
     function restartFullGame() { wordList = shuffleArray(originalWordList); vagueWords = []; currentStartIndex = 0; document.getElementById('summary-area').classList.add('hidden'); document.getElementById('game-area').classList.remove('hidden'); startStudyTimer(); renderCards(); }
@@ -1829,22 +2540,42 @@ function renderVoiceListUI() {
         }
 
         isDevResetExecuting = true;
-        const confirmReset = confirm("경고: 저장된 모든 단어 기록, AI 설정, 로컬 캐시가 영구적으로 삭제됩니다.\n진행하시겠습니까?");
+        const confirmReset = confirm("경고: 저장된 모든 단어 기록, AI 설정, 로컬 캐시 및 오디오 데이터베이스 전체가 영구적으로 삭제됩니다.\n진행하시겠습니까?");
         if (!confirmReset) {
             isDevResetExecuting = false;
             return;
         }
 
         try {
+            // 1. 로컬 스토리지 및 세션 스토리지 완벽 초기화
             localStorage.clear();
             sessionStorage.clear();
 
+            // 2. 서비스 워커(PWA) 오프라인 캐시 초기화
             if ('caches' in window) {
                 const cacheNames = await caches.keys();
                 await Promise.all(cacheNames.map(name => caches.delete(name)));
             }
 
-            alert('✅ 데이터 초기화가 완료되었습니다.\n애플리케이션을 새로고침합니다.');
+            // 3. IndexedDB 데이터베이스 자체를 통째로 완전 삭제 (Drop Database)
+            // 단어장 오디오 DB(PongcrushVocabAudioDB)와 스피킹 오디오 DB(PongcrushAudioDB) 모두 소각
+            const deleteVocabDB = new Promise((resolve) => {
+                const req = indexedDB.deleteDatabase('PongcrushVocabAudioDB');
+                req.onsuccess = resolve;
+                req.onerror = resolve; // 에러가 나더라도(DB가 없더라도) 다음 작업을 위해 resolve
+                req.onblocked = resolve;
+            });
+            
+            const deleteSpeakingDB = new Promise((resolve) => {
+                const req = indexedDB.deleteDatabase('PongcrushAudioDB');
+                req.onsuccess = resolve;
+                req.onerror = resolve;
+                req.onblocked = resolve;
+            });
+
+            await Promise.all([deleteVocabDB, deleteSpeakingDB]);
+
+            alert('✅ 데이터베이스(IndexedDB)를 포함한 모든 데이터 초기화가 완료되었습니다.\n애플리케이션을 새로고침합니다.');
             window.location.reload(true);
         } catch (error) {
             alert('초기화 중 오류가 발생했습니다: ' + error.message);
