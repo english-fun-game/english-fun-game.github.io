@@ -184,6 +184,19 @@
             box-shadow: 0 0 0 3px rgba(18, 100, 163, 0.1);
         }
 
+        /* 텍스트 에어리어 높이 동적 제어 (5줄 시작, 최대 제한 없이 무한 확장) */
+        .spk-test-textarea {
+            field-sizing: content;
+            line-height: 1.5;
+            
+            /* 최소 5줄, 최대 15줄 */
+            min-height: calc(5 * 1.5em);
+            max-height: calc(30 * 1.5em);
+
+            box-sizing: border-box;
+            resize: none;
+        }
+
         .btn-record {
             background: #f8fafc; border: 1.5px solid var(--border-strong); color: var(--text-main);
             padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 800;
@@ -394,12 +407,47 @@
         .question-list-container { max-height: 52vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
         
         .question-list-item { background: #f8fafc; border: 1.5px solid var(--border-color); border-radius: 10px; padding: 12px 16px; cursor: pointer; display: flex; align-items: center; gap: 14px; transition: all 0.2s; }
-        .question-list-item:hover { background: #f1f5f9; border-color: var(--slack-blue); }
-        .list-item-meta-tags { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+        .question-list-item:hover { background: #f1f5f9; border-color: var(--slack-blue); } 
         .list-item-badge { background: #0f172a; color: white; font-size: 13px; font-weight: 900; padding: 3px 8px; border-radius: 6px; }
         .list-item-type { background: #e0e7ff; color: #3730a3; font-size: 12px; font-weight: 800; padding: 3px 8px; border-radius: 4px; }
         .list-item-topic { background: #e0f2fe; color: #0369a1; font-size: 12px; font-weight: 800; padding: 3px 8px; border-radius: 4px; }
-        .list-item-text { font-size: 15px; font-weight: 800; color: #0f172a; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        /* 데스크탑 vs 모바일 텍스트 분기 */
+        .q-mobile { display: none; }
+        .q-desktop { display: inline; }
+
+        /* 기존 코드를 찾아 대체 */
+        .list-item-content {
+            flex: 1;
+            min-width: 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            white-space: normal;
+            line-height: 1.5;
+            word-break: keep-all;
+            overflow-wrap: break-word;
+        }
+
+        .list-item-meta-tags {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-right: 8px;
+            vertical-align: middle;
+            margin-bottom: 2px;
+        }
+
+        .list-item-text {
+            display: inline;
+            font-size: 15px;
+            font-weight: 800;
+            color: #0f172a;
+            vertical-align: middle;
+        }
+
+        
         .list-item-delete-btn { font-size: 12.5px; padding: 4px 10px; border-radius: 6px; flex-shrink: 0; }
         .json-textarea { width: 100%; height: 260px; padding: 12px; border-radius: 8px; border: 1.5px solid var(--border-strong); font-family: monospace; font-size: 13.5px; background: #f8fafc; box-sizing: border-box; resize: vertical; }
 
@@ -465,7 +513,7 @@
         }
 
 /* ==========================================
-   모바일 전용 최적화 (설정/목록/음성/읽기 4개만 노출)
+   모바일 전용 최적화
    ========================================== */
 @media (max-width: 768px) {
     body { padding: 8px 3.5vw; height: 100dvh; overflow-y: auto; }
@@ -480,18 +528,19 @@
         gap: 6px !important; 
     }
     
-    /* 좌측: 아바타 + 번호 */
+    /* 좌측: 아바타 + 번호 */ 
     .meta-header { 
         display: flex !important; 
         align-items: center !important; 
-        gap: 4px !important; 
+        gap: 3px !important; 
         flex-shrink: 0 !important; 
     }
+
     .btn-global-persona { padding: 0 !important; background: transparent !important; border: none !important; }
     .profile-img-header { width: 24px !important; height: 24px !important; }
     .question-badge-top { font-size: 11.5px !important; padding: 3px 6px !important; border-radius: 6px !important; }
-    .persona-name-text, .bc-arrow, .specific-persona-tag, .type-segmented-control, .badge-topic-category, .divider-line { display: none !important; }
-    
+    .persona-name-text, .bc-arrow, .specific-persona-tag, .top-bar .type-segmented-control, .badge-topic-category, .divider-line { display: none !important; }
+
     /* 우측 컨트롤 바 */
     .controls { 
         display: flex !important;
@@ -513,8 +562,9 @@
         display: none !important; 
         justify-content: center !important; 
         align-items: center !important; 
-        padding: 8px 0 !important; 
-        font-size: 12.5px !important; 
+        padding: 6px 1px !important; 
+        font-size: 11.5px !important; 
+        letter-spacing: -0.5px !important;
         border-radius: 6px !important; 
         flex: 1 1 0 !important; 
         min-width: 0 !important;
@@ -557,28 +607,88 @@
     .panel-right-1 { flex: none; height: 500px; margin-bottom: 20px; }
     
     .modal-content-giant[style], #voice-modal > div[style], #edit-modal > div[style], #add-modal > div[style], #list-modal > div[style] { width: 95% !important; padding: 16px !important; max-height: 90vh !important; }
+    
+    #list-modal .modal-content-giant { height: 90vh !important; }
+
     #voice-modal > div[style] { padding: 0 !important; }
     .profile-hero-extended { flex-direction: column; text-align: center; gap: 12px; }
     .identity-chips { justify-content: center; }
     .topics-grid { grid-template-columns: 1fr; overflow-y: auto; padding-bottom: 20px; }
-    .list-filter-bar { flex-direction: column; align-items: stretch; gap: 8px; }
-    .filter-select { width: 100%; margin-left: 0 !important; }
+    
+    /* 문제 목록 필터를 정확히 한 줄에 떨어지게 강제 */
+    .list-filter-bar { 
+        flex-direction: row !important; 
+        flex-wrap: nowrap !important; 
+        align-items: center !important; 
+        gap: 4px !important; 
+    }
+    .list-filter-bar > div:first-child > span:first-child,
+    .list-filter-bar label {
+        display: none !important; /* 영역:, 유형:, 주제: 텍스트 숨김 */
+    }
+    .filter-select { 
+        width: auto !important; 
+        flex: 1 !important; 
+        min-width: 0 !important; 
+        margin-left: 0 !important; 
+        padding: 6px 2px !important;
+        font-size: 12px !important;
+    }
+    #filter-domain-group { flex: 0 0 auto !important; }
     
     .question-list-container { max-height: 60vh; gap: 10px; }
     .question-list-item { 
         flex-wrap: wrap; padding: 12px 14px; border-radius: 10px; 
         background: #ffffff; border: 1.5px solid var(--border-color);
         gap: 6px 8px;
+    } 
+    
+    /* 리스트의 각 아이템의 삭제 모바일 지원 차단 */
+    .list-item-delete-btn { display: none !important; }
+ 
+
+    /* 모바일에서는 데스크탑 텍스트를 숨기고 요약 텍스트만 노출 */
+    .q-desktop { display: none !important; }
+    .q-mobile { 
+        display: -webkit-box !important; 
+        -webkit-line-clamp: 2; 
+        -webkit-box-orient: vertical; 
+        overflow: hidden; 
+        white-space: normal; 
     }
-    .list-item-meta-tags { flex: 1; min-width: 0; }
-    .list-item-delete-btn { margin-left: auto; font-size: 11px !important; padding: 3px 6px !important; }
-    .list-item-text { 
-        width: 100%; font-size: 14px; font-weight: 700; line-height: 1.4; color: #0f172a;
-        white-space: normal; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
-        overflow: hidden; margin-top: 2px; flex: none;
-    }
+    
     .coachmark-tooltip { width: auto; max-width: calc(100vw - 40px); }
+
+    .list-item-content {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        gap: 6px;
+    }
+    
+    .list-item-meta-tags {
+        display: flex;
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 0;
+    }
+    
+    .list-item-text {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        width: 100%;
+        margin-top: 0;
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1.4;
+        color: #0f172a;
+        white-space: normal;
+    }
+
 }
+
     </style>
 </head>
 <body>
@@ -728,12 +838,20 @@
 
     <!-- 전체 문제 리스트 모달 -->
     <div class="modal-overlay" id="list-modal" onclick="closeModal('list-modal')">
-        <div class="modal-content-giant" style="width: 850px; height: 75vh;" onclick="event.stopPropagation()">
+        <div class="modal-content-giant" style="width: 850px;" onclick="event.stopPropagation()">
             <button class="modal-close" onclick="closeModal('list-modal')">&times; <span class="modal-close-esc">(ESC)</span></button>
             <h3 style="margin-top: 0; font-size: 20px;">전체 문제 리스트 & 주제 필터</h3>
             
             <div class="list-filter-bar">
-                <label style="font-size: 13.5px; font-weight: 800; color: var(--text-muted);">유형 필터:</label>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="font-size: 13.5px; font-weight: 800; color: var(--text-muted);">영역:</span>
+                    <div class="type-segmented-control" id="filter-domain-group">
+                        <span class="type-pill" onclick="changeDomainFilter('라이팅', this)">라이팅</span>
+                        <span class="type-pill active" onclick="changeDomainFilter('스피킹', this)">스피킹</span>
+                    </div>
+                </div>
+
+                <label style="font-size: 13.5px; font-weight: 800; color: var(--text-muted); margin-left: 8px;">유형:</label>
                 <select id="filter-type" class="filter-select" onchange="renderQuestionList()">
                     <option value="all">전체 유형</option>
                     <option value="경험">경험</option>
@@ -741,7 +859,7 @@
                     <option value="열린">열린</option>
                 </select>
 
-                <label style="font-size: 13.5px; font-weight: 800; color: var(--text-muted); margin-left: 12px;">페르소나 주제 필터:</label>
+                <label style="font-size: 13.5px; font-weight: 800; color: var(--text-muted); margin-left: 8px;">주제:</label>
                 <select id="filter-topic" class="filter-select" onchange="renderQuestionList()">
                     <option value="all">전체 주제 (7대 대주제)</option>
                 </select>
@@ -1080,33 +1198,46 @@
             return;
         }
 
-        if (currentIndex >= spkData.length) {
-            currentIndex = 0;
-            saveCurrentIndex();
-        }
-        const data = spkData[currentIndex];
-        
-        const types = ["경험", "선택", "열린"];
-        const typePillsHtml = types.map(t => 
-            `<span class="type-pill ${t === data.meta.type ? 'active' : ''}">${t}</span>`
-        ).join('');
+    if (currentIndex >= spkData.length) {
+        currentIndex = 0;
+        saveCurrentIndex();
+    }
+    const data = spkData[currentIndex];
+    
+    const types = ["경험", "선택", "열린"];
+    const typePillsHtml = types.map(t => 
+        `<span class="type-pill ${t === data.meta.type ? 'active' : ''}">${t}</span>`
+    ).join('');
 
-        const topicLabel = data.meta.topic_category ? `📚 ${data.meta.topic_category}` : "📚 미분류";
+    const topicLabel = data.meta.topic_category ? `📚 ${data.meta.topic_category}` : "📚 미분류";
 
-        document.getElementById('meta-header').innerHTML = `
-            <button class="btn-global-persona" onclick="openPersonaModal()">
-                <img src="profile.jpg" class="profile-img-header" alt="Profile" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2NiZDVlMSI+PHBhdGggZD0iTTEyIDJhNSA1IDAgMSAwIDAgMTAgNSA1IDAgMCAwIDAtMTB6bTAtMmMzLjg2NiAwIDcgMy4xMzQgNyA3cy0zLjEzNCA3LTcgNy03LTMuMTM0LTctNyAzLjEzNC03IDctN3ptMCAxOGM1LjUyMyAwIDEwIDIuMjM5IDEwIDV2Mkgydi0yYz0yLjc2MSA0LjQ3Ny01IDEwLTV6Ii8+PC9zdmc+='">
-                <span class="persona-name-text">Zuri Harris</span>
-            </button>
-            <span class="bc-arrow">❯</span>
-            <span class="specific-persona-tag">${data.meta.specific_persona || '기본 전략'}</span>
-            <div class="divider-line"></div>
-            <span class="question-badge-top">#${currentIndex + 1}</span>
-            <div class="divider-line"></div>
-            <div class="type-segmented-control">${typePillsHtml}</div>
-            <div class="divider-line"></div>
-            <div class="badge-topic-category">${topicLabel}</div>
-        `;
+    // question_source 파싱 및 라이팅/스피킹 ON 토글 UI 생성
+    const qSource = data.meta.question_source || '';
+    const isWriting = qSource !== '' && qSource.toLowerCase().includes('writing');
+    const isSpeaking = !isWriting; 
+    const qsSegmentHtml = `
+        <div class="type-segmented-control qs-segmented-control">
+            <span class="type-pill ${isWriting ? 'active' : ''}">라이팅</span>
+            <span class="type-pill ${isSpeaking ? 'active' : ''}">스피킹</span>
+        </div>
+    `;
+
+    document.getElementById('meta-header').innerHTML = `
+        <button class="btn-global-persona" onclick="openPersonaModal()">
+            <img src="profile.jpg" class="profile-img-header" alt="Profile" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2NiZDVlMSI+PHBhdGggZD0iTTEyIDJhNSA1IDAgMSAwIDAgMTAgNSA1IDAgMCAwIDAtMTB6bTAtMmMzLjg2NiAwIDcgMy4xMzQgNyA3cy0zLjEzNCA3LTcgNy03LTMuMTM0LTctNyAzLjEzNC03IDctN3ptMCAxOGM1LjUyMyAwIDEwIDIuMjM5IDEwIDV2Mkgydi0yYz0yLjc2MSA0LjQ3Ny01IDEwLTV6Ii8+PC9zdmc+='">
+            <span class="persona-name-text">Zuri Harris</span>
+        </button>
+        <span class="bc-arrow">❯</span>
+        <span class="specific-persona-tag">${data.meta.specific_persona || '기본 전략'}</span>
+        <div class="divider-line"></div>
+        <span class="question-badge-top">#${currentIndex + 1}</span>
+        <div class="divider-line"></div>
+        <div class="type-segmented-control">${typePillsHtml}</div>
+        <div class="divider-line"></div>
+        <div class="badge-topic-category">${topicLabel}</div>
+        <div class="divider-line"></div>
+        ${qsSegmentHtml}
+    `;
 
         const qPrompt = document.getElementById('q-prompt');
         qPrompt.innerText = data.question;
@@ -1198,10 +1329,10 @@
             input.spellcheck = false;
             input.id = `write-input-${rIdx}`;
             input.placeholder = `문장 ${rIdx + 1} 작성...`;
+            // 높이 무한 확장 적용
             input.oninput = function() {
                 this.style.height = 'auto';
-                this.style.height = Math.min(this.scrollHeight, 84) + 'px';
-                this.style.overflowY = this.scrollHeight > 84 ? 'auto' : 'hidden';
+                this.style.height = this.scrollHeight + 'px';
             };
 
             rowDiv.appendChild(input);
@@ -1278,7 +1409,7 @@
                     <span style="font-size:13.5px; font-weight:800; color:#475569; background:#f1f5f9; padding:2px 8px; border-radius:6px;">전체 스크립트</span>
                     <button id="btn-record-all" class="btn-record" onclick="toggleRecord('all')">🎤 녹음 시작</button>
                 </div>
-                <textarea id="spk-input-all" class="test-input spk-test-textarea" style="min-height:120px;" placeholder="${recMode === 'file' ? '사전 녹음 시 제출 후 텍스트가 표시됩니다...' : '녹음된 전체 텍스트가 이곳에 표시됩니다...'}"></textarea>
+                <textarea id="spk-input-all" class="test-input spk-test-textarea" placeholder="${recMode === 'file' ? '사전 녹음 시 제출 후 텍스트가 표시됩니다...' : '녹음된 전체 텍스트가 이곳에 표시됩니다...'}"></textarea>
             `;
         } else {
             data.script_rows.forEach((row, rIdx) => {
@@ -1291,7 +1422,7 @@
                         <span style="font-size:13px; font-weight:800; color:#475569; background:#f1f5f9; padding:2px 8px; border-radius:6px;">문장 ${rIdx + 1}</span>
                         <button id="btn-record-${rIdx}" class="btn-record" onclick="toggleRecord(${rIdx})">🎤 녹음 시작</button>
                     </div>
-                    <textarea id="spk-input-${rIdx}" class="test-input spk-test-textarea" style="min-height:42px; margin-bottom:0;" placeholder="${recMode === 'file' ? '사전 녹음 모드' : '텍스트가 이곳에 표시됩니다...'}"></textarea>
+                    <textarea id="spk-input-${rIdx}" class="test-input spk-test-textarea" placeholder="${recMode === 'file' ? '사전 녹음 모드' : '텍스트가 이곳에 표시됩니다...'}"></textarea>
                 `;
                 contentDiv.appendChild(rowDiv);
             });
@@ -1434,7 +1565,7 @@
                     if (activeRecordTarget === target && textarea) {
                         textarea.value = (sttExistingText + ' ' + e.result.text).trim();
                         textarea.style.height = 'auto';
-                        textarea.style.height = Math.min(textarea.scrollHeight, 180) + 'px';
+                        textarea.style.height = textarea.scrollHeight + 'px'; // 입력되는 만큼 무한 확장
                     }
                 };
 
@@ -1444,7 +1575,7 @@
                         if (activeRecordTarget === target && textarea) {
                             textarea.value = sttExistingText;
                             textarea.style.height = 'auto';
-                            textarea.style.height = Math.min(textarea.scrollHeight, 180) + 'px';
+                            textarea.style.height = textarea.scrollHeight + 'px';
                         }
                     }
                 };
@@ -1872,6 +2003,27 @@
         }
     }
 
+    // 데스크탑/모바일 공통 리스트 요약용 함수 (마지막 2문장 추출)
+    function getSummaryQuestionText(text) {
+        if (!text) return '';
+        // 문장 기호 기준 추출
+        const sentences = text.match(/[^.!?]+[.!?]+['"]?\s*/g);
+        if (!sentences || sentences.length <= 2) return text;
+        return sentences.slice(-2).join('').trim();
+    }
+
+    let currentDomainFilter = 'all';
+
+    function changeDomainFilter(domain, element) {
+        currentDomainFilter = domain;
+        
+        const parent = document.getElementById('filter-domain-group');
+        parent.querySelectorAll('.type-pill').forEach(pill => pill.classList.remove('active'));
+        element.classList.add('active');
+        
+        renderQuestionList();
+    }
+
     function renderQuestionList() {
         const filterType = document.getElementById('filter-type').value;
         const filterTopic = document.getElementById('filter-topic').value;
@@ -1879,26 +2031,45 @@
         listBody.innerHTML = '';
 
         let filtered = spkData.map((item, i) => ({ item, i })).filter(({ item }) => {
-            const matchType = (filterType === 'all' || (item.meta && item.meta.type === filterType));
+            const qSrc = (item.meta?.question_source || '').toLowerCase();
+            const itemDomain = qSrc.includes('writing') ? '라이팅' : '스피킹';
+            const itemType = item.meta?.type || '';
+
+            const matchDomain = (currentDomainFilter === 'all' || itemDomain === currentDomainFilter);
+            const matchType = (filterType === 'all' || itemType === filterType);
             const matchTopic = (filterTopic === 'all' || (item.meta && item.meta.topic_category === filterTopic));
-            return matchType && matchTopic;
+
+            return matchDomain && matchType && matchTopic;
         });
 
-        if (filtered.length === 0) { listBody.innerHTML = `<div style="text-align:center; padding:20px; color:#64748b; font-weight:700;">조건에 맞는 문제가 없습니다.</div>`; return; }
+        if (filtered.length === 0) { 
+            listBody.innerHTML = `<div style="text-align:center; padding:20px; color:#64748b; font-weight:700;">조건에 맞는 문제가 없습니다.</div>`; 
+            return; 
+        }
 
         filtered.forEach(({ item, i }) => {
+            const qSrc = (item.meta?.question_source || 'Speaking').toLowerCase();
+            const domainLabel = qSrc.includes('writing') ? '라이팅' : '스피킹';
+            
+            // 데스크탑/모바일 공통으로 마지막 2문장만 추출
+            const summaryQ = getSummaryQuestionText(item.question);
+
             const div = document.createElement('div');
             div.className = 'question-list-item';
             div.innerHTML = `
-                <div class="list-item-meta-tags">
-                    <span class="list-item-badge">#${i + 1}</span>
-                    <span class="list-item-type">${item.meta?.type || '미지정'}</span>
-                    <span class="list-item-topic">${item.meta?.topic_category || '미분류'}</span>
-                </div>
-                <div class="list-item-text">${item.question}</div>
-                <button class="ctrl-btn list-item-delete-btn" style="color: #ef4444; border-color: #fca5a5; background: #fef2f2;" onclick="deleteQuestion(${i}, event)">삭제</button>
-            `;
-            
+    <div class="list-item-content">
+        <span class="list-item-meta-tags">
+            <span class="list-item-badge">#${i + 1}</span>
+            <span class="list-item-type" style="background:#e0e7ff; color:#3730a3;">${domainLabel}</span>
+            <span class="list-item-type" style="background:#f1f5f9; color:#475569;">${item.meta?.type || '스피킹'}</span>
+            <span class="list-item-topic">${item.meta?.topic_category || '미분류'}</span>
+        </span>
+        <span class="list-item-text">${summaryQ}</span>
+    </div>
+    <button class="ctrl-btn list-item-delete-btn" style="color: #ef4444; border-color: #fca5a5; background: #fef2f2;" onclick="deleteQuestion(${i}, event)">삭제</button>
+`;
+
+
             div.onclick = (e) => { 
                 if(e.target.tagName !== 'BUTTON') {
                     stopAudio(); currentIndex = i; saveCurrentIndex(); renderUI(); closeModal('list-modal'); 
