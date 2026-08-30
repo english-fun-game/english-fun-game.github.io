@@ -846,8 +846,10 @@
                 <div style="display: flex; align-items: center; gap: 6px;">
                     <span style="font-size: 13.5px; font-weight: 800; color: var(--text-muted);">영역:</span>
                     <div class="type-segmented-control" id="filter-domain-group">
-                        <span class="type-pill" onclick="changeDomainFilter('라이팅', this)">라이팅</span>
-                        <span class="type-pill active" onclick="changeDomainFilter('스피킹', this)">스피킹</span>
+                        <span class="type-pill active" onclick="changeDomainFilter('all', this)">전체</span>
+                        <span class="type-pill" onclick="changeDomainFilter('토론', this)">토론</span>
+                        <span class="type-pill" onclick="changeDomainFilter('이메일', this)">이메일</span>
+                        <span class="type-pill" onclick="changeDomainFilter('스피킹', this)">스피킹</span>
                     </div>
                 </div>
 
@@ -1222,13 +1224,16 @@
 
     const topicLabel = data.meta.topic_category ? `📚 ${data.meta.topic_category}` : "📚 미분류";
 
-    // question_source 파싱 및 라이팅/스피킹 ON 토글 UI 생성
-    const qSource = data.meta.question_source || '';
-    const isWriting = qSource !== '' && qSource.toLowerCase().includes('writing');
-    const isSpeaking = !isWriting; 
+    // question_source 파싱 및 토론/이메일/스피킹 3웨이 토글 UI 생성
+    const qSource = (data.meta.question_source || '').toLowerCase();
+    const isDiscussion = qSource.includes('discussion');
+    const isEmail = qSource.includes('email');
+    const isSpeaking = !isDiscussion && !isEmail; // discussion이나 email이 없으면 기본 스피킹으로 간주
+
     const qsSegmentHtml = `
         <div class="type-segmented-control qs-segmented-control">
-            <span class="type-pill ${isWriting ? 'active' : ''}">라이팅</span>
+            <span class="type-pill ${isDiscussion ? 'active' : ''}">토론</span>
+            <span class="type-pill ${isEmail ? 'active' : ''}">이메일</span>
             <span class="type-pill ${isSpeaking ? 'active' : ''}">스피킹</span>
         </div>
     `;
@@ -2043,10 +2048,15 @@
         const filterTopic = document.getElementById('filter-topic').value;
         const listBody = document.getElementById('list-body');
         listBody.innerHTML = '';
-
+        
         let filtered = spkData.map((item, i) => ({ item, i })).filter(({ item }) => {
             const qSrc = (item.meta?.question_source || '').toLowerCase();
-            const itemDomain = qSrc.includes('writing') ? '라이팅' : '스피킹';
+            
+            // 3분기 도메인 필터링 적용
+            let itemDomain = '스피킹';
+            if (qSrc.includes('discussion')) itemDomain = '토론';
+            else if (qSrc.includes('email')) itemDomain = '이메일';
+
             const itemType = item.meta?.type || '';
 
             const matchDomain = (currentDomainFilter === 'all' || itemDomain === currentDomainFilter);
@@ -2062,8 +2072,12 @@
         }
 
         filtered.forEach(({ item, i }) => {
-            const qSrc = (item.meta?.question_source || 'Speaking').toLowerCase();
-            const domainLabel = qSrc.includes('writing') ? '라이팅' : '스피킹';
+            const qSrc = (item.meta?.question_source || '').toLowerCase();
+            
+            // 3분기 도메인 라벨 적용
+            let domainLabel = '스피킹';
+            if (qSrc.includes('discussion')) domainLabel = '토론';
+            else if (qSrc.includes('email')) domainLabel = '이메일';
             
             // 데스크탑/모바일 공통으로 마지막 2문장만 추출
             const summaryQ = getSummaryQuestionText(item.question);
