@@ -445,10 +445,36 @@
             <span>🚨 개발자 전용: 하드 리셋</span>
             <button onclick="closeDevResetModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button>
         </div>
-        <div style="font-size:13px; color:var(--text-muted); margin-bottom:4px; line-height: 1.4;">
-            로컬 스토리지, AI 모델 설정, PWA 서비스 워커 캐시 등 디바이스의 모든 데이터를 강제로 날리고 초기화합니다.
+        
+        <div style="font-size:13px; color:var(--text-muted); margin-bottom:8px; line-height: 1.4;">
+            앱의 꼬인 상태를 해결하기 위해 서비스 워커와 캐시를 강제로 비우고 index.html을 새로 로드합니다.
         </div>
-        <div style="font-size:12px; color:#dc2626; font-weight:800; margin-bottom:12px;">
+
+        <!-- 🚨 삭제/유지 항목을 명확히 보여주는 표 영역 -->
+        <div style="border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+            <table class="tech-table" style="margin: 0; background: #ffffff;">
+                <tbody>
+                    <tr>
+                        <th style="background: #f0fdf4; color: #15803d; width: 28%; text-align: center; font-size: 12px; border-bottom: 1px solid #bbf7d0;">🟢 유지됨</th>
+                        <td style="color: #16a34a; font-weight: 800; font-size: 12.5px; border-bottom: 1px solid #bbf7d0;">
+                            단어장 음성 데이터베이스<br>
+                            <span style="font-size: 11px; font-weight: 600; opacity: 0.8;">(대용량 오디오 재다운로드 방지)</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th style="background: #fef2f2; color: #b91c1c; text-align: center; font-size: 12px; vertical-align: top; padding-top: 10px;">🔴 삭제됨</th>
+                        <td style="color: #991b1b; font-weight: 700; font-size: 12px; line-height: 1.5; padding-top: 8px; padding-bottom: 8px;">
+                            • PWA 서비스 워커 연결 해제<br>
+                            • 모든 정적 캐시 (index.html 등)<br>
+                            • 스피킹 음성 데이터베이스<br>
+                            • 로컬 스토리지 (학습 기록, AI 설정)
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="font-size:12px; color:#dc2626; font-weight:800; margin-bottom:10px; text-align: center;">
             ※ 실수 방지를 위해 <b>delete</b> 라고 정확히 입력해주세요.
         </div>
         
@@ -777,7 +803,6 @@
 <div class="container">
     <div id="network-status-container" style="width: 100%; max-width: 480px; margin: 0 auto 8px auto; display: flex; justify-content: flex-end; align-items: center; gap: 10px; user-select: none; box-sizing: border-box; padding: 0 4px;"><div id="net-online" style="opacity: 0.3; color: #94a3b8; display: flex; align-items: center; gap: 4px; transition: all 0.2s;"><span style="font-size: 11px;">🟢</span><span style="font-size: 11px; font-weight: 800; letter-spacing: -0.3px;">ONLINE</span></div><div id="net-offline" style="opacity: 0.3; color: #94a3b8; display: flex; align-items: center; gap: 4px; transition: all 0.2s;"><span style="font-size: 11px;">🔴</span><span style="font-size: 11px; font-weight: 800; letter-spacing: -0.3px;">OFFLINE</span></div></div>
     <div id="setup-area">
-        <img src="intro.png" alt="퐁크러쉬 인트로" class="intro-img" onerror="this.style.display='none'">
         <h1 aria-label="퐁크러쉬"><span class="bounce-char" style="animation-delay: 0.0s;">🎮</span><span class="bounce-char" style="animation-delay: 0.1s;"> </span><span class="bounce-char" style="animation-delay: 0.2s;">퐁</span><span class="bounce-char" style="animation-delay: 0.3s;">크</span><span class="bounce-char" style="animation-delay: 0.4s;">러</span><span class="bounce-char" style="animation-delay: 0.5s;">쉬</span></h1>
         <div id="status" class="status-msg"></div>
         <div class="quick-btn-group">
@@ -1780,61 +1805,7 @@ function renderVoiceListUI() {
             } 
         }); 
     };
-
-    function resetMultiProgressUI(isCloud, isRestore = false) {
-        document.getElementById('multi-progress-container').classList.remove('hidden');
-        document.getElementById('total-progress-container').classList.remove('hidden');
-        
-        ['text', 'vocab', 'spk', 'zip', 'net'].forEach(id => {
-            updateMultiProgress(id, 0, 0);
-        });
-
-        const netLabel = document.getElementById('lbl-step-net');
-        const netDesc = document.getElementById('lbl-desc-net');
-        
-        // 🚀 복원(Restore)일 경우 프로그레시브 바 UI 텍스트 변경
-        if (isRestore) {
-            document.querySelector('#bar-step-text').parentElement.previousElementSibling.querySelector('span:first-child').innerText = "📄 JSON Deserialization";
-            document.querySelector('#bar-step-text').parentElement.previousElementSibling.querySelector('.desktop-only-desc').innerText = "단어장/스피킹 텍스트 메타데이터 파싱";
-
-            document.querySelector('#bar-step-vocab').parentElement.previousElementSibling.querySelector('span:first-child').innerText = "🔊 Vocab DB Restore";
-            document.querySelector('#bar-step-vocab').parentElement.previousElementSibling.querySelector('.desktop-only-desc').innerText = "단어장 IndexedDB 오디오 캐시 삽입";
-
-            document.querySelector('#bar-step-spk').parentElement.previousElementSibling.querySelector('span:first-child').innerText = "🗣️ Speaking DB Restore";
-            document.querySelector('#bar-step-spk').parentElement.previousElementSibling.querySelector('.desktop-only-desc').innerText = "스피킹 IndexedDB 오디오 파일 삽입";
-
-            document.querySelector('#bar-step-zip').parentElement.previousElementSibling.querySelector('span:first-child').innerText = "📦 Zip Extraction";
-            document.querySelector('#bar-step-zip').parentElement.previousElementSibling.querySelector('.desktop-only-desc').innerText = "백업 파일 압축 해제 및 메모리 적재";
-
-            if (netLabel) {
-                netLabel.innerText = isCloud ? "☁️ Cloud Downloading" : "💾 Local File Loading";
-            }
-            if (netDesc) {
-                netDesc.innerText = isCloud ? "구글 드라이브 백업 파일 다운로드" : "로컬 백업 파일 메모리 적재";
-            }
-        } else {
-            // 기본 백업 텍스트 복구
-            document.querySelector('#bar-step-text').parentElement.previousElementSibling.querySelector('span:first-child').innerText = "📄 JSON Serialization";
-            document.querySelector('#bar-step-text').parentElement.previousElementSibling.querySelector('.desktop-only-desc').innerText = "단어장/스피킹 텍스트 메타데이터 병합";
-
-            document.querySelector('#bar-step-vocab').parentElement.previousElementSibling.querySelector('span:first-child').innerText = "🔊 Vocab DB Extraction";
-            document.querySelector('#bar-step-vocab').parentElement.previousElementSibling.querySelector('.desktop-only-desc').innerText = "단어장 IndexedDB 오디오 Blob 추출";
-
-            document.querySelector('#bar-step-spk').parentElement.previousElementSibling.querySelector('span:first-child').innerText = "🗣️ Speaking DB Extraction";
-            document.querySelector('#bar-step-spk').parentElement.previousElementSibling.querySelector('.desktop-only-desc').innerText = "스피킹 IndexedDB 오디오 Blob 추출";
-
-            document.querySelector('#bar-step-zip').parentElement.previousElementSibling.querySelector('span:first-child').innerText = "📦 Deflate Compression";
-            document.querySelector('#bar-step-zip').parentElement.previousElementSibling.querySelector('.desktop-only-desc').innerText = "단일 무손실 압축 및 메모리 버퍼링";
-
-            if (netLabel) {
-                netLabel.innerText = isCloud ? "☁️ Secure Transmission" : "💾 Local File I/O";
-            }
-            if (netDesc) {
-                netDesc.innerText = isCloud ? "구글 드라이브 SSL 암호화 터널링" : "브라우저 Blob URL 생성 및 다운로드 처리";
-            }
-        }
-    }
-
+ 
     // ==========================================
     // 메인 백업 파이프라인 엔진 (ZIP 패키징) - 🚀 옵션 적용
     // ==========================================
@@ -1906,103 +1877,6 @@ function renderVoiceListUI() {
         await delay(400);
 
         return blob;
-    }
-
-    // ==========================================
-    // 복원 파이프라인 로직 - 🚀 프로그레시브 UI 적용
-    // ==========================================
-    async function processImportedFile(blobOrString, isCloud = false) {
-        resetMultiProgressUI(isCloud, true);
-        
-        let jsonText = null;
-        let isZip = false;
-        let zipInstance = null;
-
-        updateMultiProgress('net', 100, 10);
-        await delay(300);
-
-        if (typeof blobOrString === 'string') {
-            jsonText = blobOrString;
-        } else if (blobOrString instanceof Blob) {
-            try {
-                updateMultiProgress('zip', 50, 20);
-                zipInstance = await JSZip.loadAsync(blobOrString);
-                isZip = true;
-                updateMultiProgress('zip', 100, 30);
-            } catch(e) {
-                updateMultiProgress('zip', 100, 30);
-                jsonText = await blobOrString.text();
-            }
-        }
-
-        if (isZip) {
-            const dataFile = zipInstance.file("data.json");
-            if (!dataFile) throw new Error("유효한 백업 구조가 아닙니다 (data.json 누락)");
-            jsonText = await dataFile.async("string");
-            
-            // ⭐️ 오디오 폴더 복원 헬퍼 (프로그레시브 진행률 포함)
-            const restoreAudioFolder = async (folderName, dbName, storeName, stepId, totalBase) => {
-                updateMultiProgress(stepId, 10, totalBase);
-                const folder = zipInstance.folder(folderName);
-                if (!folder) {
-                    updateMultiProgress(stepId, 100, totalBase + 20);
-                    return; 
-                }
-                
-                const files = [];
-                folder.forEach((relativePath, file) => {
-                    if (!file.dir) files.push({ key: relativePath, file: file });
-                });
-
-                if (files.length > 0) {
-                    const db = await new Promise((resolve, reject) => {
-                        const req = indexedDB.open(dbName, 1);
-                        req.onupgradeneeded = (e) => {
-                            if (!e.target.result.objectStoreNames.contains(storeName)) {
-                                e.target.result.createObjectStore(storeName);
-                            }
-                        };
-                        req.onsuccess = (e) => resolve(e.target.result);
-                        req.onerror = () => reject(req.error);
-                    });
-                    
-                    let doneCount = 0;
-                    for (const item of files) {
-                        const rawBlob = await item.file.async("blob");
-                        const audioBlob = new Blob([rawBlob], { type: "audio/mpeg" });
-                        
-                        await new Promise((resolve, reject) => {
-                            const tx = db.transaction(storeName, 'readwrite');
-                            const store = tx.objectStore(storeName);
-                            const req = store.put(audioBlob, item.key);
-                            req.onsuccess = resolve;
-                            req.onerror = () => reject(req.error);
-                        });
-                        doneCount++;
-                        updateMultiProgress(stepId, 10 + (doneCount/files.length)*90, totalBase + (doneCount/files.length)*20);
-                    }
-                } else {
-                    updateMultiProgress(stepId, 100, totalBase + 20);
-                }
-            };
-
-            await restoreAudioFolder("audio_vocab", 'PongcrushVocabAudioDB', 'vocabAudioStore', 'vocab', 30);
-            await restoreAudioFolder("audio_speaking", 'PongcrushAudioDB', 'audioStore', 'spk', 50);
-            
-            // 구버전 호환 폴더 복원
-            if (zipInstance.folder("audio")) {
-                await restoreAudioFolder("audio", 'PongcrushVocabAudioDB', 'vocabAudioStore', 'vocab', 30);
-            }
-        } else {
-            // ZIP이 아닌 단순 JSON인 경우 건너뛰기
-            updateMultiProgress('vocab', 100, 50);
-            updateMultiProgress('spk', 100, 70);
-        }
-
-        updateMultiProgress('text', 50, 80);
-        await processImportedData(jsonText);
-        updateMultiProgress('text', 100, 100);
-        await delay(500);
     }
  
     // 통합 데이터 복원 함수 (실수로 지워졌던 기존 로직 복구)
@@ -2103,116 +1977,8 @@ function renderVoiceListUI() {
         updatePWAReviewButtonUI(); 
         alert(`백업 데이터에서 ${importedList.length}개 단어를 확인했습니다.\n(신규 추가: ${addedCount}개, 병합 업데이트: ${updatedCount}개 완료)`); 
     }
+  
  
-    // 로컬 파일에서 복원
-    function restoreWeakWords() { 
-        const input = document.createElement('input'); 
-        input.type = 'file'; 
-        input.accept = ".zip,.json,.txt,text/plain,application/json,application/zip,application/x-zip-compressed,*/*"; 
-        input.style.display = 'none'; 
-        input.onchange = async function(event) { 
-            const file = event.target.files && event.target.files[0]; 
-            if (!file) return; 
-            
-            const loadingOverlay = document.getElementById('loading-overlay'); 
-            const loadingText = document.getElementById('loading-text'); 
-            loadingText.innerText = "백업 파일을 해독하고 복원하는 중..."; 
-            loadingOverlay.classList.remove('hidden'); 
-            
-            try { 
-                // 🚀 인자 추가: isCloud = false
-                await processImportedFile(file, false); 
-                closeDataModal(); 
-            } catch (err) { 
-                alert("파일 복원 실패: " + err.message); 
-            } finally {
-                loadingOverlay.classList.add('hidden');
-            }
-        }; 
-        document.body.appendChild(input); 
-        input.click(); 
-        setTimeout(() => { document.body.removeChild(input); }, 1000); 
-    }
-
-    // 구글 드라이브에서 복원
-    window.loadFromGoogleDrive = async function() { 
-        if (!GOOGLE_CLIENT_ID) { alert("스크립트 상단에 GOOGLE_CLIENT_ID를 먼저 입력해야 합니다."); return; } 
-        requestGoogleAuth(async () => { 
-            const loadingOverlay = document.getElementById('loading-overlay'); 
-            const loadingText = document.getElementById('loading-text'); 
-            loadingText.innerText = "구글 드라이브에서 최신 백업 불러오는 중..."; 
-            loadingOverlay.classList.remove('hidden'); 
-            try { 
-                const res = await gapi.client.drive.files.list({ 
-                    q: `name contains 'pongcrush_sync_data' and trashed = false`, 
-                    orderBy: 'createdTime desc',
-                    fields: 'files(id, name, createdTime)', 
-                    spaces: 'drive' 
-                }); 
-                const files = res.result.files; 
-                
-                if (!files || files.length === 0) { alert('⚠️ 구글 드라이브에 저장된 백업 파일이 없습니다.'); return; } 
-                
-                const latestFile = files[0];
-                loadingText.innerText = `최신 파일(${latestFile.name}) 분석 중...`;
-                
-                const fileRes = await fetch(`https://www.googleapis.com/drive/v3/files/${latestFile.id}?alt=media`, {
-                    headers: { Authorization: `Bearer ${gapi.client.getToken().access_token}` }
-                });
-                
-                if (!fileRes.ok) throw new Error("파일 다운로드 권한이 없거나 실패했습니다.");
-                const blob = await fileRes.blob();
-
-                // 🚀 인자 추가: isCloud = true
-                await processImportedFile(blob, true);
-                
-                alert(`✅ 최신 백업 파일(${latestFile.name}) 복원 완료!`);
-                closeDataModal(); 
-            } catch (err) { alert('❌ 불러오기 실패: ' + err.message); } 
-            finally { loadingOverlay.classList.add('hidden'); loadingText.innerText = "단어장 데이터를 가져오는 중..."; } 
-        }); 
-    };
-
-    // 구글 드라이브에서 복원
-    window.loadFromGoogleDrive = async function() { 
-        if (!GOOGLE_CLIENT_ID) { alert("스크립트 상단에 GOOGLE_CLIENT_ID를 먼저 입력해야 합니다."); return; } 
-        requestGoogleAuth(async () => { 
-            const loadingOverlay = document.getElementById('loading-overlay'); 
-            const loadingText = document.getElementById('loading-text'); 
-            loadingText.innerText = "구글 드라이브에서 최신 백업 불러오는 중..."; 
-            loadingOverlay.classList.remove('hidden'); 
-            try { 
-                // 생성일 기준 내림차순(createdTime desc)으로 검색하여 최신 버전 보장
-                const res = await gapi.client.drive.files.list({ 
-                    q: `name contains 'pongcrush_sync_data' and trashed = false`, 
-                    orderBy: 'createdTime desc',
-                    fields: 'files(id, name, createdTime)', 
-                    spaces: 'drive' 
-                }); 
-                const files = res.result.files; 
-                
-                if (!files || files.length === 0) { alert('⚠️ 구글 드라이브에 저장된 백업 파일이 없습니다.'); return; } 
-                
-                const latestFile = files[0];
-                loadingText.innerText = `최신 파일(${latestFile.name}) 분석 중...`;
-                
-                // alt: media를 통해 실제 파일 다운로드 (Blob 형태로 받음)
-                const fileRes = await fetch(`https://www.googleapis.com/drive/v3/files/${latestFile.id}?alt=media`, {
-                    headers: { Authorization: `Bearer ${gapi.client.getToken().access_token}` }
-                });
-                
-                if (!fileRes.ok) throw new Error("파일 다운로드 권한이 없거나 실패했습니다.");
-                const blob = await fileRes.blob();
-
-                await processImportedFile(blob);
-                
-                alert(`✅ 최신 백업 파일(${latestFile.name}) 복원 완료!`);
-                closeDataModal(); 
-            } catch (err) { alert('❌ 불러오기 실패: ' + err.message); } 
-            finally { loadingOverlay.classList.add('hidden'); loadingText.innerText = "단어장 데이터를 가져오는 중..."; } 
-        }); 
-    };
-
     // 히스토리 모달 닫기
     window.closeGDriveHistoryModal = function() {
         const modal = document.getElementById('gdrive-history-modal');
@@ -2698,7 +2464,7 @@ function renderVoiceListUI() {
         }
 
         isDevResetExecuting = true;
-        const confirmReset = confirm("경고: 저장된 모든 단어 기록, AI 설정, 로컬 캐시 및 오디오 데이터베이스 전체가 영구적으로 삭제됩니다.\n진행하시겠습니까?");
+        const confirmReset = confirm("경고: 단어장 오디오 캐시를 제외한 모든 기록, AI 설정, 일반 캐시 및 스피킹 데이터베이스가 영구적으로 삭제됩니다.\n진행하시겠습니까?");
         if (!confirmReset) {
             isDevResetExecuting = false;
             return;
@@ -2709,32 +2475,33 @@ function renderVoiceListUI() {
             localStorage.clear();
             sessionStorage.clear();
 
-            // 2. 서비스 워커(PWA) 오프라인 캐시 초기화
+            // 2. 서비스 워커(PWA) 오프라인 캐시 초기화 및 서비스 워커 연결 강제 종료
             if ('caches' in window) {
                 const cacheNames = await caches.keys();
                 await Promise.all(cacheNames.map(name => caches.delete(name)));
             }
 
-            // 3. IndexedDB 데이터베이스 자체를 통째로 완전 삭제 (Drop Database)
-            // 단어장 오디오 DB(PongcrushVocabAudioDB)와 스피킹 오디오 DB(PongcrushAudioDB) 모두 소각
-            const deleteVocabDB = new Promise((resolve) => {
-                const req = indexedDB.deleteDatabase('PongcrushVocabAudioDB');
-                req.onsuccess = resolve;
-                req.onerror = resolve; // 에러가 나더라도(DB가 없더라도) 다음 작업을 위해 resolve
-                req.onblocked = resolve;
-            });
-            
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (let registration of registrations) {
+                    await registration.unregister();
+                }
+            }
+
+            // 3. IndexedDB: '스피킹 오디오 DB(PongcrushAudioDB)'만 삭제 (단어장 DB 보존)
             const deleteSpeakingDB = new Promise((resolve) => {
                 const req = indexedDB.deleteDatabase('PongcrushAudioDB');
                 req.onsuccess = resolve;
-                req.onerror = resolve;
+                req.onerror = resolve; 
                 req.onblocked = resolve;
             });
 
-            await Promise.all([deleteVocabDB, deleteSpeakingDB]);
+            await deleteSpeakingDB;
 
-            alert('✅ 데이터베이스(IndexedDB)를 포함한 모든 데이터 초기화가 완료되었습니다.\n애플리케이션을 새로고침합니다.');
-            window.location.reload(true);
+            alert('✅ 단어장 오디오를 제외한 모든 데이터 및 캐시가 초기화되었습니다.\n최신 버전을 위해 앱을 새로고침합니다.');
+            
+            // 4. index.html을 서버로부터 새로 받도록 강제 (Cache Busting)
+            window.location.href = window.location.origin + window.location.pathname + '?ts=' + new Date().getTime();
         } catch (error) {
             alert('초기화 중 오류가 발생했습니다: ' + error.message);
             isDevResetExecuting = false;
@@ -2886,6 +2653,241 @@ function renderVoiceListUI() {
             });
         }
     }
+
+    // 1. 프로그레시브 바 UI 렌더링 및 CSS 강제 복구 엔진
+    function resetMultiProgressUI(isCloud, isRestore = false) {
+        const container = document.getElementById('multi-progress-container');
+        const totalContainer = document.getElementById('total-progress-container');
+        const loadingText = document.getElementById('loading-text');
+        const cardInner = document.getElementById('loading-card-inner');
+
+        // 🚨 다른 동작으로 인해 좁아졌던 로딩창 CSS를 넓고 전문적인 형태로 강제 복구
+        if (cardInner) {
+            cardInner.style.maxWidth = '520px';
+            cardInner.style.textAlign = 'left';
+            const titleFlex = cardInner.querySelector('div');
+            if (titleFlex) {
+                titleFlex.style.justifyContent = 'flex-start';
+            }
+        }
+
+        // 🚨 hidden 클래스 제거 및 display 속성 강제 부여로 무조건 화면에 렌더링
+        if (container) {
+            container.classList.remove('hidden');
+            container.style.display = 'flex';
+        }
+        if (totalContainer) {
+            totalContainer.classList.remove('hidden');
+            totalContainer.style.display = 'block';
+        }
+
+        // 3. 상태에 맞는 UI 동적 생성
+        let html = '';
+        const createRow = (id, icon, title, desc, color) => `
+            <div class="progress-row" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                <div style="flex: 1; display: flex; flex-direction: column;">
+                    <span style="font-size: 13.5px; font-weight: 800; color: #475569;">${icon} ${title}</span>
+                    <span class="desktop-only-desc" style="font-size: 11px; color: #94a3b8; font-weight: 600;">${desc}</span>
+                </div>
+                <div class="progress-bar-wrap" style="width: 120px; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                    <div id="bar-step-${id}" style="height: 100%; width: 0%; background: ${color}; transition: width 0.3s;"></div>
+                </div>
+                <div style="width: 38px; text-align: right; font-size: 12.5px; font-weight: 900; color: ${color};" id="pct-step-${id}">0%</div>
+            </div>
+        `;
+
+        if (isRestore) {
+            if (loadingText) loadingText.innerText = isCloud ? "☁️ 클라우드 복원 파이프라인 가동..." : "💾 로컬 파일 복원 파이프라인 가동...";
+            html += createRow('net', isCloud ? '☁️' : '💾', isCloud ? 'Cloud Fetching' : 'Local File I/O', isCloud ? '구글 드라이브 백업 파일 다운로드' : '로컬 백업 파일 메모리 적재', '#0ea5e9');
+            html += createRow('zip', '📦', 'Data Extraction', '백업 파일 압축 해제 및 무결성 검증', '#8b5cf6');
+            html += createRow('vocab', '🔊', 'Vocab DB Restore', '단어장 오디오 캐시 IndexedDB 적재', '#10b981');
+            html += createRow('spk', '🗣️', 'Speaking DB Restore', '스피킹 오디오 파일 IndexedDB 적재', '#f59e0b');
+            html += createRow('text', '📄', 'JSON Deserialization', '학습 데이터 파싱 및 스키마 병합', '#3b82f6');
+        } else {
+            if (loadingText) loadingText.innerText = isCloud ? "☁️ 클라우드 백업 파이프라인 가동..." : "💾 로컬 파일 백업 파이프라인 가동...";
+            html += createRow('text', '📄', 'JSON Serialization', '단어장/스피킹 텍스트 메타데이터 병합', '#3b82f6');
+            html += createRow('vocab', '🔊', 'Vocab DB Extraction', '단어장 IndexedDB 오디오 Blob 추출', '#10b981');
+            html += createRow('spk', '🗣️', 'Speaking DB Extraction', '스피킹 IndexedDB 오디오 Blob 추출', '#f59e0b');
+            html += createRow('zip', '📦', 'Deflate Compression', '단일 무손실 압축 및 메모리 버퍼링', '#8b5cf6');
+            html += createRow('net', isCloud ? '☁️' : '💾', isCloud ? 'Secure Transmission' : 'Local File I/O', isCloud ? '구글 드라이브 SSL 암호화 터널링' : '브라우저 Blob URL 생성 처리', '#ec4899');
+        }
+        
+        if (container) container.innerHTML = html;
+        ['text', 'vocab', 'spk', 'zip', 'net'].forEach(id => updateMultiProgress(id, 0, 0));
+    }
+
+    // 2. 단 하나만 존재해야 하는 구글 드라이브 복원 함수
+    window.loadFromGoogleDrive = async function() { 
+        if (!GOOGLE_CLIENT_ID) { alert("스크립트 상단에 GOOGLE_CLIENT_ID를 먼저 입력해야 합니다."); return; } 
+        requestGoogleAuth(async () => { 
+            const loadingOverlay = document.getElementById('loading-overlay'); 
+            const loadingText = document.getElementById('loading-text');
+            
+            // 💡 네트워크 통신 시작 전 UI를 100% 켜기
+            resetMultiProgressUI(true, true);
+            loadingOverlay.classList.remove('hidden'); 
+            
+            try { 
+                updateMultiProgress('net', 10, 2);
+                
+                const res = await gapi.client.drive.files.list({ 
+                    q: `name contains 'pongcrush_sync_data' and trashed = false`, 
+                    orderBy: 'createdTime desc',
+                    fields: 'files(id, name, createdTime)', 
+                    spaces: 'drive' 
+                }); 
+                const files = res.result.files; 
+                
+                if (!files || files.length === 0) { alert('⚠️ 구글 드라이브에 저장된 백업 파일이 없습니다.'); return; } 
+                
+                const latestFile = files[0];
+                loadingText.innerText = `[${latestFile.name}] 다운로드 중...`;
+                updateMultiProgress('net', 40, 5);
+                
+                const fileRes = await fetch(`https://www.googleapis.com/drive/v3/files/${latestFile.id}?alt=media`, {
+                    headers: { Authorization: `Bearer ${gapi.client.getToken().access_token}` }
+                });
+                
+                if (!fileRes.ok) throw new Error("파일 다운로드 권한이 없거나 실패했습니다.");
+                
+                updateMultiProgress('net', 80, 8);
+                const blob = await fileRes.blob();
+                updateMultiProgress('net', 100, 10);
+
+                await processImportedFile(blob, true);
+                
+                alert(`✅ 최신 백업 파일(${latestFile.name}) 복원 완료!`);
+                closeDataModal(); 
+            } catch (err) { 
+                alert('❌ 불러오기 실패: ' + err.message); 
+            } finally { 
+                loadingOverlay.classList.add('hidden'); 
+                loadingText.innerText = "단어장 데이터를 가져오는 중..."; 
+            } 
+        }); 
+    };
+
+    // 3. 로컬 파일에서 복원
+    function restoreWeakWords() { 
+        const input = document.createElement('input'); 
+        input.type = 'file'; 
+        input.accept = ".zip,.json,.txt,text/plain,application/json,application/zip,application/x-zip-compressed,*/*"; 
+        input.style.display = 'none'; 
+        input.onchange = async function(event) { 
+            const file = event.target.files && event.target.files[0]; 
+            if (!file) return; 
+            
+            const loadingOverlay = document.getElementById('loading-overlay'); 
+            
+            // 💡 파일 선택 즉시 UI 켜기
+            resetMultiProgressUI(false, true);
+            loadingOverlay.classList.remove('hidden'); 
+            
+            try { 
+                updateMultiProgress('net', 100, 10); 
+                await processImportedFile(file, false); 
+                closeDataModal(); 
+            } catch (err) { 
+                alert("파일 복원 실패: " + err.message); 
+            } finally {
+                loadingOverlay.classList.add('hidden');
+                document.getElementById('loading-text').innerText = "작업을 준비 중입니다...";
+            }
+        }; 
+        document.body.appendChild(input); 
+        input.click(); 
+        setTimeout(() => { document.body.removeChild(input); }, 1000); 
+    }
+
+    // 4. 복원 데이터 처리 (이중 안전장치 포함)
+    async function processImportedFile(blobOrString, isCloud = false) {
+        let jsonText = null;
+        let isZip = false;
+        let zipInstance = null;
+
+        // 💡 앞선 함수에서 오류로 UI가 안 켜졌을 경우를 대비한 이중 안전장치
+        resetMultiProgressUI(isCloud, true);
+        await delay(50); // DOM이 화면을 그릴 시간을 50ms 양보
+
+        if (typeof blobOrString === 'string') {
+            jsonText = blobOrString;
+        } else if (blobOrString instanceof Blob) {
+            try {
+                updateMultiProgress('zip', 50, 15);
+                zipInstance = await JSZip.loadAsync(blobOrString);
+                isZip = true;
+                updateMultiProgress('zip', 100, 20);
+            } catch(e) {
+                updateMultiProgress('zip', 100, 20);
+                jsonText = await blobOrString.text();
+            }
+        }
+
+        if (isZip) {
+            const dataFile = zipInstance.file("data.json");
+            if (!dataFile) throw new Error("유효한 백업 구조가 아닙니다 (data.json 누락)");
+            jsonText = await dataFile.async("string");
+            
+            const restoreAudioFolder = async (folderName, dbName, storeName, stepId, totalBase) => {
+                updateMultiProgress(stepId, 10, totalBase);
+                const folder = zipInstance.folder(folderName);
+                if (!folder) {
+                    updateMultiProgress(stepId, 100, totalBase + 30);
+                    return; 
+                }
+                
+                const files = [];
+                folder.forEach((relativePath, file) => {
+                    if (!file.dir) files.push({ key: relativePath, file: file });
+                });
+
+                if (files.length > 0) {
+                    const db = await new Promise((resolve, reject) => {
+                        const req = indexedDB.open(dbName, 1);
+                        req.onupgradeneeded = (e) => {
+                            if (!e.target.result.objectStoreNames.contains(storeName)) {
+                                e.target.result.createObjectStore(storeName);
+                            }
+                        };
+                        req.onsuccess = (e) => resolve(e.target.result);
+                        req.onerror = () => reject(req.error);
+                    });
+                    
+                    let doneCount = 0;
+                    for (const item of files) {
+                        const rawBlob = await item.file.async("blob");
+                        const audioBlob = new Blob([rawBlob], { type: "audio/mpeg" });
+                        
+                        await new Promise((resolve, reject) => {
+                            const tx = db.transaction(storeName, 'readwrite');
+                            const store = tx.objectStore(storeName);
+                            const req = store.put(audioBlob, item.key);
+                            req.onsuccess = resolve;
+                            req.onerror = () => reject(req.error);
+                        });
+                        doneCount++;
+                        updateMultiProgress(stepId, 10 + (doneCount/files.length)*90, totalBase + (doneCount/files.length)*30);
+                    }
+                } else {
+                    updateMultiProgress(stepId, 100, totalBase + 30);
+                }
+            };
+
+            await restoreAudioFolder("audio_vocab", 'PongcrushVocabAudioDB', 'vocabAudioStore', 'vocab', 20);
+            await restoreAudioFolder("audio_speaking", 'PongcrushAudioDB', 'audioStore', 'spk', 50);
+        } else {
+            updateMultiProgress('vocab', 100, 50);
+            updateMultiProgress('spk', 100, 80);
+        }
+
+        updateMultiProgress('text', 50, 90);
+        await delay(50); // 병합 작업 전 브라우저 렌더링 50ms 양보
+        
+        await processImportedData(jsonText);
+        updateMultiProgress('text', 100, 100);
+        await delay(500);
+    }
+
 
     window.onload = () => {
         const loadingModal = document.getElementById('loading-overlay');
