@@ -642,6 +642,11 @@
         background: #ffffff; border: 1.5px solid var(--border-color);
         gap: 6px 8px;
     } 
+
+    /* JSON 복사 버튼 모바일 숨김 처리 */
+    .btn-copy-filtered-json {
+        display: none !important;
+    }
     
     /* 리스트의 각 아이템의 삭제 모바일 지원 차단 */
     .list-item-delete-btn { display: none !important; }
@@ -865,11 +870,84 @@
                 <select id="filter-topic" class="filter-select" onchange="renderQuestionList()">
                     <option value="all">전체 주제 (7대 대주제)</option>
                 </select>
+
+                <!-- 변경 후: 템플릿 만들기 버튼 -->
+                <button id="btn-open-template-modal" class="ctrl-btn primary btn-copy-filtered-json" style="margin-left: auto; background: #8b5cf6; border-color: #7c3aed;" onclick="openTemplateModal()">
+                    ✨ 템플릿 만들기
+                </button>
             </div>
 
             <div class="question-list-container" id="list-body"></div>
         </div>
     </div>
+
+    <!-- 템플릿 만들기 가이드 모달 -->
+<div class="modal-overlay" id="template-modal" onclick="closeModal('template-modal')">
+    <div class="modal-content-giant" style="width: 820px; height: auto; padding: 32px;" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeModal('template-modal')">&times; <span class="modal-close-esc">(ESC)</span></button>
+        <h3 style="margin-top: 0; font-size: 24px; margin-bottom: 24px; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+            ✨ PPT 템플릿 자동 생성 가이드
+        </h3>
+        
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+            <!-- Step 1 -->
+            <div style="display: flex; gap: 14px; align-items: flex-start; background: #f8fafc; padding: 16px; border-radius: 12px; border: 1.5px solid #e2e8f0;">
+                <span class="list-item-type" style="background:#4f46e5; color:#ffffff; font-size: 14px; padding: 4px 10px; border-radius: 6px; flex-shrink:0;">Step 1</span>
+                <div style="font-size: 15.5px; font-weight: 700; line-height: 1.6; color: #1e293b;">
+                    템플릿을 만들고자 하는 영역의 <strong>필터(토론/이메일/스피킹 등)</strong>를 세팅합니다.
+                </div>
+            </div>
+            
+            <!-- Step 2 -->
+            <div style="display: flex; gap: 14px; align-items: flex-start; background: #f8fafc; padding: 16px; border-radius: 12px; border: 1.5px solid #e2e8f0;">
+                <span class="list-item-type" style="background:#4f46e5; color:#ffffff; font-size: 14px; padding: 4px 10px; border-radius: 6px; flex-shrink:0;">Step 2</span>
+                <div style="font-size: 15.5px; font-weight: 700; line-height: 1.6; color: #1e293b; width: 100%;">
+                    아래 버튼을 클릭하여 필터링된 데이터의 JSON을 복사합니다.
+                    <div style="margin-top: 10px;">
+                        <button id="btn-copy-json-modal" class="ctrl-btn primary" style="padding: 10px 16px; font-size: 14.5px; background: #8b5cf6; border-color: #7c3aed;" onclick="copyFilteredJson()">📋 JSON 복사하기</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 3 -->
+            <div style="display: flex; gap: 14px; align-items: flex-start; background: #f8fafc; padding: 16px; border-radius: 12px; border: 1.5px solid #e2e8f0;">
+                <span class="list-item-type" style="background:#4f46e5; color:#ffffff; font-size: 14px; padding: 4px 10px; border-radius: 6px; flex-shrink:0;">Step 3</span>
+                <div style="font-size: 15.5px; font-weight: 700; line-height: 1.6; color: #1e293b;">
+                    <a href="https://gemini.google.com/gem/165QnTICV-xJacbuOAJrlKvwAYKNVczkJ?usp=sharing" target="_blank" style="color: #4f46e5; text-decoration: underline; font-weight: 800;">토플 템플릿 생성기(GEM)</a>에 접속해 복사한 데이터를 입력하고 <strong>템플릿 JSON 데이터</strong>를 발급받습니다.
+                </div>
+            </div>
+            
+            <!-- Step 4 -->
+            <div style="display: flex; gap: 14px; align-items: flex-start; background: #f8fafc; padding: 16px; border-radius: 12px; border: 1.5px solid #e2e8f0;">
+                <span class="list-item-type" style="background:#4f46e5; color:#ffffff; font-size: 14px; padding: 4px 10px; border-radius: 6px; flex-shrink:0;">Step 4</span>
+                <div style="font-size: 15.5px; font-weight: 700; line-height: 1.6; color: #1e293b;">
+                    <a href="template.pptx" download style="color: #059669; text-decoration: underline; font-weight: 900;">템플릿 가이드 PPT 파일 다운로드</a>를 클릭하여 파일을 열어줍니다.<br>
+                </div>
+            </div>
+            
+            <!-- Step 5 -->
+            <div style="display: flex; gap: 14px; align-items: flex-start; background: #f8fafc; padding: 16px; border-radius: 12px; border: 1.5px solid #e2e8f0;">
+                <span class="list-item-type" style="background:#4f46e5; color:#ffffff; font-size: 14px; padding: 4px 10px; border-radius: 6px; flex-shrink:0;">Step 5</span>
+                <div style="font-size: 15.5px; font-weight: 700; line-height: 1.6; width: 100%; color: #1e293b;">
+                    다운받은 파워포인트 우측 하단의 <strong>코파일럿 챗봇</strong>에게 아래 프롬프트와 발급받은 <strong>'템플릿 JSON'</strong>을 함께 입력합니다.
+                    <div style="display: flex; gap: 8px; margin-top: 10px; align-items: stretch;">
+                        <!-- 글씨 잘림 방지를 위해 한 줄 input을 두 줄 textarea로 교체했습니다 -->
+                        <textarea id="prompt-readonly-input" readonly style="flex: 1; padding: 12px 14px; border: 1.5px solid var(--border-strong); border-radius: 8px; font-size: 15px; background: #ffffff; color: #0f172a; font-weight: 700; resize: none; line-height: 1.5;" rows="2">슬라이드 1의 전체 디자인 형태를 그대로 준수하여 아래 데이터에 대한 템플릿 문서를 추가로 만들어줘.</textarea>
+                        <button class="ctrl-btn primary" style="white-space: nowrap; font-weight: 800; padding: 0 18px; border-radius: 8px; font-size: 15px;" onclick="copyPromptText(this)">복사</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 6 -->
+            <div style="display: flex; gap: 14px; align-items: flex-start; background: #ecfdf5; padding: 16px; border-radius: 12px; border: 1.5px solid #a7f3d0;">
+                <span class="list-item-type" style="background:#059669; color:#ffffff; font-size: 14px; padding: 4px 10px; border-radius: 6px; flex-shrink:0;">Step 6</span>
+                <div style="font-size: 16px; font-weight: 800; line-height: 1.6; color: #065f46;">
+                    🎉 템플릿 생성 끝! 코파일럿이 자동으로 슬라이드를 완성합니다.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
     <!-- 글로벌 페르소나 모달 -->
     <div class="modal-overlay" id="persona-modal" onclick="closeModal('persona-modal')">
@@ -2840,8 +2918,89 @@
         playHybridTTS(text, voiceObj);
     }
 
+    // ========== 현재 필터된 문제 JSON 전체 복사 기능 ==========
+    async function copyFilteredJson() {
+        if (!spkData || spkData.length === 0) {
+            alert('복사할 데이터가 없습니다.');
+            return;
+        }
+
+        const filterType = document.getElementById('filter-type').value;
+        const filterTopic = document.getElementById('filter-topic').value;
+
+        // 현재 화면과 동일한 필터링 로직 적용
+        const filteredItems = spkData.filter((item) => {
+            const qSrc = (item.meta?.question_source || '').toLowerCase();
+            
+            let itemDomain = '스피킹';
+            if (qSrc.includes('discussion')) itemDomain = '토론';
+            else if (qSrc.includes('email')) itemDomain = '이메일';
+
+            const itemType = item.meta?.type || '';
+
+            const matchDomain = (currentDomainFilter === 'all' || itemDomain === currentDomainFilter);
+            const matchType = (filterType === 'all' || itemType === filterType);
+            const matchTopic = (filterTopic === 'all' || (item.meta && item.meta.topic_category === filterTopic));
+
+            return matchDomain && matchType && matchTopic;
+        });
+
+        if (filteredItems.length === 0) {
+            alert('현재 필터 조건에 맞는 데이터가 없습니다.');
+            return;
+        }
 
 
+        try {
+            const jsonString = JSON.stringify(filteredItems, null, 2);
+            await navigator.clipboard.writeText(jsonString);
+            
+            // 👇 여기서 타겟 ID를 새 모달 안에 있는 버튼으로 변경
+            const btn = document.getElementById('btn-copy-json-modal');
+            const originalText = btn.innerHTML;
+            const originalBg = btn.style.background;
+            
+            btn.innerHTML = '✅ 복사 완료!';
+            btn.style.background = '#059669'; 
+            btn.style.borderColor = '#047857';
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.style.background = originalBg;
+                btn.style.borderColor = '';
+            }, 2000);
+            
+        } catch (err) {
+            console.error('클립보드 복사 실패:', err);
+            alert('클립보드 복사에 실패했습니다. 브라우저 권한을 확인해주세요.');
+        }
+    }
+
+    // 템플릿 모달 열기
+function openTemplateModal() {
+    document.getElementById('template-modal').style.display = 'flex';
+}
+
+// 프롬프트 텍스트 복사 기능
+async function copyPromptText(btn) {
+    const input = document.getElementById('prompt-readonly-input');
+    try {
+        await navigator.clipboard.writeText(input.value);
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '✅ 복사 완료';
+        btn.style.background = '#f1f5f9';
+        btn.style.borderColor = 'var(--slack-blue)';
+        
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.style.background = '';
+            btn.style.borderColor = '';
+        }, 2000);
+    } catch (err) {
+        console.error('프롬프트 복사 실패:', err);
+        alert('복사에 실패했습니다.');
+    }
+}
 
 </script>
 </body>
