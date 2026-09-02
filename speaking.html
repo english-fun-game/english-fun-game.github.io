@@ -140,16 +140,20 @@
             margin-bottom: 8px; 
             line-height: 1.6;
         }
-        
+
+/* 1. 좌측 문장 박스 (상단 좌측 정렬로 수정) */
         .chunk {
-            display: block; width: 100%; box-sizing: border-box;
-            padding: 10px 14px; 
+            display: flex;
+            align-items: flex-start; /* 수직 상단 정렬로 변경 */
+            width: 100%; box-sizing: border-box;
+            padding: 14px; 
             border-radius: 8px; 
             background: #ffffff; border: 1.5px solid var(--border-color); 
             font-size: 19px; font-weight: 800; color: #1e293b; 
             margin-bottom: 4px; cursor: pointer; transition: all 0.2s;
             box-shadow: 0 2px 4px rgba(0,0,0,0.02); letter-spacing: -0.2px;
             line-height: 1.5;
+            min-height: calc(3em + 28px); /* 2줄 텍스트 높이 + 위아래 패딩 */
         }
         .chunk:hover { background: #f8fafc; border-color: var(--border-strong); transform: translateY(-1px); }
         .chunk.active-highlight { background: #fef08a !important; border-color: #facc15 !important; color: #854d0e !important; }
@@ -270,24 +274,46 @@
         .tab-content { display: none; flex: 1; overflow-y: auto; flex-direction: column; }
         .tab-content.active { display: flex; }
 
-        /* 탭 1: 핵심 단어장 테이블 */
-        .vocab-table-borderless {
-            width: 100%; border-collapse: collapse; margin-top: 4px;
-        }
-        .vocab-table-borderless tr { border-bottom: 1.5px solid var(--border-color); }
-        .vocab-table-borderless tr:last-child { border-bottom: none; }
-        .vocab-table-borderless td {
-            width: 50%; padding: 12px 8px; vertical-align: middle; box-sizing: border-box;
-        }
-        .vocab-col-left { font-size: 15.5px; font-weight: 900; color: var(--highlight-green); line-height: 1.3; }
-        .vocab-col-right { font-size: 14.5px; font-weight: 700; color: #1e293b; line-height: 1.4; }
-
-        /* 탭 2: Canvas 논리 흐름 그래프 */
-        #logic-flow-canvas-container {
-            width: 100%; height: 100%; position: relative; display: flex; flex: 1;
-        }
         canvas {
             display: block; width: 100%; height: 100%;
+        }
+        
+        /* 2. 문제 응용 테마 UI (전문적, 미니멀, 인덴트 구조, 폰트 확대) */
+        .topic-app-card {
+            background: transparent;
+            border: none;
+            padding: 0 0 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border-bottom: 1.5px solid var(--border-color);
+        }
+        .topic-app-card:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .topic-app-title {
+            font-size: 19px; /* 타이틀 폰트 확대 */
+            font-weight: 900;
+            color: #0f172a; /* 전문적이고 차분한 다크 네이비 톤 */
+            padding: 0;
+            letter-spacing: -0.3px;
+        }
+        .topic-app-expressions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .topic-app-exp-item {
+            font-size: 18px; /* 핵심 표현 폰트 시원하게 확대 */
+            font-weight: 600; /* 타이틀과의 대비를 위해 두께 조절 */
+            color: #334155;
+            background: transparent;
+            border: none;
+            padding: 2px 0 2px 16px; /* 왼쪽 인덴트 16px */
+            border-left: 3px solid #cbd5e1; /* 모던한 들여쓰기 라인 */
+            letter-spacing: -0.2px;
+            line-height: 1.4;
         }
 
         /* 애플 스타일 미니멀 & 폴리모피즘 Pull-to-action UI */
@@ -735,26 +761,19 @@
 
     <main class="workspace-2to1">
         <section class="panel-left-2">
-            <div id="q-prompt">Loading...</div>
+            <!-- 질문과 번역 버튼을 가로로 정렬하고 버튼 크기 규격화 -->
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2.5px solid var(--border-strong); padding-bottom: 10px; margin-bottom: 0; flex-shrink: 0; gap: 12px;">
+                <div id="q-prompt" class="question-prompt" style="border-bottom: none; padding: 0; flex: 1;">Loading...</div>
+                <button id="btn-translate-q" class="ctrl-btn" style="flex-shrink: 0;">번역 <span class="shortcut-key">(K)</span></button>
+            </div>
             <div class="answer-box"><div id="script-container"></div></div>
         </section>
 
-        <section class="panel-right-1">
-            <div class="right-tabs">
-                <button class="tab-btn active" id="tab-btn-vocab" onclick="switchTab('vocab')">🔑 핵심 단어장 <span class="shortcut-key">(PgUp)</span></button>
-                <button class="tab-btn" id="tab-btn-strategy" onclick="switchTab('strategy')">🎯 논리 흐름 <span class="shortcut-key">(PgDn)</span></button>
-            </div>
-
-            <div class="tab-content active" id="tab-vocab">
-                <table class="vocab-table-borderless">
-                    <tbody id="vocab-table-body"></tbody>
-                </table>
-            </div>
-
-            <div class="tab-content" id="tab-strategy">
-                <div id="logic-flow-canvas-container">
-                    <canvas id="logic-canvas"></canvas>
-                </div>
+        <!-- 패딩을 줄여 공간 확보 -->
+        <section class="panel-right-1" style="padding: 12px;">
+            <!-- 문제 응용 헤더 삭제됨 -->
+            <div id="application-topics-container" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 4px;">
+                <!-- JS 렌더링 -->
             </div>
         </section>
     </main>
@@ -788,16 +807,30 @@
 
     <!-- 현재 문제 수정 모달 -->
     <div class="modal-overlay" id="edit-modal" onclick="closeModal('edit-modal')">
-        <div class="modal-content-giant" style="width: 780px; height: auto;" onclick="event.stopPropagation()">
+        <div class="modal-content-giant" style="width: 850px; height: auto; max-height: 90vh;" onclick="event.stopPropagation()">
             <button class="modal-close" onclick="closeModal('edit-modal')">&times; <span class="modal-close-esc">(ESC)</span></button>
-            <h3 style="margin-top: 0; font-size: 18px;">현재 문제 JSON 수정하기</h3>
-            <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 10px;">
-                현재 선택된 문제의 데이터 구조를 직접 편집하여 즉시 반영합니다.
-            </p>
-            <textarea id="edit-json-input" class="json-textarea"></textarea>
-            <button class="ctrl-btn primary" style="width: 100%; margin-top: 12px; padding: 12px; font-size: 15px;" onclick="saveEditedData()">수정 사항 저장 및 새로고침</button>
+            <h3 style="margin-top: 0; font-size: 20px; margin-bottom: 16px;">현재 문제 수정하기</h3>
+            
+            <!-- 수정 모드 선택 탭 -->
+            <div style="display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 2px solid var(--border-color); padding-bottom: 12px;">
+                <button class="ctrl-btn primary" id="tab-edit-line" onclick="switchEditMode('line')">✏️ 라인별 정답 수정</button>
+                <button class="ctrl-btn" id="tab-edit-json" onclick="switchEditMode('json')" style="background:#f8fafc;">⚙️ JSON 전체 수정</button>
+            </div>
+
+            <!-- 1. 라인별 수정 영역 -->
+            <div id="edit-line-container" style="display: flex; flex-direction: column; gap: 16px; overflow-y: auto; flex: 1; padding-right: 8px;">
+                <!-- JS 렌더링 -->
+            </div>
+
+            <!-- 2. JSON 전체 수정 영역 (기본 숨김) -->
+            <div id="edit-json-container" style="display: none; flex-direction: column; flex: 1;">
+                <textarea id="edit-json-input" class="json-textarea" style="height: 400px; font-size: 14.5px;"></textarea>
+            </div>
+
+            <button class="ctrl-btn primary" style="width: 100%; margin-top: 16px; padding: 14px; font-size: 16px; flex-shrink: 0;" onclick="saveEditedData()">💾 수정 사항 저장 및 새로고침</button>
         </div>
     </div>
+    
 
     <!-- 데이터 추가 모달 -->
     <div class="modal-overlay" id="add-modal" onclick="closeModal('add-modal')">
@@ -1138,239 +1171,123 @@
         localStorage.setItem('pongcrush_spk_last_index', currentIndex);
     }
 
-    function switchTab(tabName) {
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+ 
 
-        if (tabName === 'vocab') {
-            document.getElementById('tab-btn-vocab').classList.add('active');
-            document.getElementById('tab-vocab').classList.add('active');
-        } else {
-            document.getElementById('tab-btn-strategy').classList.add('active');
-            document.getElementById('tab-strategy').classList.add('active');
-            setTimeout(() => drawLogicFlowCanvas('logic-canvas', currentFlowsGlobal), 10);
-        }
-    }
-
-    function highlightVocabInHtml(text, vocabList) {
-        if (!vocabList || vocabList.length === 0) return text;
-        let highlighted = text;
-        const sortedVocab = [...vocabList].sort((a, b) => b.expr.length - a.expr.length);
-        sortedVocab.forEach(v => {
-            if (!v.expr) return;
-            const escaped = v.expr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const regex = new RegExp(`(${escaped})`, 'gi');
-            highlighted = highlighted.replace(regex, '<span class="vocab-highlight">$1</span>');
-        });
-        return highlighted;
-    }
-
-    function drawLogicFlowCanvas(canvasId, steps) {
-        const container = document.getElementById('logic-flow-canvas-container');
-        const canvas = document.getElementById(canvasId);
-        if (!canvas || !steps || steps.length === 0 || !container) return;
-
-        const ctx = canvas.getContext('2d');
-        const containerWidth = container.clientWidth;
-        const containerHeight = container.offsetHeight || 500; 
-
-        const dpr = window.devicePixelRatio || 1;
-        canvas.width = containerWidth * dpr;
-        canvas.height = containerHeight * dpr;
-        canvas.style.width = `${containerWidth}px`;
-        canvas.style.height = `${containerHeight}px`;
-
-        ctx.scale(dpr, dpr);
-        ctx.clearRect(0, 0, containerWidth, containerHeight);
-
-        const nodeCount = steps.length;
-        const paddingTop = 5;
-        const paddingBottom = 5;
-        const usableHeight = containerHeight - paddingTop - paddingBottom;
-        
-        const stepHeight = usableHeight / nodeCount;
-        const boxHeight = Math.min(95, stepHeight * 0.88); 
-        const spacing = stepHeight - boxHeight;
-        const lineX = 40;
-
-        ctx.beginPath();
-        ctx.moveTo(lineX, paddingTop + boxHeight/2);
-        ctx.lineTo(lineX, paddingTop + usableHeight - boxHeight/2);
-        ctx.strokeStyle = '#e2e8f0';
-        ctx.lineWidth = 3.5;
-        ctx.stroke();
-
-        steps.forEach((step, index) => {
-            const boxY = paddingTop + index * stepHeight + spacing / 2;
-            const centerY = boxY + boxHeight / 2;
-
-            if (index < nodeCount - 1) {
-                const arrowY = boxY + boxHeight + spacing / 2 + 3;
-                ctx.beginPath();
-                ctx.moveTo(lineX, arrowY);
-                ctx.lineTo(lineX - 6, arrowY - 9);
-                ctx.lineTo(lineX + 6, arrowY - 9);
-                ctx.fillStyle = '#cbd5e1';
-                ctx.fill();
-            }
-
-            ctx.beginPath();
-            ctx.arc(lineX, centerY, 15, 0, 2 * Math.PI);
-            ctx.fillStyle = '#059669'; 
-            ctx.fill();
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 4;
-            ctx.stroke();
-
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 14px Pretendard, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(index + 1, lineX, centerY + 1);
-
-            const boxX = lineX + 35;
-            const boxWidth = containerWidth - boxX - 10;
-            
-            ctx.beginPath();
-            ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 12);
-            ctx.fillStyle = '#ffffff';
-            ctx.fill();
-            ctx.strokeStyle = '#10b981';
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'top';
-            ctx.fillStyle = '#0f172a';
-            ctx.font = '800 13px Pretendard, sans-serif';
-            ctx.fillText(step.tag, boxX + 12, boxY + 12);
-
-            ctx.fillStyle = '#059669';
-            ctx.font = '900 18.5px Pretendard, sans-serif';
-            ctx.fillText(step.keyword, boxX + 12, boxY + 30);
-
-            ctx.fillStyle = '#475569';
-            ctx.font = '600 13.5px Pretendard, sans-serif';
-            wrapTextCanvas(ctx, step.desc, boxX + 12, boxY + 52, boxWidth - 24, 16);
-        });
-    }
-
-    function wrapTextCanvas(ctx, text, x, y, maxWidth, lineHeight) {
-        const words = text.split(' ');
-        let line = '';
-        let currentY = y;
-        for(let n = 0; n < words.length; n++) {
-            const testLine = line + words[n] + ' ';
-            const metrics = ctx.measureText(testLine);
-            if (metrics.width > maxWidth && n > 0) {
-                ctx.fillText(line, x, currentY);
-                line = words[n] + ' ';
-                currentY += lineHeight;
-            } else {
-                line = testLine;
-            }
-        }
-        ctx.fillText(line, x, currentY);
-    }
+    let isTranslated = false; // 전역 변수명 변경 (질문+정답 통합)
 
     function renderUI() {
         if (!spkData || spkData.length === 0) {
             document.getElementById('meta-header').innerHTML = `<span class="badge-topic-category" style="background:#fef2f2; color:#ef4444; border-color:#fca5a5;">데이터 없음</span>`;
             document.getElementById('q-prompt').innerText = "저장된 문제가 없습니다. [추가] 버튼을 눌러 새로운 문제를 등록해주세요.";
-            document.getElementById('q-prompt').className = "question-prompt";
-            document.getElementById('q-prompt').onclick = null;
             document.getElementById('script-container').innerHTML = '<div style="color:#64748b; padding:20px 0;">화면 상단의 추가(A) 버튼을 눌러 JSON 데이터를 입력하세요.</div>';
-            document.getElementById('vocab-table-body').innerHTML = '';
-            const canvas = document.getElementById('logic-canvas');
-            if(canvas) {
-                const ctx = canvas.getContext('2d');
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-            }
+            document.getElementById('application-topics-container').innerHTML = '';
             return;
         }
 
-    if (currentIndex >= spkData.length) {
-        currentIndex = 0;
-        saveCurrentIndex();
-    }
-    const data = spkData[currentIndex];
-    
-    const types = ["경험", "선택", "열린"];
-    const typePillsHtml = types.map(t => 
-        `<span class="type-pill ${t === data.meta.type ? 'active' : ''}">${t}</span>`
-    ).join('');
-
-    const topicLabel = data.meta.topic_category ? `📚 ${data.meta.topic_category}` : "📚 미분류";
-
-    // question_source 파싱 및 토론/이메일/스피킹 3웨이 토글 UI 생성
-    const qSource = (data.meta.question_source || '').toLowerCase();
-    const isDiscussion = qSource.includes('discussion');
-    const isEmail = qSource.includes('email');
-    const isSpeaking = !isDiscussion && !isEmail; // discussion이나 email이 없으면 기본 스피킹으로 간주
-
-    const qsSegmentHtml = `
-        <div class="type-segmented-control qs-segmented-control">
-            <span class="type-pill ${isDiscussion ? 'active' : ''}">토론</span>
-            <span class="type-pill ${isEmail ? 'active' : ''}">이메일</span>
-            <span class="type-pill ${isSpeaking ? 'active' : ''}">스피킹</span>
-        </div>
-    `;
-
-    document.getElementById('meta-header').innerHTML = `
-        <button class="btn-global-persona" onclick="openPersonaModal()">
-            <img src="profile.jpg" class="profile-img-header" alt="Profile" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2NiZDVlMSI+PHBhdGggZD0iTTEyIDJhNSA1IDAgMSAwIDAgMTAgNSA1IDAgMCAwIDAtMTB6bTAtMmMzLjg2NiAwIDcgMy4xMzQgNyA3cy0zLjEzNCA3LTcgNy03LTMuMTM0LTctNyAzLjEzNC03IDctN3ptMCAxOGM1LjUyMyAwIDEwIDIuMjM5IDEwIDV2Mkgydi0yYz0yLjc2MSA0LjQ3Ny01IDEwLTV6Ii8+PC9zdmc+='">
-            <span class="persona-name-text">Zuri Harris</span>
-        </button>
-        <span class="bc-arrow">❯</span>
-        <span class="specific-persona-tag">${data.meta.specific_persona || '기본 전략'}</span>
-        <div class="divider-line"></div>
-        <span class="question-badge-top">#${currentIndex + 1}</span>
-        <div class="divider-line"></div>
-        <div class="type-segmented-control">${typePillsHtml}</div>
-        <div class="divider-line"></div>
-        <div class="badge-topic-category">${topicLabel}</div>
-        <div class="divider-line"></div>
-        ${qsSegmentHtml}
-    `;
-
-        const qPrompt = document.getElementById('q-prompt');
-        qPrompt.innerText = data.question;
-        qPrompt.className = "question-prompt q-prompt-hover";
-        qPrompt.onclick = () => playSingle(data.question);
-
-        const scriptContainer = document.getElementById('script-container');
-        scriptContainer.innerHTML = '';
+        if (currentIndex >= spkData.length) {
+            currentIndex = 0;
+            saveCurrentIndex();
+        }
+        const data = spkData[currentIndex];
         
-        data.script_rows.forEach((row, rIdx) => {
-            const rowDiv = document.createElement('div');
-            rowDiv.className = 'sentence-row';
+        // 1. 메타 헤더 렌더링
+        const types = ["경험", "선택", "열린"];
+        const typePillsHtml = types.map(t => `<span class="type-pill ${t === data.meta.type ? 'active' : ''}">${t}</span>`).join('');
+        const topicLabel = data.meta.topic_category ? `📚 ${data.meta.topic_category}` : "📚 미분류";
+        const qSource = (data.meta.question_source || '').toLowerCase();
+        const isDiscussion = qSource.includes('discussion');
+        const isEmail = qSource.includes('email');
+        const isSpeaking = !isDiscussion && !isEmail;
 
-            const combinedText = row.map(c => c.text).join(' ');
-            const span = document.createElement('span');
-            span.className = 'chunk';
-            span.innerHTML = highlightVocabInHtml(combinedText, data.vocab_list);
-            span.id = `chunk-${rIdx}`;
+        document.getElementById('meta-header').innerHTML = `
+            <button class="btn-global-persona" onclick="openPersonaModal()">
+                <img src="profile.jpg" class="profile-img-header" alt="Profile" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2NiZDVlMSI+PHBhdGggZD0iTTEyIDJhNSA1IDAgMSAwIDAgMTAgNSA1IDAgMCAwIDAtMTB6bTAtMmMzLjg2NiAwIDcgMy4xMzQgNyA3cy0zLjEzNCA3LTcgNy03LTMuMTM0LTctNyAzLjEzNC03IDctN3ptMCAxOGM1LjUyMyAwIDEwIDIuMjM5IDEwIDV2Mkgydi0yYz0yLjc2MSA0LjQ3Ny01IDEwLTV6Ii8+PC9zdmc+='">
+                <span class="persona-name-text">Zuri Harris</span>
+            </button>
+            <span class="bc-arrow">❯</span>
+            <span class="specific-persona-tag">${data.meta.specific_persona || '기본 전략'}</span>
+            <div class="divider-line"></div>
+            <span class="question-badge-top">#${currentIndex + 1}</span>
+            <div class="divider-line"></div>
+            <div class="type-segmented-control">${typePillsHtml}</div>
+            <div class="divider-line"></div>
+            <div class="badge-topic-category">${topicLabel}</div>
+            <div class="divider-line"></div>
+            <div class="type-segmented-control qs-segmented-control">
+                <span class="type-pill ${isDiscussion ? 'active' : ''}">토론</span>
+                <span class="type-pill ${isEmail ? 'active' : ''}">이메일</span>
+                <span class="type-pill ${isSpeaking ? 'active' : ''}">스피킹</span>
+            </div>
+        `;
+
+        // 2. 질문 & 정답 번역 토글 로직
+        const qPrompt = document.getElementById('q-prompt');
+        const btnTranslate = document.getElementById('btn-translate-q');
+        
+        const updateTranslationState = () => {
+            // 질문 텍스트 업데이트
+            qPrompt.innerText = isTranslated ? (data.question_ko || data.question) : data.question;
+            btnTranslate.style.background = isTranslated ? '#1e293b' : '#ffffff';
+            btnTranslate.style.color = isTranslated ? '#ffffff' : 'var(--text-main)';
+            btnTranslate.style.borderColor = isTranslated ? '#0f172a' : 'var(--border-strong)';
+
+            // 정답 스크립트 업데이트 (렌더링)
+            const scriptContainer = document.getElementById('script-container');
+            scriptContainer.innerHTML = '';
             
-            span.onclick = () => playChunk(rIdx, combinedText);
-            
-            rowDiv.appendChild(span);
-            scriptContainer.appendChild(rowDiv);
-        });
+            data.script_rows.forEach((rowObj, rIdx) => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'sentence-row';
+                
+                const combinedText = rowObj.chunks.map(c => c.text).join(' '); // 원문
+                const displayText = isTranslated ? (rowObj.translation || combinedText) : combinedText; // 표시용 텍스트
 
-        // 괄호 제거 정규식 적용된 단어장 렌더링
-        const vocabTableBody = document.getElementById('vocab-table-body');
-        vocabTableBody.innerHTML = '';
-        const vocabList = (data.vocab_list && data.vocab_list.length > 0) ? data.vocab_list : [];
-        vocabList.forEach(item => {
-            const tr = document.createElement('tr');
-            const cleanMeaning = item.meaning.replace(/\s*\([^)]*\)/g, '').trim();
-            tr.innerHTML = `<td class="vocab-col-left">${item.expr}</td><td class="vocab-col-right">${cleanMeaning}</td>`;
-            vocabTableBody.appendChild(tr);
-        });
+                const span = document.createElement('span');
+                span.className = 'chunk';
+                span.innerHTML = displayText; 
+                span.id = `chunk-${rIdx}`;
+                
+                // 재생은 항상 원문(영어)으로 전달
+                span.onclick = () => playChunk(rIdx, combinedText);
+                
+                rowDiv.appendChild(span);
+                scriptContainer.appendChild(rowDiv);
+            });
+        };
+        
+        updateTranslationState(); // 최초 1회 렌더링
+        
+        btnTranslate.onclick = () => {
+            isTranslated = !isTranslated;
+            updateTranslationState();
+        };
 
-        currentFlowsGlobal = (data.logic_flow_steps && data.logic_flow_steps.length > 0) ? data.logic_flow_steps : [];
-        if (document.getElementById('tab-strategy').classList.contains('active')) {
-            drawLogicFlowCanvas('logic-canvas', currentFlowsGlobal);
+        qPrompt.onclick = () => playSingle(data.question); // 재생은 영어 원문 기준
+
+        // 3. 우측 문제 응용(Applicable Topics) 렌더링 (인덴트 디자인 및 첫글자 대문자)
+        const appContainer = document.getElementById('application-topics-container');
+        appContainer.innerHTML = '';
+        
+        if (data.task2_applicable_topics && data.task2_applicable_topics.length > 0) {
+            data.task2_applicable_topics.forEach(app => {
+                const expressionsHtml = app.core_expressions.map(exp => {
+                    // 첫 글자 대문자 변환 로직
+                    const capitalizedExp = exp.charAt(0).toUpperCase() + exp.slice(1);
+                    return `<div class="topic-app-exp-item">${capitalizedExp}</div>`;
+                }).join('');
+                
+                const cardHtml = `
+                    <div class="topic-app-card">
+                        <div class="topic-app-title">${app.topic}</div>
+                        <div class="topic-app-expressions">
+                            ${expressionsHtml}
+                        </div>
+                    </div>
+                `;
+                appContainer.insertAdjacentHTML('beforeend', cardHtml);
+            });
+        } else {
+            appContainer.innerHTML = '<div style="color:#64748b; padding:10px; font-weight:700;">응용 가능한 주제가 없습니다.</div>';
         }
     }
 
@@ -1813,8 +1730,8 @@
     // 전체 발화 텍스트를 문장 단위로 분할하여 추적 채점
     function diffGlobalToSentences(scriptRows, userText) {
         let C = [];
-        scriptRows.forEach((row, rIdx) => {
-            let rowText = row.map(c => c.text).join(' ');
+        scriptRows.forEach((rowObj, rIdx) => {
+            let rowText = rowObj.chunks.map(c => c.text).join(' '); // 변경됨
             let words = rowText.trim().split(/\s+/).filter(w => w);
             words.forEach(w => { C.push({ word: w, rIdx: rIdx }); });
         });
@@ -1950,8 +1867,8 @@
                 rowDiv.className = 'sentence-row';
 
                 const origDiv = document.createElement('div');
-                let fullOriginalText = row.map(c => c.text).join(' ');
-                
+                let fullOriginalText = rowObj.chunks.map(c => c.text).join(' '); // 변경됨
+
                 const span = document.createElement('span');
                 span.className = 'chunk';
                 span.innerHTML = highlightVocabInHtml(fullOriginalText, data.vocab_list);
@@ -2019,21 +1936,90 @@
         renderUI(); 
     }
 
-    // ========== 나머지 유틸리티 함수 ==========
+    let currentEditMode = 'line'; // 'line' or 'json'
+
+    function switchEditMode(mode) {
+        currentEditMode = mode;
+        const btnLine = document.getElementById('tab-edit-line');
+        const btnJson = document.getElementById('tab-edit-json');
+        
+        if (mode === 'line') {
+            btnLine.className = 'ctrl-btn primary';
+            btnLine.style.background = '';
+            btnJson.className = 'ctrl-btn';
+            btnJson.style.background = '#f8fafc';
+            
+            document.getElementById('edit-line-container').style.display = 'flex';
+            document.getElementById('edit-json-container').style.display = 'none';
+        } else {
+            btnJson.className = 'ctrl-btn primary';
+            btnJson.style.background = '';
+            btnLine.className = 'ctrl-btn';
+            btnLine.style.background = '#f8fafc';
+            
+            document.getElementById('edit-line-container').style.display = 'none';
+            document.getElementById('edit-json-container').style.display = 'flex';
+            
+            // 라인별 수정에서 바뀐 내용을 JSON에 동기화
+            document.getElementById('edit-json-input').value = JSON.stringify(spkData[currentIndex], null, 2);
+        }
+    }
+
     function openEditModal() {
         if (!spkData || spkData.length === 0) { alert('수정할 데이터가 없습니다.'); return; }
-        document.getElementById('edit-json-input').value = JSON.stringify(spkData[currentIndex], null, 2);
+        
+        const data = spkData[currentIndex];
+        
+        // 1. JSON 에디터 초기화
+        document.getElementById('edit-json-input').value = JSON.stringify(data, null, 2);
+        
+        // 2. 라인별 에디터 초기화
+        const lineContainer = document.getElementById('edit-line-container');
+        lineContainer.innerHTML = '';
+        
+        data.script_rows.forEach((row, idx) => {
+            const combinedEnglish = row.chunks.map(c => c.text).join(' ');
+            const koreanTrans = row.translation || '';
+            
+            const rowBox = document.createElement('div');
+            rowBox.style.cssText = "background: #f8fafc; padding: 12px; border-radius: 8px; border: 1.5px solid var(--border-color);";
+            
+            rowBox.innerHTML = `
+                <div style="font-size: 13.5px; font-weight: 800; color: #64748b; margin-bottom: 8px;">문장 ${idx + 1}</div>
+                <textarea id="edit-line-eng-${idx}" class="test-input" style="min-height: 60px; font-size: 15px; margin-bottom: 8px;" placeholder="영어 원문">${combinedEnglish}</textarea>
+                <textarea id="edit-line-kor-${idx}" class="test-input" style="min-height: 40px; font-size: 14.5px; background: #ffffff; color: #475569;" placeholder="한국어 번역">${koreanTrans}</textarea>
+            `;
+            lineContainer.appendChild(rowBox);
+        });
+
+        // 탭 초기화 및 모달 띄우기
+        switchEditMode('line');
         document.getElementById('edit-modal').style.display = 'flex';
-        setTimeout(() => document.getElementById('edit-json-input').focus(), 10);
     }
 
     function saveEditedData() {
-        const text = document.getElementById('edit-json-input').value.trim();
-        if (!text) { alert('JSON 데이터를 입력해주세요.'); return; }
         try {
-            spkData[currentIndex] = JSON.parse(text);
+            if (currentEditMode === 'line') {
+                // 라인별 수정 내용을 spkData에 반영
+                const data = spkData[currentIndex];
+                data.script_rows.forEach((row, idx) => {
+                    const engVal = document.getElementById(`edit-line-eng-${idx}`).value.trim();
+                    const korVal = document.getElementById(`edit-line-kor-${idx}`).value.trim();
+                    
+                    row.translation = korVal;
+                    // 청크를 하나로 묶어서 덮어씀 (문장 수정 시 분할 기준이 불명확하므로 단일 청크로 통합)
+                    row.chunks = [{ text: engVal }]; 
+                });
+            } else {
+                // JSON 전체 수정 내용을 spkData에 반영
+                const text = document.getElementById('edit-json-input').value.trim();
+                if (!text) throw new Error('JSON 데이터가 비어있습니다.');
+                spkData[currentIndex] = JSON.parse(text);
+            }
+
+            // 로컬 스토리지 저장 및 UI 리렌더링
             localStorage.setItem('pongcrush_spk_data', JSON.stringify(spkData));
-            alert('수정되었습니다!');
+            alert('성공적으로 수정되었습니다!');
             closeModal('edit-modal'); 
             
             stopAudio();
@@ -2044,7 +2030,9 @@
             document.getElementById('test-result-controls').style.display = 'none';
             
             renderUI();
-        } catch (e) { alert('오류: \n' + e.message); }
+        } catch (e) { 
+            alert('저장 중 오류가 발생했습니다: \n' + e.message); 
+        }
     }
 
     function openAddModal() {
@@ -2430,6 +2418,7 @@
         }
 
         if (keyLower === 'a') { e.preventDefault(); openAddModal(); }
+        else if (keyLower === 'k') { e.preventDefault(); document.getElementById('btn-translate-q')?.click(); } // 추가됨
         else if (keyLower === 's') { e.preventDefault(); openEditModal(); }
         else if (keyLower === 'd') { e.preventDefault(); openListModal(); }
         else if (keyLower === 'f') { e.preventDefault(); openVoiceModal(); }
