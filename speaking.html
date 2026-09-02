@@ -119,11 +119,22 @@
             flex: 2; display: flex; flex-direction: column; gap: 10px; min-width: 0;
         }
 
+        /* 1. 문제 제목 영역 (2줄 고정) */
         .question-prompt {
-            font-size: 19px; font-weight: 900; color: #0f172a; line-height: 1.3;
-            padding: 0 0 10px 0; border-bottom: 2.5px solid var(--border-strong);
-            flex-shrink: 0; letter-spacing: -0.3px;
+            font-size: 19px; 
+            font-weight: 900; 
+            color: #0f172a; 
+            line-height: 1.4;
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: flex-start; /* 상단 정렬 유지 */
+            margin: 0; 
+            padding: 0;
+            flex: 1;
+            /* 높이 2줄 고정 로직 (line-height 1.4 * 2줄) */
+            min-height: 2.8em; 
         }
+
         .q-prompt-hover {
             cursor: pointer;
             transition: color 0.2s;
@@ -141,10 +152,10 @@
             line-height: 1.6;
         }
 
-/* 1. 좌측 문장 박스 (상단 좌측 정렬로 수정) */
+/* 2. 각 정답 문장 영역 (2줄 고정) */
         .chunk {
             display: flex;
-            align-items: flex-start; /* 수직 상단 정렬로 변경 */
+            align-items: flex-start; /* 상단 정렬 유지 */
             width: 100%; box-sizing: border-box;
             padding: 14px; 
             border-radius: 8px; 
@@ -153,10 +164,13 @@
             margin-bottom: 4px; cursor: pointer; transition: all 0.2s;
             box-shadow: 0 2px 4px rgba(0,0,0,0.02); letter-spacing: -0.2px;
             line-height: 1.5;
-            min-height: calc(3em + 28px); /* 2줄 텍스트 높이 + 위아래 패딩 */
+            /* 높이 2줄 고정 로직 (line-height 1.5 * 2줄 + 상하 패딩 14px*2) */
+            min-height: calc(3em + 28px); 
         }
         .chunk:hover { background: #f8fafc; border-color: var(--border-strong); transform: translateY(-1px); }
         .chunk.active-highlight { background: #fef08a !important; border-color: #facc15 !important; color: #854d0e !important; }
+
+
 
         .vocab-highlight {
             color: var(--highlight-green) !important;
@@ -626,8 +640,21 @@
 
     .workspace-2to1 { flex-direction: column; height: auto; gap: 12px; overflow: visible; padding-bottom: 24px; margin-top: 4px; }
     .panel-left-2 { flex: none; height: auto; gap: 8px; }
-    .question-prompt { font-size: 17px; padding-bottom: 8px; }
-    .chunk { font-size: 17px; padding: 8px 12px; }
+    /* 모바일 노출 스타일 보정 (@media 괄호 내부에 덮어쓰기) */
+    .question-prompt { 
+        font-size: 17px !important; 
+        line-height: 1.4 !important;
+        min-height: 2.8em !important; /* 모바일에서도 2줄 고정 */
+        padding-bottom: 0 !important;
+    }
+    
+    .chunk { 
+        font-size: 17px !important; 
+        line-height: 1.5 !important;
+        padding: 12px 14px !important; 
+        min-height: calc(3em + 24px) !important; /* 모바일 2줄 고정 (1.5 * 2줄 + 상하 패딩 12px*2) */
+    }
+    
     .test-input { font-size: 17px; padding: 8px 10px; }
     .answer-box { overflow: visible; }
     .panel-right-1 { flex: none; height: 500px; margin-bottom: 20px; }
