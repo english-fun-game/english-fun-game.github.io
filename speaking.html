@@ -2571,9 +2571,11 @@ function openEditModal() {
 
         const num = parseInt(key);
         if (num >= 1 && num <= 9 && spkData && spkData.length > 0) {
-            const data = spkData[currentIndex];
+            const data = getActiveData(); // 원본 또는 응용 데이터 가져오기
             if (data && data.script_rows && num <= data.script_rows.length) {
-                const combinedText = data.script_rows[num-1].map(c => c.text).join(' ');
+                const targetRow = data.script_rows[num-1];
+                // chunks 배열 존재 여부를 확인하고 텍스트 결합
+                const combinedText = targetRow.chunks ? targetRow.chunks.map(c => c.text).join(' ') : '';
                 playChunk(num-1, combinedText);
                 return;
             }
