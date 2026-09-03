@@ -769,8 +769,9 @@
         <div class="controls" id="normal-controls">
             <button class="ctrl-btn btn-hide-mobile" id="btn-w-test" onclick="toggleWritingTestMode()">작문 <span class="shortcut-key">(T)</span></button>
             <button class="ctrl-btn" id="btn-s-test" onclick="toggleSpeakingTestMode()">음성 <span class="shortcut-key">(P)</span></button>
-            <button class="ctrl-btn btn-hide-mobile" onclick="openAddModal()">추가 <span class="shortcut-key">(A)</span></button>
-            <button class="ctrl-btn btn-hide-mobile" onclick="openEditModal()">수정 <span class="shortcut-key">(S)</span></button>
+            <!-- 상단 버튼들에 id="btn-add", id="btn-edit" 추가 -->
+            <button class="ctrl-btn btn-hide-mobile" id="btn-add" onclick="openAddModal()">추가 <span class="shortcut-key">(A)</span></button>
+            <button class="ctrl-btn btn-hide-mobile" id="btn-edit" onclick="openEditModal()">수정 <span class="shortcut-key">(S)</span></button>
             <button class="ctrl-btn" id="btn-setting" onclick="openVoiceModal()">설정 <span class="shortcut-key">(F)</span></button>
             <button class="ctrl-btn" id="btn-list" onclick="openListModal()">목록 <span class="shortcut-key">(D)</span></button>
             <button class="ctrl-btn primary btn-m-play" id="btn-play" onclick="playAll()">읽기 <span class="shortcut-key">(↑)</span></button>
@@ -1047,6 +1048,89 @@
         } 
     }
 
+    // [기존 전역 변수 영역에 추가]
+    let currentTopicIndex = 0;
+    let isTopicApplied = false; // 응용분야 적용 상태 플래그
+    let appliedTopicIndex = 0;  // 적용된 응용분야의 인덱스
+
+    // 현재 활성화된 데이터(원본 또는 응용분야)를 반환하는 헬퍼 함수
+    function getActiveData() {
+        const baseData = spkData[currentIndex];
+        if (!baseData) return null;
+        
+        // 응용분야가 적용된 상태라면 해당 응용분야 객체 반환
+        if (isTopicApplied && baseData.applicable_topics && baseData.applicable_topics[appliedTopicIndex]) {
+            return baseData.applicable_topics[appliedTopicIndex];
+        }
+        return baseData;
+    } 
+
+    // 기존 renderApplicationTopic() 교체
+// 기존 renderApplicationTopic() 함수를 통째로 덮어씌워주세요.
+function renderApplicationTopic() {
+    const data = spkData[currentIndex];
+    const appContainer = document.getElementById('application-topics-container');
+    appContainer.innerHTML = '';
+
+    const topics = data.applicable_topics || data.task2_applicable_topics;
+
+    if (!topics || topics.length === 0) {
+        appContainer.innerHTML = '<div style="color:#64748b; padding:10px; font-weight:700;">응용 가능한 주제가 없습니다.</div>';
+        return;
+    }
+
+    // 리스트 전체를 순회하며 렌더링
+    topics.forEach((app, idx) => {
+        const expressionsHtml = app.core_expressions.map(exp => {
+            const capitalizedExp = exp.charAt(0).toUpperCase() + exp.slice(1);
+            return `<div class="topic-app-exp-item">${capitalizedExp}</div>`;
+        }).join('');
+
+        // 현재 클릭되어 적용된 상태인지 확인
+        const isThisApplied = (isTopicApplied && appliedTopicIndex === idx);
+        const borderStyle = isThisApplied ? '2px solid var(--slack-blue)' : '1.5px solid var(--border-color)';
+        const bgStyle = isThisApplied ? '#f0f9ff' : 'transparent';
+
+        const cardHtml = `
+            <div class="topic-app-card" 
+                 style="background: ${bgStyle}; border: ${borderStyle}; padding: 16px; border-radius: 12px; cursor: pointer; margin-bottom: 12px; box-sizing: border-box;" 
+                 onclick="applyTopic(${idx})">
+                <div style="font-size: 17px; font-weight: 900; color: #0f172a; margin-bottom: 12px;">
+                    ${app.topic}
+                </div>
+                <div class="topic-app-expressions">
+                    ${expressionsHtml}
+                </div>
+            </div>
+        `;
+        appContainer.innerHTML += cardHtml;
+    });
+}
+
+// 클릭 시 트리거되는 함수 추가
+function applyTopic(index) {
+    if (testMode) return; // 시험 중에는 변경 방지
+    isTopicApplied = true;
+    appliedTopicIndex = index;
+    renderUI();
+}
+
+    function nextTopic() {
+        const data = spkData[currentIndex];
+        if (!data || !data.task2_applicable_topics || data.task2_applicable_topics.length <= 1) return;
+        // 원형 링크드리스트 형태의 순환 구조 (모듈로 연산)
+        currentTopicIndex = (currentTopicIndex + 1) % data.task2_applicable_topics.length;
+        renderApplicationTopic();
+    }
+
+    function prevTopic() {
+        const data = spkData[currentIndex];
+        if (!data || !data.task2_applicable_topics || data.task2_applicable_topics.length <= 1) return;
+        // 음수 방지를 위해 length를 더한 후 모듈로 연산
+        currentTopicIndex = (currentTopicIndex - 1 + data.task2_applicable_topics.length) % data.task2_applicable_topics.length;
+        renderApplicationTopic();
+    }
+
 
     const spk_global_persona = {
       "global_persona": {
@@ -1203,120 +1287,135 @@
     let isTranslated = false; // 전역 변수명 변경 (질문+정답 통합)
 
     function renderUI() {
-        if (!spkData || spkData.length === 0) {
-            document.getElementById('meta-header').innerHTML = `<span class="badge-topic-category" style="background:#fef2f2; color:#ef4444; border-color:#fca5a5;">데이터 없음</span>`;
-            document.getElementById('q-prompt').innerText = "저장된 문제가 없습니다. [추가] 버튼을 눌러 새로운 문제를 등록해주세요.";
-            document.getElementById('script-container').innerHTML = '<div style="color:#64748b; padding:20px 0;">화면 상단의 추가(A) 버튼을 눌러 JSON 데이터를 입력하세요.</div>';
-            document.getElementById('application-topics-container').innerHTML = '';
-            return;
-        }
-
-        if (currentIndex >= spkData.length) {
-            currentIndex = 0;
-            saveCurrentIndex();
-        }
-        const data = spkData[currentIndex];
-        
-        // 1. 메타 헤더 렌더링
-        const types = ["경험", "선택", "열린"];
-        const typePillsHtml = types.map(t => `<span class="type-pill ${t === data.meta.type ? 'active' : ''}">${t}</span>`).join('');
-        const topicLabel = data.meta.topic_category ? `📚 ${data.meta.topic_category}` : "📚 미분류";
-        const qSource = (data.meta.question_source || '').toLowerCase();
-        const isDiscussion = qSource.includes('discussion');
-        const isEmail = qSource.includes('email');
-        const isSpeaking = !isDiscussion && !isEmail;
-
-        document.getElementById('meta-header').innerHTML = `
-            <button class="btn-global-persona" onclick="openPersonaModal()">
-                <img src="profile.jpg" class="profile-img-header" alt="Profile" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2NiZDVlMSI+PHBhdGggZD0iTTEyIDJhNSA1IDAgMSAwIDAgMTAgNSA1IDAgMCAwIDAtMTB6bTAtMmMzLjg2NiAwIDcgMy4xMzQgNyA3cy0zLjEzNCA3LTcgNy03LTMuMTM0LTctNyAzLjEzNC03IDctN3ptMCAxOGM1LjUyMyAwIDEwIDIuMjM5IDEwIDV2Mkgydi0yYz0yLjc2MSA0LjQ3Ny01IDEwLTV6Ii8+PC9zdmc+='">
-                <span class="persona-name-text">Zuri Harris</span>
-            </button>
-            <span class="bc-arrow">❯</span>
-            <span class="specific-persona-tag">${data.meta.specific_persona || '기본 전략'}</span>
-            <div class="divider-line"></div>
-            <span class="question-badge-top">#${currentIndex + 1}</span>
-            <div class="divider-line"></div>
-            <div class="type-segmented-control">${typePillsHtml}</div>
-            <div class="divider-line"></div>
-            <div class="badge-topic-category">${topicLabel}</div>
-            <div class="divider-line"></div>
-            <div class="type-segmented-control qs-segmented-control">
-                <span class="type-pill ${isDiscussion ? 'active' : ''}">토론</span>
-                <span class="type-pill ${isEmail ? 'active' : ''}">이메일</span>
-                <span class="type-pill ${isSpeaking ? 'active' : ''}">스피킹</span>
-            </div>
-        `;
-
-        // 2. 질문 & 정답 번역 토글 로직
-        const qPrompt = document.getElementById('q-prompt');
-        const btnTranslate = document.getElementById('btn-translate-q');
-        
-        const updateTranslationState = () => {
-            // 질문 텍스트 업데이트
-            qPrompt.innerText = isTranslated ? (data.question_ko || data.question) : data.question;
-            btnTranslate.style.background = isTranslated ? '#1e293b' : '#ffffff';
-            btnTranslate.style.color = isTranslated ? '#ffffff' : 'var(--text-main)';
-            btnTranslate.style.borderColor = isTranslated ? '#0f172a' : 'var(--border-strong)';
-
-            // 정답 스크립트 업데이트 (렌더링)
-            const scriptContainer = document.getElementById('script-container');
-            scriptContainer.innerHTML = '';
-            
-            data.script_rows.forEach((rowObj, rIdx) => {
-                const rowDiv = document.createElement('div');
-                rowDiv.className = 'sentence-row';
-                
-                const combinedText = rowObj.chunks.map(c => c.text).join(' '); // 원문
-                const displayText = isTranslated ? (rowObj.translation || combinedText) : combinedText; // 표시용 텍스트
-
-                const span = document.createElement('span');
-                span.className = 'chunk';
-                span.innerHTML = displayText; 
-                span.id = `chunk-${rIdx}`;
-                
-                // 재생은 항상 원문(영어)으로 전달
-                span.onclick = () => playChunk(rIdx, combinedText);
-                
-                rowDiv.appendChild(span);
-                scriptContainer.appendChild(rowDiv);
-            });
-        };
-        
-        updateTranslationState(); // 최초 1회 렌더링
-        
-        btnTranslate.onclick = () => {
-            isTranslated = !isTranslated;
-            updateTranslationState();
-        };
-
-        qPrompt.onclick = () => playSingle(data.question); // 재생은 영어 원문 기준
-
-        // 3. 우측 문제 응용(Applicable Topics) 렌더링 (인덴트 디자인 및 첫글자 대문자)
-        const appContainer = document.getElementById('application-topics-container');
-        appContainer.innerHTML = '';
-        
-        if (data.task2_applicable_topics && data.task2_applicable_topics.length > 0) {
-            data.task2_applicable_topics.forEach(app => {
-                const expressionsHtml = app.core_expressions.map(exp => {
-                    // 첫 글자 대문자 변환 로직
-                    const capitalizedExp = exp.charAt(0).toUpperCase() + exp.slice(1);
-                    return `<div class="topic-app-exp-item">${capitalizedExp}</div>`;
-                }).join('');
-                
-                const cardHtml = `
-                    <div class="topic-app-card">
-                        <div class="topic-app-title">${app.topic}</div>
-                        <div class="topic-app-expressions">
-                            ${expressionsHtml}
-                        </div>
-                    </div>
-                `;
-                appContainer.insertAdjacentHTML('beforeend', cardHtml);
-            });
-        } else {
-            appContainer.innerHTML = '<div style="color:#64748b; padding:10px; font-weight:700;">응용 가능한 주제가 없습니다.</div>';
-        }
+    if (!spkData || spkData.length === 0) {
+        document.getElementById('meta-header').innerHTML = `<span class="badge-topic-category" style="background:#fef2f2; color:#ef4444; border-color:#fca5a5;">데이터 없음</span>`;
+        document.getElementById('q-prompt').innerText = "저장된 문제가 없습니다. [추가] 버튼을 눌러 새로운 문제를 등록해주세요.";
+        document.getElementById('script-container').innerHTML = '<div style="color:#64748b; padding:20px 0;">화면 상단의 추가(A) 버튼을 눌러 JSON 데이터를 입력하세요.</div>';
+        document.getElementById('application-topics-container').innerHTML = '';
+        return;
     }
+
+    if (currentIndex >= spkData.length) { currentIndex = 0; saveCurrentIndex(); }
+    
+    const baseData = spkData[currentIndex];
+    const activeData = getActiveData(); 
+
+    // 1. 메타 헤더 렌더링
+    const types = ["경험", "선택", "열린"];
+    const typePillsHtml = types.map(t => `<span class="type-pill ${t === baseData.meta.type ? 'active' : ''}">${t}</span>`).join('');
+    const topicLabel = baseData.meta.topic_category ? `📚 ${baseData.meta.topic_category}` : "📚 미분류";
+    const qSource = (baseData.meta.question_source || '').toLowerCase();
+    const isDiscussion = qSource.includes('discussion');
+    const isEmail = qSource.includes('email');
+    const isSpeaking = !isDiscussion && !isEmail;
+
+    document.getElementById('meta-header').innerHTML = `
+        <button class="btn-global-persona" onclick="openPersonaModal()">
+            <img src="profile.jpg" class="profile-img-header" alt="Profile" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2NiZDVlMSI+PHBhdGggZD0iTTEyIDJhNSA1IDAgMSAwIDAgMTAgNSA1IDAgMCAwIDAtMTB6bTAtMmMzLjg2NiAwIDcgMy4xMzQgNyA3cy0zLjEzNCA3LTcgNy03LTMuMTM0LTctNyAzLjEzNC03IDctN3ptMCAxOGM1LjUyMyAwIDEwIDIuMjM5IDEwIDV2Mkgydi0yYz0yLjc2MSA0LjQ3Ny01IDEwLTV6Ii8+PC9zdmc+='">
+            <span class="persona-name-text">Zuri Harris</span>
+        </button>
+        <span class="bc-arrow">❯</span>
+        <span class="specific-persona-tag">${baseData.meta.specific_persona || '기본 전략'}</span>
+        <div class="divider-line"></div>
+        <span class="question-badge-top">#${currentIndex + 1}</span>
+        <div class="divider-line"></div>
+        <div class="type-segmented-control">${typePillsHtml}</div>
+        <div class="divider-line"></div>
+        <div class="badge-topic-category">${topicLabel}</div>
+        <div class="divider-line"></div>
+        <div class="type-segmented-control qs-segmented-control">
+            <span class="type-pill ${isDiscussion ? 'active' : ''}">토론</span>
+            <span class="type-pill ${isEmail ? 'active' : ''}">이메일</span>
+            <span class="type-pill ${isSpeaking ? 'active' : ''}">스피킹</span>
+        </div>
+    `;
+
+    // 2. 상단 컨트롤 바 버튼 표시/숨김 및 '원본 복귀' 버튼 주입
+    document.getElementById('btn-add').style.display = isTopicApplied ? 'none' : 'inline-flex';
+    document.getElementById('btn-edit').style.display = isTopicApplied ? 'none' : 'inline-flex';
+    document.getElementById('btn-setting').style.display = isTopicApplied ? 'none' : 'inline-flex';
+    document.getElementById('btn-list').style.display = isTopicApplied ? 'none' : 'inline-flex';
+
+    let returnBtn = document.getElementById('btn-return-origin');
+    if (!returnBtn) {
+        returnBtn = document.createElement('button');
+        returnBtn.id = 'btn-return-origin';
+        returnBtn.className = 'ctrl-btn primary';
+        returnBtn.style.cssText = 'background:#ef4444; border-color:#dc2626; margin-right: 8px;';
+        returnBtn.innerHTML = `🔙 원본 복귀 <span class="shortcut-key" style="color:#fecaca">(ESC)</span>`;
+        returnBtn.onclick = cancelAppliedTopic;
+        
+        const normalControls = document.getElementById('normal-controls');
+        normalControls.insertBefore(returnBtn, normalControls.firstChild);
+    }
+    returnBtn.style.display = isTopicApplied ? 'inline-flex' : 'none';
+
+    // 3. 질문 & 정답 렌더링
+    const qPrompt = document.getElementById('q-prompt');
+    const btnTranslate = document.getElementById('btn-translate-q');
+    
+    const updateTranslationState = () => {
+        qPrompt.innerText = isTranslated ? (activeData.question_ko || activeData.question) : activeData.question;
+        btnTranslate.style.background = isTranslated ? '#1e293b' : '#ffffff';
+        btnTranslate.style.color = isTranslated ? '#ffffff' : 'var(--text-main)';
+        btnTranslate.style.borderColor = isTranslated ? '#0f172a' : 'var(--border-strong)';
+
+        const scriptContainer = document.getElementById('script-container');
+        scriptContainer.innerHTML = ''; 
+        
+        activeData.script_rows.forEach((rowObj, rIdx) => {
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'sentence-row';
+            
+            let combinedText = rowObj.chunks.map(c => c.text).join(' '); 
+            let displayText = combinedText;
+
+            if (isTranslated) {
+                displayText = rowObj.translation || combinedText;
+            } else {
+                if (!isTopicApplied && activeData.recognized_templates) {
+                    // 원본 문제 처리 (템플릿 기준)
+                    const templateObj = activeData.recognized_templates.find(t => t.sentence_index === rIdx + 1);
+                    if (templateObj && templateObj.template) {
+                        displayText = templateObj.template.replace(/\{([^}]+)\}/g, '<span class="vocab-highlight">$1</span>');
+                        combinedText = templateObj.template.replace(/\{|\}/g, '');
+                    }
+                } else if (isTopicApplied && activeData.core_expressions) {
+                    // 응용 문제 처리 (core_expressions 기준)
+                    activeData.core_expressions.forEach(expr => {
+                        // 정규식 특수문자 이스케이프 후, 대소문자 무관하게 치환
+                        const escapedExpr = expr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                        const regex = new RegExp(escapedExpr, 'gi');
+                        displayText = displayText.replace(regex, match => `<span class="vocab-highlight">${match}</span>`);
+                    });
+                }
+            }
+
+            const span = document.createElement('span');
+            span.className = 'chunk';
+            span.style.display = 'block'; 
+            span.innerHTML = displayText; 
+            span.id = `chunk-${rIdx}`;
+            
+            span.onclick = () => playChunk(rIdx, combinedText);
+            
+            rowDiv.appendChild(span);
+            scriptContainer.appendChild(rowDiv);
+        });
+    };
+    
+    updateTranslationState(); 
+    
+    btnTranslate.onclick = () => {
+        isTranslated = !isTranslated;
+        updateTranslationState();
+    };
+
+    qPrompt.onclick = () => playSingle(activeData.question);
+
+    renderApplicationTopic();
+}
+
 
     window.addEventListener('resize', () => {
         if (document.getElementById('tab-strategy').classList.contains('active')) {
@@ -1339,48 +1438,7 @@
         }
         return total;
     }
-
-    // ========== 시험 모드 전환 (작문_시험) ==========
-    function toggleWritingTestMode() {
-        if (!spkData || spkData.length === 0) return;
-        stopAudio();
-        if(isRecording) stopRecord();
-        testMode = 'W';
-        isTestSubmitted = false;
-        recordedTimes = {};
-        
-        document.getElementById('normal-controls').style.display = 'none';
-        document.getElementById('test-controls').style.display = 'flex';
-        document.getElementById('test-result-controls').style.display = 'none';
-        
-        const data = spkData[currentIndex];
-        const scriptContainer = document.getElementById('script-container');
-        scriptContainer.innerHTML = '';
-        
-        data.script_rows.forEach((row, rIdx) => {
-            const rowDiv = document.createElement('div');
-            rowDiv.className = 'sentence-row';
-
-            const input = document.createElement('textarea');
-            input.className = 'test-input';
-            input.rows = 1;
-            input.spellcheck = false;
-            input.id = `write-input-${rIdx}`;
-            input.placeholder = `문장 ${rIdx + 1} 작성...`;
-            // 높이 무한 확장 적용
-            input.oninput = function() {
-                this.style.height = 'auto';
-                this.style.height = this.scrollHeight + 'px';
-            };
-
-            rowDiv.appendChild(input);
-            scriptContainer.appendChild(rowDiv);
-        });
-
-        const firstInput = scriptContainer.querySelector('.test-input');
-        if (firstInput) firstInput.focus();
-    }
-
+ 
     window.setRecMode = function(mode) {
         if(isRecording) stopRecord();
         recMode = mode;
@@ -1415,84 +1473,7 @@
         
         renderSpeakingTestUI();
     }
-
-    function renderSpeakingTestUI() {
-        const data = spkData[currentIndex];
-        const scriptContainer = document.getElementById('script-container');
-        
-        // 스트리밍/오프라인 모드 선택기 추가
-        let html = `
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px; gap: 8px;">
-                <div style="display:flex; background:#e2e8f0; border-radius:8px; padding:3px; flex:1; max-width: 250px;">
-                    <button class="ctrl-btn ${sTestType === 'all' ? 'primary' : ''}" onclick="setSTestType('all')" style="flex:1; border:none; margin:0; padding:6px 10px; font-size:13px; box-shadow:none;">전체 단위</button>
-                    <button class="ctrl-btn ${sTestType === 'sentence' ? 'primary' : ''}" onclick="setSTestType('sentence')" style="flex:1; border:none; margin:0; padding:6px 10px; font-size:13px; box-shadow:none;">문장 단위</button>
-                </div>
-                <div style="display:flex; background:#e2e8f0; border-radius:8px; padding:3px; flex:1; max-width: 250px;">
-                    <button class="ctrl-btn ${recMode === 'stream' ? 'primary' : ''}" onclick="setRecMode('stream')" style="flex:1; border:none; margin:0; padding:6px; font-size:12px; box-shadow:none;">📡 실시간 STT</button>
-                    <button class="ctrl-btn ${recMode === 'file' ? 'primary' : ''}" onclick="setRecMode('file')" style="flex:1; border:none; margin:0; padding:6px; font-size:12px; box-shadow:none;">💾 사전 녹음</button>
-                </div>
-            </div>
-            
-            <div class="progress-bar-bg" id="progress-bg"><div class="progress-bar-fill" id="progress-fill"></div></div>
-            
-            <div id="s-test-content" style="display:flex; flex-direction:column; gap:6px;"></div>
-        `;
-        
-        scriptContainer.innerHTML = html;
-        const contentDiv = document.getElementById('s-test-content');
-        
-        if (sTestType === 'all') {
-            contentDiv.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                    <span style="font-size:13.5px; font-weight:800; color:#475569; background:#f1f5f9; padding:2px 8px; border-radius:6px;">전체 스크립트</span>
-                    <button id="btn-record-all" class="btn-record" onclick="toggleRecord('all')">🎤 녹음 시작</button>
-                </div>
-                <textarea id="spk-input-all" class="test-input spk-test-textarea" placeholder="${recMode === 'file' ? '사전 녹음 시 제출 후 텍스트가 표시됩니다...' : '녹음된 전체 텍스트가 이곳에 표시됩니다...'}"></textarea>
-            `;
-        } else {
-            data.script_rows.forEach((row, rIdx) => {
-                const rowDiv = document.createElement('div');
-                rowDiv.className = 'sentence-row';
-                rowDiv.style.marginBottom = '6px';
-                
-                rowDiv.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                        <span style="font-size:13px; font-weight:800; color:#475569; background:#f1f5f9; padding:2px 8px; border-radius:6px;">문장 ${rIdx + 1}</span>
-                        <button id="btn-record-${rIdx}" class="btn-record" onclick="toggleRecord(${rIdx})">🎤 녹음 시작</button>
-                    </div>
-                    <textarea id="spk-input-${rIdx}" class="test-input spk-test-textarea" placeholder="${recMode === 'file' ? '사전 녹음 모드' : '텍스트가 이곳에 표시됩니다...'}"></textarea>
-                `;
-                contentDiv.appendChild(rowDiv);
-            });
-        }
-        
-        // --- 45초 음성 네트워크 사용량 및 비용 가이드 UI 추가 ---
-        const usageGuideHtml = `
-            <div style="margin-top: 12px; padding: 12px; border: 1.5px solid var(--border-color); border-radius: 8px; background: #ffffff;">
-                <div style="font-size: 12.5px; font-weight: 800; color: #475569; margin-bottom: 8px;">📊 데이터 사용량 및 비용 가이드 (Azure API)</div>
-                <table style="width: 100%; border-collapse: collapse; font-size: 12px; color: #64748b;">
-                    <tr style="border-bottom: 1px solid #e2e8f0;">
-                        <th style="text-align: left; padding: 4px 0; color: #334155; font-weight: 800;">구분</th>
-                        <th style="text-align: right; padding: 4px 0; color: #334155; font-weight: 800;">네트워크 (45초 기준)</th>
-                        <th style="text-align: right; padding: 4px 0; color: #334155; font-weight: 800;">예상 비용 (1시간 누적)</th>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #e2e8f0;">
-                        <td style="padding: 6px 0;"><b>실시간 (Stream)</b></td>
-                        <td style="text-align: right;">약 <b>1.5 MB</b></td>
-                        <td style="text-align: right;"><b>$1.00</b></td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 6px 0;"><b>사전 녹음 (File)</b></td>
-                        <td style="text-align: right;">약 <b>1.4 MB</b></td>
-                        <td style="text-align: right;"><b>$1.00</b></td>
-                    </tr>
-                </table>
-                <div style="font-size: 11px; margin-top: 6px; color: #94a3b8; letter-spacing: -0.2px;">* 16kHz, 16-bit Mono 포맷 기준. 실시간 방식은 패킷 분할 전송 오버헤드로 인해 데이터량이 미세하게 더 높습니다.</div>
-            </div>
-        `;
-        contentDiv.insertAdjacentHTML('beforeend', usageGuideHtml);
-    }
-
+ 
     // ========== Azure STT 및 오프라인 파일 레코딩 (타이머 카운트다운 적용) ==========
     function toggleRecord(target) {
         if (recMode === 'stream' && typeof SpeechSDK === 'undefined') {
@@ -1698,6 +1679,8 @@
     function cancelTestMode() {
         if(isRecording) stopRecord();
         testMode = null;
+
+        isTopicApplied = false; // 추가
         isTestSubmitted = false;
         
         // 취소 시 메모리 모두 파기
@@ -1823,136 +1806,7 @@
         }
         return resultByRow.map(s => s.trim());
     }
-
-    async function submitTest() {
-        if(!confirm('제출 후 채점 결과를 확인하시겠습니까?')) return;
-        if(isRecording) stopRecord(); 
-        
-        document.getElementById('normal-controls').style.display = 'none';
-        document.getElementById('test-controls').style.display = 'none';
-
-        // --- [신규 추가] 오프라인 사전녹음 시 Azure REST API 직접 호출 및 메모리 파기 ---
-        if (recMode === 'file') {
-            const data = spkData[currentIndex];
-            
-            const loadingOverlay = document.createElement('div');
-            loadingOverlay.innerHTML = '<div style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.85); backdrop-filter:blur(4px); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:18px; font-weight:900; color:#0f172a;">📡 Azure로 오프라인 음성 전송 중...<br><span style="font-size:14px; color:#64748b; margin-top:8px; font-weight:700;">완료 즉시 브라우저 메모리가 자동 해제됩니다.</span></div>';
-            document.body.appendChild(loadingOverlay);
-
-            try {
-                if (sTestType === 'sentence') {
-                    for (let rIdx = 0; rIdx < data.script_rows.length; rIdx++) {
-                        if (tempMemoryBlobs[rIdx]) {
-                            let text = await transcribeOfflineAudioToAzure(tempMemoryBlobs[rIdx]);
-                            document.getElementById(`spk-input-${rIdx}`).value = text;
-                        }
-                    }
-                } else if (sTestType === 'all') {
-                    if (tempMemoryBlobs['all']) {
-                        let text = await transcribeOfflineAudioToAzure(tempMemoryBlobs['all']);
-                        document.getElementById('spk-input-all').value = text;
-                    }
-                }
-            } catch(e) {
-                alert("Azure STT 직접 통신 실패: " + e.message);
-                document.body.removeChild(loadingOverlay);
-                cancelTestMode();
-                return;
-            }
-            
-            // ⭐️ 호출 완료 즉시 객체를 초기화하여 메모리를 완벽히 파기시킴 (가비지 컬렉터 수집)
-            tempMemoryBlobs = {}; 
-            console.log("✅ Azure 호출 완료 및 임시 음성 메모리(RAM) 해제 성공");
-            document.body.removeChild(loadingOverlay);
-        }
-        // --------------------------------------------------------------------------
-
-        isTestSubmitted = true;
-        document.getElementById('test-result-controls').style.display = 'flex';
-        
-        const data = spkData[currentIndex];
-        const scriptContainer = document.getElementById('script-container');
-        
-        // 작문 시험(W)이거나 스피킹 시험(S) 중 문장단위 녹음인 경우
-        if (testMode === 'W' || (testMode === 'S' && sTestType === 'sentence')) {
-            const inputs = document.querySelectorAll('.test-input');
-            const userAnswers = Array.from(inputs).map(inp => inp.value);
-            
-            scriptContainer.innerHTML = '';
-
-            // S시험 문장단위의 경우 전체 발화 시간 상단 렌더링
-            if (testMode === 'S') {
-                scriptContainer.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding-bottom:8px; border-bottom:1.5px solid #e2e8f0;">
-                        <span style="font-size:14px; font-weight:800; color:#475569;">채점 결과</span>
-                        <span style="font-size:14px; font-weight:900; color:#0f172a;">⏱️ 총 발화 시간: ${formatTime(getTotalSentenceTime())}</span>
-                    </div>`;
-            }
-
-            data.script_rows.forEach((row, rIdx) => {
-                const rowDiv = document.createElement('div');
-                rowDiv.className = 'sentence-row';
-
-                const origDiv = document.createElement('div');
-                let fullOriginalText = rowObj.chunks.map(c => c.text).join(' '); // 변경됨
-
-                const span = document.createElement('span');
-                span.className = 'chunk';
-                span.innerHTML = highlightVocabInHtml(fullOriginalText, data.vocab_list);
-                origDiv.appendChild(span);
-                rowDiv.appendChild(origDiv);
-                
-                const userAnsDiv = document.createElement('div');
-                userAnsDiv.className = 'user-answer-disp';
-                
-                let diffHtml = diffSentences(fullOriginalText, userAnswers[rIdx] || '');
-                // 텍스트 인라인 끝부분에 시간 뱃지 삽입
-                if (testMode === 'S') {
-                    let t = formatTime(recordedTimes[rIdx] || 0);
-                    diffHtml += ` <span style="display:inline-block; font-size:11.5px; font-weight:800; color:#64748b; background:#f1f5f9; padding:2px 6px; border-radius:6px; margin-left:4px; vertical-align:middle; white-space:nowrap;">⏱️ ${t}</span>`;
-                }
-                userAnsDiv.innerHTML = diffHtml;
-                rowDiv.appendChild(userAnsDiv);
-                
-                scriptContainer.appendChild(rowDiv);
-            });
-        } 
-        // 스피킹 시험(S) 중 전체단위 녹음인 경우 (문장별 분할 채점 적용)
-        else if (testMode === 'S' && sTestType === 'all') {
-            const userInput = document.getElementById('spk-input-all').value;
-            const diffResults = diffGlobalToSentences(data.script_rows, userInput);
-            
-            scriptContainer.innerHTML = '';
-            
-            scriptContainer.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding-bottom:8px; border-bottom:1.5px solid #e2e8f0;">
-                    <span style="font-size:14px; font-weight:800; color:#475569;">채점 결과 (전체 분할)</span>
-                    <span style="font-size:14px; font-weight:900; color:#0f172a;">⏱️ 총 발화 시간: ${formatTime(recordedTimes['all']||0)}</span>
-                </div>`;
-
-            data.script_rows.forEach((row, rIdx) => {
-                const rowDiv = document.createElement('div');
-                rowDiv.className = 'sentence-row';
-
-                const origDiv = document.createElement('div');
-                let fullOriginalText = row.map(c => c.text).join(' ');
-                
-                const span = document.createElement('span');
-                span.className = 'chunk';
-                span.innerHTML = highlightVocabInHtml(fullOriginalText, data.vocab_list);
-                origDiv.appendChild(span);
-                rowDiv.appendChild(origDiv);
-                
-                const userAnsDiv = document.createElement('div');
-                userAnsDiv.className = 'user-answer-disp';
-                userAnsDiv.innerHTML = diffResults[rIdx] || '<span style="color:#94a3b8; font-size:14px; font-weight:600;">(인식된 음성 없음)</span>';
-                rowDiv.appendChild(userAnsDiv);
-                
-                scriptContainer.appendChild(rowDiv);
-            });
-        }
-    }
-
+ 
     function finishTest() {
         testMode = null;
         isTestSubmitted = false;
@@ -1992,38 +1846,283 @@
         }
     }
 
-    function openEditModal() {
-        if (!spkData || spkData.length === 0) { alert('수정할 데이터가 없습니다.'); return; }
-        
-        const data = spkData[currentIndex];
-        
-        // 1. JSON 에디터 초기화
-        document.getElementById('edit-json-input').value = JSON.stringify(data, null, 2);
-        
-        // 2. 라인별 에디터 초기화
-        const lineContainer = document.getElementById('edit-line-container');
-        lineContainer.innerHTML = '';
-        
-        data.script_rows.forEach((row, idx) => {
-            const combinedEnglish = row.chunks.map(c => c.text).join(' ');
-            const koreanTrans = row.translation || '';
-            
-            const rowBox = document.createElement('div');
-            rowBox.style.cssText = "background: #f8fafc; padding: 12px; border-radius: 8px; border: 1.5px solid var(--border-color);";
-            
-            rowBox.innerHTML = `
-                <div style="font-size: 13.5px; font-weight: 800; color: #64748b; margin-bottom: 8px;">문장 ${idx + 1}</div>
-                <textarea id="edit-line-eng-${idx}" class="test-input" style="min-height: 60px; font-size: 15px; margin-bottom: 8px;" placeholder="영어 원문">${combinedEnglish}</textarea>
-                <textarea id="edit-line-kor-${idx}" class="test-input" style="min-height: 40px; font-size: 14.5px; background: #ffffff; color: #475569;" placeholder="한국어 번역">${koreanTrans}</textarea>
-            `;
-            lineContainer.appendChild(rowBox);
-        });
+    // [1] 작문 시험 모드
+function toggleWritingTestMode() {
+    if (!spkData || spkData.length === 0) return;
+    stopAudio();
+    if(isRecording) stopRecord();
+    testMode = 'W';
+    isTestSubmitted = false;
+    recordedTimes = {};
+    
+    document.getElementById('normal-controls').style.display = 'none';
+    document.getElementById('test-controls').style.display = 'flex';
+    document.getElementById('test-result-controls').style.display = 'none';
+    
+    // 수정: getActiveData() 사용
+    const data = getActiveData(); 
+    const scriptContainer = document.getElementById('script-container');
+    scriptContainer.innerHTML = '';
+    
+    data.script_rows.forEach((row, rIdx) => {
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'sentence-row';
 
-        // 탭 초기화 및 모달 띄우기
-        switchEditMode('line');
-        document.getElementById('edit-modal').style.display = 'flex';
+        const input = document.createElement('textarea');
+        input.className = 'test-input';
+        input.rows = 1;
+        input.spellcheck = false;
+        input.id = `write-input-${rIdx}`;
+        input.placeholder = `문장 ${rIdx + 1} 작성...`;
+        input.oninput = function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        };
+
+        rowDiv.appendChild(input);
+        scriptContainer.appendChild(rowDiv);
+    });
+
+    const firstInput = scriptContainer.querySelector('.test-input');
+    if (firstInput) firstInput.focus();
+}
+
+
+// [2] 음성 시험 모드
+function renderSpeakingTestUI() {
+    // 수정: getActiveData() 사용
+    const data = getActiveData(); 
+    const scriptContainer = document.getElementById('script-container');
+    
+    let html = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px; gap: 8px;">
+            <div style="display:flex; background:#e2e8f0; border-radius:8px; padding:3px; flex:1; max-width: 250px;">
+                <button class="ctrl-btn ${sTestType === 'all' ? 'primary' : ''}" onclick="setSTestType('all')" style="flex:1; border:none; margin:0; padding:6px 10px; font-size:13px; box-shadow:none;">전체 단위</button>
+                <button class="ctrl-btn ${sTestType === 'sentence' ? 'primary' : ''}" onclick="setSTestType('sentence')" style="flex:1; border:none; margin:0; padding:6px 10px; font-size:13px; box-shadow:none;">문장 단위</button>
+            </div>
+            <div style="display:flex; background:#e2e8f0; border-radius:8px; padding:3px; flex:1; max-width: 250px;">
+                <button class="ctrl-btn ${recMode === 'stream' ? 'primary' : ''}" onclick="setRecMode('stream')" style="flex:1; border:none; margin:0; padding:6px; font-size:12px; box-shadow:none;">📡 실시간 STT</button>
+                <button class="ctrl-btn ${recMode === 'file' ? 'primary' : ''}" onclick="setRecMode('file')" style="flex:1; border:none; margin:0; padding:6px; font-size:12px; box-shadow:none;">💾 사전 녹음</button>
+            </div>
+        </div>
+        
+        <div class="progress-bar-bg" id="progress-bg"><div class="progress-bar-fill" id="progress-fill"></div></div>
+        
+        <div id="s-test-content" style="display:flex; flex-direction:column; gap:6px;"></div>
+    `;
+    
+    scriptContainer.innerHTML = html;
+    const contentDiv = document.getElementById('s-test-content');
+    
+    if (sTestType === 'all') {
+        contentDiv.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <span style="font-size:13.5px; font-weight:800; color:#475569; background:#f1f5f9; padding:2px 8px; border-radius:6px;">전체 스크립트</span>
+                <button id="btn-record-all" class="btn-record" onclick="toggleRecord('all')">🎤 녹음 시작</button>
+            </div>
+            <textarea id="spk-input-all" class="test-input spk-test-textarea" placeholder="${recMode === 'file' ? '사전 녹음 시 제출 후 텍스트가 표시됩니다...' : '녹음된 전체 텍스트가 이곳에 표시됩니다...'}"></textarea>
+        `;
+    } else {
+        data.script_rows.forEach((row, rIdx) => {
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'sentence-row';
+            rowDiv.style.marginBottom = '6px';
+            
+            rowDiv.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                    <span style="font-size:13px; font-weight:800; color:#475569; background:#f1f5f9; padding:2px 8px; border-radius:6px;">문장 ${rIdx + 1}</span>
+                    <button id="btn-record-${rIdx}" class="btn-record" onclick="toggleRecord(${rIdx})">🎤 녹음 시작</button>
+                </div>
+                <textarea id="spk-input-${rIdx}" class="test-input spk-test-textarea" placeholder="${recMode === 'file' ? '사전 녹음 모드' : '텍스트가 이곳에 표시됩니다...'}"></textarea>
+            `;
+            contentDiv.appendChild(rowDiv);
+        });
+    }
+    
+    const usageGuideHtml = `
+        <div style="margin-top: 12px; padding: 12px; border: 1.5px solid var(--border-color); border-radius: 8px; background: #ffffff;">
+            <div style="font-size: 12.5px; font-weight: 800; color: #475569; margin-bottom: 8px;">📊 데이터 사용량 및 비용 가이드 (Azure API)</div>
+            <table style="width: 100%; border-collapse: collapse; font-size: 12px; color: #64748b;">
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <th style="text-align: left; padding: 4px 0; color: #334155; font-weight: 800;">구분</th>
+                    <th style="text-align: right; padding: 4px 0; color: #334155; font-weight: 800;">네트워크 (45초 기준)</th>
+                    <th style="text-align: right; padding: 4px 0; color: #334155; font-weight: 800;">예상 비용 (1시간 누적)</th>
+                </tr>
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 6px 0;"><b>실시간 (Stream)</b></td>
+                    <td style="text-align: right;">약 <b>1.5 MB</b></td>
+                    <td style="text-align: right;"><b>$1.00</b></td>
+                </tr>
+                <tr>
+                    <td style="padding: 6px 0;"><b>사전 녹음 (File)</b></td>
+                    <td style="text-align: right;">약 <b>1.4 MB</b></td>
+                    <td style="text-align: right;"><b>$1.00</b></td>
+                </tr>
+            </table>
+            <div style="font-size: 11px; margin-top: 6px; color: #94a3b8; letter-spacing: -0.2px;">* 16kHz, 16-bit Mono 포맷 기준. 실시간 방식은 패킷 분할 전송 오버헤드로 인해 데이터량이 미세하게 더 높습니다.</div>
+        </div>
+    `;
+    contentDiv.insertAdjacentHTML('beforeend', usageGuideHtml);
+}
+
+
+// [3] 채점 및 결과 제출 함수
+async function submitTest() {
+    if(!confirm('제출 후 채점 결과를 확인하시겠습니까?')) return;
+    if(isRecording) stopRecord(); 
+    
+    document.getElementById('normal-controls').style.display = 'none';
+    document.getElementById('test-controls').style.display = 'none';
+
+    // 수정: getActiveData() 사용
+    const data = getActiveData();
+
+    if (recMode === 'file') {
+        const loadingOverlay = document.createElement('div');
+        loadingOverlay.innerHTML = '<div style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.85); backdrop-filter:blur(4px); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:18px; font-weight:900; color:#0f172a;">📡 Azure로 오프라인 음성 전송 중...<br><span style="font-size:14px; color:#64748b; margin-top:8px; font-weight:700;">완료 즉시 브라우저 메모리가 자동 해제됩니다.</span></div>';
+        document.body.appendChild(loadingOverlay);
+
+        try {
+            if (sTestType === 'sentence') {
+                for (let rIdx = 0; rIdx < data.script_rows.length; rIdx++) {
+                    if (tempMemoryBlobs[rIdx]) {
+                        let text = await transcribeOfflineAudioToAzure(tempMemoryBlobs[rIdx]);
+                        document.getElementById(`spk-input-${rIdx}`).value = text;
+                    }
+                }
+            } else if (sTestType === 'all') {
+                if (tempMemoryBlobs['all']) {
+                    let text = await transcribeOfflineAudioToAzure(tempMemoryBlobs['all']);
+                    document.getElementById('spk-input-all').value = text;
+                }
+            }
+        } catch(e) {
+            alert("Azure STT 직접 통신 실패: " + e.message);
+            document.body.removeChild(loadingOverlay);
+            cancelTestMode();
+            return;
+        }
+        
+        tempMemoryBlobs = {}; 
+        console.log("✅ Azure 호출 완료 및 임시 음성 메모리(RAM) 해제 성공");
+        document.body.removeChild(loadingOverlay);
     }
 
+    isTestSubmitted = true;
+    document.getElementById('test-result-controls').style.display = 'flex';
+    
+    const scriptContainer = document.getElementById('script-container');
+    
+    if (testMode === 'W' || (testMode === 'S' && sTestType === 'sentence')) {
+        const inputs = document.querySelectorAll('.test-input');
+        const userAnswers = Array.from(inputs).map(inp => inp.value);
+        
+        scriptContainer.innerHTML = '';
+
+        if (testMode === 'S') {
+            scriptContainer.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding-bottom:8px; border-bottom:1.5px solid #e2e8f0;">
+                    <span style="font-size:14px; font-weight:800; color:#475569;">채점 결과</span>
+                    <span style="font-size:14px; font-weight:900; color:#0f172a;">⏱️ 총 발화 시간: ${formatTime(getTotalSentenceTime())}</span>
+                </div>`;
+        }
+
+        data.script_rows.forEach((row, rIdx) => {
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'sentence-row';
+
+            const origDiv = document.createElement('div');
+            // 오타 수정(rowObj -> row) 적용
+            let fullOriginalText = row.chunks.map(c => c.text).join(' '); 
+
+            const span = document.createElement('span');
+            span.className = 'chunk';
+            span.innerHTML = typeof highlightVocabInHtml === 'function' ? highlightVocabInHtml(fullOriginalText, data.vocab_list) : fullOriginalText;
+            origDiv.appendChild(span);
+            rowDiv.appendChild(origDiv);
+            
+            const userAnsDiv = document.createElement('div');
+            userAnsDiv.className = 'user-answer-disp';
+            
+            let diffHtml = diffSentences(fullOriginalText, userAnswers[rIdx] || '');
+            if (testMode === 'S') {
+                let t = formatTime(recordedTimes[rIdx] || 0);
+                diffHtml += ` <span style="display:inline-block; font-size:11.5px; font-weight:800; color:#64748b; background:#f1f5f9; padding:2px 6px; border-radius:6px; margin-left:4px; vertical-align:middle; white-space:nowrap;">⏱️ ${t}</span>`;
+            }
+            userAnsDiv.innerHTML = diffHtml;
+            rowDiv.appendChild(userAnsDiv);
+            
+            scriptContainer.appendChild(rowDiv);
+        });
+    } 
+    else if (testMode === 'S' && sTestType === 'all') {
+        const userInput = document.getElementById('spk-input-all').value;
+        const diffResults = diffGlobalToSentences(data.script_rows, userInput);
+        
+        scriptContainer.innerHTML = '';
+        
+        scriptContainer.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding-bottom:8px; border-bottom:1.5px solid #e2e8f0;">
+                <span style="font-size:14px; font-weight:800; color:#475569;">채점 결과 (전체 분할)</span>
+                <span style="font-size:14px; font-weight:900; color:#0f172a;">⏱️ 총 발화 시간: ${formatTime(recordedTimes['all']||0)}</span>
+            </div>`;
+
+        data.script_rows.forEach((row, rIdx) => {
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'sentence-row';
+
+            const origDiv = document.createElement('div');
+            // 오타 수정(배열 객체화 맵핑 수정)
+            let fullOriginalText = row.chunks ? row.chunks.map(c => c.text).join(' ') : "";
+            
+            const span = document.createElement('span');
+            span.className = 'chunk';
+            span.innerHTML = typeof highlightVocabInHtml === 'function' ? highlightVocabInHtml(fullOriginalText, data.vocab_list) : fullOriginalText;
+            origDiv.appendChild(span);
+            rowDiv.appendChild(origDiv);
+            
+            const userAnsDiv = document.createElement('div');
+            userAnsDiv.className = 'user-answer-disp';
+            userAnsDiv.innerHTML = diffResults[rIdx] || '<span style="color:#94a3b8; font-size:14px; font-weight:600;">(인식된 음성 없음)</span>';
+            rowDiv.appendChild(userAnsDiv);
+            
+            scriptContainer.appendChild(rowDiv);
+        });
+    }
+}
+
+
+// [4] 에디터(수정 모달) 열기 함수
+function openEditModal() {
+    if (!spkData || spkData.length === 0) { alert('수정할 데이터가 없습니다.'); return; }
+    
+    // 수정: getActiveData() 사용 (응용 문제를 수정하면 응용 문제 JSON에 바로 바인딩 됨)
+    const data = getActiveData();
+    
+    document.getElementById('edit-json-input').value = JSON.stringify(data, null, 2);
+    
+    const lineContainer = document.getElementById('edit-line-container');
+    lineContainer.innerHTML = '';
+    
+    data.script_rows.forEach((row, idx) => {
+        const combinedEnglish = row.chunks.map(c => c.text).join(' ');
+        const koreanTrans = row.translation || '';
+        
+        const rowBox = document.createElement('div');
+        rowBox.style.cssText = "background: #f8fafc; padding: 12px; border-radius: 8px; border: 1.5px solid var(--border-color);";
+        
+        rowBox.innerHTML = `
+            <div style="font-size: 13.5px; font-weight: 800; color: #64748b; margin-bottom: 8px;">문장 ${idx + 1}</div>
+            <textarea id="edit-line-eng-${idx}" class="test-input" style="min-height: 60px; font-size: 15px; margin-bottom: 8px;" placeholder="영어 원문">${combinedEnglish}</textarea>
+            <textarea id="edit-line-kor-${idx}" class="test-input" style="min-height: 40px; font-size: 14.5px; background: #ffffff; color: #475569;" placeholder="한국어 번역">${koreanTrans}</textarea>
+        `;
+        lineContainer.appendChild(rowBox);
+    });
+
+    switchEditMode('line');
+    document.getElementById('edit-modal').style.display = 'flex';
+}
+ 
     function saveEditedData() {
         try {
             if (currentEditMode === 'line') {
@@ -2272,9 +2371,17 @@
         highlighted.forEach(el => el.classList.remove('highlight-target'));
     }
 
+    // 응용분야 모드 해제 함수
+    function cancelAppliedTopic() {
+        isTopicApplied = false;
+        renderUI();
+    }
+
+    // loadNext(), loadPrev(), cancelTestMode() 함수 내부에 isTopicApplied = false; 추가
     function loadNext() {
         if (!spkData || spkData.length === 0) return;
         stopAudio();
+        isTopicApplied = false; // 추가
         currentIndex = (currentIndex + 1) % spkData.length;
         saveCurrentIndex();
         renderUI();
@@ -2283,11 +2390,11 @@
     function loadPrev() {
         if (!spkData || spkData.length === 0) return;
         stopAudio();
+        isTopicApplied = false; // 추가
         currentIndex = (currentIndex - 1 + spkData.length) % spkData.length;
         saveCurrentIndex();
         renderUI();
     }
-
     function openPersonaModal() {
         const topicsHtml = spk_global_persona.global_persona.universal_topic_coverage.map(t => `
             <div class="topic-card-item">
@@ -2391,13 +2498,41 @@
 
         const key = e.key;
 
+        // ----- [여기서부터 새로 추가] -----
+        if (key === 'Escape') {
+            e.preventDefault();
+
+            // 1순위: 켜져있는 모달 닫기
+            const modals = document.querySelectorAll('.modal-overlay');
+            let isModalOpen = false;
+            modals.forEach(m => {
+                if (window.getComputedStyle(m).display !== 'none') {
+                    m.style.display = 'none';
+                    isModalOpen = true;
+                }
+            });
+            if (isModalOpen) return;
+
+            // 2순위: 시험 모드 켜져있으면 취소
+            if (testMode) {
+                cancelTestMode();
+                return;
+            }
+
+            // 3순위: 응용분야 모드 적용 중이면 원본 복귀
+            if (isTopicApplied) {
+                cancelAppliedTopic();
+                return;
+            }
+        }
+
         const backdrop = document.getElementById('coachmark-backdrop');
         if (backdrop && backdrop.classList.contains('show')) {
             closeCoachmark();
         }
 
-        if (key === 'PageUp') { e.preventDefault(); switchTab('vocab'); return; }
-        if (key === 'PageDown') { e.preventDefault(); switchTab('strategy'); return; }
+        if (key === 'PageUp') { e.preventDefault(); prevTopic(); return; }
+        if (key === 'PageDown') { e.preventDefault(); nextTopic(); return; }
 
         if (key === 'Enter' && document.getElementById('add-modal').style.display === 'flex') {
             if (!e.shiftKey) { 
