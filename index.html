@@ -1214,7 +1214,46 @@ function addWordToPWAStorage(item) {
     }
 
     function updatePWAReviewButtonUI() { const savedList = getPWASavedWords(); const btn = document.getElementById('pwa-review-btn'); if (btn) { btn.classList.remove('hidden'); btn.innerText = `🔥 취약 단어 복습 (${savedList.length}개)`; } }
-    function registerServiceWorker() { if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js').then(reg => { console.log('SW Registered'); }).catch(err => { console.warn('SW Registration Failed', err); }); } }
+    // PWA Service Worker 등록
+    // updateViaCache:'none'으로 브라우저 HTTP 캐시에 남아 있는 오래된 sw.js를 사용하지 않도록 합니다.
+    function registerServiceWorker() {
+        if (!('serviceWorker' in navigator)) return Promise.resolve(null);
+
+        return navigator.serviceWorker.register('./sw.js', {
+            updateViaCache: 'none'
+        }).then(reg => {
+            console.log('SW Registered:', reg.scope);
+            return reg;
+        }).catch(err => {
+            console.warn('SW Registration Failed:', err);
+            return null;
+        });
+    }
+
+    // Service Worker가 실제로 활성화될 때까지 기다립니다.
+    function waitForServiceWorkerActivation(registration) {
+        if (!registration) return Promise.resolve(false);
+
+        if (registration.active && navigator.serviceWorker.controller) {
+            return Promise.resolve(true);
+        }
+
+        const worker = registration.installing || registration.waiting;
+        if (!worker) return Promise.resolve(!!registration.active);
+
+        return new Promise(resolve => {
+            const timeout = setTimeout(() => resolve(!!registration.active), 30000);
+            worker.addEventListener('statechange', () => {
+                if (worker.state === 'activated') {
+                    clearTimeout(timeout);
+                    resolve(true);
+                } else if (worker.state === 'redundant') {
+                    clearTimeout(timeout);
+                    resolve(false);
+                }
+            });
+        });
+    }
     function requestPersistentStorage() { if (navigator.storage && navigator.storage.persist) { navigator.storage.persist().then(granted => { console.log("Persistent Storage:", granted); }); } }
     function patchPWASavedWordsWithNewData() { console.log("PWA DB Check Complete."); }
     
@@ -2498,10 +2537,29 @@ function renderVoiceListUI() {
 
             await deleteSpeakingDB;
 
-            alert('✅ 단어장 오디오를 제외한 모든 데이터 및 캐시가 초기화되었습니다.\n최신 버전을 위해 앱을 새로고침합니다.');
-            
-            // 4. index.html을 서버로부터 새로 받도록 강제 (Cache Busting)
-            window.location.href = window.location.origin + window.location.pathname + '?ts=' + new Date().getTime();
+            // 4. 기존 SW를 완전히 제거한 상태에서 최신 sw.js를 다시 설치합니다.
+            //    query string + updateViaCache:'none' 조합으로 브라우저 HTTP 캐시까지 우회합니다.
+            let newRegistration = null;
+            if ('serviceWorker' in navigator) {
+                const swVersion = Date.now();
+                newRegistration = await navigator.serviceWorker.register(
+                    './sw.js?reset=' + swVersion,
+                    { updateViaCache: 'none' }
+                );
+
+                // sw.js의 install 단계가 끝나야 speaking.html도 precache가 완료됩니다.
+                await waitForServiceWorkerActivation(newRegistration);
+            }
+
+            alert('✅ 초기화 완료\n최신 index.html / sw.js / speaking.html을 다시 받아 새 PWA 캐시를 구성했습니다.');
+
+            // 5. 새로 받아진 index.html로 이동합니다.
+            //    이때 새 SW가 이미 활성화되어 있어 다음 화면부터 새 캐시를 사용합니다.
+            window.location.replace(
+                window.location.origin +
+                window.location.pathname +
+                '?reset=' + new Date().getTime()
+            );
         } catch (error) {
             alert('초기화 중 오류가 발생했습니다: ' + error.message);
             isDevResetExecuting = false;
