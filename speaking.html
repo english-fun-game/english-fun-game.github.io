@@ -1053,26 +1053,37 @@
     let isTopicApplied = false; // 응용분야 적용 상태 플래그
     let appliedTopicIndex = 0;  // 적용된 응용분야의 인덱스
 
-    // 현재 활성화된 데이터(원본 또는 응용분야)를 반환하는 헬퍼 함수
-    function getActiveData() {
-        const baseData = spkData[currentIndex];
-        if (!baseData) return null;
+ // 현재 활성화된 데이터(원본 또는 응용분야)를 반환하는 헬퍼 함수
+function getActiveData() {
+    const baseData = spkData[currentIndex];
+    if (!baseData) return null;
+    
+    // 응용분야가 적용된 상태라면 해당 응용분야 객체 반환
+    if (isTopicApplied && baseData.applicable_topics && baseData.applicable_topics[appliedTopicIndex]) {
+        const appData = baseData.applicable_topics[appliedTopicIndex];
         
-        // 응용분야가 적용된 상태라면 해당 응용분야 객체 반환
-        if (isTopicApplied && baseData.applicable_topics && baseData.applicable_topics[appliedTopicIndex]) {
-            return baseData.applicable_topics[appliedTopicIndex];
-        }
-        return baseData;
-    } 
-
-    // 기존 renderApplicationTopic() 교체
-// 기존 renderApplicationTopic() 함수를 통째로 덮어씌워주세요.
-function renderApplicationTopic() {
+        // 응용 데이터에 script_rows나 question 텍스트가 없을 경우 원본에서 상속 (안전장치)
+        if (!appData.script_rows) appData.script_rows = baseData.script_rows;
+        if (!appData.question) appData.question = baseData.question;
+        
+        return appData;
+    }
+    return baseData;
+} 
+// 클릭 시 트리거되는 함수 추가
+function applyTopic(index) {
+    if (testMode) return; // 시험 중에는 변경 방지
+    isTopicApplied = true;
+    appliedTopicIndex = index;
+    renderUI();
+}
+ function renderApplicationTopic() {
     const data = spkData[currentIndex];
     const appContainer = document.getElementById('application-topics-container');
     appContainer.innerHTML = '';
 
-    const topics = data.applicable_topics || data.task2_applicable_topics;
+    // task2_ 찌꺼기 제거됨
+    const topics = data.applicable_topics;
 
     if (!topics || topics.length === 0) {
         appContainer.innerHTML = '<div style="color:#64748b; padding:10px; font-weight:700;">응용 가능한 주제가 없습니다.</div>';
@@ -1107,30 +1118,19 @@ function renderApplicationTopic() {
     });
 }
 
-// 클릭 시 트리거되는 함수 추가
-function applyTopic(index) {
-    if (testMode) return; // 시험 중에는 변경 방지
-    isTopicApplied = true;
-    appliedTopicIndex = index;
-    renderUI();
+function nextTopic() {
+    const data = spkData[currentIndex];
+    if (!data || !data.applicable_topics || data.applicable_topics.length <= 1) return;
+    currentTopicIndex = (currentTopicIndex + 1) % data.applicable_topics.length;
+    renderApplicationTopic();
 }
 
-    function nextTopic() {
-        const data = spkData[currentIndex];
-        if (!data || !data.task2_applicable_topics || data.task2_applicable_topics.length <= 1) return;
-        // 원형 링크드리스트 형태의 순환 구조 (모듈로 연산)
-        currentTopicIndex = (currentTopicIndex + 1) % data.task2_applicable_topics.length;
-        renderApplicationTopic();
-    }
-
-    function prevTopic() {
-        const data = spkData[currentIndex];
-        if (!data || !data.task2_applicable_topics || data.task2_applicable_topics.length <= 1) return;
-        // 음수 방지를 위해 length를 더한 후 모듈로 연산
-        currentTopicIndex = (currentTopicIndex - 1 + data.task2_applicable_topics.length) % data.task2_applicable_topics.length;
-        renderApplicationTopic();
-    }
-
+function prevTopic() {
+    const data = spkData[currentIndex];
+    if (!data || !data.applicable_topics || data.applicable_topics.length <= 1) return;
+    currentTopicIndex = (currentTopicIndex - 1 + data.applicable_topics.length) % data.applicable_topics.length;
+    renderApplicationTopic();
+}
 
     const spk_global_persona = {
       "global_persona": {
@@ -1381,14 +1381,18 @@ function applyTopic(index) {
                         combinedText = templateObj.template.replace(/\{|\}/g, '');
                     }
                 } else if (isTopicApplied && activeData.core_expressions) {
-                    // 응용 문제 처리 (core_expressions 기준)
-                    activeData.core_expressions.forEach(expr => {
-                        // 정규식 특수문자 이스케이프 후, 대소문자 무관하게 치환
-                        const escapedExpr = expr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                        const regex = new RegExp(escapedExpr, 'gi');
-                        displayText = displayText.replace(regex, match => `<span class="vocab-highlight">${match}</span>`);
-                    });
-                }
+                // 응용 문제 처리 (core_expressions 기준)
+                // 길이가 긴 표현식부터 치환하여 짧은 단어가 긴 단어의 HTML 태그를 깨부수는 것을 방지
+                const sortedExprs = [...activeData.core_expressions].sort((a, b) => b.length - a.length);
+                
+                sortedExprs.forEach(expr => {
+                    // 정규식 특수문자 이스케이프 후 치환
+                    const escapedExpr = expr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    // (?![^<]*>) : 이미 HTML 태그(<span...>)로 감싸진 내부는 건너뛰도록 부정형 전방탐색 적용
+                    const regex = new RegExp(`(${escapedExpr})(?![^<]*>)`, 'gi');
+                    displayText = displayText.replace(regex, match => `<span class="vocab-highlight">${match}</span>`);
+                });
+            }
             }
 
             const span = document.createElement('span');

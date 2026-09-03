@@ -829,7 +829,7 @@
     </div>
 </div>
 
-<div class="app-version" onclick="openReleaseNoteModal()" title="릴리즈 노트 보기">v7.2.2 (Update Log)</div>
+<div class="app-version" onclick="openReleaseNoteModal()" title="릴리즈 노트 보기">v7.2.4 (Update Log)</div>
 <div id="toast-notification" class="toast-notification"></div>
 
 <script>
@@ -2473,6 +2473,9 @@ function renderVoiceListUI() {
 
     // ==========================================
     // 🛠️ 개발자 전용 데이터 강제 초기화 (Hidden Feature)
+    // ========================================== 
+// ==========================================
+    // 🛠️ 개발자 전용 데이터 강제 초기화 (Hidden Feature)
     // ==========================================
     let isDevResetExecuting = false;
 
@@ -2492,7 +2495,7 @@ function renderVoiceListUI() {
         const modal = document.getElementById('dev-reset-modal');
         if (modal) modal.classList.add('hidden');
     }
-
+    
     async function executeDevReset() {
         if (isDevResetExecuting) return;
 
@@ -2565,26 +2568,30 @@ function renderVoiceListUI() {
             isDevResetExecuting = false;
         }
     }
-
-    let devResetTapCount = 0;
+ 
+let devResetTapCount = 0;
     let devResetTapTimer = null;
-    document.addEventListener('touchstart', (e) => {
-        if (e.touches.length > 0) {
-            const touch = e.touches[0];
-            if (touch.clientX <= 100 && touch.clientY <= 100) {
-                devResetTapCount++;
-                if (devResetTapTimer) clearTimeout(devResetTapTimer);
-                
-                if (devResetTapCount >= 3) {
-                    devResetTapCount = 0;
-                    openDevResetModal();
-                } else {
-                    devResetTapTimer = setTimeout(() => { devResetTapCount = 0; }, 600);
-                }
-            } else {
+
+    // 데스크탑(마우스), 모바일/태블릿(터치) 공통 영역 감지기
+    function checkDevResetArea(clientX, clientY) {
+        if (clientX <= 100 && clientY <= 100) {
+            devResetTapCount++;
+            if (devResetTapTimer) clearTimeout(devResetTapTimer);
+            
+            if (devResetTapCount >= 3) {
                 devResetTapCount = 0;
+                openDevResetModal();
+            } else {
+                devResetTapTimer = setTimeout(() => { devResetTapCount = 0; }, 600);
             }
+        } else {
+            devResetTapCount = 0;
         }
+    }
+
+    // pointerdown 이벤트를 사용하여 마우스 클릭과 터치를 한 번에 처리
+    document.addEventListener('pointerdown', (e) => {
+        checkDevResetArea(e.clientX, e.clientY);
     }, { passive: true });
 
     document.addEventListener('keydown', (e) => {
