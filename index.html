@@ -53,6 +53,8 @@
         .ai-ask-btn:hover { background: #bae6fd; color: #0369a1; transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .toast-notification { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: rgba(30, 41, 59, 0.95); color: #ffffff; padding: 14px 24px; border-radius: 100px; font-size: 14px; font-weight: 800; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); z-index: 40000; transition: bottom 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); display: flex; align-items: center; gap: 10px; width: max-content; max-width: 90vw; line-height: 1.4; text-align: center; backdrop-filter: blur(8px); pointer-events: none; }
         .toast-notification.show { bottom: 40px; }
+
+
         @media (max-width: 650px) { .app-version { font-size: 10px; bottom: 6px; left: 6px; padding: 4px 6px; } .release-modal-card { width: 100vw !important; max-width: 100% !important; height: 95vh !important; max-height: 95vh !important; border-radius: 24px 24px 0 0 !important; padding: 0 !important; margin-top: auto; } }
         body.game-active { height: 100vh; height: 100dvh; overflow: hidden; justify-content: flex-start; padding: 12px 16px; }
         .sync-details { background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 8px; overflow: hidden; transition: all 0.2s ease; }
@@ -829,7 +831,7 @@
     </div>
 </div>
 
-<div class="app-version" onclick="openReleaseNoteModal()" title="릴리즈 노트 보기">v7.2.4 (Update Log)</div>
+<div class="app-version" onclick="openReleaseNoteModal()" title="릴리즈 노트 보기">v7.2.5 (Update Log)</div>
 <div id="toast-notification" class="toast-notification"></div>
 
 <script>

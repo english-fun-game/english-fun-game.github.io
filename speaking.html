@@ -11,550 +11,786 @@
     <script src="https://cdn.jsdelivr.net/npm/microsoft-cognitiveservices-speech-sdk@latest/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle-min.js"></script>
     <style>
         :root {
-            --slack-blue: #1264a3;
-            --slack-bg: #f8fafc;
-            --card-bg: #ffffff;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --border-color: #e2e8f0;
-            --border-strong: #cbd5e1;
-            --highlight-green: #059669; 
-            --highlight-green-bg: #d1fae5;
-        }
-        
-        /* 브라우저 기본 스와이프 뒤로가기 제스처 원천 차단 */
-        html, body { 
-            overscroll-behavior-x: none; 
-        }
+    --slack-blue: #1264a3;
+    --slack-bg: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --border-strong: #cbd5e1;
+    --highlight-green: #059669; 
+    --highlight-green-bg: #d1fae5;
+}
 
-        body { 
-            font-family: 'Pretendard', -apple-system, sans-serif; 
-            background-color: var(--slack-bg); 
-            color: var(--text-main); 
-            margin: 0; padding: 12px 5vw; 
-            display: flex; flex-direction: column; 
-            height: 100vh; box-sizing: border-box; overflow: hidden;
-        }
+/* 브라우저 기본 스와이프 뒤로가기 제스처 원천 차단 */
+html, body { 
+    overscroll-behavior-x: none; 
+}
 
-        /* 상단 컨트롤 바 */
-        .top-bar {
-            display: flex; justify-content: space-between; align-items: center;
-            padding-bottom: 8px; margin-bottom: 8px; border-bottom: 2.5px solid var(--border-strong); flex-shrink: 0;
-            gap: 12px;
-        }
-        
-        .meta-header { 
-            display: flex; flex-direction: row; align-items: center; gap: 6px; 
-            flex-wrap: nowrap; overflow: hidden; white-space: nowrap;
-        }
+body { 
+    font-family: 'Pretendard', -apple-system, sans-serif; 
+    background-color: var(--slack-bg); 
+    color: var(--text-main); 
+    margin: 0; padding: 12px 5vw; 
+    display: flex; flex-direction: column; 
+    height: 100vh; box-sizing: border-box; overflow: hidden;
+}
 
-        .btn-global-persona {
-            display: flex; align-items: center; gap: 4px;
-            font-size: 13px; font-weight: 800; color: #0f172a; background: #f1f5f9;
-            padding: 4px 10px; border-radius: 20px; border: 1.5px solid var(--border-strong); cursor: pointer;
-        }
-        .profile-img-header {
-            width: 20px; height: 20px; border-radius: 50%; object-fit: cover;
-            border: 1px solid #cbd5e1; background: #e2e8f0;
-        }
-        .bc-arrow { color: #94a3b8; font-weight: 900; font-size: 11px; }
-        .specific-persona-tag {
-            font-size: 12px; font-weight: 800; color: #334155;
-            background: #ffffff; padding: 3px 8px; border-radius: 12px;
-            border: 1.5px solid var(--border-color); box-shadow: 0 1px 2px rgba(0,0,0,0.02);
-        }
+/* 상단 컨트롤 바 */
+.top-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-bottom: 8px; margin-bottom: 8px; border-bottom: 2.5px solid var(--border-strong); flex-shrink: 0;
+    gap: 12px;
+}
 
-        .divider-line {
-            width: 2px; height: 16px; background: var(--border-strong);
-            margin: 0 2px; border-radius: 1px;
-        }
+.meta-header { 
+    display: flex; flex-direction: row; align-items: center; gap: 6px; 
+    flex-wrap: nowrap; overflow: hidden; white-space: nowrap;
+}
 
-        .question-badge-top {
-            font-size: 12px; font-weight: 900; background: #0f172a; color: #ffffff;
-            padding: 4px 10px; border-radius: 8px;
-        }
+.btn-global-persona {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 13px; font-weight: 800; color: #0f172a; background: #f1f5f9;
+    padding: 4px 10px; border-radius: 20px; border: 1.5px solid var(--border-strong); cursor: pointer;
+}
+.profile-img-header {
+    width: 20px; height: 20px; border-radius: 50%; object-fit: cover;
+    border: 1px solid #cbd5e1; background: #e2e8f0;
+}
+.bc-arrow { color: #94a3b8; font-weight: 900; font-size: 11px; }
+.specific-persona-tag {
+    font-size: 12px; font-weight: 800; color: #334155;
+    background: #ffffff; padding: 3px 8px; border-radius: 12px;
+    border: 1.5px solid var(--border-color); box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
 
-        .type-segmented-control {
-            display: flex; background: #e2e8f0; border-radius: 6px; padding: 2px; gap: 2px;
-        }
-        .type-pill {
-            font-size: 12px; font-weight: 800; color: #64748b; padding: 3px 8px;
-            border-radius: 4px;
-        }
-        .type-pill.active {
-            background: #1e293b; color: #ffffff;
-        }
+.divider-line {
+    width: 2px; height: 16px; background: var(--border-strong);
+    margin: 0 2px; border-radius: 1px;
+}
 
-        .badge-topic-category {
-            font-size: 12.5px; font-weight: 800; color: #0369a1;
-            background: #e0f2fe; padding: 4px 10px; border-radius: 8px; border: 1.5px solid #bae6fd;
-        }
-        
-        .controls { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
-        .ctrl-btn {
-            background: #ffffff; border: 1.5px solid var(--border-strong); color: var(--text-main);
-            padding: 5px 8px; border-radius: 6px; font-size: 13px; font-weight: 800;
-            cursor: pointer; transition: all 0.2s ease; white-space: nowrap;
-        }
-        .ctrl-btn:hover { background: #f1f5f9; border-color: var(--slack-blue); }
-        .ctrl-btn.primary { background: #1e293b; color: white; border-color: #0f172a; }
-        .ctrl-btn.primary:hover { background: #334155; }
-        .shortcut-key { color: #94a3b8; font-size: 9.5px; margin-left: 1px; font-weight: 800; }
-        .ctrl-btn.primary .shortcut-key { color: #cbd5e1; }
+.question-badge-top {
+    font-size: 12px; font-weight: 900; background: #0f172a; color: #ffffff;
+    padding: 4px 10px; border-radius: 8px;
+}
 
-        /* 음성 모달 내부 스타일 */
-        .voice-list-container { display: flex; flex-direction: column; gap: 8px; padding-bottom: 8px; }
-        .voice-item { display: flex; justify-content: space-between; align-items: center; background: #ffffff; border: 1.5px solid var(--border-color); padding: 10px 12px; border-radius: 8px; gap: 8px; cursor: pointer; transition: all 0.15s ease; }
-        .voice-item.selected { border-color: #f97316; background: #fff7ed; box-shadow: 0 2px 6px rgba(249, 115, 22, 0.15); }
-        .voice-info { display: flex; flex-direction: column; overflow: hidden; text-align: left; flex: 1; min-width: 0; padding-right: 4px; }
-        .voice-name { font-size: 14px; font-weight: 800; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
-        .voice-badge { background: #e2e8f0; color: #334155; font-size: 10px; padding: 1px 5px; border-radius: 4px; font-weight: 700; flex-shrink: 0; }
+.type-segmented-control {
+    display: flex; background: #e2e8f0; border-radius: 6px; padding: 2px; gap: 2px;
+}
+.type-pill {
+    font-size: 12px; font-weight: 800; color: #64748b; padding: 3px 8px;
+    border-radius: 4px;
+}
+.type-pill.active {
+    background: #1e293b; color: #ffffff;
+}
 
-        /* 2:1 레이아웃 워크스페이스 */
-        .workspace-2to1 { 
-            display: flex; gap: 20px; flex: 1; min-height: 0; margin-top: 8px;
-        }
+.badge-topic-category {
+    font-size: 12.5px; font-weight: 800; color: #0369a1;
+    background: #e0f2fe; padding: 4px 10px; border-radius: 8px; border: 1.5px solid #bae6fd;
+}
 
-        .panel-left-2 {
-            flex: 2; display: flex; flex-direction: column; gap: 10px; min-width: 0;
-        }
+.controls { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
+.ctrl-btn {
+    background: #ffffff; border: 1.5px solid var(--border-strong); color: var(--text-main);
+    padding: 5px 8px; border-radius: 6px; font-size: 13px; font-weight: 800;
+    cursor: pointer; transition: all 0.2s ease; white-space: nowrap;
+}
+.ctrl-btn:hover { background: #f1f5f9; border-color: var(--slack-blue); }
+.ctrl-btn.primary { background: #1e293b; color: white; border-color: #0f172a; }
+.ctrl-btn.primary:hover { background: #334155; }
+.shortcut-key { color: #94a3b8; font-size: 9.5px; margin-left: 1px; font-weight: 800; }
+.ctrl-btn.primary .shortcut-key { color: #cbd5e1; }
 
-        /* 1. 문제 제목 영역 (2줄 고정) */
-        .question-prompt {
-            font-size: 19px; 
-            font-weight: 900; 
-            color: #0f172a; 
-            line-height: 1.4;
-            letter-spacing: -0.3px;
-            display: flex;
-            align-items: flex-start; /* 상단 정렬 유지 */
-            margin: 0; 
-            padding: 0;
-            flex: 1;
-            /* 높이 2줄 고정 로직 (line-height 1.4 * 2줄) */
-            min-height: 2.8em; 
-        }
+/* 음성 모달 내부 스타일 */
+.voice-list-container { display: flex; flex-direction: column; gap: 8px; padding-bottom: 8px; }
+.voice-item { display: flex; justify-content: space-between; align-items: center; background: #ffffff; border: 1.5px solid var(--border-color); padding: 10px 12px; border-radius: 8px; gap: 8px; cursor: pointer; transition: all 0.15s ease; }
+.voice-item.selected { border-color: #f97316; background: #fff7ed; box-shadow: 0 2px 6px rgba(249, 115, 22, 0.15); }
+.voice-info { display: flex; flex-direction: column; overflow: hidden; text-align: left; flex: 1; min-width: 0; padding-right: 4px; }
+.voice-name { font-size: 14px; font-weight: 800; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.voice-badge { background: #e2e8f0; color: #334155; font-size: 10px; padding: 1px 5px; border-radius: 4px; font-weight: 700; flex-shrink: 0; }
 
-        .q-prompt-hover {
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-        .q-prompt-hover:hover {
-            color: var(--slack-blue);
-        }
+/* 2:1 레이아웃 워크스페이스 */
+.workspace-2to1 { 
+    display: flex; gap: 20px; flex: 1; min-height: 0; margin-top: 8px;
+}
 
-        .answer-box {
-            flex: 1; background: transparent; padding: 4px 0; overflow-y: auto; display: flex; flex-direction: column;
-        }
-        
-        .sentence-row {
-            margin-bottom: 8px; 
-            line-height: 1.6;
-        }
+.panel-left-2 {
+    flex: 2; display: flex; flex-direction: column; gap: 10px; min-width: 0;
+}
+
+/* 1. 문제 제목 영역 (2줄 고정) */
+.question-prompt {
+    font-size: 19px; 
+    font-weight: 900; 
+    color: #0f172a; 
+    line-height: 1.4;
+    letter-spacing: -0.3px;
+    display: flex;
+    align-items: flex-start;
+    margin: 0; 
+    padding: 0;
+    flex: 1;
+    min-height: 2.8em; 
+}
+
+.q-prompt-hover {
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.q-prompt-hover:hover {
+    color: var(--slack-blue);
+}
+
+.answer-box {
+    flex: 1; background: transparent; padding: 4px 0; overflow-y: auto; display: flex; flex-direction: column;
+}
+
+.sentence-row {
+    margin-bottom: 8px; 
+    line-height: 1.6;
+}
 
 /* 2. 각 정답 문장 영역 (2줄 고정) */
-        .chunk {
-            display: flex;
-            align-items: flex-start; /* 상단 정렬 유지 */
-            width: 100%; box-sizing: border-box;
-            padding: 14px; 
-            border-radius: 8px; 
-            background: #ffffff; border: 1.5px solid var(--border-color); 
-            font-size: 19px; font-weight: 800; color: #1e293b; 
-            margin-bottom: 4px; cursor: pointer; transition: all 0.2s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02); letter-spacing: -0.2px;
-            line-height: 1.5;
-            /* 높이 2줄 고정 로직 (line-height 1.5 * 2줄 + 상하 패딩 14px*2) */
-            min-height: calc(3em + 28px); 
-        }
-        .chunk:hover { background: #f8fafc; border-color: var(--border-strong); transform: translateY(-1px); }
-        .chunk.active-highlight { background: #fef08a !important; border-color: #facc15 !important; color: #854d0e !important; }
+.chunk {
+    display: flex;
+    align-items: flex-start;
+    width: 100%; box-sizing: border-box;
+    padding: 14px; 
+    border-radius: 8px; 
+    background: #ffffff; border: 1.5px solid var(--border-color); 
+    font-size: 19px; font-weight: 800; color: #1e293b; 
+    margin-bottom: 4px; cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02); letter-spacing: -0.2px;
+    line-height: 1.5;
+    min-height: calc(3em + 28px); 
+}
+.chunk:hover { background: #f8fafc; border-color: var(--border-strong); transform: translateY(-1px); }
+.chunk.active-highlight { background: #fef08a !important; border-color: #facc15 !important; color: #854d0e !important; }
 
+.vocab-highlight {
+    color: var(--highlight-green) !important;
+    font-weight: 900;
+}
 
+/* 시험 모드 인풋, 음성 녹음 버튼, 결과 디스플레이 스타일 */
+.test-input {
+    width: 100%;
+    padding: 8px 12px; 
+    font-size: 18px;
+    font-weight: 600;
+    font-family: inherit;
+    border: 2px solid var(--border-strong);
+    border-radius: 8px;
+    margin-bottom: 4px;
+    box-sizing: border-box;
+    background: #ffffff;
+    color: #1e293b;
+    transition: border-color 0.2s;
+    resize: none;
+    overflow-y: hidden;
+    line-height: 1.5;
+    min-height: 46px;
+}
+.test-input:focus {
+    border-color: var(--slack-blue);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(18, 100, 163, 0.1);
+}
 
-        .vocab-highlight {
-            color: var(--highlight-green) !important;
-            font-weight: 900;
-        }
+.spk-test-textarea {
+    field-sizing: content;
+    line-height: 1.5;
+    min-height: calc(5 * 1.5em);
+    max-height: calc(30 * 1.5em);
+    box-sizing: border-box;
+    resize: none;
+}
 
-        /* 시험 모드 용 인풋, 음성 녹음 버튼, 결과 디스플레이 스타일 */
-        .test-input {
-            width: 100%;
-            padding: 8px 12px; 
-            font-size: 18px;
-            font-weight: 600;
-            font-family: inherit;
-            border: 2px solid var(--border-strong);
-            border-radius: 8px;
-            margin-bottom: 4px;
-            box-sizing: border-box;
-            background: #ffffff;
-            color: #1e293b;
-            transition: border-color 0.2s;
-            resize: none;
-            overflow-y: hidden;
-            line-height: 1.5;
-            min-height: 46px;
-        }
-        .test-input:focus {
-            border-color: var(--slack-blue);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(18, 100, 163, 0.1);
-        }
+.btn-record {
+    background: #f8fafc; border: 1.5px solid var(--border-strong); color: var(--text-main);
+    padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 800;
+    cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 4px;
+}
+.btn-record:hover { background: #f1f5f9; border-color: var(--slack-blue); }
+.btn-record.recording-active {
+    background: #fee2e2 !important; color: #ef4444 !important; border-color: #fca5a5 !important;
+    animation: pulse-record 1.5s infinite;
+}
+@keyframes pulse-record {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
 
-        /* 텍스트 에어리어 높이 동적 제어 (5줄 시작, 최대 제한 없이 무한 확장) */
-        .spk-test-textarea {
-            field-sizing: content;
-            line-height: 1.5;
-            
-            /* 최소 5줄, 최대 15줄 */
-            min-height: calc(5 * 1.5em);
-            max-height: calc(30 * 1.5em);
+.timer-badge {
+    background: #e2e8f0; color: #334155; padding: 2px 6px; border-radius: 6px; 
+    font-size: 11px; font-weight: 900; margin-left: 4px; font-variant-numeric: tabular-nums;
+}
+.recording-active .timer-badge {
+    background: #ef4444; color: #fff;
+}
 
-            box-sizing: border-box;
-            resize: none;
-        }
+/* 45초 카운트다운 프로그레시브 바 */
+.progress-bar-bg {
+    width: 100%; height: 6px; background: #e2e8f0; 
+    border-radius: 3px; overflow: hidden; margin-bottom: 8px;
+    display: none;
+}
+.progress-bar-fill {
+    height: 100%; width: 100%; background: #3b82f6; 
+    transition: width 0.1s linear, background-color 0.3s;
+}
+.progress-bar-fill.warning { background: #eab308; }
+.progress-bar-fill.danger { background: #ef4444; }
 
-        .btn-record {
-            background: #f8fafc; border: 1.5px solid var(--border-strong); color: var(--text-main);
-            padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 800;
-            cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 4px;
-        }
-        .btn-record:hover { background: #f1f5f9; border-color: var(--slack-blue); }
-        .btn-record.recording-active {
-            background: #fee2e2 !important; color: #ef4444 !important; border-color: #fca5a5 !important;
-            animation: pulse-record 1.5s infinite;
-        }
-        @keyframes pulse-record {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-            70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-        }
+.user-answer-disp {
+    font-size: 19px;
+    font-weight: 800;
+    color: #475569; 
+    margin-top: 4px;
+    padding-left: 4px; 
+    margin-bottom: 12px;
+    line-height: 1.5;
+    letter-spacing: -0.2px;
+}
+.wrong-word {
+    color: #ef4444; 
+    font-weight: 900;
+    text-decoration: none; 
+}
 
-        .timer-badge {
-            background: #e2e8f0; color: #334155; padding: 2px 6px; border-radius: 6px; 
-            font-size: 11px; font-weight: 900; margin-left: 4px; font-variant-numeric: tabular-nums;
-        }
-        .recording-active .timer-badge {
-            background: #ef4444; color: #fff;
-        }
+/* 우측 패널 */
+.panel-right-1 {
+    flex: 1; background: var(--card-bg); border: 2px solid var(--border-strong);
+    border-radius: 12px; padding: 16px; display: flex;
+    flex-direction: column; gap: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); overflow: hidden;
+}
+.right-tabs {
+    display: flex; gap: 6px; border-bottom: 2px solid var(--border-color); padding-bottom: 8px; flex-shrink: 0;
+}
+.tab-btn {
+    flex: 1; padding: 6px 10px; font-size: 13.5px; font-weight: 900; border-radius: 6px;
+    border: 1.5px solid var(--border-strong); background: #f8fafc; color: var(--text-muted); cursor: pointer;
+    text-align: center; transition: all 0.2s;
+}
+.tab-btn.active { background: #1e293b; color: #ffffff; border-color: #0f172a; }
+.tab-btn.active .shortcut-key { color: #cbd5e1; }
 
-        /* 45초 카운트다운 프로그레시브 바 */
-        .progress-bar-bg {
-            width: 100%; height: 6px; background: #e2e8f0; 
-            border-radius: 3px; overflow: hidden; margin-bottom: 8px;
-            display: none;
-        }
-        .progress-bar-fill {
-            height: 100%; width: 100%; background: #3b82f6; 
-            transition: width 0.1s linear, background-color 0.3s;
-        }
-        .progress-bar-fill.warning { background: #eab308; }
-        .progress-bar-fill.danger { background: #ef4444; }
-        
-        .user-answer-disp {
-            font-size: 19px;
-            font-weight: 800;
-            color: #475569; 
-            margin-top: 4px;
-            padding-left: 4px; 
-            margin-bottom: 12px;
-            line-height: 1.5;
-            letter-spacing: -0.2px;
-        }
-        .wrong-word {
-            color: #ef4444; 
-            font-weight: 900;
-            text-decoration: none; 
-        }
+.tab-content { display: none; flex: 1; overflow-y: auto; flex-direction: column; }
+.tab-content.active { display: flex; }
 
-        /* 우측 패널 */
-        .panel-right-1 {
-            flex: 1; background: var(--card-bg); border: 2px solid var(--border-strong);
-            border-radius: 12px; padding: 16px; display: flex;
-            flex-direction: column; gap: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); overflow: hidden;
-        }
-        .right-tabs {
-            display: flex; gap: 6px; border-bottom: 2px solid var(--border-color); padding-bottom: 8px; flex-shrink: 0;
-        }
-        .tab-btn {
-            flex: 1; padding: 6px 10px; font-size: 13.5px; font-weight: 900; border-radius: 6px;
-            border: 1.5px solid var(--border-strong); background: #f8fafc; color: var(--text-muted); cursor: pointer;
-            text-align: center; transition: all 0.2s;
-        }
-        .tab-btn.active { background: #1e293b; color: #ffffff; border-color: #0f172a; }
-        .tab-btn.active .shortcut-key { color: #cbd5e1; }
+canvas {
+    display: block; width: 100%; height: 100%;
+}
 
-        .tab-content { display: none; flex: 1; overflow-y: auto; flex-direction: column; }
-        .tab-content.active { display: flex; }
+/* 문제 응용 테마 UI */
+.topic-app-card {
+    background: transparent;
+    border: none;
+    padding: 0 0 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border-bottom: 1.5px solid var(--border-color);
+}
+.topic-app-card:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+.topic-app-title {
+    font-size: 19px;
+    font-weight: 900;
+    color: #0f172a;
+    padding: 0;
+    letter-spacing: -0.3px;
+}
+.topic-app-expressions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.topic-app-exp-item {
+    font-size: 18px;
+    font-weight: 600;
+    color: #334155;
+    background: transparent;
+    border: none;
+    padding: 2px 0 2px 16px;
+    border-left: 3px solid #cbd5e1;
+    letter-spacing: -0.2px;
+    line-height: 1.4;
+}
 
-        canvas {
-            display: block; width: 100%; height: 100%;
-        }
-        
-        /* 2. 문제 응용 테마 UI (전문적, 미니멀, 인덴트 구조, 폰트 확대) */
-        .topic-app-card {
-            background: transparent;
-            border: none;
-            padding: 0 0 20px 0;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            border-bottom: 1.5px solid var(--border-color);
-        }
-        .topic-app-card:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
-        }
-        .topic-app-title {
-            font-size: 19px; /* 타이틀 폰트 확대 */
-            font-weight: 900;
-            color: #0f172a; /* 전문적이고 차분한 다크 네이비 톤 */
-            padding: 0;
-            letter-spacing: -0.3px;
-        }
-        .topic-app-expressions {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .topic-app-exp-item {
-            font-size: 18px; /* 핵심 표현 폰트 시원하게 확대 */
-            font-weight: 600; /* 타이틀과의 대비를 위해 두께 조절 */
-            color: #334155;
-            background: transparent;
-            border: none;
-            padding: 2px 0 2px 16px; /* 왼쪽 인덴트 16px */
-            border-left: 3px solid #cbd5e1; /* 모던한 들여쓰기 라인 */
-            letter-spacing: -0.2px;
-            line-height: 1.4;
-        }
+/* 애플 스타일 미니멀 & 폴리모피즘 Pull-to-action UI */
+.pull-indicator {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%) scale(0.92);
+    width: 0;
+    height: 64px;
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 8px 32px 0 rgba(15, 23, 42, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    pointer-events: none;
+    overflow: hidden;
+    opacity: 0;
+    transition: width 0.05s cubic-bezier(0.1, 0.9, 0.2, 1), opacity 0.2s, transform 0.2s;
+}
+#pull-left-indicator {
+    left: 12px;
+    border-radius: 32px;
+}
+#pull-right-indicator {
+    right: 12px;
+    border-radius: 32px;
+}
+.pull-indicator.active {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+}
+.pull-indicator-icon {
+    font-size: 18px;
+    font-weight: 900;
+    color: #0f172a;
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    transform: scale(0.8);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.pull-indicator-icon.visible {
+    opacity: 1;
+    transform: scale(1);
+}
 
-        /* 애플 스타일 미니멀 & 폴리모피즘 Pull-to-action UI */
-        .pull-indicator {
-            position: fixed;
-            top: 50%;
-            transform: translateY(-50%) scale(0.92);
-            width: 0;
-            height: 64px;
-            background: rgba(255, 255, 255, 0.72);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 8px 32px 0 rgba(15, 23, 42, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            pointer-events: none;
-            overflow: hidden;
-            opacity: 0;
-            transition: width 0.05s cubic-bezier(0.1, 0.9, 0.2, 1), opacity 0.2s, transform 0.2s;
-        }
-        #pull-left-indicator {
-            left: 12px;
-            border-radius: 32px;
-        }
-        #pull-right-indicator {
-            right: 12px;
-            border-radius: 32px;
-        }
-        .pull-indicator.active {
-            opacity: 1;
-            transform: translateY(-50%) scale(1);
-        }
-        .pull-indicator-icon {
-            font-size: 18px;
-            font-weight: 900;
-            color: #0f172a;
-            opacity: 0;
-            transition: opacity 0.2s, transform 0.2s;
-            transform: scale(0.8);
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .pull-indicator-icon.visible {
-            opacity: 1;
-            transform: scale(1);
-        }
+/* 모달 공통 스타일 */
+.modal-overlay {
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(15, 23, 42, 0.75); z-index: 999; 
+    justify-content: center; align-items: center;
+}
 
-        /* 모달 공통 스타일 */
-        .modal-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.75); z-index: 999; 
-            justify-content: center; align-items: center;
-        }
-        
-        .modal-content-giant {
-            background: #ffffff; width: 92vw; max-width: 1300px; max-height: 88vh;
-            border-radius: 16px; padding: 24px; position: relative; box-sizing: border-box; 
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3); display: flex; flex-direction: column; overflow: hidden;
-        }
-        .modal-close {
-            position: absolute; top: 16px; right: 20px; font-size: 28px; font-weight: bold;
-            color: #64748b; cursor: pointer; border: none; background: none; display: flex; align-items: center; gap: 4px; z-index: 10;
-        }
-        .modal-close:hover { color: #0f172a; }
-        .modal-close-esc { font-size: 12px; font-weight: 700; color: #94a3b8; margin-top: 4px; }
-        
-        /* 글로벌 페르소나 모달 스타일 */
-        #persona-modal .modal-content-giant {
-            height: 94vh; max-height: 94vh; max-width: 1450px; padding: 28px 32px;
-            box-sizing: border-box; 
-        }
-        .profile-hero-extended { 
-            display: flex; align-items: center; gap: 20px; padding-bottom: 16px; 
-            border-bottom: 2px solid var(--border-color); margin-bottom: 16px; flex-shrink: 0; 
-        }
-        .profile-hero-img-extended { 
-            width: 86px; height: 86px; border-radius: 50%; object-fit: cover; 
-            border: 3px solid var(--slack-blue); box-shadow: 0 4px 12px rgba(18, 100, 163, 0.15); 
-        }
-        .profile-hero-info-extended { display: flex; flex-direction: column; flex: 1; justify-content: center; }
-        .profile-hero-info-extended h2 { margin: 0 0 8px 0; font-size: 22px; font-weight: 900; color: #0f172a; letter-spacing: -0.5px; }
-        .identity-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
-        .id-chip { background: #f8fafc; border: 1.5px solid #e2e8f0; padding: 6px 12px; border-radius: 8px; font-size: 14px; font-weight: 700; color: #334155; line-height: 1.3; }
-        .motto-text { 
-            margin: 0; font-size: 14px; color: var(--slack-blue); font-weight: 800; 
-            background: #f0f9ff; padding: 10px 14px; border-radius: 8px; border: 1.5px solid #bae6fd; line-height: 1.4; 
-        }
-        
-        /* 본문 및 7대 주제 */
-        .persona-giant-body { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
-        .section-title-topic { margin: 0 0 12px 0; font-size: 18px; font-weight: 900; color: #0f172a; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-        .topics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; flex: 1; min-height: 0; align-items: start; } 
-        .topic-card-item { 
-            background: #ffffff; border: 2px solid var(--border-color); border-radius: 12px; 
-            padding: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; flex-direction: column; 
-            height: 100%; box-sizing: border-box; gap: 8px;
-        }
-        .topic-card-title { font-size: 16px; font-weight: 900; color: #0f172a; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 2px; }
-        .topic-card-subs { font-size: 13px; color: var(--text-muted); line-height: 1.4; font-weight: 600; }
-        .topic-badge-container { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
-        .topic-badge-giant { 
-            background: #e0f2fe; color: #0369a1; font-size: 12px; font-weight: 800; 
-            padding: 4px 8px; border-radius: 6px; border: 1px solid #bae6fd; display: inline-block;
-        }
+.modal-content-giant {
+    background: #ffffff; width: 92vw; max-width: 1300px; max-height: 88vh;
+    border-radius: 16px; padding: 24px; position: relative; box-sizing: border-box; 
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3); display: flex; flex-direction: column; overflow: hidden;
+}
+.modal-close {
+    position: absolute; top: 16px; right: 20px; font-size: 28px; font-weight: bold;
+    color: #64748b; cursor: pointer; border: none; background: none; display: flex; align-items: center; gap: 4px; z-index: 10;
+}
+.modal-close:hover { color: #0f172a; }
+.modal-close-esc { font-size: 12px; font-weight: 700; color: #94a3b8; margin-top: 4px; }
 
-        /* 기타 요소 (가이드, 리스트 등) */
-        .gemini-guide-banner { background: linear-gradient(135deg, #eff6ff 0%, #f3e8ff 100%); border: 1.5px solid #c7d2fe; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
-        .gemini-guide-title { font-size: 13.5px; font-weight: 900; color: #3730a3; }
-        .gemini-guide-desc { font-size: 12.5px; font-weight: 700; color: #334155; line-height: 1.35; }
-        .gemini-link-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: #4f46e5; color: #ffffff; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 900; text-decoration: none; width: fit-content; }
-        .list-filter-bar { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
-        .filter-select { padding: 6px 10px; border-radius: 8px; border: 1.5px solid var(--border-strong); font-size: 13.5px; font-weight: 700; background: #ffffff; color: var(--text-main); }
-        .question-list-container { max-height: 52vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        
-        .question-list-item { background: #f8fafc; border: 1.5px solid var(--border-color); border-radius: 10px; padding: 12px 16px; cursor: pointer; display: flex; align-items: center; gap: 14px; transition: all 0.2s; }
-        .question-list-item:hover { background: #f1f5f9; border-color: var(--slack-blue); } 
-        .list-item-badge { background: #0f172a; color: white; font-size: 13px; font-weight: 900; padding: 3px 8px; border-radius: 6px; }
-        .list-item-type { background: #e0e7ff; color: #3730a3; font-size: 12px; font-weight: 800; padding: 3px 8px; border-radius: 4px; }
-        .list-item-topic { background: #e0f2fe; color: #0369a1; font-size: 12px; font-weight: 800; padding: 3px 8px; border-radius: 4px; }
-        
-        /* 데스크탑 vs 모바일 텍스트 분기 */
-        .q-mobile { display: none; }
-        .q-desktop { display: inline; }
+/* [목록, 수정, 추가] 모달 높이 90vh 고정 및 내부 레이아웃 */
+#list-modal .modal-content-giant,
+#edit-modal .modal-content-giant,
+#add-modal .modal-content-giant {
+    height: 90vh !important;
+    max-height: 90vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
 
-        /* 기존 코드를 찾아 대체 */
-        .list-item-content {
-            flex: 1;
-            min-width: 0;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            white-space: normal;
-            line-height: 1.5;
-            word-break: keep-all;
-            overflow-wrap: break-word;
-        }
+/* 목록 모달 내부 리스트 스크롤 영역 */
+#list-modal .question-list-container {
+    flex: 1;
+    min-height: 0;
+    max-height: none !important;
+    overflow-y: auto;
+}
 
-        .list-item-meta-tags {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            margin-right: 8px;
-            vertical-align: middle;
-            margin-bottom: 2px;
-        }
+/* 추가 모달 내부 JSON 입력창 자동 신축 */
+#add-modal #json-input {
+    flex: 1;
+    min-height: 0;
+    height: auto !important;
+    resize: none;
+}
 
-        .list-item-text {
-            display: inline;
-            font-size: 15px;
-            font-weight: 800;
-            color: #0f172a;
-            vertical-align: middle;
-        }
+/* 글로벌 페르소나 모달 스타일 */
+#persona-modal .modal-content-giant {
+    height: 94vh; max-height: 94vh; max-width: 1450px; padding: 28px 32px;
+    box-sizing: border-box; 
+}
+.profile-hero-extended { 
+    display: flex; align-items: center; gap: 20px; padding-bottom: 16px; 
+    border-bottom: 2px solid var(--border-color); margin-bottom: 16px; flex-shrink: 0; 
+}
+.profile-hero-img-extended { 
+    width: 86px; height: 86px; border-radius: 50%; object-fit: cover; 
+    border: 3px solid var(--slack-blue); box-shadow: 0 4px 12px rgba(18, 100, 163, 0.15); 
+}
+.profile-hero-info-extended { display: flex; flex-direction: column; flex: 1; justify-content: center; }
+.profile-hero-info-extended h2 { margin: 0 0 8px 0; font-size: 22px; font-weight: 900; color: #0f172a; letter-spacing: -0.5px; }
+.identity-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.id-chip { background: #f8fafc; border: 1.5px solid #e2e8f0; padding: 6px 12px; border-radius: 8px; font-size: 14px; font-weight: 700; color: #334155; line-height: 1.3; }
+.motto-text { 
+    margin: 0; font-size: 14px; color: var(--slack-blue); font-weight: 800; 
+    background: #f0f9ff; padding: 10px 14px; border-radius: 8px; border: 1.5px solid #bae6fd; line-height: 1.4; 
+}
 
-        
-        .list-item-delete-btn { font-size: 12.5px; padding: 4px 10px; border-radius: 6px; flex-shrink: 0; }
-        .json-textarea { width: 100%; height: 260px; padding: 12px; border-radius: 8px; border: 1.5px solid var(--border-strong); font-family: monospace; font-size: 13.5px; background: #f8fafc; box-sizing: border-box; resize: vertical; }
+/* 본문 및 7대 주제 */
+.persona-giant-body { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+.section-title-topic { margin: 0 0 12px 0; font-size: 18px; font-weight: 900; color: #0f172a; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.topics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; flex: 1; min-height: 0; align-items: start; } 
+.topic-card-item { 
+    background: #ffffff; border: 2px solid var(--border-color); border-radius: 12px; 
+    padding: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; flex-direction: column; 
+    height: 100%; box-sizing: border-box; gap: 8px;
+}
+.topic-card-title { font-size: 16px; font-weight: 900; color: #0f172a; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 2px; }
+.topic-card-subs { font-size: 13px; color: var(--text-muted); line-height: 1.4; font-weight: 600; }
+.topic-badge-container { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+.topic-badge-giant { 
+    background: #e0f2fe; color: #0369a1; font-size: 12px; font-weight: 800; 
+    padding: 4px 8px; border-radius: 6px; border: 1px solid #bae6fd; display: inline-block;
+}
 
-        /* 단축키 코치마크 (Coachmark) UI */
-        .onboarding-backdrop {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(15, 23, 42, 0.65);
-            z-index: 9000;
-            opacity: 0; pointer-events: none; 
-            transition: opacity 0.3s ease;
-        }
-        .onboarding-backdrop.show {
-            opacity: 1; pointer-events: auto;
-        }
+/* 가이드 배너, 필터 바, 리스트 요소 */
+.gemini-guide-banner { background: linear-gradient(135deg, #eff6ff 0%, #f3e8ff 100%); border: 1.5px solid #c7d2fe; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.gemini-guide-title { font-size: 13.5px; font-weight: 900; color: #3730a3; }
+.gemini-guide-desc { font-size: 12.5px; font-weight: 700; color: #334155; line-height: 1.35; }
+.gemini-link-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: #4f46e5; color: #ffffff; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 900; text-decoration: none; width: fit-content; }
+.list-filter-bar { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+.filter-select { padding: 6px 10px; border-radius: 8px; border: 1.5px solid var(--border-strong); font-size: 13.5px; font-weight: 700; background: #ffffff; color: var(--text-main); }
+.question-list-container { max-height: 52vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
 
-        .coachmark-tooltip {
-            position: fixed;
-            background: #ffffff;
-            color: #1e293b;
-            padding: 16px 20px;
-            border-radius: 12px;
-            font-size: 14.5px;
-            font-weight: 800;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            z-index: 9002;
-            width: 260px;
-            line-height: 1.5;
-            pointer-events: none; 
-            transform: translateY(-10px);
-            opacity: 0;
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
-        }
-        .onboarding-backdrop.show .coachmark-tooltip {
-            transform: translateY(0);
-            opacity: 1;
-        }
-        .coachmark-tooltip::before {
-            content: '';
-            position: absolute;
-            top: -8px;
-            left: 20px;
-            border-left: 8px solid transparent;
-            border-right: 8px solid transparent;
-            border-bottom: 8px solid #ffffff;
-        }
+.question-list-item { background: #f8fafc; border: 1.5px solid var(--border-color); border-radius: 10px; padding: 12px 16px; cursor: pointer; display: flex; align-items: center; gap: 14px; transition: all 0.2s; }
+.question-list-item:hover { background: #f1f5f9; border-color: var(--slack-blue); } 
+.list-item-badge { background: #0f172a; color: white; font-size: 13px; font-weight: 900; padding: 3px 8px; border-radius: 6px; }
+.list-item-type { background: #e0e7ff; color: #3730a3; font-size: 12px; font-weight: 800; padding: 3px 8px; border-radius: 4px; }
+.list-item-topic { background: #e0f2fe; color: #0369a1; font-size: 12px; font-weight: 800; padding: 3px 8px; border-radius: 4px; }
 
-        .mobile-swipe-tooltip {
-            top: 50% !important;
-            left: 50% !important;
-            transform: translate(-50%, -50%) !important;
-            width: 82vw !important;
-            max-width: 320px !important;
-            text-align: center;
-        }
-        .mobile-swipe-tooltip::before { display: none !important; }
+/* 데스크탑 vs 모바일 텍스트 분기 */
+.q-mobile { display: none; }
+.q-desktop { display: inline; }
 
-        .highlight-target {
-            position: relative;
-            z-index: 9001 !important;
-            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.9), 0 0 20px rgba(79, 70, 229, 0.6) !important;
-            border-color: #4f46e5 !important;
-        }
+.list-item-content {
+    flex: 1;
+    min-width: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    white-space: normal;
+    line-height: 1.5;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+}
+
+.list-item-meta-tags {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-right: 8px;
+    vertical-align: middle;
+    margin-bottom: 2px;
+}
+
+.list-item-text {
+    display: inline;
+    font-size: 15px;
+    font-weight: 800;
+    color: #0f172a;
+    vertical-align: middle;
+}
+
+.list-item-delete-btn { font-size: 12.5px; padding: 4px 10px; border-radius: 6px; flex-shrink: 0; }
+.json-textarea { width: 100%; height: 260px; padding: 12px; border-radius: 8px; border: 1.5px solid var(--border-strong); font-family: monospace; font-size: 13.5px; background: #f8fafc; box-sizing: border-box; resize: vertical; }
+
+/* 수정 모달 3단계 편집 UI */
+#edit-modal .edit-modal-head {
+    flex-shrink: 0;
+    margin: 0 0 14px 0;
+    padding-right: 36px;
+}
+
+#edit-modal .edit-modal-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--text-main);
+    letter-spacing: -0.4px;
+}
+
+#edit-modal .edit-modal-desc {
+    margin-top: 5px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    line-height: 1.45;
+}
+
+#edit-modal .edit-mode-nav {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+#edit-modal .edit-mode-btn {
+    appearance: none;
+    border: 1.5px solid var(--border-color);
+    background: #f8fafc;
+    color: var(--text-main);
+    border-radius: 9px;
+    padding: 10px 12px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    min-width: 0;
+}
+
+#edit-modal .edit-mode-btn:hover {
+    border-color: var(--slack-blue);
+    background: #f8fbff;
+}
+
+#edit-modal .edit-mode-btn.active {
+    border-color: var(--slack-blue);
+    background: #f0f9ff;
+    box-shadow: 0 0 0 1px rgba(18, 100, 163, 0.08);
+}
+
+#edit-modal .edit-mode-kicker {
+    display: block;
+    margin-bottom: 3px;
+    font-size: 10.5px;
+    font-weight: 800;
+    color: var(--text-muted);
+}
+
+#edit-modal .edit-mode-btn.active .edit-mode-kicker {
+    color: var(--slack-blue);
+}
+
+#edit-modal .edit-mode-title {
+    display: block;
+    margin-bottom: 3px;
+    font-size: 13.5px;
+    font-weight: 900;
+    line-height: 1.3;
+}
+
+#edit-modal .edit-mode-desc {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    line-height: 1.35;
+}
+
+#edit-modal .edit-panel {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+#edit-modal .edit-panel-head {
+    flex-shrink: 0;
+    margin-bottom: 9px;
+}
+
+#edit-modal .edit-panel-title {
+    font-size: 15px;
+    font-weight: 900;
+    color: var(--text-main);
+}
+
+#edit-modal .edit-panel-desc {
+    margin-top: 3px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+#edit-modal #edit-line-container {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+#edit-modal .edit-line-box {
+    background: #f8fafc;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border-color);
+    margin-bottom: 10px;
+}
+
+#edit-modal .edit-line-label {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+#edit-modal .edit-line-box .test-input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#edit-modal #edit-app-json-container {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding-right: 4px;
+}
+
+#edit-modal .edit-app-json-card {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    background: #f8fafc;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px;
+}
+
+#edit-modal .edit-app-json-label {
+    margin-bottom: 7px;
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--text-main);
+}
+
+#edit-modal .edit-app-json-textarea {
+    width: 100%;
+    min-height: 360px;
+    flex: 1;
+    box-sizing: border-box;
+    resize: vertical;
+    padding: 10px;
+    border: 1.5px solid var(--border-strong);
+    border-radius: 7px;
+    background: #ffffff;
+    color: var(--text-main);
+    font-family: monospace;
+    font-size: 12.5px;
+    line-height: 1.5;
+    outline: none;
+}
+
+#edit-modal .edit-app-json-textarea:focus,
+#edit-modal #edit-json-input:focus {
+    border-color: var(--slack-blue);
+    box-shadow: 0 0 0 2px rgba(18, 100, 163, 0.08);
+}
+
+#edit-modal #edit-json-container {
+    flex: 1;
+    min-height: 0;
+}
+
+#edit-modal #edit-json-input {
+    width: 100%;
+    flex: 1;
+    min-height: 400px;
+    box-sizing: border-box;
+}
+
+#edit-modal .edit-save-btn {
+    width: 100%;
+    margin-top: 12px;
+    padding: 13px;
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+/* 단축키 코치마크 (Coachmark) UI */
+.onboarding-backdrop {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(15, 23, 42, 0.65);
+    z-index: 9000;
+    opacity: 0; pointer-events: none; 
+    transition: opacity 0.3s ease;
+}
+.onboarding-backdrop.show {
+    opacity: 1; pointer-events: auto;
+}
+
+.coachmark-tooltip {
+    position: fixed;
+    background: #ffffff;
+    color: #1e293b;
+    padding: 16px 20px;
+    border-radius: 12px;
+    font-size: 14.5px;
+    font-weight: 800;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    z-index: 9002;
+    width: 260px;
+    line-height: 1.5;
+    pointer-events: none; 
+    transform: translateY(-10px);
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+}
+.onboarding-backdrop.show .coachmark-tooltip {
+    transform: translateY(0);
+    opacity: 1;
+}
+.coachmark-tooltip::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 20px;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid #ffffff;
+}
+
+.mobile-swipe-tooltip {
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 82vw !important;
+    max-width: 320px !important;
+    text-align: center;
+}
+.mobile-swipe-tooltip::before { display: none !important; }
+
+.highlight-target {
+    position: relative;
+    z-index: 9001 !important;
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.9), 0 0 20px rgba(79, 70, 229, 0.6) !important;
+    border-color: #4f46e5 !important;
+}
 
 /* ==========================================
-   모바일 전용 최적화
+   반응형 및 모바일 최적화
    ========================================== */
+@media (max-width: 720px) {
+    #edit-modal .edit-mode-nav {
+        grid-template-columns: 1fr;
+    }
+
+    #edit-modal #edit-app-json-container {
+        grid-template-columns: 1fr;
+    }
+
+    #edit-modal .edit-app-json-textarea {
+        min-height: 260px;
+    }
+}
+
 @media (max-width: 768px) {
     body { padding: 8px 3.5vw; height: 100dvh; overflow-y: auto; }
     
@@ -568,7 +804,6 @@
         gap: 6px !important; 
     }
     
-    /* 좌측: 아바타 + 번호 */ 
     .meta-header { 
         display: flex !important; 
         align-items: center !important; 
@@ -581,7 +816,6 @@
     .question-badge-top { font-size: 11.5px !important; padding: 3px 6px !important; border-radius: 6px !important; }
     .persona-name-text, .bc-arrow, .specific-persona-tag, .top-bar .type-segmented-control, .badge-topic-category, .divider-line { display: none !important; }
 
-    /* 우측 컨트롤 바 */
     .controls { 
         display: flex !important;
         flex-direction: row !important;
@@ -597,7 +831,6 @@
 
     .controls .shortcut-key { display: none !important; }
 
-    /* 기본적으로 모바일에서는 컨트롤 내의 모든 버튼을 숨김 */
     .controls .ctrl-btn { 
         display: none !important; 
         justify-content: center !important; 
@@ -612,7 +845,6 @@
         white-space: nowrap !important;
     }
     
-    /* 모바일 기본 화면에서는 [설정, 목록, 음성, 읽기] 4개만 정확히 노출 */
     #normal-controls #btn-setting,
     #normal-controls #btn-list,
     #normal-controls #btn-s-test,
@@ -620,7 +852,6 @@
         display: inline-flex !important;
     }
 
-    /* 시험 모드 버튼(취소/제출/완료) 활성화 시 정상 노출 */
     #test-controls .ctrl-btn,
     #test-result-controls .ctrl-btn {
         display: inline-flex !important;
@@ -632,7 +863,6 @@
         border-color: #0f172a !important; 
     }
     
-    /* 모바일 노출 순서: 설정 / 목록 / 음성 / 읽기 */
     #btn-setting { order: 1; }
     #btn-list    { order: 2; }
     #btn-s-test  { order: 3; }
@@ -640,11 +870,10 @@
 
     .workspace-2to1 { flex-direction: column; height: auto; gap: 12px; overflow: visible; padding-bottom: 24px; margin-top: 4px; }
     .panel-left-2 { flex: none; height: auto; gap: 8px; }
-    /* 모바일 노출 스타일 보정 (@media 괄호 내부에 덮어쓰기) */
     .question-prompt { 
         font-size: 17px !important; 
         line-height: 1.4 !important;
-        min-height: 2.8em !important; /* 모바일에서도 2줄 고정 */
+        min-height: 2.8em !important;
         padding-bottom: 0 !important;
     }
     
@@ -652,23 +881,25 @@
         font-size: 17px !important; 
         line-height: 1.5 !important;
         padding: 12px 14px !important; 
-        min-height: calc(3em + 24px) !important; /* 모바일 2줄 고정 (1.5 * 2줄 + 상하 패딩 12px*2) */
+        min-height: calc(3em + 24px) !important;
     }
     
     .test-input { font-size: 17px; padding: 8px 10px; }
     .answer-box { overflow: visible; }
     .panel-right-1 { flex: none; height: 500px; margin-bottom: 20px; }
     
-    .modal-content-giant[style], #voice-modal > div[style], #edit-modal > div[style], #add-modal > div[style], #list-modal > div[style] { width: 95% !important; padding: 16px !important; max-height: 90vh !important; }
-    
-    #list-modal .modal-content-giant { height: 90vh !important; }
+    .modal-content-giant[style], #voice-modal > div[style], #edit-modal > div[style], #add-modal > div[style], #list-modal > div[style] { 
+        width: 95% !important; 
+        padding: 16px !important; 
+        height: 90vh !important;
+        max-height: 90vh !important; 
+    }
 
     #voice-modal > div[style] { padding: 0 !important; }
     .profile-hero-extended { flex-direction: column; text-align: center; gap: 12px; }
     .identity-chips { justify-content: center; }
     .topics-grid { grid-template-columns: 1fr; overflow-y: auto; padding-bottom: 20px; }
     
-    /* 문제 목록 필터를 정확히 한 줄에 떨어지게 강제 */
     .list-filter-bar { 
         flex-direction: row !important; 
         flex-wrap: nowrap !important; 
@@ -677,7 +908,7 @@
     }
     .list-filter-bar > div:first-child > span:first-child,
     .list-filter-bar label {
-        display: none !important; /* 영역:, 유형:, 주제: 텍스트 숨김 */
+        display: none !important;
     }
     .filter-select { 
         width: auto !important; 
@@ -689,23 +920,19 @@
     }
     #filter-domain-group { flex: 0 0 auto !important; }
     
-    .question-list-container { max-height: 60vh; gap: 10px; }
+    .question-list-container { max-height: none; flex: 1; min-height: 0; gap: 10px; }
     .question-list-item { 
         flex-wrap: wrap; padding: 12px 14px; border-radius: 10px; 
         background: #ffffff; border: 1.5px solid var(--border-color);
         gap: 6px 8px;
     } 
 
-    /* JSON 복사 버튼 모바일 숨김 처리 */
     .btn-copy-filtered-json {
         display: none !important;
     }
     
-    /* 리스트의 각 아이템의 삭제 모바일 지원 차단 */
     .list-item-delete-btn { display: none !important; }
- 
 
-    /* 모바일에서는 데스크탑 텍스트를 숨기고 요약 텍스트만 노출 */
     .q-desktop { display: none !important; }
     .q-mobile { 
         display: -webkit-box !important; 
@@ -744,7 +971,6 @@
         color: #0f172a;
         white-space: normal;
     }
-
 }
 
     </style>
@@ -834,31 +1060,113 @@
     </div>
 
     <!-- 현재 문제 수정 모달 -->
-    <div class="modal-overlay" id="edit-modal" onclick="closeModal('edit-modal')">
-        <div class="modal-content-giant" style="width: 850px; height: auto; max-height: 90vh;" onclick="event.stopPropagation()">
-            <button class="modal-close" onclick="closeModal('edit-modal')">&times; <span class="modal-close-esc">(ESC)</span></button>
-            <h3 style="margin-top: 0; font-size: 20px; margin-bottom: 16px;">현재 문제 수정하기</h3>
-            
-            <!-- 수정 모드 선택 탭 -->
-            <div style="display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 2px solid var(--border-color); padding-bottom: 12px;">
-                <button class="ctrl-btn primary" id="tab-edit-line" onclick="switchEditMode('line')">✏️ 라인별 정답 수정</button>
-                <button class="ctrl-btn" id="tab-edit-json" onclick="switchEditMode('json')" style="background:#f8fafc;">⚙️ JSON 전체 수정</button>
-            </div>
+    <!-- 현재 문제 수정 모달 -->
+<div class="modal-overlay" id="edit-modal" onclick="closeModal('edit-modal')">
+    <div
+        class="modal-content-giant"
+        style="width: 850px; height: 95vh; max-height: 95vh;"
+        onclick="event.stopPropagation()"
+    >
 
-            <!-- 1. 라인별 수정 영역 -->
-            <div id="edit-line-container" style="display: flex; flex-direction: column; gap: 16px; overflow-y: auto; flex: 1; padding-right: 8px;">
+        <button
+            class="modal-close"
+            onclick="closeModal('edit-modal')"
+        >
+            &times; <span class="modal-close-esc">(ESC)</span>
+        </button>
+
+        <div class="edit-modal-head">
+            <h3 class="edit-modal-title">문제 수정</h3>
+        </div>
+
+        <!-- 수정 범위 -->
+        <div class="edit-mode-nav">
+
+            <button
+                class="edit-mode-btn active"
+                id="tab-edit-line"
+                onclick="switchEditMode('line')"
+            >
+                <span class="edit-mode-kicker">현재 화면</span>
+                <span class="edit-mode-title">현재 문제 라인별 수정</span>
+                <span class="edit-mode-desc">
+                    본 문제, 응용1/2/3 문제
+                </span>
+            </button>
+
+            <button
+                class="edit-mode-btn"
+                id="tab-edit-app-json"
+                onclick="switchEditMode('app-json')"
+            >
+                <span class="edit-mode-kicker">응용문제 1 · 2 · 3</span>
+                <span class="edit-mode-title">응용문제별 JSON 수정</span>
+                <span class="edit-mode-desc">
+                    각 응용문제를 개별 JSON으로 편집
+                </span>
+            </button>
+
+            <button
+                class="edit-mode-btn"
+                id="tab-edit-json"
+                onclick="switchEditMode('json')"
+            >
+                <span class="edit-mode-kicker">전체 데이터</span>
+                <span class="edit-mode-title">현재 문제 전체 JSON 수정</span>
+                <span class="edit-mode-desc">
+                    문제 데이터 전체 구조를 직접 편집
+                </span>
+            </button>
+
+        </div>
+
+        <!-- ① 현재 화면 라인별 수정 -->
+        <div id="edit-line-panel" class="edit-panel">
+
+
+            <div id="edit-line-container">
                 <!-- JS 렌더링 -->
             </div>
 
-            <!-- 2. JSON 전체 수정 영역 (기본 숨김) -->
-            <div id="edit-json-container" style="display: none; flex-direction: column; flex: 1;">
-                <textarea id="edit-json-input" class="json-textarea" style="height: 400px; font-size: 14.5px;"></textarea>
+        </div>
+
+        <!-- ② 응용문제별 JSON -->
+        <div
+            id="edit-app-json-panel"
+            class="edit-panel"
+            style="display:none;"
+        >
+
+            <div id="edit-app-json-container">
+                <!-- JS 렌더링 -->
             </div>
 
-            <button class="ctrl-btn primary" style="width: 100%; margin-top: 16px; padding: 14px; font-size: 16px; flex-shrink: 0;" onclick="saveEditedData()">💾 수정 사항 저장 및 새로고침</button>
         </div>
+
+        <!-- ③ 현재 문제 전체 JSON -->
+        <div
+            id="edit-json-panel"
+            class="edit-panel"
+            style="display:none;"
+        >
+
+            <textarea
+                id="edit-json-input"
+                class="json-textarea"
+                spellcheck="false"
+            ></textarea>
+
+        </div>
+
+        <button
+            class="ctrl-btn primary edit-save-btn"
+            onclick="saveEditedData()"
+        >
+            수정 사항 저장 및 새로고침
+        </button>
+
     </div>
-    
+</div>
 
     <!-- 데이터 추가 모달 -->
     <div class="modal-overlay" id="add-modal" onclick="closeModal('add-modal')">
@@ -1062,8 +1370,12 @@ function getActiveData() {
     if (isTopicApplied && baseData.applicable_topics && baseData.applicable_topics[appliedTopicIndex]) {
         const appData = baseData.applicable_topics[appliedTopicIndex];
         
-        // 응용 데이터에 script_rows나 question 텍스트가 없을 경우 원본에서 상속 (안전장치)
-        if (!appData.script_rows) appData.script_rows = baseData.script_rows;
+        if (!appData.script_rows) {
+            appData.script_rows = JSON.parse(
+                JSON.stringify(baseData.script_rows || [])
+            );
+        }
+
         if (!appData.question) appData.question = baseData.question;
         
         return appData;
@@ -1092,8 +1404,14 @@ function applyTopic(index) {
 
     // 리스트 전체를 순회하며 렌더링
     topics.forEach((app, idx) => {
-        const expressionsHtml = app.core_expressions.map(exp => {
-            const capitalizedExp = exp.charAt(0).toUpperCase() + exp.slice(1);
+        const expressions = Array.isArray(app.core_expressions)
+            ? app.core_expressions
+            : [];
+
+        const expressionsHtml = expressions.map(exp => {
+            const text = String(exp ?? '');
+            const capitalizedExp = text.charAt(0).toUpperCase() + text.slice(1);
+
             return `<div class="topic-app-exp-item">${capitalizedExp}</div>`;
         }).join('');
 
@@ -1107,7 +1425,7 @@ function applyTopic(index) {
                  style="background: ${bgStyle}; border: ${borderStyle}; padding: 16px; border-radius: 12px; cursor: pointer; margin-bottom: 12px; box-sizing: border-box;" 
                  onclick="applyTopic(${idx})">
                 <div style="font-size: 17px; font-weight: 900; color: #0f172a; margin-bottom: 12px;">
-                    ${app.topic}
+                    ${app.topic || '응용문제'}
                 </div>
                 <div class="topic-app-expressions">
                     ${expressionsHtml}
@@ -1332,7 +1650,6 @@ function prevTopic() {
 
     // 2. 상단 컨트롤 바 버튼 표시/숨김 및 '원본 복귀' 버튼 주입
     document.getElementById('btn-add').style.display = isTopicApplied ? 'none' : 'inline-flex';
-    document.getElementById('btn-edit').style.display = isTopicApplied ? 'none' : 'inline-flex';
     document.getElementById('btn-setting').style.display = isTopicApplied ? 'none' : 'inline-flex';
     document.getElementById('btn-list').style.display = isTopicApplied ? 'none' : 'inline-flex';
 
@@ -1821,34 +2138,44 @@ function prevTopic() {
         renderUI(); 
     }
 
-    let currentEditMode = 'line'; // 'line' or 'json'
+    let currentEditMode = 'line'; // 'line' | 'app-json' | 'json'
 
-    function switchEditMode(mode) {
-        currentEditMode = mode;
-        const btnLine = document.getElementById('tab-edit-line');
-        const btnJson = document.getElementById('tab-edit-json');
-        
-        if (mode === 'line') {
-            btnLine.className = 'ctrl-btn primary';
-            btnLine.style.background = '';
-            btnJson.className = 'ctrl-btn';
-            btnJson.style.background = '#f8fafc';
-            
-            document.getElementById('edit-line-container').style.display = 'flex';
-            document.getElementById('edit-json-container').style.display = 'none';
-        } else {
-            btnJson.className = 'ctrl-btn primary';
-            btnJson.style.background = '';
-            btnLine.className = 'ctrl-btn';
-            btnLine.style.background = '#f8fafc';
-            
-            document.getElementById('edit-line-container').style.display = 'none';
-            document.getElementById('edit-json-container').style.display = 'flex';
-            
-            // 라인별 수정에서 바뀐 내용을 JSON에 동기화
-            document.getElementById('edit-json-input').value = JSON.stringify(spkData[currentIndex], null, 2);
+function switchEditMode(mode) {
+    currentEditMode = mode;
+
+    const modes = ['line', 'app-json', 'json'];
+
+    modes.forEach(item => {
+        const button = document.getElementById(
+            item === 'app-json'
+                ? 'tab-edit-app-json'
+                : `tab-edit-${item}`
+        );
+
+        const panel = document.getElementById(
+            `edit-${item}-panel`
+        );
+
+        if (!button || !panel) return;
+
+        const isActive = item === mode;
+
+        button.classList.toggle('active', isActive);
+        panel.style.display = isActive ? 'flex' : 'none';
+    });
+
+    if (mode === 'json') {
+        const input = document.getElementById('edit-json-input');
+
+        if (input) {
+            input.value = JSON.stringify(
+                getActiveData(),
+                null,
+                2
+            );
         }
     }
+}
 
     // [1] 작문 시험 모드
 function toggleWritingTestMode() {
@@ -2094,76 +2421,177 @@ async function submitTest() {
         });
     }
 }
-
-
-// [4] 에디터(수정 모달) 열기 함수
+ // [1] 수정 모달 열기 함수 (괄호 제거 및 문장 중복 버그 완벽 수정)
 function openEditModal() {
-    if (!spkData || spkData.length === 0) { alert('수정할 데이터가 없습니다.'); return; }
-    
-    // 수정: getActiveData() 사용 (응용 문제를 수정하면 응용 문제 JSON에 바로 바인딩 됨)
+    if (!spkData || spkData.length === 0) {
+        alert('수정할 데이터가 없습니다.');
+        return;
+    }
+
     const data = getActiveData();
-    
-    document.getElementById('edit-json-input').value = JSON.stringify(data, null, 2);
-    
+    if (!data) return;
+
+    const title = document.getElementById('edit-line-panel-title');
+    if (title) {
+        title.textContent = isTopicApplied
+            ? `응용문제 ${appliedTopicIndex + 1} · 문장별 수정`
+            : '현재 문제의 문장별 수정';
+    }
+
     const lineContainer = document.getElementById('edit-line-container');
     lineContainer.innerHTML = '';
-    
-    data.script_rows.forEach((row, idx) => {
-        const combinedEnglish = row.chunks.map(c => c.text).join(' ');
+
+    (data.script_rows || []).forEach((row, idx) => {
+        let combinedEnglish = '';
+
+        // 화면에는 {} 괄호를 완전히 제거한 순수 텍스트만 보여줍니다.
+        // 버그 원인이었던 애매한 인덱스 매칭을 정확히 일치(idx + 1)하도록 수정하여 중복 출력 방지
+        if (!isTopicApplied && Array.isArray(data.recognized_templates)) {
+            const tObj = data.recognized_templates.find(t => t.sentence_index === idx + 1);
+            if (tObj && tObj.template) {
+                combinedEnglish = tObj.template.replace(/\{|\}/g, ''); 
+            }
+        }
+        
+        // 위에서 값을 못 가져왔다면 원래 chunks 데이터를 사용
+        if (!combinedEnglish) {
+            combinedEnglish = (row.chunks || []).map(c => c.text || '').join(' ');
+        }
+
         const koreanTrans = row.translation || '';
-        
         const rowBox = document.createElement('div');
-        rowBox.style.cssText = "background: #f8fafc; padding: 12px; border-radius: 8px; border: 1.5px solid var(--border-color);";
-        
+        rowBox.className = 'edit-line-box';
         rowBox.innerHTML = `
-            <div style="font-size: 13.5px; font-weight: 800; color: #64748b; margin-bottom: 8px;">문장 ${idx + 1}</div>
-            <textarea id="edit-line-eng-${idx}" class="test-input" style="min-height: 60px; font-size: 15px; margin-bottom: 8px;" placeholder="영어 원문">${combinedEnglish}</textarea>
-            <textarea id="edit-line-kor-${idx}" class="test-input" style="min-height: 40px; font-size: 14.5px; background: #ffffff; color: #475569;" placeholder="한국어 번역">${koreanTrans}</textarea>
+            <div class="edit-line-label">문장 ${idx + 1}</div>
+            <textarea
+                id="edit-line-eng-${idx}"
+                class="test-input"
+                style="min-height:60px; font-size:15px; margin-bottom:8px;"
+                placeholder="영어 원문"
+            >${combinedEnglish}</textarea>
+            <textarea
+                id="edit-line-kor-${idx}"
+                class="test-input"
+                style="min-height:40px; font-size:14.5px; background:#ffffff; color:#475569;"
+                placeholder="한국어 번역"
+            >${koreanTrans}</textarea>
         `;
         lineContainer.appendChild(rowBox);
     });
 
+    // 응용문제 JSON
+    const appContainer = document.getElementById('edit-app-json-container');
+    appContainer.innerHTML = '';
+    const topics = Array.isArray(spkData[currentIndex].applicable_topics)
+        ? spkData[currentIndex].applicable_topics
+        : [];
+
+    for (let i = 0; i < Math.max(3, topics.length); i++) {
+        const card = document.createElement('div');
+        card.className = 'edit-app-json-card';
+        card.innerHTML = `
+            <div class="edit-app-json-label">응용문제 ${i + 1}</div>
+            <textarea
+                class="edit-app-json-textarea"
+                data-app-index="${i}"
+                spellcheck="false"
+                placeholder="응용문제 ${i + 1} JSON"
+            >${topics[i] ? JSON.stringify(topics[i], null, 2) : ''}</textarea>
+        `;
+        appContainer.appendChild(card);
+    }
+
+    // 전체 JSON
+    document.getElementById('edit-json-input').value = JSON.stringify(data, null, 2);
     switchEditMode('line');
     document.getElementById('edit-modal').style.display = 'flex';
 }
- 
-    function saveEditedData() {
-        try {
-            if (currentEditMode === 'line') {
-                // 라인별 수정 내용을 spkData에 반영
-                const data = spkData[currentIndex];
-                data.script_rows.forEach((row, idx) => {
-                    const engVal = document.getElementById(`edit-line-eng-${idx}`).value.trim();
-                    const korVal = document.getElementById(`edit-line-kor-${idx}`).value.trim();
-                    
-                    row.translation = korVal;
-                    // 청크를 하나로 묶어서 덮어씀 (문장 수정 시 분할 기준이 불명확하므로 단일 청크로 통합)
-                    row.chunks = [{ text: engVal }]; 
-                });
-            } else {
-                // JSON 전체 수정 내용을 spkData에 반영
-                const text = document.getElementById('edit-json-input').value.trim();
-                if (!text) throw new Error('JSON 데이터가 비어있습니다.');
-                spkData[currentIndex] = JSON.parse(text);
-            }
 
-            // 로컬 스토리지 저장 및 UI 리렌더링
-            localStorage.setItem('pongcrush_spk_data', JSON.stringify(spkData));
-            alert('성공적으로 수정되었습니다!');
-            closeModal('edit-modal'); 
-            
-            stopAudio();
-            testMode = null;
-            isTestSubmitted = false;
-            document.getElementById('normal-controls').style.display = 'flex';
-            document.getElementById('test-controls').style.display = 'none';
-            document.getElementById('test-result-controls').style.display = 'none';
-            
-            renderUI();
-        } catch (e) { 
-            alert('저장 중 오류가 발생했습니다: \n' + e.message); 
+// [2] 데이터 저장 함수 (단순하고 정확하게 원본 덮어쓰기)
+function saveEditedData() {
+    try {
+        const baseData = spkData[currentIndex];
+        if (!baseData) throw new Error('현재 문제 데이터를 찾을 수 없습니다.');
+
+        /* ① 현재 화면 라인별 수정 */
+        if (currentEditMode === 'line') {
+            const data = getActiveData() || baseData;
+            if (!data) throw new Error('현재 편집 대상 데이터를 찾을 수 없습니다.');
+            if (!Array.isArray(data.script_rows)) throw new Error('script_rows 데이터가 없습니다.');
+
+            data.script_rows.forEach((row, idx) => {
+                const engInput = document.getElementById(`edit-line-eng-${idx}`);
+                const korInput = document.getElementById(`edit-line-kor-${idx}`);
+                if (!engInput || !korInput) return;
+
+                const newEng = engInput.value.trim();
+                const newKor = korInput.value.trim();
+
+                // 1. 기존 script_rows 업데이트
+                row.translation = newKor;
+                row.chunks = [{ text: newEng }];
+
+                // 2. 화면 렌더링용 배열 동기화
+                if (!isTopicApplied && Array.isArray(data.recognized_templates)) {
+                    const tObj = data.recognized_templates.find(t => t.sentence_index === idx + 1);
+                    if (tObj) {
+                        const oldPure = (tObj.template || '').replace(/\{|\}/g, '');
+                        // 유저가 수정한 텍스트가 기존과 다르면, 괄호 없이 순수 수정본으로 완전히 덮어씁니다.
+                        if (oldPure !== newEng) {
+                            tObj.template = newEng;
+                        }
+                    }
+                }
+            });
         }
+        /* ② 응용문제별 JSON 수정 */
+        else if (currentEditMode === 'app-json') {
+            if (!Array.isArray(baseData.applicable_topics)) {
+                throw new Error('현재 문제에 applicable_topics가 없습니다.');
+            }
+            const editors = document.querySelectorAll('.edit-app-json-textarea');
+            editors.forEach(textarea => {
+                const index = Number(textarea.dataset.appIndex);
+                const raw = textarea.value.trim();
+                if (!raw && index >= baseData.applicable_topics.length) return;
+                if (!raw) throw new Error(`응용문제 ${index + 1}의 JSON이 비어 있습니다.`);
+
+                let parsed;
+                try {
+                    parsed = JSON.parse(raw);
+                } catch (e) {
+                    throw new Error(`응용문제 ${index + 1}의 JSON 형식이 올바르지 않습니다.`);
+                }
+                if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+                    throw new Error(`응용문제 ${index + 1}는 JSON 객체여야 합니다.`);
+                }
+                baseData.applicable_topics[index] = parsed;
+            });
+        }
+        /* ③ 현재 문제 전체 JSON 수정 */
+        else if (currentEditMode === 'json') {
+            const text = document.getElementById('edit-json-input').value.trim();
+            if (!text) throw new Error('JSON 데이터가 비어있습니다.');
+            spkData[currentIndex] = JSON.parse(text);
+        }
+
+        localStorage.setItem('pongcrush_spk_data', JSON.stringify(spkData));
+        alert('성공적으로 수정되었습니다!');
+        closeModal('edit-modal');
+        stopAudio();
+
+        testMode = null;
+        isTestSubmitted = false;
+        document.getElementById('normal-controls').style.display = 'flex';
+        document.getElementById('test-controls').style.display = 'none';
+        document.getElementById('test-result-controls').style.display = 'none';
+
+        renderUI();
+    } catch (e) {
+        console.error('saveEditedData error:', e);
+        alert('저장 중 오류가 발생했습니다:\n\n' + e.message);
     }
+}
 
     function openAddModal() {
         document.getElementById('json-input').value = '';
