@@ -262,12 +262,7 @@ body {
     text-decoration: none; 
 }
 
-/* 우측 패널 */
-.panel-right-1 {
-    flex: 1; background: var(--card-bg); border: 2px solid var(--border-strong);
-    border-radius: 12px; padding: 16px; display: flex;
-    flex-direction: column; gap: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); overflow: hidden;
-}
+
 
 /* [추가] 메모장 및 마크다운 뷰어 스타일 */
 .markdown-body {
@@ -813,6 +808,48 @@ canvas {
     border-color: #4f46e5 !important;
 }
 
+/* 데스크탑 기본: 우측 패널과 메모장이 남은 전체 높이를 꽉 채우도록 설정 */
+.panel-right-1 {
+    flex: 1;
+    height: 100%;
+    min-height: 0;
+    background: var(--card-bg);
+    border: 2px solid var(--border-strong);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+#notepad-panel-container {
+    flex: 1;
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#memo-editor {
+    flex: 1;
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 12px;
+    border: 1.5px solid var(--border-strong);
+    border-radius: 8px;
+    background: #ffffff;
+    color: #0f172a;
+    line-height: 1.6;
+    outline: none;
+    box-sizing: border-box;
+    word-break: break-word;
+}
+
 /* ==========================================
    반응형 및 모바일 최적화
    ========================================== */
@@ -925,7 +962,37 @@ canvas {
     
     .test-input { font-size: 17px; padding: 8px 10px; }
     .answer-box { overflow: visible; }
-    .panel-right-1 { flex: none; height: 500px; margin-bottom: 20px; }
+
+/* 모바일 전용: 화면이 세로로 스크롤되므로 응용문제 -> 메모장 순으로 자연스럽게 늘어남 */
+    .panel-right-1 { 
+        flex: none !important; 
+        height: auto !important; 
+        min-height: auto !important;
+        overflow: visible !important; 
+        margin-bottom: 24px !important; 
+        gap: 16px !important;
+    }
+    #application-topics-container {
+        display: flex !important;
+        flex: none !important;
+        height: auto !important;
+        max-height: 200px !important;
+        overflow: scroll  !important;
+    }
+    #notepad-panel-container {
+        display: flex !important;
+        flex: none !important;
+        height: auto !important;
+        min-height: 280px !important;
+        padding-top: 14px !important;
+        border-top: 2px dashed var(--border-color) !important;
+    }
+    #memo-editor {
+        flex: none !important;
+        height: auto !important;
+        min-height: 220px !important;
+    }
+ 
     
     .modal-content-giant[style], #voice-modal > div[style], #edit-modal > div[style], #add-modal > div[style], #list-modal > div[style] { 
         width: 95% !important; 
@@ -1412,85 +1479,8 @@ canvas {
             .catch(err => { console.warn('SW Registration Failed', err); }); 
         } 
     }
- 
-    // [추가] 우측 패널 전환 및 메모장 관리 함수들
-    function switchRightPanel(panelName) {
-        currentRightPanel = panelName;
-        localStorage.setItem('pongcrush_right_panel', currentRightPanel);
-        renderRightPanel();
-    }
-
-    function toggleRightPanel() {
-        const nextPanel = currentRightPanel === 'app' ? 'memo' : 'app';
-        switchRightPanel(nextPanel);
-    }
-
-    function renderRightPanel() {
-        const appContainer = document.getElementById('application-topics-container');
-        const memoContainer = document.getElementById('notepad-panel-container'); 
-
-        if (!appContainer || !memoContainer) return;
-
-        if (currentRightPanel === 'memo') {
-            appContainer.style.display = 'none';
-            memoContainer.style.display = 'flex'; 
-            loadCurrentMemo();
-            applyMemoFontSize();
-        } else {
-            memoContainer.style.display = 'none';
-            appContainer.style.display = 'flex'; 
-            renderApplicationTopic();
-        }
-    }
-
-    // 본문제 객체(spkData[currentIndex]) 영역에만 메모 관리
-    function loadCurrentMemo() {
-        const memoTextarea = document.getElementById('memo-textarea');
-        if (!memoTextarea || !spkData || spkData.length === 0) return;
-        const baseData = spkData[currentIndex];
-        memoTextarea.value = (baseData && baseData.memo) ? baseData.memo : '';
-        updateMemoPreview();
-    }
-
-    function saveCurrentMemo(showNotice = true) {
-        if (!spkData || spkData.length === 0) return;
-        const memoTextarea = document.getElementById('memo-textarea');
-        if (!memoTextarea) return;
-
-        // 본 문제 데이터 영역에 memo 프로퍼티로 귀속 저장
-        spkData[currentIndex].memo = memoTextarea.value;
-        localStorage.setItem('pongcrush_spk_data', JSON.stringify(spkData));
-
-        updateMemoPreview();
-
-        if (showNotice) {
-            const status = document.getElementById('memo-save-status');
-            if (status) {
-                status.innerText = '✅ 저장 완료!';
-                status.style.color = '#059669';
-                setTimeout(() => {
-                    status.innerText = '(Ctrl+S)';
-                    status.style.color = '#64748b';
-                }, 1500);
-            }
-        }
-    }
-
-    function adjustMemoFontSize(delta) {
-        memoFontSize = Math.min(32, Math.max(12, memoFontSize + delta));
-        localStorage.setItem('pongcrush_memo_font_size', memoFontSize);
-        applyMemoFontSize();
-    }
-
-    function applyMemoFontSize() {
-        const textarea = document.getElementById('memo-textarea');
-        const preview = document.getElementById('memo-preview');
-        if (textarea) textarea.style.fontSize = memoFontSize + 'px';
-        if (preview) preview.style.fontSize = memoFontSize + 'px';
-    }
   
-
-// [수정] 우측 패널 및 메모장 상태 변수
+  // [우측 패널 및 메모장 상태 변수]
     let currentRightPanel = localStorage.getItem('pongcrush_right_panel') || 'app'; // 'app' | 'memo'
     let memoFontSize = parseInt(localStorage.getItem('pongcrush_memo_font_size')) || 15;
 
@@ -1506,6 +1496,7 @@ canvas {
     }
 
     function renderRightPanel() {
+        const isMobile = window.innerWidth <= 768;
         const appContainer = document.getElementById('application-topics-container');
         const memoContainer = document.getElementById('notepad-panel-container');
         const panelTitle = document.getElementById('right-panel-title');
@@ -1513,6 +1504,22 @@ canvas {
 
         if (!appContainer || !memoContainer) return;
 
+        // [모바일] 로컬스토리지 값과 무관하게 응용문제 먼저 렌더링 후, 메모장까지 둘 다 순차 표시
+        if (isMobile) {
+            appContainer.style.display = 'flex';
+            memoContainer.style.display = 'flex';
+            if (panelTitle) panelTitle.innerText = '📚 응용문제';
+            if (hintText) hintText.style.display = 'none';
+
+            renderApplicationTopic(); // 1. 응용문제 생성 (필수)
+            loadCurrentMemo();        // 2. 메모장 로드
+            applyMemoFontSize();
+            initMemoShortcuts();
+            return;
+        }
+
+        // [데스크탑] 기존 PgUp / PgDn 단일 토글 유지
+        if (hintText) hintText.style.display = 'inline-block';
         if (currentRightPanel === 'memo') {
             appContainer.style.display = 'none';
             memoContainer.style.display = 'flex';
@@ -1530,7 +1537,6 @@ canvas {
         }
     }
 
-    // 본문제 데이터에 서식(HTML) 그대로 관리
     function loadCurrentMemo() {
         const editor = document.getElementById('memo-editor');
         if (!editor || !spkData || spkData.length === 0) return;
@@ -1543,7 +1549,6 @@ canvas {
         const editor = document.getElementById('memo-editor');
         if (!editor) return;
 
-        // 본문제 객체에만 저장
         spkData[currentIndex].memo = editor.innerHTML;
         localStorage.setItem('pongcrush_spk_data', JSON.stringify(spkData));
 
@@ -1570,6 +1575,8 @@ canvas {
         const editor = document.getElementById('memo-editor');
         if (editor) editor.style.fontSize = memoFontSize + 'px';
     }
+
+ 
 
     // [핵심] Tab 들여쓰기 / - 누르고 Space 시 불렛 리스트 변환 / Ctrl+B 볼드체 처리
 
@@ -2035,11 +2042,11 @@ function prevTopic() {
         renderRightPanel();
 }
 
-
     window.addEventListener('resize', () => {
-        if (document.getElementById('tab-strategy').classList.contains('active')) {
+        if (document.getElementById('tab-strategy')?.classList.contains('active')) {
             drawLogicFlowCanvas('logic-canvas', currentFlowsGlobal);
         }
+        renderRightPanel();
     });
 
     // ========== 시험 모드 공통 헬퍼 ==========
