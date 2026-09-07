@@ -1140,14 +1140,23 @@ canvas {
 
             <!-- [수정] 즉시 서식 반영 일체형 메모장 패널 -->
             <div id="notepad-panel-container" style="display: none; flex: 1; flex-direction: column; min-height: 0; gap: 8px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-shrink: 0;">
-                    <div style="font-size: 11.5px; color: #94a3b8; font-weight: 700;">
-                        <span>굵게: <b>Ctrl+B</b></span> | <span>목록: <b>- + Space</b></span> | <span>들여쓰기: <b>Tab</b></span>
+                
+                <!-- [수정] 친절한 워딩의 좌측(자동저장) / 우측 끝(수동저장 + 폰트) 툴바 헤더 -->
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; background: #f8fafc; border: 1.5px solid var(--border-color); border-radius: 8px; gap: 8px; flex-shrink: 0;">
+                    <!-- 좌측: 메모 라벨 & 자동저장 상태 안내 -->
+                    <div style="display: flex; align-items: center; gap: 8px; min-width: 0; white-space: nowrap;">
+                        <span style="font-size: 13px; font-weight: 800; color: #1e293b;">📝 메모</span>
+                        <span style="color: #cbd5e1; font-size: 11px;">|</span>
+                        <span id="memo-save-status" style="font-size: 12px; color: #64748b; font-weight: 600; font-variant-numeric: tabular-nums;">자동저장 (5초 주기)</span>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 4px;">
+
+                    <!-- 우측 끝: 수동저장 안내 뱃지 & 폰트 조절 버튼 -->
+                    <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+                        <span style="font-size: 11.5px; color: #475569; background: #ffffff; border: 1.5px solid var(--border-strong); padding: 2px 8px; border-radius: 6px; font-weight: 700; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                            수동저장 <kbd style="font-family: inherit; color: #0f172a; font-weight: 800;">Ctrl+S</kbd>
+                        </span>
                         <button class="ctrl-btn" onclick="adjustMemoFontSize(-1)" title="글자 축소" style="padding: 3px 8px; font-size: 12px; font-weight: 900;">A-</button>
                         <button class="ctrl-btn" onclick="adjustMemoFontSize(1)" title="글자 확대" style="padding: 3px 8px; font-size: 12px; font-weight: 900;">A+</button>
-                        <span id="memo-save-status" style="font-size: 11px; color: #64748b; font-weight: 700; margin-left: 2px;">(Ctrl+S)</span>
                     </div>
                 </div>
                 <!-- 단일 라이브 에디터 -->
@@ -1485,6 +1494,9 @@ canvas {
     let memoFontSize = parseInt(localStorage.getItem('pongcrush_memo_font_size')) || 15;
 
     function switchRightPanel(panelName) {
+        if (panelName !== 'memo') {
+            stopMemoAutoSave(true); // 메모장 이탈 시 타이머 해제 및 플러시
+        }
         currentRightPanel = panelName;
         localStorage.setItem('pongcrush_right_panel', currentRightPanel);
         renderRightPanel();
@@ -1535,35 +1547,85 @@ canvas {
             if (hintText) hintText.innerText = 'PgUp / PgDn : 메모장 전환';
             renderApplicationTopic();
         }
+    } 
+
+    // [추가/수정] 메모장 자동 저장 & Diffing & 메모리 관리 변수
+    let memoAutoSaveTimer = null;
+    let lastSavedMemoHtml = '';
+ 
+    // 한국인 리더블 12시간제 시간 포맷팅 (예: 오후 9:45:10)
+    function getKoreanTimeString(date) {
+        const hours = date.getHours();
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        const period = hours < 12 ? '오전' : '오후';
+        const displayHours = hours % 12 || 12;
+        return `${period} ${displayHours}:${minutes}:${seconds}`;
     }
 
     function loadCurrentMemo() {
         const editor = document.getElementById('memo-editor');
         if (!editor || !spkData || spkData.length === 0) return;
         const baseData = spkData[currentIndex];
-        editor.innerHTML = (baseData && baseData.memo) ? baseData.memo : '';
+        const savedHtml = (baseData && baseData.memo) ? baseData.memo : '';
+        editor.innerHTML = savedHtml;
+        lastSavedMemoHtml = savedHtml;
+
+        // 문제 전환 시 친절한 기본 안내로 복귀
+        const status = document.getElementById('memo-save-status');
+        if (status) {
+            status.innerText = '자동저장 (5초 주기)';
+            status.style.color = '#64748b';
+        }
     }
 
-    function saveCurrentMemo(showNotice = true) {
+    function saveCurrentMemo(showNotice = true, isAuto = false) {
         if (!spkData || spkData.length === 0) return;
         const editor = document.getElementById('memo-editor');
         if (!editor) return;
 
-        spkData[currentIndex].memo = editor.innerHTML;
+        const currentHtml = editor.innerHTML;
+
+        // Diffing: 내용 변화가 없으면 로컬스토리지 쓰기 및 타임스탬프 갱신 건너뛰기
+        if (currentHtml === lastSavedMemoHtml) return;
+
+        spkData[currentIndex].memo = currentHtml;
+        lastSavedMemoHtml = currentHtml;
         localStorage.setItem('pongcrush_spk_data', JSON.stringify(spkData));
 
         if (showNotice) {
             const status = document.getElementById('memo-save-status');
             if (status) {
-                status.innerText = '✅ 저장 완료!';
-                status.style.color = '#059669';
+                const timeStr = getKoreanTimeString(new Date());
+                // 친절하고 명확한 풀네임 워딩 적용
+                status.innerText = isAuto ? `자동저장 완료 (${timeStr})` : `수동저장 완료 (${timeStr})`;
+                status.style.color = isAuto ? '#475569' : '#0f172a';
                 setTimeout(() => {
-                    status.innerText = '(Ctrl+S)';
-                    status.style.color = '#64748b';
-                }, 1500);
+                    if (status) status.style.color = '#64748b';
+                }, 1800);
             }
         }
     }
+
+    // [수정] 자동 저장 인터벌을 2초에서 5초(5000ms)로 변경
+    function startMemoAutoSave() {
+        stopMemoAutoSave(false);
+        memoAutoSaveTimer = setInterval(() => {
+            saveCurrentMemo(true, true); // 5초 주기 Diffing 후 자동 저장
+        }, 5000);
+    }
+
+    // 편집 이탈(Blur, 전환 등) 시 타이머 정리 및 최종 플러시 (메모리 누수 차단)
+    function stopMemoAutoSave(flush = true) {
+        if (memoAutoSaveTimer) {
+            clearInterval(memoAutoSaveTimer);
+            memoAutoSaveTimer = null;
+        }
+        if (flush) {
+            saveCurrentMemo(false, false);
+        }
+    }
+
 
     function adjustMemoFontSize(delta) {
         memoFontSize = Math.min(32, Math.max(12, memoFontSize + delta));
@@ -1583,11 +1645,19 @@ canvas {
     // [수정] - 누르고 Space 시 윗줄 간섭 없이 현재 줄만 불렛 리스트로 변환
 
     // [수정] 복붙 시 줄바꿈 분리 및 불렛 변환 시 기존 문장 텍스트 100% 보존
-    let isMemoShortcutsBound = false;
+let isMemoShortcutsBound = false;
     function initMemoShortcuts() {
         const editor = document.getElementById('memo-editor');
         if (!editor || isMemoShortcutsBound) return;
         isMemoShortcutsBound = true;
+
+        // [추가] 편집 진입 시 2초 diffing 타이머 가동, 이탈 시 타이머 해제 및 플러시
+        editor.addEventListener('focus', () => {
+            startMemoAutoSave();
+        });
+        editor.addEventListener('blur', () => {
+            stopMemoAutoSave(true);
+        });
 
         // 엔터 입력 시 기본 블록을 div로 분리
         document.execCommand('defaultParagraphSeparator', false, 'div');
@@ -3113,6 +3183,7 @@ function saveEditedData() {
 
             div.onclick = (e) => { 
                 if(e.target.tagName !== 'BUTTON') {
+                    stopMemoAutoSave(true); // [추가] 다른 문제로 넘어가기 전 타이머 해제 및 플러시
                     stopAudio(); currentIndex = i; saveCurrentIndex(); renderUI(); closeModal('list-modal'); 
                 }
             };
@@ -3197,10 +3268,11 @@ function saveEditedData() {
         isTopicApplied = false;
         renderUI();
     }
+ 
 
     function loadNext() {
         if (!spkData || spkData.length === 0) return;
-        saveCurrentMemo(false); // [추가] 다음 문제로 가기 전 본문제 메모 자동 저장
+        stopMemoAutoSave(true); // [수정] 타이머 해제 및 잔여 메모 플러시
         stopAudio();
         isTopicApplied = false;
         currentIndex = (currentIndex + 1) % spkData.length;
@@ -3210,7 +3282,7 @@ function saveEditedData() {
 
     function loadPrev() {
         if (!spkData || spkData.length === 0) return;
-        saveCurrentMemo(false); // [추가] 이전 문제로 가기 전 본문제 메모 자동 저장
+        stopMemoAutoSave(true); // [수정] 타이머 해제 및 잔여 메모 플러시
         stopAudio();
         isTopicApplied = false;
         currentIndex = (currentIndex - 1 + spkData.length) % spkData.length;
@@ -3336,7 +3408,7 @@ function saveEditedData() {
 
         const key = e.key;
 
-        // ----- [여기서부터 새로 추가] -----
+        // ESC 키 우선순위 처리 (모달 닫기 -> 시험 취소 -> 편집 포커스 해제 -> 응용문제 원본 복귀)
         if (key === 'Escape') {
             e.preventDefault();
 
@@ -3357,7 +3429,15 @@ function saveEditedData() {
                 return;
             }
 
-            // 3순위: 응용분야 모드 적용 중이면 원본 복귀
+            // 3순위: [추가] 메모장(contenteditable) 또는 입력창 편집 중이면 포커스 해제 (기존 컨트롤 즉시 가능)
+            const isEditing = e.target.isContentEditable || ['TEXTAREA', 'INPUT', 'SELECT'].includes(e.target.tagName);
+            if (isEditing) {
+                saveCurrentMemo(false);
+                e.target.blur();
+                return;
+            }
+
+            // 4순위: 응용분야 모드 적용 중이면 원본 복귀
             if (isTopicApplied) {
                 cancelAppliedTopic();
                 return;
@@ -3996,6 +4076,11 @@ async function copyPromptText(btn) {
         alert('복사에 실패했습니다.');
     }
 }
+
+// [추가] 브라우저 종료 또는 탭 닫기 시 메모리 정리 및 최종 저장
+    window.addEventListener('beforeunload', () => {
+        stopMemoAutoSave(true);
+    });
 
 </script>
 </body>
