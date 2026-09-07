@@ -9,6 +9,8 @@
     <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
     <!-- Azure Speech SDK 추가 -->
     <script src="https://cdn.jsdelivr.net/npm/microsoft-cognitiveservices-speech-sdk@latest/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle-min.js"></script>
+    <!-- [추가] 마크다운 파싱 라이브러리 (marked.js) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root {
     --slack-blue: #1264a3;
@@ -266,6 +268,22 @@ body {
     border-radius: 12px; padding: 16px; display: flex;
     flex-direction: column; gap: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); overflow: hidden;
 }
+
+/* [추가] 메모장 및 마크다운 뷰어 스타일 */
+.markdown-body {
+    font-size: 15px;
+    color: #1e293b;
+    word-break: break-word;
+}
+.markdown-body h1, .markdown-body h2, .markdown-body h3 {
+    margin: 8px 0 6px 0; font-weight: 800; color: #0f172a;
+}
+.markdown-body p { margin: 4px 0; }
+.markdown-body ul, .markdown-body ol { padding-left: 20px; margin: 4px 0; }
+.markdown-body code { background: #f1f5f9; padding: 2px 5px; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
+.markdown-body pre { background: #0f172a; color: #f8fafc; padding: 10px; border-radius: 6px; overflow-x: auto; }
+.markdown-body blockquote { border-left: 3px solid #cbd5e1; margin: 4px 0; padding-left: 10px; color: #64748b; }
+
 .right-tabs {
     display: flex; gap: 6px; border-bottom: 2px solid var(--border-color); padding-bottom: 8px; flex-shrink: 0;
 }
@@ -389,6 +407,27 @@ canvas {
 }
 .modal-close:hover { color: #0f172a; }
 .modal-close-esc { font-size: 12px; font-weight: 700; color: #94a3b8; margin-top: 4px; }
+
+/* [추가] 라이브 에디터 플레이스홀더 및 리스트 스타일 */
+#memo-editor:empty:before {
+    content: attr(placeholder);
+    color: #94a3b8;
+    pointer-events: none;
+    display: block;
+}
+#memo-editor ul, #memo-editor ol {
+    margin: 4px 0;
+    padding-left: 24px;
+}
+#memo-editor li {
+    margin-bottom: 2px;
+}
+#memo-editor blockquote {
+    border-left: 3px solid #cbd5e1;
+    margin: 4px 0;
+    padding-left: 10px;
+    color: #64748b;
+}
 
 /* [목록, 수정, 추가] 모달 높이 90vh 고정 및 내부 레이아웃 */
 #list-modal .modal-content-giant,
@@ -1025,9 +1064,27 @@ canvas {
 
         <!-- 패딩을 줄여 공간 확보 -->
         <section class="panel-right-1" style="padding: 12px;">
-            <!-- 문제 응용 헤더 삭제됨 -->
+            
+
+            <!-- 기존 응용문제 패널 (디자인 100% 보존)[cite: 1] -->
             <div id="application-topics-container" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 4px;">
                 <!-- JS 렌더링 -->
+            </div>
+
+            <!-- [수정] 즉시 서식 반영 일체형 메모장 패널 -->
+            <div id="notepad-panel-container" style="display: none; flex: 1; flex-direction: column; min-height: 0; gap: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-shrink: 0;">
+                    <div style="font-size: 11.5px; color: #94a3b8; font-weight: 700;">
+                        <span>굵게: <b>Ctrl+B</b></span> | <span>목록: <b>- + Space</b></span> | <span>들여쓰기: <b>Tab</b></span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                        <button class="ctrl-btn" onclick="adjustMemoFontSize(-1)" title="글자 축소" style="padding: 3px 8px; font-size: 12px; font-weight: 900;">A-</button>
+                        <button class="ctrl-btn" onclick="adjustMemoFontSize(1)" title="글자 확대" style="padding: 3px 8px; font-size: 12px; font-weight: 900;">A+</button>
+                        <span id="memo-save-status" style="font-size: 11px; color: #64748b; font-weight: 700; margin-left: 2px;">(Ctrl+S)</span>
+                    </div>
+                </div>
+                <!-- 단일 라이브 에디터 -->
+                <div id="memo-editor" contenteditable="true" spellcheck="false" placeholder="메모를 작성하세요... (Ctrl+B 볼드, - 스페이스 불렛, Tab 들여쓰기)" style="flex: 1; height: 100%; min-height: 0; padding: 12px; border: 1.5px solid var(--border-strong); border-radius: 8px; background: #ffffff; color: #0f172a; line-height: 1.6; outline: none; overflow-y: auto; box-sizing: border-box; word-break: break-word;"></div>
             </div>
         </section>
     </main>
@@ -1355,6 +1412,247 @@ canvas {
             .catch(err => { console.warn('SW Registration Failed', err); }); 
         } 
     }
+ 
+    // [추가] 우측 패널 전환 및 메모장 관리 함수들
+    function switchRightPanel(panelName) {
+        currentRightPanel = panelName;
+        localStorage.setItem('pongcrush_right_panel', currentRightPanel);
+        renderRightPanel();
+    }
+
+    function toggleRightPanel() {
+        const nextPanel = currentRightPanel === 'app' ? 'memo' : 'app';
+        switchRightPanel(nextPanel);
+    }
+
+    function renderRightPanel() {
+        const appContainer = document.getElementById('application-topics-container');
+        const memoContainer = document.getElementById('notepad-panel-container'); 
+
+        if (!appContainer || !memoContainer) return;
+
+        if (currentRightPanel === 'memo') {
+            appContainer.style.display = 'none';
+            memoContainer.style.display = 'flex'; 
+            loadCurrentMemo();
+            applyMemoFontSize();
+        } else {
+            memoContainer.style.display = 'none';
+            appContainer.style.display = 'flex'; 
+            renderApplicationTopic();
+        }
+    }
+
+    // 본문제 객체(spkData[currentIndex]) 영역에만 메모 관리
+    function loadCurrentMemo() {
+        const memoTextarea = document.getElementById('memo-textarea');
+        if (!memoTextarea || !spkData || spkData.length === 0) return;
+        const baseData = spkData[currentIndex];
+        memoTextarea.value = (baseData && baseData.memo) ? baseData.memo : '';
+        updateMemoPreview();
+    }
+
+    function saveCurrentMemo(showNotice = true) {
+        if (!spkData || spkData.length === 0) return;
+        const memoTextarea = document.getElementById('memo-textarea');
+        if (!memoTextarea) return;
+
+        // 본 문제 데이터 영역에 memo 프로퍼티로 귀속 저장
+        spkData[currentIndex].memo = memoTextarea.value;
+        localStorage.setItem('pongcrush_spk_data', JSON.stringify(spkData));
+
+        updateMemoPreview();
+
+        if (showNotice) {
+            const status = document.getElementById('memo-save-status');
+            if (status) {
+                status.innerText = '✅ 저장 완료!';
+                status.style.color = '#059669';
+                setTimeout(() => {
+                    status.innerText = '(Ctrl+S)';
+                    status.style.color = '#64748b';
+                }, 1500);
+            }
+        }
+    }
+
+    function adjustMemoFontSize(delta) {
+        memoFontSize = Math.min(32, Math.max(12, memoFontSize + delta));
+        localStorage.setItem('pongcrush_memo_font_size', memoFontSize);
+        applyMemoFontSize();
+    }
+
+    function applyMemoFontSize() {
+        const textarea = document.getElementById('memo-textarea');
+        const preview = document.getElementById('memo-preview');
+        if (textarea) textarea.style.fontSize = memoFontSize + 'px';
+        if (preview) preview.style.fontSize = memoFontSize + 'px';
+    }
+  
+
+// [수정] 우측 패널 및 메모장 상태 변수
+    let currentRightPanel = localStorage.getItem('pongcrush_right_panel') || 'app'; // 'app' | 'memo'
+    let memoFontSize = parseInt(localStorage.getItem('pongcrush_memo_font_size')) || 15;
+
+    function switchRightPanel(panelName) {
+        currentRightPanel = panelName;
+        localStorage.setItem('pongcrush_right_panel', currentRightPanel);
+        renderRightPanel();
+    }
+
+    function toggleRightPanel() {
+        const nextPanel = currentRightPanel === 'app' ? 'memo' : 'app';
+        switchRightPanel(nextPanel);
+    }
+
+    function renderRightPanel() {
+        const appContainer = document.getElementById('application-topics-container');
+        const memoContainer = document.getElementById('notepad-panel-container');
+        const panelTitle = document.getElementById('right-panel-title');
+        const hintText = document.getElementById('right-panel-hint');
+
+        if (!appContainer || !memoContainer) return;
+
+        if (currentRightPanel === 'memo') {
+            appContainer.style.display = 'none';
+            memoContainer.style.display = 'flex';
+            if (panelTitle) panelTitle.innerText = '📝 본문제 메모장';
+            if (hintText) hintText.innerText = 'PgUp / PgDn : 응용문제 전환';
+            loadCurrentMemo();
+            applyMemoFontSize();
+            initMemoShortcuts();
+        } else {
+            memoContainer.style.display = 'none';
+            appContainer.style.display = 'flex';
+            if (panelTitle) panelTitle.innerText = '📚 응용문제';
+            if (hintText) hintText.innerText = 'PgUp / PgDn : 메모장 전환';
+            renderApplicationTopic();
+        }
+    }
+
+    // 본문제 데이터에 서식(HTML) 그대로 관리
+    function loadCurrentMemo() {
+        const editor = document.getElementById('memo-editor');
+        if (!editor || !spkData || spkData.length === 0) return;
+        const baseData = spkData[currentIndex];
+        editor.innerHTML = (baseData && baseData.memo) ? baseData.memo : '';
+    }
+
+    function saveCurrentMemo(showNotice = true) {
+        if (!spkData || spkData.length === 0) return;
+        const editor = document.getElementById('memo-editor');
+        if (!editor) return;
+
+        // 본문제 객체에만 저장
+        spkData[currentIndex].memo = editor.innerHTML;
+        localStorage.setItem('pongcrush_spk_data', JSON.stringify(spkData));
+
+        if (showNotice) {
+            const status = document.getElementById('memo-save-status');
+            if (status) {
+                status.innerText = '✅ 저장 완료!';
+                status.style.color = '#059669';
+                setTimeout(() => {
+                    status.innerText = '(Ctrl+S)';
+                    status.style.color = '#64748b';
+                }, 1500);
+            }
+        }
+    }
+
+    function adjustMemoFontSize(delta) {
+        memoFontSize = Math.min(32, Math.max(12, memoFontSize + delta));
+        localStorage.setItem('pongcrush_memo_font_size', memoFontSize);
+        applyMemoFontSize();
+    }
+
+    function applyMemoFontSize() {
+        const editor = document.getElementById('memo-editor');
+        if (editor) editor.style.fontSize = memoFontSize + 'px';
+    }
+
+    // [핵심] Tab 들여쓰기 / - 누르고 Space 시 불렛 리스트 변환 / Ctrl+B 볼드체 처리
+
+    // [수정] - 누르고 Space 시 윗줄 간섭 없이 현재 줄만 불렛 리스트로 변환
+    let isMemoShortcutsBound = false;
+    function initMemoShortcuts() {
+        const editor = document.getElementById('memo-editor');
+        if (!editor || isMemoShortcutsBound) return;
+        isMemoShortcutsBound = true;
+
+        // 엔터 입력 시 항상 독립된 div 블록을 생성하도록 지정
+        document.execCommand('defaultParagraphSeparator', false, 'div');
+
+        editor.addEventListener('keydown', (e) => {
+            // 1. Tab 들여쓰기 / Shift+Tab 내어쓰기
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                if (e.shiftKey) {
+                    document.execCommand('outdent');
+                } else {
+                    document.execCommand('indent');
+                }
+                return;
+            }
+
+            // 2. Ctrl+B / Cmd+B 볼드체 토글
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+                e.preventDefault();
+                document.execCommand('bold');
+                return;
+            }
+
+            // 3. '-' 입력 후 Space 시 현재 줄만 불렛 포인트(•) 리스트로 직접 변환
+            if (e.key === ' ' || e.code === 'Space') {
+                const sel = window.getSelection();
+                if (!sel || sel.rangeCount === 0) return;
+
+                const range = sel.getRangeAt(0);
+                const node = range.startContainer;
+
+                // 이미 리스트(li) 내부에서 작성 중인 경우는 무시
+                if (node.nodeType === Node.ELEMENT_NODE && node.closest('li')) return;
+                if (node.nodeType === Node.TEXT_NODE && node.parentElement.closest('li')) return;
+
+                if (node.nodeType === Node.TEXT_NODE) {
+                    const textBefore = node.textContent.substring(0, range.startOffset);
+                    
+                    // 현재 줄에 '-'만 적힌 상태에서 스페이스를 누른 경우
+                    if (textBefore.trim() === '-') {
+                        e.preventDefault();
+
+                        // 새 불렛 리스트 요소(ul > li) 생성
+                        const ul = document.createElement('ul');
+                        const li = document.createElement('li');
+                        li.appendChild(document.createElement('br'));
+                        ul.appendChild(li);
+
+                        // 현재 줄에 해당하는 최상위 블록 요소 탐색
+                        let targetBlock = node;
+                        while (targetBlock && targetBlock.parentNode !== editor) {
+                            targetBlock = targetBlock.parentNode;
+                        }
+
+                        if (targetBlock && targetBlock.parentNode === editor) {
+                            editor.replaceChild(ul, targetBlock);
+                        } else {
+                            if (node.previousSibling && node.previousSibling.nodeName === 'BR') {
+                                editor.removeChild(node.previousSibling);
+                            }
+                            editor.replaceChild(ul, node);
+                        }
+
+                        // 커서를 생성된 불렛(li) 안으로 이동
+                        const newRange = document.createRange();
+                        newRange.setStart(li, 0);
+                        newRange.collapse(true);
+                        sel.removeAllRanges();
+                        sel.addRange(newRange);
+                    }
+                }
+            }
+        });
+    }
 
     // [기존 전역 변수 영역에 추가]
     let currentTopicIndex = 0;
@@ -1605,136 +1903,136 @@ function prevTopic() {
     let isTranslated = false; // 전역 변수명 변경 (질문+정답 통합)
 
     function renderUI() {
-    if (!spkData || spkData.length === 0) {
-        document.getElementById('meta-header').innerHTML = `<span class="badge-topic-category" style="background:#fef2f2; color:#ef4444; border-color:#fca5a5;">데이터 없음</span>`;
-        document.getElementById('q-prompt').innerText = "저장된 문제가 없습니다. [추가] 버튼을 눌러 새로운 문제를 등록해주세요.";
-        document.getElementById('script-container').innerHTML = '<div style="color:#64748b; padding:20px 0;">화면 상단의 추가(A) 버튼을 눌러 JSON 데이터를 입력하세요.</div>';
-        document.getElementById('application-topics-container').innerHTML = '';
-        return;
-    }
+        if (!spkData || spkData.length === 0) {
+            document.getElementById('meta-header').innerHTML = `<span class="badge-topic-category" style="background:#fef2f2; color:#ef4444; border-color:#fca5a5;">데이터 없음</span>`;
+            document.getElementById('q-prompt').innerText = "저장된 문제가 없습니다. [추가] 버튼을 눌러 새로운 문제를 등록해주세요.";
+            document.getElementById('script-container').innerHTML = '<div style="color:#64748b; padding:20px 0;">화면 상단의 추가(A) 버튼을 눌러 JSON 데이터를 입력하세요.</div>';
+            document.getElementById('application-topics-container').innerHTML = '';
+            return;
+        }
 
-    if (currentIndex >= spkData.length) { currentIndex = 0; saveCurrentIndex(); }
-    
-    const baseData = spkData[currentIndex];
-    const activeData = getActiveData(); 
-
-    // 1. 메타 헤더 렌더링
-    const types = ["경험", "선택", "열린"];
-    const typePillsHtml = types.map(t => `<span class="type-pill ${t === baseData.meta.type ? 'active' : ''}">${t}</span>`).join('');
-    const topicLabel = baseData.meta.topic_category ? `📚 ${baseData.meta.topic_category}` : "📚 미분류";
-    const qSource = (baseData.meta.question_source || '').toLowerCase();
-    const isDiscussion = qSource.includes('discussion');
-    const isEmail = qSource.includes('email');
-    const isSpeaking = !isDiscussion && !isEmail;
-
-    document.getElementById('meta-header').innerHTML = `
-        <button class="btn-global-persona" onclick="openPersonaModal()">
-            <img src="profile.jpg" class="profile-img-header" alt="Profile" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2NiZDVlMSI+PHBhdGggZD0iTTEyIDJhNSA1IDAgMSAwIDAgMTAgNSA1IDAgMCAwIDAtMTB6bTAtMmMzLjg2NiAwIDcgMy4xMzQgNyA3cy0zLjEzNCA3LTcgNy03LTMuMTM0LTctNyAzLjEzNC03IDctN3ptMCAxOGM1LjUyMyAwIDEwIDIuMjM5IDEwIDV2Mkgydi0yYz0yLjc2MSA0LjQ3Ny01IDEwLTV6Ii8+PC9zdmc+='">
-            <span class="persona-name-text">Zuri Harris</span>
-        </button>
-        <span class="bc-arrow">❯</span>
-        <span class="specific-persona-tag">${baseData.meta.specific_persona || '기본 전략'}</span>
-        <div class="divider-line"></div>
-        <span class="question-badge-top">#${currentIndex + 1}</span>
-        <div class="divider-line"></div>
-        <div class="type-segmented-control">${typePillsHtml}</div>
-        <div class="divider-line"></div>
-        <div class="badge-topic-category">${topicLabel}</div>
-        <div class="divider-line"></div>
-        <div class="type-segmented-control qs-segmented-control">
-            <span class="type-pill ${isDiscussion ? 'active' : ''}">토론</span>
-            <span class="type-pill ${isEmail ? 'active' : ''}">이메일</span>
-            <span class="type-pill ${isSpeaking ? 'active' : ''}">스피킹</span>
-        </div>
-    `;
-
-    // 2. 상단 컨트롤 바 버튼 표시/숨김 및 '원본 복귀' 버튼 주입
-    document.getElementById('btn-add').style.display = isTopicApplied ? 'none' : 'inline-flex';
-    document.getElementById('btn-setting').style.display = isTopicApplied ? 'none' : 'inline-flex';
-    document.getElementById('btn-list').style.display = isTopicApplied ? 'none' : 'inline-flex';
-
-    let returnBtn = document.getElementById('btn-return-origin');
-    if (!returnBtn) {
-        returnBtn = document.createElement('button');
-        returnBtn.id = 'btn-return-origin';
-        returnBtn.className = 'ctrl-btn primary';
-        returnBtn.style.cssText = 'background:#ef4444; border-color:#dc2626; margin-right: 8px;';
-        returnBtn.innerHTML = `🔙 원본 복귀 <span class="shortcut-key" style="color:#fecaca">(ESC)</span>`;
-        returnBtn.onclick = cancelAppliedTopic;
+        if (currentIndex >= spkData.length) { currentIndex = 0; saveCurrentIndex(); }
         
-        const normalControls = document.getElementById('normal-controls');
-        normalControls.insertBefore(returnBtn, normalControls.firstChild);
-    }
-    returnBtn.style.display = isTopicApplied ? 'inline-flex' : 'none';
+        const baseData = spkData[currentIndex];
+        const activeData = getActiveData(); 
 
-    // 3. 질문 & 정답 렌더링
-    const qPrompt = document.getElementById('q-prompt');
-    const btnTranslate = document.getElementById('btn-translate-q');
-    
-    const updateTranslationState = () => {
-        qPrompt.innerText = isTranslated ? (activeData.question_ko || activeData.question) : activeData.question;
-        btnTranslate.style.background = isTranslated ? '#1e293b' : '#ffffff';
-        btnTranslate.style.color = isTranslated ? '#ffffff' : 'var(--text-main)';
-        btnTranslate.style.borderColor = isTranslated ? '#0f172a' : 'var(--border-strong)';
+        // 1. 메타 헤더 렌더링
+        const types = ["경험", "선택", "열린"];
+        const typePillsHtml = types.map(t => `<span class="type-pill ${t === baseData.meta.type ? 'active' : ''}">${t}</span>`).join('');
+        const topicLabel = baseData.meta.topic_category ? `📚 ${baseData.meta.topic_category}` : "📚 미분류";
+        const qSource = (baseData.meta.question_source || '').toLowerCase();
+        const isDiscussion = qSource.includes('discussion');
+        const isEmail = qSource.includes('email');
+        const isSpeaking = !isDiscussion && !isEmail;
 
-        const scriptContainer = document.getElementById('script-container');
-        scriptContainer.innerHTML = ''; 
-        
-        activeData.script_rows.forEach((rowObj, rIdx) => {
-            const rowDiv = document.createElement('div');
-            rowDiv.className = 'sentence-row';
+        document.getElementById('meta-header').innerHTML = `
+            <button class="btn-global-persona" onclick="openPersonaModal()">
+                <img src="profile.jpg" class="profile-img-header" alt="Profile" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2NiZDVlMSI+PHBhdGggZD0iTTEyIDJhNSA1IDAgMSAwIDAgMTAgNSA1IDAgMCAwIDAtMTB6bTAtMmMzLjg2NiAwIDcgMy4xMzQgNyA3cy0zLjEzNCA3LTcgNy03LTMuMTM0LTctNyAzLjEzNC03IDctN3ptMCAxOGM1LjUyMyAwIDEwIDIuMjM5IDEwIDV2Mkgydi0yYz0yLjc2MSA0LjQ3Ny01IDEwLTV6Ii8+PC9zdmc+='">
+                <span class="persona-name-text">Zuri Harris</span>
+            </button>
+            <span class="bc-arrow">❯</span>
+            <span class="specific-persona-tag">${baseData.meta.specific_persona || '기본 전략'}</span>
+            <div class="divider-line"></div>
+            <span class="question-badge-top">#${currentIndex + 1}</span>
+            <div class="divider-line"></div>
+            <div class="type-segmented-control">${typePillsHtml}</div>
+            <div class="divider-line"></div>
+            <div class="badge-topic-category">${topicLabel}</div>
+            <div class="divider-line"></div>
+            <div class="type-segmented-control qs-segmented-control">
+                <span class="type-pill ${isDiscussion ? 'active' : ''}">토론</span>
+                <span class="type-pill ${isEmail ? 'active' : ''}">이메일</span>
+                <span class="type-pill ${isSpeaking ? 'active' : ''}">스피킹</span>
+            </div>
+        `;
+
+        // 2. 상단 컨트롤 바 버튼 표시/숨김 및 '원본 복귀' 버튼 주입
+        document.getElementById('btn-add').style.display = isTopicApplied ? 'none' : 'inline-flex';
+        document.getElementById('btn-setting').style.display = isTopicApplied ? 'none' : 'inline-flex';
+        document.getElementById('btn-list').style.display = isTopicApplied ? 'none' : 'inline-flex';
+
+        let returnBtn = document.getElementById('btn-return-origin');
+        if (!returnBtn) {
+            returnBtn = document.createElement('button');
+            returnBtn.id = 'btn-return-origin';
+            returnBtn.className = 'ctrl-btn primary';
+            returnBtn.style.cssText = 'background:#ef4444; border-color:#dc2626; margin-right: 8px;';
+            returnBtn.innerHTML = `🔙 원본 복귀 <span class="shortcut-key" style="color:#fecaca">(ESC)</span>`;
+            returnBtn.onclick = cancelAppliedTopic;
             
-            let combinedText = rowObj.chunks.map(c => c.text).join(' '); 
-            let displayText = combinedText;
+            const normalControls = document.getElementById('normal-controls');
+            normalControls.insertBefore(returnBtn, normalControls.firstChild);
+        }
+        returnBtn.style.display = isTopicApplied ? 'inline-flex' : 'none';
 
-            if (isTranslated) {
-                displayText = rowObj.translation || combinedText;
-            } else {
-                if (!isTopicApplied && activeData.recognized_templates) {
-                    // 원본 문제 처리 (템플릿 기준)
-                    const templateObj = activeData.recognized_templates.find(t => t.sentence_index === rIdx + 1);
-                    if (templateObj && templateObj.template) {
-                        displayText = templateObj.template.replace(/\{([^}]+)\}/g, '<span class="vocab-highlight">$1</span>');
-                        combinedText = templateObj.template.replace(/\{|\}/g, '');
-                    }
-                } else if (isTopicApplied && activeData.core_expressions) {
-                // 응용 문제 처리 (core_expressions 기준)
-                // 길이가 긴 표현식부터 치환하여 짧은 단어가 긴 단어의 HTML 태그를 깨부수는 것을 방지
-                const sortedExprs = [...activeData.core_expressions].sort((a, b) => b.length - a.length);
+        // 3. 질문 & 정답 렌더링
+        const qPrompt = document.getElementById('q-prompt');
+        const btnTranslate = document.getElementById('btn-translate-q');
+        
+        const updateTranslationState = () => {
+            qPrompt.innerText = isTranslated ? (activeData.question_ko || activeData.question) : activeData.question;
+            btnTranslate.style.background = isTranslated ? '#1e293b' : '#ffffff';
+            btnTranslate.style.color = isTranslated ? '#ffffff' : 'var(--text-main)';
+            btnTranslate.style.borderColor = isTranslated ? '#0f172a' : 'var(--border-strong)';
+
+            const scriptContainer = document.getElementById('script-container');
+            scriptContainer.innerHTML = ''; 
+            
+            activeData.script_rows.forEach((rowObj, rIdx) => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'sentence-row';
                 
-                sortedExprs.forEach(expr => {
-                    // 정규식 특수문자 이스케이프 후 치환
-                    const escapedExpr = expr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                    // (?![^<]*>) : 이미 HTML 태그(<span...>)로 감싸진 내부는 건너뛰도록 부정형 전방탐색 적용
-                    const regex = new RegExp(`(${escapedExpr})(?![^<]*>)`, 'gi');
-                    displayText = displayText.replace(regex, match => `<span class="vocab-highlight">${match}</span>`);
-                });
-            }
-            }
+                let combinedText = rowObj.chunks.map(c => c.text).join(' '); 
+                let displayText = combinedText;
 
-            const span = document.createElement('span');
-            span.className = 'chunk';
-            span.style.display = 'block'; 
-            span.innerHTML = displayText; 
-            span.id = `chunk-${rIdx}`;
-            
-            span.onclick = () => playChunk(rIdx, combinedText);
-            
-            rowDiv.appendChild(span);
-            scriptContainer.appendChild(rowDiv);
-        });
-    };
-    
-    updateTranslationState(); 
-    
-    btnTranslate.onclick = () => {
-        isTranslated = !isTranslated;
-        updateTranslationState();
-    };
+                if (isTranslated) {
+                    displayText = rowObj.translation || combinedText;
+                } else {
+                    if (!isTopicApplied && activeData.recognized_templates) {
+                        // 원본 문제 처리 (템플릿 기준)
+                        const templateObj = activeData.recognized_templates.find(t => t.sentence_index === rIdx + 1);
+                        if (templateObj && templateObj.template) {
+                            displayText = templateObj.template.replace(/\{([^}]+)\}/g, '<span class="vocab-highlight">$1</span>');
+                            combinedText = templateObj.template.replace(/\{|\}/g, '');
+                        }
+                    } else if (isTopicApplied && activeData.core_expressions) {
+                    // 응용 문제 처리 (core_expressions 기준)
+                    // 길이가 긴 표현식부터 치환하여 짧은 단어가 긴 단어의 HTML 태그를 깨부수는 것을 방지
+                    const sortedExprs = [...activeData.core_expressions].sort((a, b) => b.length - a.length);
+                    
+                    sortedExprs.forEach(expr => {
+                        // 정규식 특수문자 이스케이프 후 치환
+                        const escapedExpr = expr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                        // (?![^<]*>) : 이미 HTML 태그(<span...>)로 감싸진 내부는 건너뛰도록 부정형 전방탐색 적용
+                        const regex = new RegExp(`(${escapedExpr})(?![^<]*>)`, 'gi');
+                        displayText = displayText.replace(regex, match => `<span class="vocab-highlight">${match}</span>`);
+                    });
+                }
+                }
 
-    qPrompt.onclick = () => playSingle(activeData.question);
+                const span = document.createElement('span');
+                span.className = 'chunk';
+                span.style.display = 'block'; 
+                span.innerHTML = displayText; 
+                span.id = `chunk-${rIdx}`;
+                
+                span.onclick = () => playChunk(rIdx, combinedText);
+                
+                rowDiv.appendChild(span);
+                scriptContainer.appendChild(rowDiv);
+            });
+        };
+        
+        updateTranslationState(); 
+        
+        btnTranslate.onclick = () => {
+            isTranslated = !isTranslated;
+            updateTranslationState();
+        };
 
-    renderApplicationTopic();
+        qPrompt.onclick = () => playSingle(activeData.question);
+
+        renderRightPanel();
 }
 
 
@@ -2809,11 +3107,11 @@ function saveEditedData() {
         renderUI();
     }
 
-    // loadNext(), loadPrev(), cancelTestMode() 함수 내부에 isTopicApplied = false; 추가
     function loadNext() {
         if (!spkData || spkData.length === 0) return;
+        saveCurrentMemo(false); // [추가] 다음 문제로 가기 전 본문제 메모 자동 저장
         stopAudio();
-        isTopicApplied = false; // 추가
+        isTopicApplied = false;
         currentIndex = (currentIndex + 1) % spkData.length;
         saveCurrentIndex();
         renderUI();
@@ -2821,12 +3119,14 @@ function saveEditedData() {
 
     function loadPrev() {
         if (!spkData || spkData.length === 0) return;
+        saveCurrentMemo(false); // [추가] 이전 문제로 가기 전 본문제 메모 자동 저장
         stopAudio();
-        isTopicApplied = false; // 추가
+        isTopicApplied = false;
         currentIndex = (currentIndex - 1 + spkData.length) % spkData.length;
         saveCurrentIndex();
         renderUI();
     }
+
     function openPersonaModal() {
         const topicsHtml = spk_global_persona.global_persona.universal_topic_coverage.map(t => `
             <div class="topic-card-item">
@@ -2926,7 +3226,22 @@ function saveEditedData() {
 
     // 단축키 이벤트 리스너 통합 관리
     document.addEventListener('keydown', (e) => {
+        // [추가] Ctrl+S / Cmd+S 누를 때 본문제 메모 즉시 저장
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+            e.preventDefault();
+            saveCurrentMemo(true);
+            return;
+        }
+
+        // [수정] PageUp / PageDown 누르면 우측 패널(응용문제 <-> 메모장) 순환 토글
+        if (e.key === 'PageUp' || e.key === 'PageDown') {
+            e.preventDefault();
+            toggleRightPanel();
+            return;
+        }
+
         if (e.ctrlKey || e.metaKey || e.altKey) return;
+
 
         const key = e.key;
 
@@ -2961,10 +3276,7 @@ function saveEditedData() {
         const backdrop = document.getElementById('coachmark-backdrop');
         if (backdrop && backdrop.classList.contains('show')) {
             closeCoachmark();
-        }
-
-        if (key === 'PageUp') { e.preventDefault(); prevTopic(); return; }
-        if (key === 'PageDown') { e.preventDefault(); nextTopic(); return; }
+        } 
 
         if (key === 'Enter' && document.getElementById('add-modal').style.display === 'flex') {
             if (!e.shiftKey) { 
@@ -2976,7 +3288,14 @@ function saveEditedData() {
             e.preventDefault(); confirmVoiceSettings(); return;
         }
 
-        if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') {
+        // 메모장(contenteditable) 및 입력창(input/textarea) 수정 중일 때
+        const isEditing = e.target.isContentEditable || ['TEXTAREA', 'INPUT', 'SELECT'].includes(e.target.tagName);
+        if (isEditing) {
+            // 방향키(상/하/좌/우)는 전역 단축키(읽기, 문제 이동 등)를 타지 않고 메모장 조작이 최우선 되도록 즉시 반환
+            if (key.startsWith('Arrow')) {
+                return;
+            }
+
             if (testMode && key === 'Enter') { 
                 if (!e.shiftKey) { e.preventDefault(); submitTest(); }
             }
@@ -2986,7 +3305,7 @@ function saveEditedData() {
                 closeModal('add-modal'); closeModal('edit-modal'); closeVoiceModal();
             }
             return; 
-        } 
+        }
         
         const keyLower = key.toLowerCase();
         
