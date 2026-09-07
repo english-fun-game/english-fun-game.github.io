@@ -1581,17 +1581,63 @@ canvas {
     // [핵심] Tab 들여쓰기 / - 누르고 Space 시 불렛 리스트 변환 / Ctrl+B 볼드체 처리
 
     // [수정] - 누르고 Space 시 윗줄 간섭 없이 현재 줄만 불렛 리스트로 변환
+
+    // [수정] 복붙 시 줄바꿈 분리 및 불렛 변환 시 기존 문장 텍스트 100% 보존
     let isMemoShortcutsBound = false;
     function initMemoShortcuts() {
         const editor = document.getElementById('memo-editor');
         if (!editor || isMemoShortcutsBound) return;
         isMemoShortcutsBound = true;
 
-        // 엔터 입력 시 항상 독립된 div 블록을 생성하도록 지정
+        // 엔터 입력 시 기본 블록을 div로 분리
         document.execCommand('defaultParagraphSeparator', false, 'div');
 
+        // 1. [추가] 텍스트 복붙 시 줄바꿈(\n) 기준으로 문장/블록 분리 처리
+        editor.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+            if (!text) return;
+
+            // 줄바꿈 기호 정규화 후 라인 분리
+            const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+
+            // 단일 라인 복붙인 경우 기본 삽입
+            if (lines.length === 1) {
+                document.execCommand('insertText', false, lines[0]);
+                return;
+            }
+
+            // 여러 줄 복붙인 경우 각 줄을 독립된 <div> 또는 <ul><li>로 구조화
+            const escapeHtml = (str) => str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            let html = '';
+            let inUl = false;
+
+            lines.forEach((line) => {
+                const trimmed = line.trim();
+                // 붙여넣은 원문에 이미 '- ' 또는 '• '가 있으면 자동으로 불렛 목록화
+                if (trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
+                    if (!inUl) {
+                        html += '<ul>';
+                        inUl = true;
+                    }
+                    const content = trimmed.replace(/^[-•]\s+/, '');
+                    html += `<li>${escapeHtml(content) || '<br>'}</li>`;
+                } else {
+                    if (inUl) {
+                        html += '</ul>';
+                        inUl = false;
+                    }
+                    html += trimmed.length === 0 ? '<div><br></div>' : `<div>${escapeHtml(line)}</div>`;
+                }
+            });
+
+            if (inUl) html += '</ul>';
+            document.execCommand('insertHTML', false, html);
+        });
+
+        // 2. 키보드 단축키 및 라이브 서식 핸들러
         editor.addEventListener('keydown', (e) => {
-            // 1. Tab 들여쓰기 / Shift+Tab 내어쓰기
+            // Tab 들여쓰기 / Shift+Tab 내어쓰기
             if (e.key === 'Tab') {
                 e.preventDefault();
                 if (e.shiftKey) {
@@ -1602,14 +1648,28 @@ canvas {
                 return;
             }
 
-            // 2. Ctrl+B / Cmd+B 볼드체 토글
+            // Ctrl+B / Cmd+B 볼드체 토글
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
                 e.preventDefault();
                 document.execCommand('bold');
                 return;
             }
 
-            // 3. '-' 입력 후 Space 시 현재 줄만 불렛 포인트(•) 리스트로 직접 변환
+            // 빈 불렛(li)에서 Backspace 시 불렛 해제 후 일반 줄로 복귀
+            if (e.key === 'Backspace') {
+                const sel = window.getSelection();
+                if (!sel || sel.rangeCount === 0) return;
+                const range = sel.getRangeAt(0);
+                const node = range.startContainer;
+                const li = node.nodeType === Node.ELEMENT_NODE ? node.closest('li') : (node.parentElement ? node.parentElement.closest('li') : null);
+                if (li && range.startOffset === 0 && (!li.textContent.trim() || li.innerHTML === '<br>')) {
+                    e.preventDefault();
+                    document.execCommand('outdent');
+                    return;
+                }
+            }
+
+            // '-' 뒤에서 Space 누를 때 기존 문장을 날리지 않고 그대로 불렛(li)으로 전환
             if (e.key === ' ' || e.code === 'Space') {
                 const sel = window.getSelection();
                 if (!sel || sel.rangeCount === 0) return;
@@ -1617,41 +1677,65 @@ canvas {
                 const range = sel.getRangeAt(0);
                 const node = range.startContainer;
 
-                // 이미 리스트(li) 내부에서 작성 중인 경우는 무시
+                // 이미 리스트 내부인 경우 무시
                 if (node.nodeType === Node.ELEMENT_NODE && node.closest('li')) return;
-                if (node.nodeType === Node.TEXT_NODE && node.parentElement.closest('li')) return;
+                if (node.nodeType === Node.TEXT_NODE && node.parentElement && node.parentElement.closest('li')) return;
 
                 if (node.nodeType === Node.TEXT_NODE) {
                     const textBefore = node.textContent.substring(0, range.startOffset);
-                    
-                    // 현재 줄에 '-'만 적힌 상태에서 스페이스를 누른 경우
+
+                    // 현재 커서 바로 앞이 '-' 인 경우
                     if (textBefore.trim() === '-') {
                         e.preventDefault();
 
-                        // 새 불렛 리스트 요소(ul > li) 생성
-                        const ul = document.createElement('ul');
-                        const li = document.createElement('li');
-                        li.appendChild(document.createElement('br'));
-                        ul.appendChild(li);
+                        // '-' 뒷부분에 적혀있던 원래 문장 텍스트 추출 및 앞쪽 공백 제거
+                        const textAfter = node.textContent.substring(range.startOffset).replace(/^\s+/, '');
+                        node.textContent = textAfter;
 
-                        // 현재 줄에 해당하는 최상위 블록 요소 탐색
+                        // 현재 줄의 최상위 블록(div 등) 탐색
                         let targetBlock = node;
                         while (targetBlock && targetBlock.parentNode !== editor) {
                             targetBlock = targetBlock.parentNode;
                         }
 
-                        if (targetBlock && targetBlock.parentNode === editor) {
-                            editor.replaceChild(ul, targetBlock);
-                        } else {
-                            if (node.previousSibling && node.previousSibling.nodeName === 'BR') {
-                                editor.removeChild(node.previousSibling);
+                        if (!targetBlock || targetBlock === editor) return;
+
+                        const ul = document.createElement('ul');
+                        const li = document.createElement('li');
+
+                        if (targetBlock.nodeType === Node.TEXT_NODE) {
+                            if (node.textContent.trim().length > 0) {
+                                li.appendChild(document.createTextNode(node.textContent));
+                            } else {
+                                li.appendChild(document.createElement('br'));
                             }
-                            editor.replaceChild(ul, node);
+                        } else {
+                            // targetBlock(div 등) 내부에 있던 기존 텍스트 및 서식 노드들을 li 내부로 온전히 이전
+                            while (targetBlock.firstChild) {
+                                li.appendChild(targetBlock.firstChild);
+                            }
+                            if (!li.textContent.trim() && li.children.length === 0) {
+                                li.appendChild(document.createElement('br'));
+                            }
                         }
 
-                        // 커서를 생성된 불렛(li) 안으로 이동
+                        // 바로 윗줄이 이미 <ul>이면 해당 목록에 병합, 아니면 새로 <ul> 치환
+                        const prevElem = targetBlock.previousElementSibling;
+                        if (prevElem && prevElem.tagName === 'UL') {
+                            prevElem.appendChild(li);
+                            editor.removeChild(targetBlock);
+                        } else {
+                            ul.appendChild(li);
+                            editor.replaceChild(ul, targetBlock);
+                        }
+
+                        // 커서를 li 내부의 문장 시작 지점으로 안착
                         const newRange = document.createRange();
-                        newRange.setStart(li, 0);
+                        if (li.firstChild && li.firstChild.nodeType === Node.TEXT_NODE) {
+                            newRange.setStart(li.firstChild, 0);
+                        } else {
+                            newRange.setStart(li, 0);
+                        }
                         newRange.collapse(true);
                         sel.removeAllRanges();
                         sel.addRange(newRange);
