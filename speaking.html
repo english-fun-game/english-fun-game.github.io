@@ -1170,16 +1170,18 @@ mark, .cdx-marker {
     color: #94a3b8;
 }
 
-/* ⭐ [수정] 보기 모드: 마우스 커서를 text로 유지하여 클릭 시 작성 가능함을 자연스럽게 유도 */
-#memo-editor.memo-view-mode {
+/* ⭐ [수정] 보기/수정 모드 배경색을 동일한 순백색(#ffffff)으로 통일 */
+#memo-editor.memo-view-mode,
+#memo-editor.memo-edit-mode {
     cursor: text !important;
-    background-color: #fafbfc;
+    background-color: #ffffff !important; /* 칙칙한 회색 제거 및 순백색 유지 */
+}
+
+#memo-editor.memo-view-mode {
     border-color: var(--border-strong);
 }
 
 #memo-editor.memo-edit-mode {
-    cursor: text !important;
-    background-color: #ffffff;
     border-color: #3b82f6 !important;
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.12);
 }
@@ -1612,7 +1614,8 @@ mark, .cdx-marker {
                 
                 <!-- 단일 라이브 에디터 -->
                 <!-- [수정 후] Editor.js 마운트 컨테이너 -->
-                <div id="memo-editor"></div>
+                <!-- [수정 후] 맞춤법 검사 및 자동완성 원천 차단 -->
+                <div id="memo-editor" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off"></div>
 
                 <!-- ⭐ 오른쪽 하단 귀여운 조그마한 물음표 버튼 -->
                 <button type="button" id="btn-memo-guide" class="btn-memo-guide" onclick="startMemoTour(event)" title="메모 & 리사이저 기능 가이드">?</button>
@@ -2442,6 +2445,15 @@ const memoTourSteps = [
                 setupEditorMarkdownShortcuts();
                 isMemoEditMode = false;
                 updateMemoModeUI();
+                
+                // ⭐ [추가] 에디터 전체 영역 및 입력 블록 맞춤법 검사 완전 차단
+                editorContainer.setAttribute('spellcheck', 'false');
+                const redactor = editorContainer.querySelector('.codex-editor__redactor');
+                if (redactor) {
+                    redactor.setAttribute('spellcheck', 'false');
+                    redactor.setAttribute('autocorrect', 'off');
+                    redactor.setAttribute('autocapitalize', 'off');
+                }
 
                 // ⭐ [추가] 보기 모드에서 메모 영역 클릭 시 즉시 수정 모드 진입
                 editorContainer.onclick = async (e) => {
