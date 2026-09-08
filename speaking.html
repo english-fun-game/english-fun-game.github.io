@@ -731,6 +731,142 @@ canvas {
     flex-shrink: 0;
 }
 
+/* ==========================================
+   메모 & 리사이저 타겟 코치마크 (Spotlight) UI
+   ========================================== */
+/* 뒷배경 딤드 오버레이 */
+.memo-coachmark-backdrop {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(15, 23, 42, 0.65);
+    z-index: 9400;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+.memo-coachmark-backdrop.show {
+    opacity: 1; pointer-events: auto;
+}
+
+/* 실제 UI 요소에 적용되는 조명(Spotlight) 하이라이트 */
+.coachmark-spotlight-active {
+    position: relative !important;
+    z-index: 9401 !important;
+    box-shadow: 0 0 0 4px #8b5cf6, 0 0 30px rgba(139, 92, 246, 0.5) !important;
+    border-color: #8b5cf6 !important;
+    background-color: #ffffff !important;
+    transition: all 0.2s ease !important;
+}
+
+/* 타겟 UI 위치를 따라다니는 안내 카드 */
+.memo-coachmark-box {
+    position: fixed;
+    z-index: 9402;
+    width: 320px;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 14px;
+    padding: 16px 18px;
+    box-shadow: 0 20px 40px -8px rgba(15, 23, 42, 0.25), 0 0 1px 1px rgba(15, 23, 42, 0.05);
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    transition: top 0.25s cubic-bezier(0.16, 1, 0.3, 1), left 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-sizing: border-box;
+}
+
+.memo-coachmark-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1.5px solid var(--border-color);
+    padding-bottom: 8px;
+}
+
+.memo-coachmark-title {
+    font-size: 14px;
+    font-weight: 900;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.memo-coachmark-step-badge {
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+}
+
+.memo-coachmark-body {
+    font-size: 12.5px;
+    color: #334155;
+    line-height: 1.55;
+    word-break: keep-all;
+}
+
+.memo-coachmark-body ul {
+    margin: 6px 0 0 0;
+    padding-left: 16px;
+}
+
+.memo-coachmark-body li {
+    margin-bottom: 4px;
+}
+
+.memo-coachmark-body kbd {
+    background: #f1f5f9;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-size: 11px;
+    font-weight: 800;
+    color: #0f172a;
+    font-family: inherit;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.memo-coachmark-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 4px;
+}
+
+/* 오른쪽 하단 귀여운 미니 물음표 버튼 */
+.btn-memo-guide {
+    position: absolute;
+    bottom: 12px;
+    right: 14px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 1.5px solid var(--border-strong);
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
+    opacity: 0.65;
+    transition: all 0.2s ease;
+    z-index: 20;
+    user-select: none;
+}
+.btn-memo-guide:hover {
+    opacity: 1;
+    background: #f8fafc;
+    border-color: var(--slack-blue);
+    color: var(--slack-blue);
+    transform: scale(1.1);
+}
+
 /* 단축키 코치마크 (Coachmark) UI */
 .onboarding-backdrop {
     position: fixed;
@@ -1304,9 +1440,12 @@ body.is-resizing #panel-resizer {
         </div>
 
         <!-- 우측: 메모장 단독 패널 -->
+<!-- 우측: 메모장 단독 패널 -->
         <section class="panel-right-1" id="panel-right" style="padding: 12px;">
-            <div id="notepad-panel-container" style="display: flex; flex: 1; flex-direction: column; min-height: 0; gap: 8px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; background: #f8fafc; border: 1.5px solid var(--border-color); border-radius: 8px; gap: 8px; flex-shrink: 0;">
+            <div id="notepad-panel-container" style="display: flex; flex: 1; flex-direction: column; min-height: 0; gap: 8px; position: relative;">
+                
+                <!-- ⭐ id="memo-toolbar" 부여 (코치마크 타겟팅용) -->
+                <div id="memo-toolbar" style="display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; background: #f8fafc; border: 1.5px solid var(--border-color); border-radius: 8px; gap: 8px; flex-shrink: 0;">
                     <div style="display: flex; align-items: center; gap: 8px; min-width: 0; white-space: nowrap;">
                         <span style="font-size: 13px; font-weight: 800; color: #1e293b;">📝 메모</span>
                         <span style="color: #cbd5e1; font-size: 11px;">|</span>
@@ -1325,40 +1464,11 @@ body.is-resizing #panel-resizer {
                 <!-- 단일 라이브 에디터 -->
                 <div id="memo-editor" contenteditable="true" spellcheck="false" placeholder="메모를 작성하세요... (Ctrl+B 볼드, - 스페이스 불렛, Tab 들여쓰기)" style="flex: 1; height: 100%; min-height: 0; padding: 12px; border: 1.5px solid var(--border-strong); border-radius: 8px; background: #ffffff; color: #0f172a; line-height: 1.6; outline: none; overflow-y: auto; box-sizing: border-box; word-break: break-word;"></div>
 
-                <!-- ⭐ [추가] 오른쪽 하단 조그마한 물음표 버튼 -->
-                <button type="button" id="btn-memo-guide" class="btn-memo-guide" onclick="toggleMemoGuide(event)" title="메모 & 리사이저 가이드">?</button>
-
-                <!-- ⭐ [추가] 코치마크 툴팁 팝오버 -->
-                <div id="memo-guide-tooltip" class="memo-guide-card" onclick="event.stopPropagation()">
-                    <div class="memo-guide-head">
-                        <span class="memo-guide-title">💡 메모 & 패널 가이드</span>
-                        <button type="button" class="memo-guide-close" onclick="closeMemoGuide(event)">&times;</button>
-                    </div>
-                    
-                    <!-- 1. 메모장 기능 및 단축키 -->
-                    <div>
-                        <div class="memo-guide-sec-title">📝 스마트 메모 단축키</div>
-                        <ul class="memo-guide-list">
-                            <li><kbd>Ctrl</kbd>+<kbd>S</kbd> : 즉시 수동 저장 (5초 자동 저장)</li>
-                            <li><kbd>Ctrl</kbd>+<kbd>B</kbd> : 굵은 글씨(Bold) 토글</li>
-                            <li><kbd>-</kbd> + <kbd>Space</kbd> : 불렛(•) 목록 자동 변환</li>
-                            <li><kbd>Tab</kbd> / <kbd>Shift+Tab</kbd> : 들여쓰기 / 내어쓰기</li>
-                            <li><kbd>A+</kbd> / <kbd>A-</kbd> : 글자 크기 조절 (설정 기억)</li>
-                        </ul>
-                    </div>
-
-                    <!-- 2. 패널 리사이저 기능 -->
-                    <div style="border-top: 1px dashed var(--border-color); padding-top: 8px;">
-                        <div class="memo-guide-sec-title">↔️ 패널 리사이저 바</div>
-                        <ul class="memo-guide-list">
-                            <li><strong>구분선 드래그</strong> : 문제 vs 메모장 너비 조절</li>
-                            <li><strong>구분선 더블클릭</strong> : 65% 기본 비율 리셋</li>
-                            <li>조절한 분할 비율은 브라우저에 자동 기억</li>
-                        </ul>
-                    </div>
-                </div>
+                <!-- ⭐ 오른쪽 하단 귀여운 조그마한 물음표 버튼 -->
+                <button type="button" id="btn-memo-guide" class="btn-memo-guide" onclick="startMemoTour(event)" title="메모 & 리사이저 기능 가이드">?</button>
             </div>
         </section>
+
      </main>
 
     <!-- 온보딩 안내 코치마크 -->
@@ -1669,6 +1779,23 @@ body.is-resizing #panel-resizer {
         </div>
     </div>
 
+<!-- 메모 & 리사이저 위치 추적 코치마크 UI -->
+    <div id="memo-tour-backdrop" class="memo-coachmark-backdrop" onclick="closeMemoTour()"></div>
+    <div id="memo-tour-box" class="memo-coachmark-box">
+        <div class="memo-coachmark-header">
+            <div class="memo-coachmark-title" id="tour-title">가이드</div>
+            <span class="memo-coachmark-step-badge" id="tour-step-badge">1 / 3</span>
+        </div>
+        <div class="memo-coachmark-body" id="tour-body"></div>
+        <div class="memo-coachmark-footer">
+            <button type="button" class="ctrl-btn" id="tour-prev-btn" onclick="prevMemoTourStep()" style="font-size: 12px;">❮ 이전</button>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 11px; color: #94a3b8; font-weight: 700;">(ESC로 닫기)</span>
+                <button type="button" class="ctrl-btn primary" id="tour-next-btn" onclick="nextMemoTourStep()" style="font-size: 12px; padding: 5px 12px;">다음 ❯</button>
+            </div>
+        </div>
+    </div>
+
 <script>
 
     // 👉 1. 서비스 워커 등록 함수 추가 (index.html과 동일한 로직)
@@ -1679,6 +1806,135 @@ body.is-resizing #panel-resizer {
             .catch(err => { console.warn('SW Registration Failed', err); }); 
         } 
     }
+
+    // ==========================================
+// 💡 메모 & 리사이저 위치 추적 코치마크 (Spotlight Tour)
+// ==========================================
+let currentTourStep = 0;
+let isMemoTourActive = false;
+
+const memoTourSteps = [
+    {
+        targetId: 'panel-resizer',
+        title: '↔️ 패널 리사이저 바',
+        desc: `
+            <ul>
+                <li><strong>좌우 드래그</strong>: 마우스로 구분선을 드래그하여 문제와 메모장의 너비를 자유롭게 조절합니다.</li>
+                <li><strong>더블 클릭</strong>: 구분선을 더블클릭하면 <strong>기본 65%</strong> 비율로 즉시 초기화됩니다.</li>
+                <li>조절한 분할 비율은 브라우저에 저장되어 새로고침 후에도 유지됩니다.</li>
+            </ul>
+        `,
+        preferredPos: 'right'
+    },
+    {
+        targetId: 'memo-toolbar',
+        title: '📝 저장 상태 & 폰트 조절',
+        desc: `
+            <ul>
+                <li><strong>자동 저장</strong>: 입력을 멈추면 <strong>5초 주기</strong>로 브라우저에 자동 저장됩니다.</li>
+                <li><strong>수동 저장</strong>: <kbd>Ctrl+S</kbd> (Mac: <kbd>Cmd+S</kbd>)를 누르면 즉시 수동 저장됩니다.</li>
+                <li><strong>글자 크기</strong>: 우측의 <kbd>A-</kbd> / <kbd>A+</kbd> 버튼으로 폰트 크기를 조절하며 설정이 영구 보존됩니다.</li>
+            </ul>
+        `,
+        preferredPos: 'bottom'
+    },
+    {
+        targetId: 'memo-editor',
+        title: '✍️ 스마트 에디터 단축키',
+        desc: `
+            <ul>
+                <li><kbd>Ctrl+B</kbd> : 선택한 텍스트 <strong>굵은 글씨</strong> 토글</li>
+                <li><kbd>-</kbd> + <kbd>Space</kbd> : 글머리 기호(•) 리스트로 자동 변환</li>
+                <li><kbd>Tab</kbd> / <kbd>Shift+Tab</kbd> : 들여쓰기 / 내어쓰기</li>
+                <li><kbd>ESC</kbd> : 메모 작성 중 누르면 <strong>포커스가 즉시 해제</strong>되어 전체 읽기 및 문제 이동 단축키를 바로 사용 가능합니다.</li>
+            </ul>
+        `,
+        preferredPos: 'inside'
+    }
+];
+
+function startMemoTour(e) {
+    if (e) e.stopPropagation();
+    currentTourStep = 0;
+    isMemoTourActive = true;
+    document.getElementById('memo-tour-backdrop').classList.add('show');
+    renderTourStep();
+}
+
+function renderTourStep() {
+    // 이전 하이라이트 제거
+    document.querySelectorAll('.coachmark-spotlight-active').forEach(el => el.classList.remove('coachmark-spotlight-active'));
+
+    const step = memoTourSteps[currentTourStep];
+    const targetEl = document.getElementById(step.targetId);
+    const box = document.getElementById('memo-tour-box');
+    if (!targetEl || !box) return;
+
+    // 조명 하이라이트 부여
+    targetEl.classList.add('coachmark-spotlight-active');
+
+    // 텍스트 바인딩
+    document.getElementById('tour-title').innerHTML = step.title;
+    document.getElementById('tour-step-badge').innerText = `${currentTourStep + 1} / ${memoTourSteps.length}`;
+    document.getElementById('tour-body').innerHTML = step.desc;
+
+    // 버튼 텍스트
+    const prevBtn = document.getElementById('tour-prev-btn');
+    const nextBtn = document.getElementById('tour-next-btn');
+    prevBtn.style.visibility = currentTourStep === 0 ? 'hidden' : 'visible';
+    nextBtn.innerText = currentTourStep === memoTourSteps.length - 1 ? '완료 ✓' : '다음 ❯';
+
+    // 화면 좌표 계산 및 툴팁 박스 배치
+    box.style.display = 'flex';
+    const rect = targetEl.getBoundingClientRect();
+    const boxWidth = 320;
+    const boxHeight = box.offsetHeight || 220;
+
+    let top = 0;
+    let left = 0;
+
+    if (step.preferredPos === 'right') {
+        left = rect.right + 14;
+        top = Math.max(20, rect.top + (rect.height / 2) - (boxHeight / 2));
+    } else if (step.preferredPos === 'bottom') {
+        top = rect.bottom + 12;
+        left = Math.max(16, rect.left + (rect.width / 2) - (boxWidth / 2));
+    } else { // inside
+        top = rect.top + 24;
+        left = rect.left + 24;
+    }
+
+    // 브라우저 화면 경계 클램핑
+    left = Math.max(12, Math.min(left, window.innerWidth - boxWidth - 12));
+    top = Math.max(12, Math.min(top, window.innerHeight - boxHeight - 12));
+
+    box.style.left = `${left}px`;
+    box.style.top = `${top}px`;
+}
+
+function nextMemoTourStep() {
+    if (currentTourStep < memoTourSteps.length - 1) {
+        currentTourStep++;
+        renderTourStep();
+    } else {
+        closeMemoTour();
+    }
+}
+
+function prevMemoTourStep() {
+    if (currentTourStep > 0) {
+        currentTourStep--;
+        renderTourStep();
+    }
+}
+
+function closeMemoTour() {
+    isMemoTourActive = false;
+    document.getElementById('memo-tour-backdrop').classList.remove('show');
+    document.getElementById('memo-tour-box').style.display = 'none';
+    document.querySelectorAll('.coachmark-spotlight-active').forEach(el => el.classList.remove('coachmark-spotlight-active'));
+}
+
   
   // [우측 패널 및 메모장 상태 변수]
     let memoFontSize = parseInt(localStorage.getItem('pongcrush_memo_font_size')) || 15;
@@ -2221,6 +2477,7 @@ function renderUI() {
 }
 
 window.addEventListener('resize', () => {
+    if (isMemoTourActive) renderTourStep();
     applySavedSplitRatio();  // 화면 창 크기 변경 시에도 설정 비율 유지
     renderRightPanel();
 });
@@ -3369,8 +3626,20 @@ function saveEditedData() {
         // ESC 키 우선순위 처리 (모달 닫기 -> 시험 취소 -> 편집 포커스 해제 -> 응용문제 원본 복귀)
         if (key === 'Escape') {
             e.preventDefault();
+            
+            // 1순위: 코치마크 실행 중이면 닫기
+            if (isMemoTourActive) {
+                closeMemoTour();
+                return;
+            }
 
-            closeMemoGuide(); // 코치마크 팝오버 닫기
+            // 2순위: ⭐ 메모장(contenteditable)이나 인풋 편집 중이면 즉시 포커스 해제(Blur)!
+            const isEditing = e.target.isContentEditable || ['TEXTAREA', 'INPUT', 'SELECT'].includes(e.target.tagName);
+            if (isEditing) {
+                saveCurrentMemo(false); // 잔여 메모 안전 저장
+                e.target.blur();        // 포커스 해제 -> 이제 방향키/A/S/D 단축키 자유롭게 사용 가능
+                return;
+            }
            
             // 1순위: 켜져있는 모달 닫기
             const modals = document.querySelectorAll('.modal-overlay');
@@ -3389,13 +3658,6 @@ function saveEditedData() {
                 return;
             }
 
-            // 3순위: [추가] 메모장(contenteditable) 또는 입력창 편집 중이면 포커스 해제 (기존 컨트롤 즉시 가능)
-            const isEditing = e.target.isContentEditable || ['TEXTAREA', 'INPUT', 'SELECT'].includes(e.target.tagName);
-            if (isEditing) {
-                saveCurrentMemo(false);
-                e.target.blur();
-                return;
-            }
 
         }
 
@@ -4175,5 +4437,6 @@ document.addEventListener('pointerdown', (e) => {
 
 
 </script>
+
 </body>
 </html>
