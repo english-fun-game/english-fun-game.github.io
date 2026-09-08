@@ -1961,68 +1961,7 @@ mark, .cdx-marker {
             .catch(err => { console.warn('SW Registration Failed', err); }); 
         } 
     }
-
-    // ==========================================
-// 💡 메모 & 리사이저 위치 추적 코치마크 (Spotlight Tour)
-// ==========================================
-let currentTourStep = 0;
-let isMemoTourActive = false;
-
-const memoTourSteps = [
-    {
-        targetId: 'panel-resizer',
-        title: '↔️ 패널 리사이저 바',
-        desc: `
-            <ul>
-                <li><strong>좌우 드래그</strong>: 마우스로 구분선을 드래그하여 문제와 메모장의 너비를 자유롭게 조절합니다.</li>
-                <li><strong>더블 클릭</strong>: 구분선을 더블클릭하면 <strong>기본 65%</strong> 비율로 즉시 초기화됩니다.</li>
-                <li>조절한 분할 비율은 브라우저에 저장되어 새로고침 후에도 유지됩니다.</li>
-            </ul>
-        `,
-        preferredPos: 'right'
-    },
-    {
-        targetId: 'memo-toolbar',
-        title: '📝 저장 상태 & 폰트 조절',
-        desc: `
-            <ul>
-                <li><strong>자동 저장</strong>: 입력을 멈추면 <strong>2초 주기</strong>로 브라우저에 자동 저장됩니다.</li>
-                <li><strong>수동 저장</strong>: <kbd>Ctrl+S</kbd> (Mac: <kbd>Cmd+S</kbd>)를 누르면 즉시 수동 저장됩니다.</li>
-                <li><strong>글자 크기</strong>: 우측의 <kbd>A-</kbd> / <kbd>A+</kbd> 버튼으로 폰트 크기를 조절하며 설정이 영구 보존됩니다.</li>
-            </ul>
-        `,
-        preferredPos: 'bottom'
-    },
-{
-        targetId: 'memo-editor',
-        title: '✍️ 스마트 메모장 핵심 단축키',
-        desc: `
-            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 4px;">
-                <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 13px; font-weight: 800; color: #1e293b;">• 글머리 목록</span>
-                    <kbd style="font-size: 12.5px; font-weight: 900; background: #ffffff; border: 1.5px solid #cbd5e1; padding: 2px 7px; border-radius: 6px; color: #0f172a;">- + Space</kbd>
-                </div>
-                <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 13px; font-weight: 800; color: #1e293b;">1. 번호 매기기</span>
-                    <kbd style="font-size: 12.5px; font-weight: 900; background: #ffffff; border: 1.5px solid #cbd5e1; padding: 2px 7px; border-radius: 6px; color: #0f172a;">1. + Space</kbd>
-                </div>
-                <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 13px; font-weight: 800; color: #1e293b;">굵게 / 형광펜</span>
-                    <span style="font-size: 12.5px; font-weight: 800; color: #475569;">텍스트 더블클릭(단축키 안내)</span>
-                </div>
-                <div style="background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 13px; font-weight: 900; color: #1d4ed8;">단축키 모드 복귀</span>
-                    <kbd style="font-size: 12.5px; font-weight: 900; background: #ffffff; border: 1.5px solid #93c5fd; padding: 2px 7px; border-radius: 6px; color: #1e40af;">ESC</kbd>
-                </div>
-                <div style="font-size: 11.5px; color: #64748b; font-weight: 600; line-height: 1.35; padding-left: 2px;">
-                    * 목록 작성 중 <kbd style="padding: 1px 4px;">Enter</kbd>를 한 번 더 누르면 일반 줄로 빠져나옵니다.
-                </div>
-            </div>
-        `,
-        preferredPos: 'inside'
-    }
-];
-
+ 
 // ==========================================
     // Editor.js 메모장 엔진 (단축키 & 형광펜 & 동기화 완벽 버전)
     // ==========================================
@@ -2516,7 +2455,96 @@ const memoTourSteps = [
     function renderRightPanel() {
         loadCurrentMemo();
     }
+// ==========================================
+// 💡 메모 & 리사이저 위치 추적 코치마크 (Spotlight Tour)
+// ==========================================
+let currentTourStep = 0;
+let isMemoTourActive = false;
 
+const memoTourSteps = [
+    {
+        targetId: 'memo-editor',
+        title: '✍️ 스마트 메모장 사용법',
+        desc: `
+            <div style="display: flex; flex-direction: column; gap: 7px; margin-top: 2px;">
+                <!-- 1. 수정 & 완료 모드 -->
+                <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 7px 10px;">
+                    <div style="font-size: 11px; font-weight: 800; color: #475569; margin-bottom: 5px; display: flex; align-items: center; gap: 4px;">
+                        <span>🔄</span> <span>수정 & 완료 전환</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 700;">
+                        <span style="color: #0f172a;">수정 모드 진입</span>
+                        <span><kbd>클릭</kbd> 또는 <kbd>PgDn</kbd></span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 700; margin-top: 3px;">
+                        <span style="color: #0f172a;">완료 (자동 저장)</span>
+                        <span><kbd>ESC</kbd> 또는 <kbd>PgDn</kbd></span>
+                    </div>
+                </div>
+
+                <!-- 2. 볼드 & 형광펜 -->
+                <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 7px 10px;">
+                    <div style="font-size: 11px; font-weight: 800; color: #475569; margin-bottom: 5px; display: flex; align-items: center; gap: 4px;">
+                        <span>🎨</span> <span>서식 & 하이라이트</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 700;">
+                        <span style="color: #0f172a;">굵게 (볼드)</span>
+                        <kbd>Ctrl + B</kbd>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 700; margin-top: 3px;">
+                        <span style="color: #0f172a;">형광펜 마커</span>
+                        <kbd style="background: #fef08a; border-color: #fde047; color: #854d0e;">Ctrl + M</kbd>
+                    </div>
+                </div>
+
+                <!-- 3. 스마트 목록 작성 -->
+                <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 7px 10px;">
+                    <div style="font-size: 11px; font-weight: 800; color: #475569; margin-bottom: 5px; display: flex; align-items: center; gap: 4px;">
+                        <span>📋</span> <span>스마트 목록 자동 변환</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 700;">
+                        <span style="color: #0f172a;">• 불렛 글머리</span>
+                        <kbd>- + Space</kbd>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 700; margin-top: 3px;">
+                        <span style="color: #0f172a;">1. 번호 매기기</span>
+                        <kbd>1. + Space</kbd>
+                    </div>
+                </div>
+
+                <div style="font-size: 11px; color: #64748b; font-weight: 600; line-height: 1.4; padding-left: 2px;">
+                    * 목록 작성 중 <kbd style="padding: 1px 4px;">Enter</kbd>를 한 번 더 치면 일반 본문으로 탈출합니다.<br>
+                    * Mac 사용자는 <kbd style="padding: 1px 4px;">Cmd</kbd> 키를 사용하시면 됩니다.
+                </div>
+            </div>
+        `,
+        preferredPos: 'inside'
+    },
+    {
+        targetId: 'memo-toolbar',
+        title: '📝 저장 상태 & 폰트 조절',
+        desc: `
+            <ul>
+                <li><strong>자동 저장</strong>: 입력을 멈추면 <strong>2초 주기</strong>로 브라우저에 자동 저장됩니다.</li>
+                <li><strong>수동 저장</strong>: <kbd>Ctrl+S</kbd> (Mac: <kbd>Cmd+S</kbd>)를 누르면 즉시 수동 저장됩니다.</li>
+                <li><strong>글자 크기</strong>: 우측의 <kbd>A-</kbd> / <kbd>A+</kbd> 버튼으로 폰트 크기를 조절하며 설정이 영구 보존됩니다.</li>
+            </ul>
+        `,
+        preferredPos: 'bottom'
+    },
+    {
+        targetId: 'panel-resizer',
+        title: '↔️ 패널 리사이저 바',
+        desc: `
+            <ul>
+                <li><strong>좌우 드래그</strong>: 마우스로 구분선을 드래그하여 문제와 메모장의 너비를 자유롭게 조절합니다.</li>
+                <li><strong>더블 클릭</strong>: 구분선을 더블클릭하면 <strong>기본 65%</strong> 비율로 즉시 초기화됩니다.</li>
+                <li>조절한 분할 비율은 브라우저에 저장되어 새로고침 후에도 유지됩니다.</li>
+            </ul>
+        `,
+        preferredPos: 'right'
+    }
+];
 
 function startMemoTour(e) {
     if (e) e.stopPropagation();
@@ -2552,8 +2580,8 @@ function renderTourStep() {
     // 화면 좌표 계산 및 툴팁 박스 배치
     box.style.display = 'flex';
     const rect = targetEl.getBoundingClientRect();
-    const boxWidth = 320;
-    const boxHeight = box.offsetHeight || 220;
+    const boxWidth = box.offsetWidth || 330;
+    const boxHeight = box.offsetHeight || 300;
 
     let top = 0;
     let left = 0;
@@ -2565,18 +2593,18 @@ function renderTourStep() {
         top = rect.bottom + 12;
         left = Math.max(16, rect.left + (rect.width / 2) - (boxWidth / 2));
     } else { // inside
-        top = rect.top + 24;
-        left = rect.left + 24;
+        top = rect.top + 20;
+        left = rect.left + 20;
     }
 
-    // 브라우저 화면 경계 클램핑
+    // 브라우저 화면 경계 클램핑 (화면 밖으로 튀어나가지 않도록 보정)
     left = Math.max(12, Math.min(left, window.innerWidth - boxWidth - 12));
     top = Math.max(12, Math.min(top, window.innerHeight - boxHeight - 12));
 
     box.style.left = `${left}px`;
     box.style.top = `${top}px`;
 }
-
+ 
 function nextMemoTourStep() {
     if (currentTourStep < memoTourSteps.length - 1) {
         currentTourStep++;
