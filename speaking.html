@@ -1170,21 +1170,19 @@ mark, .cdx-marker {
     color: #94a3b8;
 }
 
-/* ⭐ [수정] 보기/수정 모드 배경색을 동일한 순백색(#ffffff)으로 통일 */
-#memo-editor.memo-view-mode,
-#memo-editor.memo-edit-mode {
-    cursor: text !important;
-    background-color: #ffffff !important; /* 칙칙한 회색 제거 및 순백색 유지 */
-}
-
 #memo-editor.memo-view-mode {
+    cursor: text !important;
+    background-color: #fafafa;
     border-color: var(--border-strong);
 }
 
 #memo-editor.memo-edit-mode {
+    cursor: text !important;
+    background-color: #ffffff;
     border-color: #3b82f6 !important;
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.12);
 }
+
 
 /* 플레이스홀더 안내 스타일 보강 */
 #memo-editor .ce-paragraph[data-placeholder]:empty::before {
