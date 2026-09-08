@@ -4534,12 +4534,6 @@ function scrollToMemo() {
     if (memoPanel) {
         memoPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
         
-        // 스크롤 이동 직후 메모장에 곧바로 타이핑 가능하도록 포커스 안착
-        if (memoEditor) {
-            setTimeout(() => {
-                memoEditor.focus();
-            }, 300);
-        }
     }
 }
 
