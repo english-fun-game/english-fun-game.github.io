@@ -3575,23 +3575,34 @@ function saveEditedData() {
     }
 
  
-
-    function loadNext() {
+function loadNext() {
         if (!spkData || spkData.length === 0) return;
-        stopMemoAutoSave(true); // [수정] 타이머 해제 및 잔여 메모 플러시
+        stopMemoAutoSave(true); // 타이머 해제 및 잔여 메모 플러시
         stopAudio();
+        isTopicApplied = false;
         currentIndex = (currentIndex + 1) % spkData.length;
         saveCurrentIndex();
         renderUI();
+        
+        // ⭐ [추가] 모바일에서 다음 문제로 넘길 때 스크롤을 맨 위로 이동
+        if (window.innerWidth <= 768) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
     }
 
     function loadPrev() {
         if (!spkData || spkData.length === 0) return;
-        stopMemoAutoSave(true); // [수정] 타이머 해제 및 잔여 메모 플러시
+        stopMemoAutoSave(true); // 타이머 해제 및 잔여 메모 플러시
         stopAudio();
+        isTopicApplied = false;
         currentIndex = (currentIndex - 1 + spkData.length) % spkData.length;
         saveCurrentIndex();
         renderUI();
+        
+        // ⭐ [추가] 모바일에서 이전 문제로 넘길 때 스크롤을 맨 위로 이동
+        if (window.innerWidth <= 768) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
     }
 
     function openPersonaModal() {
