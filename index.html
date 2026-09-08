@@ -53,7 +53,25 @@
         .ai-ask-btn:hover { background: #bae6fd; color: #0369a1; transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .toast-notification { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: rgba(30, 41, 59, 0.95); color: #ffffff; padding: 14px 24px; border-radius: 100px; font-size: 14px; font-weight: 800; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); z-index: 40000; transition: bottom 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); display: flex; align-items: center; gap: 10px; width: max-content; max-width: 90vw; line-height: 1.4; text-align: center; backdrop-filter: blur(8px); pointer-events: none; }
         .toast-notification.show { bottom: 40px; }
+ 
+/* 과한 테두리/애니메이션 제거: 기본 행 스타일과 완벽히 통일 */
+.progress-row-highlight {
+    background: #ffffff !important;
+    border-radius: 6px;
+}
 
+.new-sparkle-badge {
+    background: #ede9fe;
+    color: #7c3aed;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 1px 6px;
+    border-radius: 4px;
+    border: 1px solid #ddd6fe;
+    margin-left: 6px;
+    letter-spacing: -0.2px;
+}
+ 
 
         @media (max-width: 650px) { .app-version { font-size: 10px; bottom: 6px; left: 6px; padding: 4px 6px; } .release-modal-card { width: 100vw !important; max-width: 100% !important; height: 95vh !important; max-height: 95vh !important; border-radius: 24px 24px 0 0 !important; padding: 0 !important; margin-top: auto; } }
         body.game-active { height: 100vh; height: 100dvh; overflow: hidden; justify-content: flex-start; padding: 12px 16px; }
@@ -162,6 +180,9 @@
         .modal-card.tall-modal { max-width: 580px; height: 90vh !important; max-height: 90vh !important; display: flex; flex-direction: column; overflow: hidden; padding: 0 !important; border-radius: 18px; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; font-size: 17px; font-weight: 800; color: var(--text-main); }
         
+
+        
+
         /* 🚨 취약 단어 복습 모달 (3단 그리드 레이아웃) */
         .weak-col-container { 
             display: grid; 
@@ -475,14 +496,30 @@
                 </tbody>
             </table>
         </div>
-
+        
         <div style="font-size:12px; color:#dc2626; font-weight:800; margin-bottom:10px; text-align: center;">
-            ※ 실수 방지를 위해 <b>delete</b> 라고 정확히 입력해주세요.
+            ※ 실수 방지를 위해 <b>delete</b> 라고 직접 타이핑해주세요.
         </div>
         
-        <input type="text" id="dev-reset-input" class="sentence-test-textarea" style="padding: 14px; font-size: 16px; min-height: unset; text-align: center; font-weight: 900; letter-spacing: 1px;" placeholder="delete" autocomplete="off">
+        <input 
+            type="text" 
+            id="dev-reset-input" 
+            class="sentence-test-textarea" 
+            style="padding: 14px; font-size: 16px; min-height: unset; text-align: center; font-weight: 900; letter-spacing: 1px;" 
+            placeholder="여기에 delete 입력" 
+            autocomplete="off"
+            onkeydown="if(event.key === 'Enter' || event.keyCode === 13) { event.preventDefault(); window.executeDevReset(); }"
+        >
         
-        <button class="base-btn" style="background:#dc2626; margin-top:12px; padding: 14px;" onclick="executeDevReset()">🚀 강제 초기화 및 새로고침 (Enter)</button>
+        <button 
+            type="button"
+            id="btn-dev-reset-confirm" 
+            class="base-btn" 
+            style="background:#dc2626; margin-top:12px; padding: 14px;" 
+            onclick="window.executeDevReset()"
+        >
+            🚀 강제 초기화 및 새로고침 (Enter)
+        </button>
 
         <!-- 🎓 테크 블로그 아코디언 영역 -->
         <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 8px;">
@@ -831,7 +868,7 @@
     </div>
 </div>
 
-<div class="app-version" onclick="openReleaseNoteModal()" title="릴리즈 노트 보기">v7.2.5 (Update Log)</div>
+<div class="app-version" onclick="openReleaseNoteModal()" title="릴리즈 노트 보기">v7.3.0 (Update Log)</div>
 <div id="toast-notification" class="toast-notification"></div>
 
 <script>
@@ -1737,46 +1774,61 @@ function renderVoiceListUI() {
     } 
 
     // ⭐️ [버그 해결] 특정 DB에서 모든 오디오 데이터를 안전하게 긁어오는 커서(Cursor) 함수
+    // ⭐️ [멈춤 방지] 2.5초 타임아웃 안전장치가 내장된 DB 추출기
     async function getAllAudioFromSpecificDB(dbName, storeName) {
-        return new Promise((resolve) => {
-            const request = indexedDB.open(dbName, 1);
-            
-            // DB가 없을 경우 생성만 해둠 (에러 방지)
-            request.onupgradeneeded = (e) => {
-                const db = e.target.result;
-                if (!db.objectStoreNames.contains(storeName)) {
-                    db.createObjectStore(storeName);
-                }
-            };
+        const fetchPromise = new Promise((resolve) => {
+            try {
+                // 버전을 명시하지 않고 열어야 기존 탭과의 버전 충돌 및 블락을 방지함
+                const request = indexedDB.open(dbName);
 
-            request.onsuccess = (e) => {
-                const db = e.target.result;
-                if (!db.objectStoreNames.contains(storeName)) {
-                    resolve({}); return;
-                }
-                
-                const tx = db.transaction(storeName, 'readonly');
-                const store = tx.objectStore(storeName);
-                const result = {};
-                
-                // Cursor를 이용해 메모리 폭발과 비동기 꼬임(Race condition) 원천 차단
-                const cursorReq = store.openCursor();
-                cursorReq.onsuccess = (ev) => {
-                    const cursor = ev.target.result;
-                    if (cursor) {
-                        result[cursor.key] = cursor.value;
-                        cursor.continue(); // 다음 데이터 탐색
-                    } else {
-                        // 모든 탐색이 끝나면 최종 결과 반환
-                        resolve(result);
-                    }
+                request.onblocked = () => {
+                    console.warn(`[DB Blocked] ${dbName} 열기 블락됨 - 스킵`);
+                    resolve({});
                 };
-                cursorReq.onerror = () => resolve({});
-            };
-            request.onerror = () => resolve({});
+
+                request.onerror = () => {
+                    console.warn(`[DB Error] ${dbName} 접근 실패 - 스킵`);
+                    resolve({});
+                };
+
+                request.onsuccess = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(storeName)) {
+                        db.close();
+                        resolve({});
+                        return;
+                    }
+
+                    const tx = db.transaction(storeName, 'readonly');
+                    const store = tx.objectStore(storeName);
+                    const result = {};
+
+                    const cursorReq = store.openCursor();
+                    cursorReq.onsuccess = (ev) => {
+                        const cursor = ev.target.result;
+                        if (cursor) {
+                            result[cursor.key] = cursor.value;
+                            cursor.continue();
+                        } else {
+                            db.close();
+                            resolve(result);
+                        }
+                    };
+                    cursorReq.onerror = () => {
+                        db.close();
+                        resolve({});
+                    };
+                };
+            } catch (err) {
+                resolve({});
+            }
         });
+
+        // 2.5초 초과 시 멈추지 않고 빈 데이터 반환 후 즉시 강제 통과
+        const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve({}), 2500));
+        return Promise.race([fetchPromise, timeoutPromise]);
     }
- 
+
     // ==========================================
     // 로컬 백업 내보내기
     // ==========================================
@@ -1850,6 +1902,7 @@ function renderVoiceListUI() {
     // ==========================================
     // 메인 백업 파이프라인 엔진 (ZIP 패키징) - 🚀 옵션 적용
     // ==========================================
+
     async function executeBackupPipeline(isCloud = false) {
         resetMultiProgressUI(isCloud, false);
 
@@ -1858,165 +1911,168 @@ function renderVoiceListUI() {
         const optVocabAudio = document.getElementById('chk-vocab-audio') ? document.getElementById('chk-vocab-audio').checked : false;
         const optSpkAudio = document.getElementById('chk-speaking-audio') ? document.getElementById('chk-speaking-audio').checked : true;
 
-        if (!optVocabText && !optSpkText && !optVocabAudio && !optSpkAudio) {
-            throw new Error("최소 한 개 이상의 백업 항목을 선택해야 합니다.");
-        }
+        // 1. [스피킹 워크스페이스 설정] 즉시 100% 완료
+        updateMultiProgress('settings', 100, 5);
 
-        // 1. 텍스트 메타데이터 스캔
-        updateMultiProgress('text', 50, 2);
-        await delay(400); 
-        
-        let localList = [];
-        if (optVocabText) {
-            localList = getPWASavedWords();
-        }
-        let localSpkData = [];
-        if (optSpkText) {
-            localSpkData = JSON.parse(localStorage.getItem('pongcrush_spk_data') || '[]');
-        }
+        const localSpkSettings = {
+            memo_font_size: localStorage.getItem('pongcrush_memo_font_size') || '15',
+            split_ratio_pct: localStorage.getItem('pongcrush_split_ratio_pct') || '65',
+            azure_key: localStorage.getItem('pongcrush_azure_key') || '',
+            azure_region: localStorage.getItem('pongcrush_azure_region') || '',
+            fixed_voice_uris: localStorage.getItem('pongcrush_spk_fixed_voice_uris_v5') || '[]',
+            last_index: localStorage.getItem('pongcrush_spk_last_index') || '0'
+        };
 
-        const exportData = { type: "pongcrush_combined", words: localList, speaking: localSpkData };
+        // 2. 텍스트 직렬화
+        updateMultiProgress('text', 50, 10);
+        let localList = optVocabText ? getPWASavedWords() : [];
+        let localSpkData = optSpkText ? JSON.parse(localStorage.getItem('pongcrush_spk_data') || '[]') : [];
+
+        const exportData = { 
+            type: "pongcrush_combined", 
+            words: localList, 
+            speaking: localSpkData,
+            speaking_settings: localSpkSettings 
+        };
+
         const zip = new JSZip();
         zip.file("data.json", JSON.stringify(exportData, null, 2));
-        updateMultiProgress('text', 100, 5);
-        await delay(300);
+        updateMultiProgress('text', 100, 15);
 
-        // 2. 단어장(Vocab) 오디오 DB 추출
+        // 3. 단어장 오디오 추출
         if (optVocabAudio) {
-            updateMultiProgress('vocab', 40, 10);
+            updateMultiProgress('vocab', 40, 22);
             const vocabAudioData = await getAllAudioFromSpecificDB('PongcrushVocabAudioDB', 'vocabAudioStore');
-            const vocabAudioFolder = zip.folder("audio_vocab"); 
-            for(const key of Object.keys(vocabAudioData)) {
-                vocabAudioFolder.file(key, vocabAudioData[key]);
+            const vocabFolder = zip.folder("audio_vocab"); 
+            for (const key of Object.keys(vocabAudioData)) {
+                vocabFolder.file(key, vocabAudioData[key]);
             }
-            updateMultiProgress('vocab', 100, 25);
-            await delay(300);
+            updateMultiProgress('vocab', 100, 32);
         } else {
-            updateMultiProgress('vocab', 100, 25);
+            updateMultiProgress('vocab', 100, 32);
         }
 
-        // 3. ⭐️ 스피킹(Speaking) 오디오 DB 추출
+        // 4. 스피킹 오디오 추출 (락 방지 타임아웃 적용)
         if (optSpkAudio) {
-            updateMultiProgress('spk', 40, 35);
+            updateMultiProgress('spk', 40, 42);
             const spkAudioData = await getAllAudioFromSpecificDB('PongcrushAudioDB', 'audioStore');
-            const spkAudioFolder = zip.folder("audio_speaking"); 
-            for(const key of Object.keys(spkAudioData)) {
-                spkAudioFolder.file(key, spkAudioData[key]);
+            const spkFolder = zip.folder("audio_speaking"); 
+            for (const key of Object.keys(spkAudioData)) {
+                spkFolder.file(key, spkAudioData[key]);
             }
-            updateMultiProgress('spk', 100, 45);
-            await delay(300);
+            updateMultiProgress('spk', 100, 55);
         } else {
-            updateMultiProgress('spk', 100, 45);
+            updateMultiProgress('spk', 100, 55);
         }
 
-        // 4. JSZip 단일 압축
+        // 5. ZIP 압축
         const blob = await zip.generateAsync(
-            {type:"blob", compression: "DEFLATE", compressionOptions: { level: 6 }}, 
-            (meta) => updateMultiProgress('zip', meta.percent, 45 + (meta.percent * 0.4))
+            { type: "blob", compression: "DEFLATE", compressionOptions: { level: 6 } }, 
+            (meta) => updateMultiProgress('zip', meta.percent, 55 + (meta.percent * 0.35))
         );
-        updateMultiProgress('zip', 100, 85);
-        await delay(400);
+        updateMultiProgress('zip', 100, 90);
 
         return blob;
     }
- 
+
     // 통합 데이터 복원 함수 (실수로 지워졌던 기존 로직 복구)
     async function processImportedData(rawContent) { 
-        let importedList = []; 
-        if (typeof rawContent === 'string') { 
-            const trimmed = rawContent.trim(); 
-            if (trimmed.startsWith('[') || trimmed.startsWith('{')) { 
-                try { 
-                    const parsed = JSON.parse(trimmed); 
-                    if (Array.isArray(parsed)) { 
-                        importedList = parsed; 
-                    } else if (parsed && parsed.type === "pongcrush_combined") {
-                        importedList = parsed.words || [];
-                        if (parsed.speaking && parsed.speaking.length > 0) {
-                            localStorage.setItem('pongcrush_spk_data', JSON.stringify(parsed.speaking));
+            let importedList = []; 
+            let importedSpeakingSettings = null;
+
+            if (typeof rawContent === 'string') { 
+                const trimmed = rawContent.trim(); 
+                if (trimmed.startsWith('[') || trimmed.startsWith('{')) { 
+                    try { 
+                        const parsed = JSON.parse(trimmed); 
+                        if (Array.isArray(parsed)) { 
+                            importedList = parsed; 
+                        } else if (parsed && parsed.type === "pongcrush_combined") {
+                            importedList = parsed.words || [];
+                            if (parsed.speaking && parsed.speaking.length > 0) {
+                                localStorage.setItem('pongcrush_spk_data', JSON.stringify(parsed.speaking));
+                            }
+
+                            // ⭐ [추가] 스피킹 3:1 패널비율, 메모장 폰트, Azure 설정 복원 주입
+                            if (parsed.speaking_settings) {
+                                const s = parsed.speaking_settings;
+                                if (s.split_ratio_pct) localStorage.setItem('pongcrush_split_ratio_pct', String(s.split_ratio_pct));
+                                if (s.memo_font_size) localStorage.setItem('pongcrush_memo_font_size', String(s.memo_font_size));
+                                if (s.azure_key) localStorage.setItem('pongcrush_azure_key', s.azure_key);
+                                if (s.azure_region) localStorage.setItem('pongcrush_azure_region', s.azure_region);
+                                if (s.fixed_voice_uris) localStorage.setItem('pongcrush_spk_fixed_voice_uris_v5', s.fixed_voice_uris);
+                                if (s.last_index !== undefined) localStorage.setItem('pongcrush_spk_last_index', String(s.last_index));
+                            }
                         }
-                    } else if (parsed && typeof parsed === 'object') { 
-                        const possibleArray = Object.values(parsed).find(v => Array.isArray(v)); 
-                        if (possibleArray) importedList = possibleArray; 
-                        else if (parsed.ko && parsed.en) importedList = [parsed]; 
-                    } 
-                } catch(e) { console.warn("JSON parse failed, trying line parse:", e); } 
-            } 
-            if (importedList.length === 0) { 
-                const lines = trimmed.split(/\r?\n/); 
-                lines.forEach(line => { 
-                    const parts = line.split(/\t|,|\s{2,}/); 
-                    if (parts.length >= 2) { 
-                        importedList.push({ ko: parts[0].trim(), en: parts[1].trim(), exEn: parts[2] ? parts[2].trim() : '', exKo: parts[3] ? parts[3].trim() : '', synonyms: parts[4] ? parts[4].trim() : '', vagueCount: 1 }); 
-                    } 
-                }); 
-            } 
-        } else if (Array.isArray(rawContent)) { 
-            importedList = rawContent; 
-        } 
+                    } catch(e) {} 
+                }
+            }
+
+            updateMultiProgress('settings', 100, 85);
+            await delay(200);
         
-        if (!Array.isArray(importedList) || importedList.length === 0) { throw new Error("올바른 백업 형식이 아니거나 데이터가 비어 있습니다."); } 
-        if (!window.isAllDbLoaded) { 
-            const confirmLoad = confirm("⚠️ 현재 브라우저 메모리에 전체 단어장 DB가 로드되어 있지 않습니다.\n\n완벽한 복원을 위해 기본 단어장(스피킹, 라이팅, 초록이)을 모두 불러오시겠습니까?"); 
-            if (confirmLoad) { 
-                const loadingModal = document.getElementById('loading-overlay'); 
-                const loadingText = document.getElementById('loading-text'); 
-                if (loadingModal) { 
-                    if (loadingText) loadingText.innerText = "단어장 통합 데이터 로딩 중..."; 
-                    loadingModal.classList.remove('hidden'); 
-                } 
-                try { 
-                    const urls = [ 
-                        'https://docs.google.com/spreadsheets/d/1m7KXifCB6txkKEOHqApMWOR4MQwqb6Ji1Dm-hRJYzLc/edit?usp=sharing', 
-                        'https://docs.google.com/spreadsheets/d/1UYTEv88wdKsSS2kkB-UylHAfQAlV6yrvjwVNecG6m64/edit?usp=sharing', 
-                        'https://docs.google.com/spreadsheets/d/1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U/edit?usp=sharing' 
-                    ]; 
-                    const results = await Promise.all(urls.map(url => fetchSheetData(url))); 
-                    loadedRawWordList = []; 
-                    results.forEach(res => { loadedRawWordList = loadedRawWordList.concat(res); }); 
-                    window.isAllDbLoaded = true; 
-                } catch (err) { 
+            if (!Array.isArray(importedList) || importedList.length === 0) { throw new Error("올바른 백업 형식이 아니거나 데이터가 비어 있습니다."); } 
+            if (!window.isAllDbLoaded) { 
+                const confirmLoad = confirm("⚠️ 현재 브라우저 메모리에 전체 단어장 DB가 로드되어 있지 않습니다.\n\n완벽한 복원을 위해 기본 단어장(스피킹, 라이팅, 초록이)을 모두 불러오시겠습니까?"); 
+                if (confirmLoad) { 
+                    const loadingModal = document.getElementById('loading-overlay'); 
+                    const loadingText = document.getElementById('loading-text'); 
+                    if (loadingModal) { 
+                        if (loadingText) loadingText.innerText = "단어장 통합 데이터 로딩 중..."; 
+                        loadingModal.classList.remove('hidden'); 
+                    } 
+                    try { 
+                        const urls = [ 
+                            'https://docs.google.com/spreadsheets/d/1m7KXifCB6txkKEOHqApMWOR4MQwqb6Ji1Dm-hRJYzLc/edit?usp=sharing', 
+                            'https://docs.google.com/spreadsheets/d/1UYTEv88wdKsSS2kkB-UylHAfQAlV6yrvjwVNecG6m64/edit?usp=sharing', 
+                            'https://docs.google.com/spreadsheets/d/1VCSxOUY7bDuZlp3JtRPANYFXxBAzFBxrYCj6tC89n1U/edit?usp=sharing' 
+                        ]; 
+                        const results = await Promise.all(urls.map(url => fetchSheetData(url))); 
+                        loadedRawWordList = []; 
+                        results.forEach(res => { loadedRawWordList = loadedRawWordList.concat(res); }); 
+                        window.isAllDbLoaded = true; 
+                    } catch (err) { 
+                        if (loadingModal) loadingModal.classList.add('hidden'); 
+                        throw new Error("통합 데이터를 불러오는데 실패했습니다: " + err.message); 
+                    } 
                     if (loadingModal) loadingModal.classList.add('hidden'); 
-                    throw new Error("통합 데이터를 불러오는데 실패했습니다: " + err.message); 
+                    if (loadingText) loadingText.innerText = "단어장 데이터를 가져오는 중..."; 
                 } 
-                if (loadingModal) loadingModal.classList.add('hidden'); 
-                if (loadingText) loadingText.innerText = "단어장 데이터를 가져오는 중..."; 
             } 
-        } 
-        let currentList = getPWASavedWords(); 
-        let addedCount = 0; 
-        let updatedCount = 0; 
-        importedList.forEach(item => { 
-            if (item && item.ko && item.en) { 
-                let syn = item.synonyms || ''; 
-                let exEn = item.exEn || ''; 
-                let exKo = item.exKo || ''; 
-                const matchKo = sanitizeForMatch(item.ko); 
-                const matchEn = sanitizeForMatch(item.en); 
-                if (loadedRawWordList && loadedRawWordList.length > 0) { 
-                    const match = loadedRawWordList.find(r => sanitizeForMatch(r.ko) === matchKo && sanitizeForMatch(r.en) === matchEn); 
-                    if (match) { 
-                        if (!syn && match.synonyms) syn = match.synonyms; 
-                        if (!exEn && match.exEn) exEn = match.exEn; 
-                        if (!exKo && match.exKo) exKo = match.exKo; 
+            let currentList = getPWASavedWords(); 
+            let addedCount = 0; 
+            let updatedCount = 0; 
+            importedList.forEach(item => { 
+                if (item && item.ko && item.en) { 
+                    let syn = item.synonyms || ''; 
+                    let exEn = item.exEn || ''; 
+                    let exKo = item.exKo || ''; 
+                    const matchKo = sanitizeForMatch(item.ko); 
+                    const matchEn = sanitizeForMatch(item.en); 
+                    if (loadedRawWordList && loadedRawWordList.length > 0) { 
+                        const match = loadedRawWordList.find(r => sanitizeForMatch(r.ko) === matchKo && sanitizeForMatch(r.en) === matchEn); 
+                        if (match) { 
+                            if (!syn && match.synonyms) syn = match.synonyms; 
+                            if (!exEn && match.exEn) exEn = match.exEn; 
+                            if (!exKo && match.exKo) exKo = match.exKo; 
+                        } 
+                    } 
+                    const existingIdx = currentList.findIndex(w => sanitizeForMatch(w.ko) === matchKo && sanitizeForMatch(w.en) === matchEn); 
+                    if (existingIdx > -1) { 
+                        currentList[existingIdx].vagueCount = Math.max(currentList[existingIdx].vagueCount || 1, item.vagueCount || 1); 
+                        if (!currentList[existingIdx].synonyms && syn) currentList[existingIdx].synonyms = syn; 
+                        if (!currentList[existingIdx].exEn && exEn) currentList[existingIdx].exEn = exEn; 
+                        if (!currentList[existingIdx].exKo && exKo) currentList[existingIdx].exKo = exKo; 
+                        updatedCount++; 
+                    } else { 
+                        currentList.push({ ko: item.ko, en: item.en, exEn: exEn, exKo: exKo, synonyms: syn, category: item.category || '기타', dayIndex: item.dayIndex !== undefined ? item.dayIndex : -1, vagueCount: item.vagueCount || 1 }); 
+                        addedCount++; 
                     } 
                 } 
-                const existingIdx = currentList.findIndex(w => sanitizeForMatch(w.ko) === matchKo && sanitizeForMatch(w.en) === matchEn); 
-                if (existingIdx > -1) { 
-                    currentList[existingIdx].vagueCount = Math.max(currentList[existingIdx].vagueCount || 1, item.vagueCount || 1); 
-                    if (!currentList[existingIdx].synonyms && syn) currentList[existingIdx].synonyms = syn; 
-                    if (!currentList[existingIdx].exEn && exEn) currentList[existingIdx].exEn = exEn; 
-                    if (!currentList[existingIdx].exKo && exKo) currentList[existingIdx].exKo = exKo; 
-                    updatedCount++; 
-                } else { 
-                    currentList.push({ ko: item.ko, en: item.en, exEn: exEn, exKo: exKo, synonyms: syn, category: item.category || '기타', dayIndex: item.dayIndex !== undefined ? item.dayIndex : -1, vagueCount: item.vagueCount || 1 }); 
-                    addedCount++; 
-                } 
-            } 
-        }); 
-        localStorage.setItem(PWA_VAGUE_STORAGE_KEY, JSON.stringify(currentList)); 
-        updatePWAReviewButtonUI(); 
-        alert(`백업 데이터에서 ${importedList.length}개 단어를 확인했습니다.\n(신규 추가: ${addedCount}개, 병합 업데이트: ${updatedCount}개 완료)`); 
+            }); 
+            localStorage.setItem(PWA_VAGUE_STORAGE_KEY, JSON.stringify(currentList)); 
+            updatePWAReviewButtonUI(); 
+            alert(`백업 데이터에서 ${importedList.length}개 단어를 확인했습니다.\n(신규 추가: ${addedCount}개, 병합 업데이트: ${updatedCount}개 완료)`); 
     }
   
  
@@ -2472,22 +2528,26 @@ function renderVoiceListUI() {
             card.innerHTML = ` <div class="speaking-top-bar" style="color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 8px;"> <span>📊 평가 결과</span> <button class="speaking-close-btn" onclick="closeSpeakingModal()" style="color: #64748b;">✖ <span style="font-size:12px; font-weight:700; opacity:0.8;">(ESC)</span></button> </div> <div class="speaking-content-area" style="justify-content: flex-start; gap: 12px; padding: 0;"> <div class="result-score-box"><div style="font-size: 13px; font-weight: 800; color: #64748b;">발음 및 유사도 점수</div><div class="result-score-val" style="color: ${scoreColor};">${evalResult.overallScore}점</div></div> <div class="result-card-box question"><div style="font-size: 11px; font-weight: 800; opacity: 0.8; margin-bottom: 4px;">원문 (정답)</div><div style="font-size: 16px; font-weight: 800; line-height: 1.4;">${speakingTargetText}</div></div> <div class="result-card-box my-answer"><div style="font-size: 11px; font-weight: 800; color: #64748b; margin-bottom: 4px;">내 발음 분석 결과</div><div style="font-size: 16px; line-height: 1.4;">${evalHtml}</div></div> </div> <div class="speaking-two-btn-row"> <button class="btn-light" onclick="speakingStep=1; renderSpeakingModalUI(); speakTargetTextInModal();">다시 연습하기</button> <button class="btn-dark" onclick="window.closeSpeakingModalAndNext()">닫기 및 다음 단어 (Enter)</button> </div> `; 
         } 
     }
-
-    // ==========================================
-    // 🛠️ 개발자 전용 데이터 강제 초기화 (Hidden Feature)
-    // ========================================== 
-// ==========================================
-    // 🛠️ 개발자 전용 데이터 강제 초기화 (Hidden Feature)
-    // ==========================================
-    let isDevResetExecuting = false;
-
-    function openDevResetModal() {
+ 
+ function openDevResetModal() {
         const modal = document.getElementById('dev-reset-modal');
         if (modal) {
             modal.classList.remove('hidden');
             const input = document.getElementById('dev-reset-input');
+            const btn = document.getElementById('btn-dev-reset-confirm');
+            if (btn) {
+                btn.disabled = false;
+                btn.innerText = "🚀 강제 초기화 및 새로고침 (Enter)";
+            }
             if (input) {
                 input.value = '';
+                // 엔터 키 직결
+                input.onkeydown = (e) => {
+                    if (e.key === 'Enter' || e.keyCode === 13) {
+                        e.preventDefault();
+                        window.executeDevReset();
+                    }
+                };
                 setTimeout(() => input.focus(), 100);
             }
         }
@@ -2497,80 +2557,94 @@ function renderVoiceListUI() {
         const modal = document.getElementById('dev-reset-modal');
         if (modal) modal.classList.add('hidden');
     }
-    
-    async function executeDevReset() {
-        if (isDevResetExecuting) return;
 
+    // ⭐️ [전역 바인딩] 막힘없는 하드 리셋 엔진
+    window.executeDevReset = async function() {
         const input = document.getElementById('dev-reset-input');
-        if (!input || input.value.trim().toLowerCase() !== 'delete') {
-            alert('안전 장치 작동 중: 입력란에 "delete"라고 정확히 입력해야 초기화가 진행됩니다.');
+        const btn = document.getElementById('btn-dev-reset-confirm');
+        const val = (input ? input.value : '').trim().toLowerCase();
+
+        // 1. 값 검증 (사용자가 친 값을 alert로 명확히 피드백)
+        if (val !== 'delete') {
+            alert(`안전 장치 작동 중:\n입력창에 "delete"를 정확히 입력해주세요.\n(현재 입력값: "${val}")`);
+            if (input) {
+                input.focus();
+                input.select();
+            }
             return;
         }
 
-        isDevResetExecuting = true;
-        const confirmReset = confirm("경고: 단어장 오디오 캐시를 제외한 모든 기록, AI 설정, 일반 캐시 및 스피킹 데이터베이스가 영구적으로 삭제됩니다.\n진행하시겠습니까?");
-        if (!confirmReset) {
-            isDevResetExecuting = false;
-            return;
+        if (btn) {
+            btn.disabled = true;
+            btn.innerText = "⏳ 초기화 처리 중...";
         }
 
         try {
-            // 1. 로컬 스토리지 및 세션 스토리지 완벽 초기화
+            // [1] 로컬 / 세션 스토리지 소각
             localStorage.clear();
             sessionStorage.clear();
 
-            // 2. 서비스 워커(PWA) 오프라인 캐시 초기화 및 서비스 워커 연결 강제 종료
-            if ('caches' in window) {
-                const cacheNames = await caches.keys();
-                await Promise.all(cacheNames.map(name => caches.delete(name)));
-            }
-
+            // [2] PWA 서비스 워커 연결 해제 (오류 무시 통과)
             if ('serviceWorker' in navigator) {
-                const registrations = await navigator.serviceWorker.getRegistrations();
-                for (let registration of registrations) {
-                    await registration.unregister();
+                try {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (let reg of registrations) {
+                        await reg.unregister();
+                    }
+                } catch (swErr) {
+                    console.warn(swErr);
                 }
             }
 
-            // 3. IndexedDB: '스피킹 오디오 DB(PongcrushAudioDB)'만 삭제 (단어장 DB 보존)
-            const deleteSpeakingDB = new Promise((resolve) => {
-                const req = indexedDB.deleteDatabase('PongcrushAudioDB');
-                req.onsuccess = resolve;
-                req.onerror = resolve; 
-                req.onblocked = resolve;
-            });
-
-            await deleteSpeakingDB;
-
-            // 4. 기존 SW를 완전히 제거한 상태에서 최신 sw.js를 다시 설치합니다.
-            //    query string + updateViaCache:'none' 조합으로 브라우저 HTTP 캐시까지 우회합니다.
-            let newRegistration = null;
-            if ('serviceWorker' in navigator) {
-                const swVersion = Date.now();
-                newRegistration = await navigator.serviceWorker.register(
-                    './sw.js?reset=' + swVersion,
-                    { updateViaCache: 'none' }
-                );
-
-                // sw.js의 install 단계가 끝나야 speaking.html도 precache가 완료됩니다.
-                await waitForServiceWorkerActivation(newRegistration);
+            // [3] 브라우저 정적 오프라인 캐시(CacheStorage) 파기
+            if ('caches' in window) {
+                try {
+                    const cacheNames = await caches.keys();
+                    await Promise.all(cacheNames.map(name => caches.delete(name)));
+                } catch (cErr) {
+                    console.warn(cErr);
+                }
             }
 
-            alert('✅ 초기화 완료\n최신 index.html / sw.js / speaking.html을 다시 받아 새 PWA 캐시를 구성했습니다.');
+            // [4] 스피킹 IndexedDB 삭제 (다른 탭 락 방지: 500ms 타임아웃 강제 통과)
+            await new Promise((resolve) => {
+                try {
+                    const req = indexedDB.deleteDatabase('PongcrushAudioDB');
+                    req.onsuccess = resolve;
+                    req.onerror = resolve;
+                    req.onblocked = resolve;
+                } catch (dbErr) {
+                    resolve();
+                }
+                setTimeout(resolve, 500);
+            });
 
-            // 5. 새로 받아진 index.html로 이동합니다.
-            //    이때 새 SW가 이미 활성화되어 있어 다음 화면부터 새 캐시를 사용합니다.
+            closeDevResetModal();
+
+            // [5] 기본 윈도우 얼럿 확인 후 즉시 새로고침
+            window.alert(
+                "🎉 시스템 초기화 완료!\n\n" +
+                "• 로컬/세션 스토리지 완전 삭제\n" +
+                "• 브라우저 정적 캐시 파기\n" +
+                "• 스피킹 오디오 DB 소각\n\n" +
+                "확인을 누르면 최신 상태로 새로고침됩니다."
+            );
+
             window.location.replace(
                 window.location.origin +
                 window.location.pathname +
-                '?reset=' + new Date().getTime()
+                '?reset=' + Date.now()
             );
+
         } catch (error) {
             alert('초기화 중 오류가 발생했습니다: ' + error.message);
-            isDevResetExecuting = false;
+            if (btn) {
+                btn.disabled = false;
+                btn.innerText = "🚀 강제 초기화 및 새로고침 (Enter)";
+            }
         }
-    }
- 
+    };
+
 let devResetTapCount = 0;
     let devResetTapTimer = null;
 
@@ -2597,6 +2671,23 @@ let devResetTapCount = 0;
     }, { passive: true });
 
     document.addEventListener('keydown', (e) => {
+        const devResetModal = document.getElementById('dev-reset-modal');
+        const isDevResetOpen = devResetModal && !devResetModal.classList.contains('hidden');
+
+        // ⭐ 리셋 모달이 열려있을 때의 단축키 최우선 가로채기
+        if (isDevResetOpen) {
+            if (e.key === 'Enter' || e.keyCode === 13) {
+                e.preventDefault();
+                window.executeDevReset();
+                return;
+            }
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                closeDevResetModal();
+                return;
+            }
+        }
+
         if (e.key === 'Insert') {
             e.preventDefault();
             openDevResetModal();
@@ -2618,17 +2709,7 @@ let devResetTapCount = 0;
             return; 
         }
 
-        const devResetModal = document.getElementById('dev-reset-modal');
-        const isDevResetOpen = devResetModal && !devResetModal.classList.contains('hidden');
-
-        if (isDevResetOpen) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                executeDevReset();
-            }
-            return;
-        }
-
+        // 일반 텍스트 입력창일 때 엔터 가드
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
             if (e.target.id === 'modal-sentence-textarea' && e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -2721,24 +2802,19 @@ let devResetTapCount = 0;
         }
     }
 
-    // 1. 프로그레시브 바 UI 렌더링 및 CSS 강제 복구 엔진
     function resetMultiProgressUI(isCloud, isRestore = false) {
         const container = document.getElementById('multi-progress-container');
         const totalContainer = document.getElementById('total-progress-container');
         const loadingText = document.getElementById('loading-text');
         const cardInner = document.getElementById('loading-card-inner');
 
-        // 🚨 다른 동작으로 인해 좁아졌던 로딩창 CSS를 넓고 전문적인 형태로 강제 복구
         if (cardInner) {
-            cardInner.style.maxWidth = '520px';
+            cardInner.style.maxWidth = '500px';
             cardInner.style.textAlign = 'left';
             const titleFlex = cardInner.querySelector('div');
-            if (titleFlex) {
-                titleFlex.style.justifyContent = 'flex-start';
-            }
+            if (titleFlex) titleFlex.style.justifyContent = 'flex-start';
         }
 
-        // 🚨 hidden 클래스 제거 및 display 속성 강제 부여로 무조건 화면에 렌더링
         if (container) {
             container.classList.remove('hidden');
             container.style.display = 'flex';
@@ -2748,42 +2824,46 @@ let devResetTapCount = 0;
             totalContainer.style.display = 'block';
         }
 
-        // 3. 상태에 맞는 UI 동적 생성
-        let html = '';
-        const createRow = (id, icon, title, desc, color) => `
-            <div class="progress-row" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+        const createRow = (id, icon, title, desc, color, isHighlight = false) => `
+            <div class="progress-row ${isHighlight ? 'progress-row-highlight' : ''}" style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
                 <div style="flex: 1; display: flex; flex-direction: column;">
-                    <span style="font-size: 13.5px; font-weight: 800; color: #475569;">${icon} ${title}</span>
+                    <div style="display: flex; align-items: center;">
+                        <span style="font-size: 13.5px; font-weight: 800; color: #334155;">${icon} ${title}</span>
+                        ${isHighlight ? '<span class="new-sparkle-badge">NEW</span>' : ''}
+                    </div>
                     <span class="desktop-only-desc" style="font-size: 11px; color: #94a3b8; font-weight: 600;">${desc}</span>
                 </div>
                 <div class="progress-bar-wrap" style="width: 120px; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
-                    <div id="bar-step-${id}" style="height: 100%; width: 0%; background: ${color}; transition: width 0.3s;"></div>
+                    <div id="bar-step-${id}" style="height: 100%; width: 0%; background: ${color}; transition: width 0.2s;"></div>
                 </div>
-                <div style="width: 38px; text-align: right; font-size: 12.5px; font-weight: 900; color: ${color};" id="pct-step-${id}">0%</div>
+                <div style="width: 38px; text-align: right; font-size: 12px; font-weight: 900; color: ${color};" id="pct-step-${id}">0%</div>
             </div>
         `;
 
+        let html = '';
         if (isRestore) {
-            if (loadingText) loadingText.innerText = isCloud ? "☁️ 클라우드 복원 파이프라인 가동..." : "💾 로컬 파일 복원 파이프라인 가동...";
-            html += createRow('net', isCloud ? '☁️' : '💾', isCloud ? 'Cloud Fetching' : 'Local File I/O', isCloud ? '구글 드라이브 백업 파일 다운로드' : '로컬 백업 파일 메모리 적재', '#0ea5e9');
+            if (loadingText) loadingText.innerText = isCloud ? "☁️ 클라우드 복원 진행 중..." : "💾 로컬 파일 복원 진행 중...";
+            html += createRow('net', isCloud ? '☁️' : '💾', isCloud ? 'Cloud Fetch' : 'File Read', isCloud ? '구글 드라이브 백업 파일 다운로드' : '로컬 백업 파일 메모리 적재', '#0ea5e9');
             html += createRow('zip', '📦', 'Data Extraction', '백업 파일 압축 해제 및 무결성 검증', '#8b5cf6');
-            html += createRow('vocab', '🔊', 'Vocab DB Restore', '단어장 오디오 캐시 IndexedDB 적재', '#10b981');
-            html += createRow('spk', '🗣️', 'Speaking DB Restore', '스피킹 오디오 파일 IndexedDB 적재', '#f59e0b');
-            html += createRow('text', '📄', 'JSON Deserialization', '학습 데이터 파싱 및 스키마 병합', '#3b82f6');
+            html += createRow('settings', '⚙️', 'Workspace Config', '좌우 패널 비율, 메모장 폰트 복원', '#7c3aed', true);
+            html += createRow('vocab', '🔊', 'Vocab DB Restore', '단어장 오디오 캐시 적재', '#10b981');
+            html += createRow('spk', '🗣️', 'Speaking DB Restore', '스피킹 오디오 파일 적재', '#f59e0b');
+            html += createRow('text', '📄', 'JSON Parse', '학습 데이터 파싱 및 스키마 병합', '#3b82f6');
         } else {
-            if (loadingText) loadingText.innerText = isCloud ? "☁️ 클라우드 백업 파이프라인 가동..." : "💾 로컬 파일 백업 파이프라인 가동...";
-            html += createRow('text', '📄', 'JSON Serialization', '단어장/스피킹 텍스트 메타데이터 병합', '#3b82f6');
-            html += createRow('vocab', '🔊', 'Vocab DB Extraction', '단어장 IndexedDB 오디오 Blob 추출', '#10b981');
-            html += createRow('spk', '🗣️', 'Speaking DB Extraction', '스피킹 IndexedDB 오디오 Blob 추출', '#f59e0b');
-            html += createRow('zip', '📦', 'Deflate Compression', '단일 무손실 압축 및 메모리 버퍼링', '#8b5cf6');
-            html += createRow('net', isCloud ? '☁️' : '💾', isCloud ? 'Secure Transmission' : 'Local File I/O', isCloud ? '구글 드라이브 SSL 암호화 터널링' : '브라우저 Blob URL 생성 처리', '#ec4899');
+            if (loadingText) loadingText.innerText = isCloud ? "☁️ 클라우드 백업 진행 중..." : "💾 로컬 파일 백업 진행 중...";
+            html += createRow('settings', '⚙️', 'Workspace Config', '좌우 패널비율, 메모장 폰트 패키징', '#7c3aed', true);
+            html += createRow('text', '📄', 'JSON Serialization', '단어장/스피킹 문제 텍스트 병합', '#3b82f6');
+            html += createRow('vocab', '🔊', 'Vocab DB Extraction', '단어장 IndexedDB 오디오 추출', '#10b981');
+            html += createRow('spk', '🗣️', 'Speaking DB Extraction', '스피킹 IndexedDB 오디오 추출', '#f59e0b');
+            html += createRow('zip', '📦', 'Deflate Compression', '단일 무손실 압축 및 패키징', '#6366f1');
+            html += createRow('net', isCloud ? '☁️' : '💾', isCloud ? 'Cloud Upload' : 'Local Download', isCloud ? '구글 드라이브 업로드 전송' : '브라우저 파일 다운로드 생성', '#ec4899');
         }
-        
+
         if (container) container.innerHTML = html;
-        ['text', 'vocab', 'spk', 'zip', 'net'].forEach(id => updateMultiProgress(id, 0, 0));
+        ['settings', 'text', 'vocab', 'spk', 'zip', 'net'].forEach(id => updateMultiProgress(id, 0, 0));
     }
 
-    // 2. 단 하나만 존재해야 하는 구글 드라이브 복원 함수
+     // 2. 단 하나만 존재해야 하는 구글 드라이브 복원 함수
     window.loadFromGoogleDrive = async function() { 
         if (!GOOGLE_CLIENT_ID) { alert("스크립트 상단에 GOOGLE_CLIENT_ID를 먼저 입력해야 합니다."); return; } 
         requestGoogleAuth(async () => { 
@@ -2942,6 +3022,12 @@ let devResetTapCount = 0;
 
             await restoreAudioFolder("audio_vocab", 'PongcrushVocabAudioDB', 'vocabAudioStore', 'vocab', 20);
             await restoreAudioFolder("audio_speaking", 'PongcrushAudioDB', 'audioStore', 'spk', 50);
+
+            // ⭐ [신규] 복원 프로그레스에서 설정 복구 단계 진행
+            updateMultiProgress('settings', 50, 75);
+            await delay(200);
+
+
         } else {
             updateMultiProgress('vocab', 100, 50);
             updateMultiProgress('spk', 100, 80);
