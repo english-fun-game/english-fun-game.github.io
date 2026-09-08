@@ -1151,6 +1151,13 @@ body.is-resizing #panel-resizer {
     word-break: break-word;
 }
 
+
+    /* 기본(PC): 플로팅 버튼 숨김 */
+.btn-float-memo-jump {
+    display: none !important;
+}
+
+
 /* ==========================================
    반응형 및 모바일 최적화
    ========================================== */
@@ -1260,42 +1267,112 @@ body.is-resizing #panel-resizer {
         min-height: calc(3em + 24px) !important;
     }
     
-    .test-input { font-size: 17px; padding: 8px 10px; }
-    .answer-box { overflow: visible; }
+    .test-input { font-size: 17px; padding: 8px 10px; } 
 
-    .workspace-2to1 { 
-        flex-direction: column; 
-        gap: 12px; 
+    /* 1. 전체 화면 스크롤 잠금 완전 해제 */
+    html {
+        height: auto !important;
+        overflow-y: auto !important;
     }
+
+    body { 
+        padding: 8px 3.5vw 40px 3.5vw !important; 
+        height: auto !important; 
+        min-height: 100dvh !important;
+        overflow-x: hidden !important;
+        overflow-y: visible !important; 
+        display: block !important; /* flex 잠금 해제 */
+    }
+
+    /* 2. 워크스페이스 컨테이너를 세로 흐름 블록으로 전환 */
+    .workspace-2to1 { 
+        display: block !important;
+        flex: none !important;
+        height: auto !important;
+        min-height: auto !important;
+        overflow: visible !important;
+        margin-top: 6px !important;
+    }
+.btn-float-memo-jump {
+        display: flex !important;
+        position: fixed;
+        bottom: 24px;
+        right: 20px;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        
+        /* 기존 물음표와 동일한 깔끔한 화이트 배경 */
+        background: #ffffff;
+        border: 1.5px solid var(--border-strong);
+        color: var(--text-main);
+        
+        font-size: 16px;
+        font-weight: 900;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        
+        /* 가볍고 부드러운 그림자 */
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.18s, border-color 0.18s;
+        z-index: 999;
+        user-select: none;
+    }
+
+    .btn-float-memo-jump:hover {
+        background: #f8fafc;
+        border-color: var(--slack-blue);
+        color: var(--slack-blue);
+    }
+
+    .btn-float-memo-jump:active {
+        transform: scale(0.92);
+    }
+
     .panel-resizer { 
         display: none !important; 
     }
-    #panel-left, 
-    #panel-right {
+
+    /* 3. 좌측 문제 영역: 100% 너비 및 자율 높이 */
+    #panel-left {
         width: 100% !important;
+        max-width: 100% !important;
         min-width: 0 !important;
+        flex: none !important;
+        height: auto !important;
+        overflow: visible !important;
+        margin-bottom: 20px !important;
+    }
+
+    .answer-box { 
+        overflow: visible !important; 
+        height: auto !important;
         flex: none !important;
     }
 
-    #application-topics-container {
-        display: flex !important;
+    /* 4. 우측 메모장 영역: 세로로 자연스럽게 배치 */
+    #panel-right {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
         flex: none !important;
         height: auto !important;
-        max-height: 200px !important;
-        overflow: scroll  !important;
+        min-height: 360px !important;
+        overflow: visible !important;
+        margin-bottom: 40px !important;
     }
+
     #notepad-panel-container {
-        display: flex !important;
-        flex: none !important;
         height: auto !important;
-        min-height: 280px !important;
-        padding-top: 14px !important;
-        border-top: 2px dashed var(--border-color) !important;
+        min-height: 320px !important;
     }
+
     #memo-editor {
         flex: none !important;
         height: auto !important;
-        min-height: 220px !important;
+        min-height: 240px !important;
+        overflow-y: auto !important;
     }
  
     
@@ -1466,6 +1543,10 @@ body.is-resizing #panel-resizer {
 
                 <!-- ⭐ 오른쪽 하단 귀여운 조그마한 물음표 버튼 -->
                 <button type="button" id="btn-memo-guide" class="btn-memo-guide" onclick="startMemoTour(event)" title="메모 & 리사이저 기능 가이드">?</button>
+                <!-- 모바일 전용 우측 하단 고정 플로팅 메모 이동 버튼 -->
+                <button type="button" id="btn-float-jump" class="btn-float-memo-jump" onclick="scrollToMemo()" title="메모장 위치로 이동">
+                    ↓
+                </button>
             </div>
         </section>
 
@@ -4297,14 +4378,22 @@ const SPLIT_RATIO_KEY = 'pongcrush_split_ratio_pct';
 const DEFAULT_SPLIT_RATIO = 65; //
 
 function applySavedSplitRatio() {
-    if (window.innerWidth <= 768) return;
-
     const leftPanel = document.getElementById('panel-left');
     const rightPanel = document.getElementById('panel-right');
     if (!leftPanel || !rightPanel) return;
 
+    // ⭐ 모바일 환경일 때는 인라인 스타일을 제거하여 100% 너비 보장
+    if (window.innerWidth <= 768) {
+        leftPanel.style.removeProperty('width');
+        leftPanel.style.removeProperty('max-width');
+        leftPanel.style.removeProperty('flex');
+        rightPanel.style.removeProperty('width');
+        rightPanel.style.removeProperty('flex');
+        return;
+    }
+
     let ratio = parseFloat(localStorage.getItem(SPLIT_RATIO_KEY));
-    if (isNaN(ratio)) {
+    if (isNaN(ratio) || ratio < 20 || ratio > 85) {
         ratio = DEFAULT_SPLIT_RATIO;
     }
 
@@ -4432,6 +4521,38 @@ document.addEventListener('pointerdown', (e) => {
         if (!tooltip.contains(e.target) && e.target !== guideBtn) {
             tooltip.style.display = 'none';
         }
+    }
+});
+
+// ==========================================
+// 메모장 위치로 곧장 이동하는 플로팅 점프 엔진
+// ==========================================
+function scrollToMemo() {
+    const memoPanel = document.getElementById('panel-right') || document.getElementById('notepad-panel-container');
+    const memoEditor = document.getElementById('memo-editor');
+    
+    if (memoPanel) {
+        memoPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        
+        // 스크롤 이동 직후 메모장에 곧바로 타이핑 가능하도록 포커스 안착
+        if (memoEditor) {
+            setTimeout(() => {
+                memoEditor.focus();
+            }, 300);
+        }
+    }
+}
+
+// 스크롤 위치에 따라 플로팅 버튼을 자연스럽게 보여주거나 숨기는 옵션 (선택 사항)
+window.addEventListener('scroll', () => {
+    const floatBtn = document.getElementById('btn-float-jump');
+    if (!floatBtn) return;
+    
+    // 페이지 상단 근처에 있으면 버튼을 살짝 숨겨서 시야 방해 최소화
+    if (window.scrollY < 120) {
+        floatBtn.style.opacity = '0.7';
+    } else {
+        floatBtn.style.opacity = '1';
     }
 });
 
