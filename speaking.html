@@ -880,13 +880,123 @@ body.is-resizing #panel-resizer {
 }
 
 
+/* 메모장 패널 기준점 설정 */
 #notepad-panel-container {
-    flex: 1;
-    height: 100%;
-    min-height: 0;
+    position: relative; /* 우측 하단 버튼 및 가이드 팝업 기준 */
+}
+
+/* 오른쪽 하단 귀여운 미니 물음표 버튼 */
+.btn-memo-guide {
+    position: absolute;
+    bottom: 12px;
+    right: 14px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 1.5px solid var(--border-strong);
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
+    opacity: 0.65;
+    transition: all 0.2s ease;
+    z-index: 20;
+    user-select: none;
+}
+
+.btn-memo-guide:hover {
+    opacity: 1;
+    background: #f8fafc;
+    border-color: var(--slack-blue);
+    color: var(--slack-blue);
+    transform: scale(1.1);
+}
+
+/* 메모 & 리사이저 코치마크 팝오버 카드 */
+.memo-guide-card {
+    position: absolute;
+    bottom: 42px;
+    right: 14px;
+    width: 285px;
+    background: #ffffff;
+    border: 1.5px solid var(--border-strong);
+    border-radius: 12px;
+    padding: 14px 16px;
+    box-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.16), 0 2px 6px rgba(15, 23, 42, 0.04);
+    z-index: 30;
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    animation: memoGuidePop 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes memoGuidePop {
+    from { opacity: 0; transform: translateY(6px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.memo-guide-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1.5px solid var(--border-color);
+    padding-bottom: 7px;
+}
+
+.memo-guide-title {
+    font-size: 13.5px;
+    font-weight: 900;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.memo-guide-close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #94a3b8;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+}
+.memo-guide-close:hover { color: #0f172a; }
+
+.memo-guide-sec-title {
+    font-size: 11.5px;
+    font-weight: 800;
+    color: var(--slack-blue);
+    margin-bottom: 4px;
+}
+
+.memo-guide-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 5px;
+    font-size: 12px;
+    color: #334155;
+    line-height: 1.4;
+}
+
+.memo-guide-list kbd {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-size: 10.5px;
+    font-weight: 800;
+    color: #0f172a;
+    font-family: inherit;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.04);
 }
 
 #memo-editor {
@@ -1212,10 +1322,44 @@ body.is-resizing #panel-resizer {
                     </div>
                 </div>
                 
+                <!-- 단일 라이브 에디터 -->
                 <div id="memo-editor" contenteditable="true" spellcheck="false" placeholder="메모를 작성하세요... (Ctrl+B 볼드, - 스페이스 불렛, Tab 들여쓰기)" style="flex: 1; height: 100%; min-height: 0; padding: 12px; border: 1.5px solid var(--border-strong); border-radius: 8px; background: #ffffff; color: #0f172a; line-height: 1.6; outline: none; overflow-y: auto; box-sizing: border-box; word-break: break-word;"></div>
+
+                <!-- ⭐ [추가] 오른쪽 하단 조그마한 물음표 버튼 -->
+                <button type="button" id="btn-memo-guide" class="btn-memo-guide" onclick="toggleMemoGuide(event)" title="메모 & 리사이저 가이드">?</button>
+
+                <!-- ⭐ [추가] 코치마크 툴팁 팝오버 -->
+                <div id="memo-guide-tooltip" class="memo-guide-card" onclick="event.stopPropagation()">
+                    <div class="memo-guide-head">
+                        <span class="memo-guide-title">💡 메모 & 패널 가이드</span>
+                        <button type="button" class="memo-guide-close" onclick="closeMemoGuide(event)">&times;</button>
+                    </div>
+                    
+                    <!-- 1. 메모장 기능 및 단축키 -->
+                    <div>
+                        <div class="memo-guide-sec-title">📝 스마트 메모 단축키</div>
+                        <ul class="memo-guide-list">
+                            <li><kbd>Ctrl</kbd>+<kbd>S</kbd> : 즉시 수동 저장 (5초 자동 저장)</li>
+                            <li><kbd>Ctrl</kbd>+<kbd>B</kbd> : 굵은 글씨(Bold) 토글</li>
+                            <li><kbd>-</kbd> + <kbd>Space</kbd> : 불렛(•) 목록 자동 변환</li>
+                            <li><kbd>Tab</kbd> / <kbd>Shift+Tab</kbd> : 들여쓰기 / 내어쓰기</li>
+                            <li><kbd>A+</kbd> / <kbd>A-</kbd> : 글자 크기 조절 (설정 기억)</li>
+                        </ul>
+                    </div>
+
+                    <!-- 2. 패널 리사이저 기능 -->
+                    <div style="border-top: 1px dashed var(--border-color); padding-top: 8px;">
+                        <div class="memo-guide-sec-title">↔️ 패널 리사이저 바</div>
+                        <ul class="memo-guide-list">
+                            <li><strong>구분선 드래그</strong> : 문제 vs 메모장 너비 조절</li>
+                            <li><strong>구분선 더블클릭</strong> : 65% 기본 비율 리셋</li>
+                            <li>조절한 분할 비율은 브라우저에 자동 기억</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </section>
-    </main>
+     </main>
 
     <!-- 온보딩 안내 코치마크 -->
     <div id="coachmark-backdrop" class="onboarding-backdrop" onclick="closeCoachmark()">
@@ -3218,10 +3362,7 @@ function saveEditedData() {
             return;
         }
 
- 
-
         if (e.ctrlKey || e.metaKey || e.altKey) return;
-
 
         const key = e.key;
 
@@ -3229,6 +3370,8 @@ function saveEditedData() {
         if (key === 'Escape') {
             e.preventDefault();
 
+            closeMemoGuide(); // 코치마크 팝오버 닫기
+           
             // 1순위: 켜져있는 모달 닫기
             const modals = document.querySelectorAll('.modal-overlay');
             let isModalOpen = false;
@@ -4001,6 +4144,34 @@ window.onload = () => {
     checkMobileSwipeCoachmark();
     registerServiceWorker();
 };
+
+// ==========================================
+// 메모 & 리사이저 코치마크 팝오버 엔진
+// ==========================================
+function toggleMemoGuide(event) {
+    if (event) event.stopPropagation();
+    const tooltip = document.getElementById('memo-guide-tooltip');
+    if (!tooltip) return;
+    const isOpen = tooltip.style.display === 'flex';
+    tooltip.style.display = isOpen ? 'none' : 'flex';
+}
+
+function closeMemoGuide(event) {
+    if (event) event.stopPropagation();
+    const tooltip = document.getElementById('memo-guide-tooltip');
+    if (tooltip) tooltip.style.display = 'none';
+}
+
+// 화면 바깥 클릭 시 가이드 자동 닫기
+document.addEventListener('pointerdown', (e) => {
+    const tooltip = document.getElementById('memo-guide-tooltip');
+    const guideBtn = document.getElementById('btn-memo-guide');
+    if (tooltip && tooltip.style.display === 'flex') {
+        if (!tooltip.contains(e.target) && e.target !== guideBtn) {
+            tooltip.style.display = 'none';
+        }
+    }
+});
 
 
 </script>
