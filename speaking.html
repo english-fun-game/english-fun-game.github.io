@@ -1298,8 +1298,8 @@ body.is-resizing #panel-resizer {
         position: fixed;
         bottom: 24px;
         right: 20px;
-        width: 42px;
-        height: 42px;
+        width: 60px;
+        height: 60px;
         border-radius: 50%;
         
         /* 기존 물음표와 동일한 깔끔한 화이트 배경 */
@@ -1307,7 +1307,7 @@ body.is-resizing #panel-resizer {
         border: 1.5px solid var(--border-strong);
         color: var(--text-main);
         
-        font-size: 16px;
+        font-size: 30px;
         font-weight: 900;
         align-items: center;
         justify-content: center;
@@ -1545,7 +1545,7 @@ body.is-resizing #panel-resizer {
                 <button type="button" id="btn-memo-guide" class="btn-memo-guide" onclick="startMemoTour(event)" title="메모 & 리사이저 기능 가이드">?</button>
                 <!-- 모바일 전용 우측 하단 고정 플로팅 메모 이동 버튼 -->
                 <button type="button" id="btn-float-jump" class="btn-float-memo-jump" onclick="scrollToMemo()" title="메모장 위치로 이동">
-                    ↓
+                    👇
                 </button>
             </div>
         </section>
@@ -3574,8 +3574,7 @@ function saveEditedData() {
         highlighted.forEach(el => el.classList.remove('highlight-target'));
     }
 
- 
-function loadNext() {
+ function loadNext() {
         if (!spkData || spkData.length === 0) return;
         stopMemoAutoSave(true); // 타이머 해제 및 잔여 메모 플러시
         stopAudio();
@@ -3584,9 +3583,9 @@ function loadNext() {
         saveCurrentIndex();
         renderUI();
         
-        // ⭐ [추가] 모바일에서 다음 문제로 넘길 때 스크롤을 맨 위로 이동
+        // ⭐ [수정] 모바일에서 애니메이션 없이 즉각적으로 맨 위로 이동
         if (window.innerWidth <= 768) {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({ top: 0, behavior: 'instant' });
         }
     }
 
@@ -3599,9 +3598,9 @@ function loadNext() {
         saveCurrentIndex();
         renderUI();
         
-        // ⭐ [추가] 모바일에서 이전 문제로 넘길 때 스크롤을 맨 위로 이동
+        // ⭐ [수정] 모바일에서 애니메이션 없이 즉각적으로 맨 위로 이동
         if (window.innerWidth <= 768) {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({ top: 0, behavior: 'instant' });
         }
     }
 
@@ -4543,7 +4542,7 @@ function scrollToMemo() {
     const memoEditor = document.getElementById('memo-editor');
     
     if (memoPanel) {
-        memoPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        memoPanel.scrollIntoView({ behavior: 'instant', block: 'start' });
         
     }
 }
