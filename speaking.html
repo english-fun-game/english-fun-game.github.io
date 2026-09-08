@@ -2134,48 +2134,112 @@ let isMemoShortcutsBound = false;
         // 엔터 입력 시 기본 블록을 div로 분리
         document.execCommand('defaultParagraphSeparator', false, 'div');
 
-        // 1. [추가] 텍스트 복붙 시 줄바꿈(\n) 기준으로 문장/블록 분리 처리
-        editor.addEventListener('paste', (e) => {
-            e.preventDefault();
-            const text = (e.clipboardData || window.clipboardData).getData('text/plain');
-            if (!text) return;
+        // 1. 복붙은 HTML 서식 우선 보존
+editor.addEventListener('paste', (e) => {
+    const clipboard = e.clipboardData || window.clipboardData;
+    if (!clipboard) return;
 
-            // 줄바꿈 기호 정규화 후 라인 분리
-            const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+    const htmlData = clipboard.getData('text/html');
+    const textData = clipboard.getData('text/plain');
 
-            // 단일 라인 복붙인 경우 기본 삽입
-            if (lines.length === 1) {
-                document.execCommand('insertText', false, lines[0]);
-                return;
-            }
+    // 같은 메모장/서식 있는 영역에서 잘라낸 경우
+    // 문단, 불렛, 볼드 등의 HTML 구조를 그대로 유지
+    if (htmlData) {
+        e.preventDefault();
 
-            // 여러 줄 복붙인 경우 각 줄을 독립된 <div> 또는 <ul><li>로 구조화
-            const escapeHtml = (str) => str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-            let html = '';
-            let inUl = false;
+        const doc = new DOMParser().parseFromString(htmlData, 'text/html');
 
-            lines.forEach((line) => {
-                const trimmed = line.trim();
-                // 붙여넣은 원문에 이미 '- ' 또는 '• '가 있으면 자동으로 불렛 목록화
-                if (trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
-                    if (!inUl) {
-                        html += '<ul>';
-                        inUl = true;
-                    }
-                    const content = trimmed.replace(/^[-•]\s+/, '');
-                    html += `<li>${escapeHtml(content) || '<br>'}</li>`;
-                } else {
-                    if (inUl) {
-                        html += '</ul>';
-                        inUl = false;
-                    }
-                    html += trimmed.length === 0 ? '<div><br></div>' : `<div>${escapeHtml(line)}</div>`;
+        // 외부 HTML의 위험 요소 제거
+        doc.querySelectorAll(
+            'script, style, iframe, object, embed, link, meta'
+        ).forEach(el => el.remove());
+
+        // inline 이벤트 및 위험한 URL 제거
+        doc.querySelectorAll('*').forEach(el => {
+            [...el.attributes].forEach(attr => {
+                const name = attr.name.toLowerCase();
+                const value = attr.value || '';
+
+                if (name.startsWith('on')) {
+                    el.removeAttribute(attr.name);
+                    return;
+                }
+
+                if (
+                    (name === 'href' ||
+                     name === 'src' ||
+                     name === 'xlink:href') &&
+                    /^(javascript:|data:|vbscript:)/i.test(value.trim())
+                ) {
+                    el.removeAttribute(attr.name);
                 }
             });
-
-            if (inUl) html += '</ul>';
-            document.execCommand('insertHTML', false, html);
         });
+
+        const richHtml = doc.body.innerHTML.trim();
+
+        if (richHtml) {
+            document.execCommand('insertHTML', false, richHtml);
+            return;
+        }
+    }
+
+    // HTML이 없는 경우에만 일반 텍스트 처리
+    if (!textData) return;
+
+    e.preventDefault();
+
+    const text = textData
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n');
+
+    const lines = text.split('\n');
+
+    // 단일 라인
+    if (lines.length === 1) {
+        document.execCommand('insertText', false, lines[0]);
+        return;
+    }
+
+    // 여러 줄: 문장별 독립 블록 유지
+    const escapeHtml = (str) => str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+
+    let insertHtml = '';
+    let inUl = false;
+
+    lines.forEach((line) => {
+        const trimmed = line.trim();
+
+        if (trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
+            if (!inUl) {
+                insertHtml += '<ul>';
+                inUl = true;
+            }
+
+            const content = trimmed.replace(/^[-•]\s+/, '');
+            insertHtml += `<li>${escapeHtml(content) || '<br>'}</li>`;
+        } else {
+            if (inUl) {
+                insertHtml += '</ul>';
+                inUl = false;
+            }
+
+            insertHtml += trimmed.length === 0
+                ? '<div><br></div>'
+                : `<div>${escapeHtml(line)}</div>`;
+        }
+    });
+
+    if (inUl) {
+        insertHtml += '</ul>';
+    }
+
+    document.execCommand('insertHTML', false, insertHtml);
+});
 
         // 2. 키보드 단축키 및 라이브 서식 핸들러
         editor.addEventListener('keydown', (e) => {
