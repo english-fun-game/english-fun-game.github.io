@@ -9,9 +9,14 @@
     <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
     <!-- Azure Speech SDK 추가 -->
     <script src="https://cdn.jsdelivr.net/npm/microsoft-cognitiveservices-speech-sdk@latest/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle-min.js"></script>
-    <!-- [추가] 마크다운 파싱 라이브러리 (marked.js) -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <style>
+
+<!-- [추가] Editor.js Core 및 공식 플러그인 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/list@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/marker@latest"></script>
+
+<style>
         :root {
     --slack-blue: #1264a3;
     --slack-bg: #f8fafc;
@@ -386,27 +391,7 @@ canvas {
 }
 .modal-close:hover { color: #0f172a; }
 .modal-close-esc { font-size: 12px; font-weight: 700; color: #94a3b8; margin-top: 4px; }
-
-/* [추가] 라이브 에디터 플레이스홀더 및 리스트 스타일 */
-#memo-editor:empty:before {
-    content: attr(placeholder);
-    color: #94a3b8;
-    pointer-events: none;
-    display: block;
-}
-#memo-editor ul, #memo-editor ol {
-    margin: 4px 0;
-    padding-left: 24px;
-}
-#memo-editor li {
-    margin-bottom: 2px;
-}
-#memo-editor blockquote {
-    border-left: 3px solid #cbd5e1;
-    margin: 4px 0;
-    padding-left: 10px;
-    color: #64748b;
-}
+  
 
 /* [목록, 수정, 추가] 모달 높이 90vh 고정 및 내부 레이아웃 */
 #list-modal .modal-content-giant,
@@ -1134,23 +1119,74 @@ body.is-resizing #panel-resizer {
     font-family: inherit;
     box-shadow: 0 1px 1px rgba(0,0,0,0.04);
 }
+ 
 
+/* [수정] Editor.js 컨테이너 (좌측 툴바 제거에 맞춰 일반 패딩으로 복구) */
 #memo-editor {
     flex: 1;
     height: 100%;
     min-height: 0;
     overflow-y: auto;
-    padding: 12px;
+    padding: 12px 16px 24px 16px; /* 좌측 44px 여백을 일반 16px로 복구 */
     border: 1.5px solid var(--border-strong);
     border-radius: 8px;
     background: #ffffff;
     color: #0f172a;
-    line-height: 1.6;
-    outline: none;
     box-sizing: border-box;
-    word-break: break-word;
+    line-height: 1.45;
+    cursor: text;
 }
 
+/* ⭐ 왼편 안내 UI(+, 드래그 핸들, 툴바 영역) 완전 숨김 */
+.ce-toolbar {
+    display: none !important;
+}
+
+.codex-editor {
+    height: 100% !important;
+}
+
+.codex-editor__redactor {
+    min-height: 100% !important;
+    padding-bottom: 60px !important;
+}
+
+.ce-block__content {
+    max-width: 100% !important;
+}
+
+.ce-paragraph[data-placeholder]:empty::before {
+    color: #94a3b8;
+}
+
+/* 블록 상하 여백 및 문단 패딩 압축 유지 */
+#memo-editor .ce-block {
+    margin-bottom: 0 !important;
+}
+
+#memo-editor .ce-paragraph {
+    padding: 2px 0 !important;
+    line-height: 1.45 !important;
+    min-height: auto !important;
+}
+
+#memo-editor .ce-header {
+    padding: 4px 0 2px 0 !important;
+    margin: 8px 0 2px 0 !important;
+    line-height: 1.35 !important;
+}
+
+#memo-editor .cdx-list,
+#memo-editor .cdx-nested-list {
+    padding-left: 22px !important;
+    margin: 2px 0 !important;
+}
+
+#memo-editor .cdx-list__item,
+#memo-editor .cdx-nested-list__item {
+    padding: 1px 0 !important;
+    line-height: 1.45 !important;
+}
 
     /* 기본(PC): 플로팅 버튼 숨김 */
 .btn-float-memo-jump {
@@ -1367,13 +1403,7 @@ body.is-resizing #panel-resizer {
         height: auto !important;
         min-height: 320px !important;
     }
-
-    #memo-editor {
-        flex: none !important;
-        height: auto !important;
-        min-height: 240px !important;
-        overflow-y: auto !important;
-    }
+ 
  
     
     .modal-content-giant[style], #voice-modal > div[style], #edit-modal > div[style], #add-modal > div[style], #list-modal > div[style] { 
@@ -1539,7 +1569,8 @@ body.is-resizing #panel-resizer {
                 </div>
                 
                 <!-- 단일 라이브 에디터 -->
-                <div id="memo-editor" contenteditable="true" spellcheck="false" placeholder="메모를 작성하세요... (Ctrl+B 볼드, - 스페이스 불렛, Tab 들여쓰기)" style="flex: 1; height: 100%; min-height: 0; padding: 12px; border: 1.5px solid var(--border-strong); border-radius: 8px; background: #ffffff; color: #0f172a; line-height: 1.6; outline: none; overflow-y: auto; box-sizing: border-box; word-break: break-word;"></div>
+                <!-- [수정 후] Editor.js 마운트 컨테이너 -->
+                <div id="memo-editor"></div>
 
                 <!-- ⭐ 오른쪽 하단 귀여운 조그마한 물음표 버튼 -->
                 <button type="button" id="btn-memo-guide" class="btn-memo-guide" onclick="startMemoTour(event)" title="메모 & 리사이저 기능 가이드">?</button>
@@ -1919,20 +1950,312 @@ const memoTourSteps = [
         `,
         preferredPos: 'bottom'
     },
-    {
+{
         targetId: 'memo-editor',
-        title: '✍️ 스마트 에디터 단축키',
+        title: '✍️ 스마트 메모장 핵심 단축키',
         desc: `
-            <ul>
-                <li><kbd>Ctrl+B</kbd> : 선택한 텍스트 <strong>굵은 글씨</strong> 토글</li>
-                <li><kbd>-</kbd> + <kbd>Space</kbd> : 글머리 기호(•) 리스트로 자동 변환</li>
-                <li><kbd>Tab</kbd> / <kbd>Shift+Tab</kbd> : 들여쓰기 / 내어쓰기</li>
-                <li><kbd>ESC</kbd> : 메모 작성 중 누르면 <strong>포커스가 즉시 해제</strong>되어 전체 읽기 및 문제 이동 단축키를 바로 사용 가능합니다.</li>
-            </ul>
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 4px;">
+                <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 13px; font-weight: 800; color: #1e293b;">• 글머리 목록</span>
+                    <kbd style="font-size: 12.5px; font-weight: 900; background: #ffffff; border: 1.5px solid #cbd5e1; padding: 2px 7px; border-radius: 6px; color: #0f172a;">- + Space</kbd>
+                </div>
+                <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 13px; font-weight: 800; color: #1e293b;">1. 번호 매기기</span>
+                    <kbd style="font-size: 12.5px; font-weight: 900; background: #ffffff; border: 1.5px solid #cbd5e1; padding: 2px 7px; border-radius: 6px; color: #0f172a;">1. + Space</kbd>
+                </div>
+                <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 13px; font-weight: 800; color: #1e293b;">굵게 / 형광펜</span>
+                    <span style="font-size: 12.5px; font-weight: 800; color: #475569;">텍스트 더블클릭(단축키 안내)</span>
+                </div>
+                <div style="background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 13px; font-weight: 900; color: #1d4ed8;">단축키 모드 복귀</span>
+                    <kbd style="font-size: 12.5px; font-weight: 900; background: #ffffff; border: 1.5px solid #93c5fd; padding: 2px 7px; border-radius: 6px; color: #1e40af;">ESC</kbd>
+                </div>
+                <div style="font-size: 11.5px; color: #64748b; font-weight: 600; line-height: 1.35; padding-left: 2px;">
+                    * 목록 작성 중 <kbd style="padding: 1px 4px;">Enter</kbd>를 한 번 더 누르면 일반 줄로 빠져나옵니다.
+                </div>
+            </div>
         `,
         preferredPos: 'inside'
     }
 ];
+
+
+// ==========================================
+    // Editor.js 메모장 엔진 (목록 완벽 지원 버전)
+    // ==========================================
+    let memoEditor = null;
+    let memoFontSize = parseInt(localStorage.getItem('pongcrush_memo_font_size')) || 15;
+    let memoAutoSaveTimer = null;
+    let lastSavedMemoJson = '';
+    let isEditorInitializing = false;
+
+    function getKoreanTimeString(date) {
+        const hours = date.getHours();
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        const period = hours < 12 ? '오전' : '오후';
+        const displayHours = hours % 12 || 12;
+        return `${period} ${displayHours}:${minutes}:${seconds}`;
+    }
+
+    function getCurrentQuestionMemoData() {
+        if (!spkData || spkData.length === 0 || !spkData[currentIndex]) {
+            return { time: Date.now(), blocks: [{ type: 'paragraph', data: { text: '' } }] };
+        }
+        const raw = spkData[currentIndex].memo;
+        if (!raw) return { time: Date.now(), blocks: [{ type: 'paragraph', data: { text: '' } }] };
+
+        if (typeof raw === 'object' && Array.isArray(raw.blocks)) {
+            if (raw.blocks.length === 0) raw.blocks = [{ type: 'paragraph', data: { text: '' } }];
+            return raw;
+        }
+        try {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed.blocks) && parsed.blocks.length > 0) return parsed;
+        } catch (e) {
+            return {
+                time: Date.now(),
+                blocks: [{ type: 'paragraph', data: { text: String(raw).replace(/<[^>]*>?/gm, '') } }]
+            };
+        }
+        return { time: Date.now(), blocks: [{ type: 'paragraph', data: { text: '' } }] };
+    }
+
+    // ⭐ Editor.js 마크다운 목록 단축키 엔진 (- 스페이스, 1. 스페이스)
+    function setupEditorMarkdownShortcuts() {
+        const editorContainer = document.getElementById('memo-editor');
+        if (!editorContainer || editorContainer._hasMarkdownListener) return;
+        editorContainer._hasMarkdownListener = true;
+
+        // capturing(true)으로 Editor.js 내부 핸들러보다 먼저 키 이벤트를 선점
+        editorContainer.addEventListener('keydown', async (e) => {
+            if (e.key !== ' ' && e.code !== 'Space') return;
+            if (!memoEditor || !memoEditor.blocks) return;
+
+            try {
+                const currentIdx = memoEditor.blocks.getCurrentBlockIndex();
+                if (currentIdx < 0) return;
+
+                const currentBlock = memoEditor.blocks.getBlockByIndex(currentIdx);
+                if (!currentBlock || currentBlock.name !== 'paragraph') return;
+
+                const blockEl = currentBlock.holder.querySelector('.ce-paragraph');
+                if (!blockEl) return;
+
+                const sel = window.getSelection();
+                if (!sel || !sel.rangeCount) return;
+                const range = sel.getRangeAt(0);
+
+                const fullText = blockEl.textContent.replace(/\u00a0/g, ' ');
+                const textBefore = fullText.slice(0, range.startOffset).trim();
+                const textAfter = fullText.slice(range.startOffset).trim();
+
+                // 1. 불렛 리스트 변환 (- 또는 * 또는 • 입력 후 Space)
+                if (textBefore === '-' || textBefore === '*' || textBefore === '•') {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    // v1/v2 공용 호환 포맷
+                    await memoEditor.blocks.insert('list', {
+                        style: 'unordered',
+                        items: [textAfter]
+                    }, undefined, currentIdx, true);
+
+                    memoEditor.blocks.delete(currentIdx + 1);
+                    focusBlockItem(currentIdx);
+                    return;
+                }
+
+                // 2. 번호 매기기 리스트 변환 (1. 또는 1 입력 후 Space)
+                if (textBefore === '1.' || textBefore === '1') {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    await memoEditor.blocks.insert('list', {
+                        style: 'ordered',
+                        items: [textAfter]
+                    }, undefined, currentIdx, true);
+
+                    memoEditor.blocks.delete(currentIdx + 1);
+                    focusBlockItem(currentIdx);
+                    return;
+                }
+            } catch (err) {
+                console.warn('목록 단축키 변환 실패 방지:', err);
+            }
+        }, true);
+    }
+
+    // 변환 직후 리스트 내부로 안전하게 커서 안착
+    function focusBlockItem(blockIndex) {
+        setTimeout(() => {
+            try {
+                const block = memoEditor.blocks.getBlockByIndex(blockIndex);
+                if (!block) return;
+                const inputEl = block.holder.querySelector('[contenteditable="true"]');
+                if (inputEl) {
+                    inputEl.focus();
+                    const sel = window.getSelection();
+                    const range = document.createRange();
+                    range.selectNodeContents(inputEl);
+                    range.collapse(false);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                }
+            } catch (e) {}
+        }, 15);
+    }
+
+    async function loadCurrentMemo() {
+        const editorContainer = document.getElementById('memo-editor');
+        if (!editorContainer || isEditorInitializing) return;
+
+        const memoData = getCurrentQuestionMemoData();
+        lastSavedMemoJson = JSON.stringify(memoData.blocks || []);
+
+        // CDN 전역 클래스 안전 매핑
+        const HeaderTool = window.Header;
+        const ListTool = window.EditorjsList || window.NestedList || window.List;
+        const MarkerTool = window.Marker;
+
+        const toolsConfig = {};
+        if (HeaderTool) {
+            toolsConfig.header = {
+                class: HeaderTool,
+                inlineToolbar: ['marker', 'bold'],
+                config: { levels: [2, 3, 4], defaultLevel: 3 }
+            };
+        }
+        if (ListTool) {
+            toolsConfig.list = {
+                class: ListTool,
+                inlineToolbar: true,
+                config: { defaultStyle: 'unordered' }
+            };
+        }
+        if (MarkerTool) {
+            toolsConfig.marker = { class: MarkerTool };
+        }
+
+        if (memoEditor && typeof memoEditor.render === 'function') {
+            try {
+                await memoEditor.isReady;
+                await memoEditor.render(memoData);
+                applyMemoFontSize();
+            } catch (err) {
+                if (memoEditor.destroy) memoEditor.destroy();
+                memoEditor = null;
+                await loadCurrentMemo();
+            }
+        } else {
+            isEditorInitializing = true;
+            editorContainer.innerHTML = '';
+
+            memoEditor = new EditorJS({
+                holder: 'memo-editor',
+                placeholder: '작성하세요...',
+                data: memoData,
+                tools: toolsConfig,
+                minHeight: 0,
+                onChange: () => {
+                    startMemoAutoSave();
+                }
+            });
+
+            try {
+                await memoEditor.isReady;
+                applyMemoFontSize();
+                setupEditorMarkdownShortcuts(); // 단축키 리스너 등록
+
+                // 여백 클릭 시 포커스 보장
+                editorContainer.onclick = (e) => {
+                    if (e.target === editorContainer || e.target.classList.contains('codex-editor__redactor')) {
+                        if (memoEditor && memoEditor.caret) {
+                            memoEditor.caret.setToLastBlock('end');
+                        }
+                    }
+                };
+            } catch (e) {
+                console.error('EditorJS 초기화 에러:', e);
+            } finally {
+                isEditorInitializing = false;
+            }
+        }
+
+        const status = document.getElementById('memo-save-status');
+        if (status) {
+            status.innerText = '자동저장 (5초 주기)';
+            status.style.color = '#64748b';
+        }
+    }
+
+    async function saveCurrentMemo(showNotice = true, isAuto = false) {
+        if (!memoEditor || !spkData || spkData.length === 0 || !spkData[currentIndex]) return;
+
+        try {
+            await memoEditor.isReady;
+            const outputData = await memoEditor.save();
+            const currentJson = JSON.stringify(outputData.blocks || []);
+
+            if (currentJson === lastSavedMemoJson) return;
+
+            spkData[currentIndex].memo = outputData;
+            lastSavedMemoJson = currentJson;
+            localStorage.setItem('pongcrush_spk_data', JSON.stringify(spkData));
+
+            if (showNotice) {
+                const status = document.getElementById('memo-save-status');
+                if (status) {
+                    const timeStr = getKoreanTimeString(new Date());
+                    status.innerText = isAuto ? `자동저장 완료 (${timeStr})` : `수동저장 완료 (${timeStr})`;
+                    status.style.color = isAuto ? '#475569' : '#0f172a';
+                    setTimeout(() => {
+                        if (status) status.style.color = '#64748b';
+                    }, 1800);
+                }
+            }
+        } catch (e) {
+            console.error('메모 저장 실패:', e);
+        }
+    }
+
+    function startMemoAutoSave() {
+        if (memoAutoSaveTimer) clearTimeout(memoAutoSaveTimer);
+        memoAutoSaveTimer = setTimeout(() => {
+            saveCurrentMemo(true, true);
+        }, 5000);
+    }
+
+    function stopMemoAutoSave(flush = true) {
+        if (memoAutoSaveTimer) {
+            clearTimeout(memoAutoSaveTimer);
+            memoAutoSaveTimer = null;
+        }
+        if (flush) {
+            saveCurrentMemo(false, false);
+        }
+    }
+
+    function adjustMemoFontSize(delta) {
+        memoFontSize = Math.min(32, Math.max(12, memoFontSize + delta));
+        localStorage.setItem('pongcrush_memo_font_size', memoFontSize);
+        applyMemoFontSize();
+    }
+
+    function applyMemoFontSize() {
+        const editor = document.getElementById('memo-editor');
+        if (editor) {
+            editor.style.fontSize = memoFontSize + 'px';
+            const blocks = editor.querySelectorAll('.ce-paragraph, .ce-header, .cdx-list, .cdx-nested-list, .cdx-list__item, .cdx-nested-list__item-content');
+            blocks.forEach(b => b.style.fontSize = memoFontSize + 'px');
+        }
+    }
+
+    function renderRightPanel() {
+        loadCurrentMemo();
+    }
+
 
 function startMemoTour(e) {
     if (e) e.stopPropagation();
@@ -2016,341 +2339,15 @@ function closeMemoTour() {
     document.querySelectorAll('.coachmark-spotlight-active').forEach(el => el.classList.remove('coachmark-spotlight-active'));
 }
 
+   
   
-  // [우측 패널 및 메모장 상태 변수]
-    let memoFontSize = parseInt(localStorage.getItem('pongcrush_memo_font_size')) || 15;
- 
-    
-    // [추가/수정] 메모장 자동 저장 & Diffing & 메모리 관리 변수
-    let memoAutoSaveTimer = null;
-    let lastSavedMemoHtml = '';
- 
-    // 한국인 리더블 12시간제 시간 포맷팅 (예: 오후 9:45:10)
-    function getKoreanTimeString(date) {
-        const hours = date.getHours();
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-        const period = hours < 12 ? '오전' : '오후';
-        const displayHours = hours % 12 || 12;
-        return `${period} ${displayHours}:${minutes}:${seconds}`;
-    }
-
-    function loadCurrentMemo() {
-        const editor = document.getElementById('memo-editor');
-        if (!editor || !spkData || spkData.length === 0) return;
-        const baseData = spkData[currentIndex];
-        const savedHtml = (baseData && baseData.memo) ? baseData.memo : '';
-        editor.innerHTML = savedHtml;
-        lastSavedMemoHtml = savedHtml;
-
-        // 문제 전환 시 친절한 기본 안내로 복귀
-        const status = document.getElementById('memo-save-status');
-        if (status) {
-            status.innerText = '자동저장 (5초 주기)';
-            status.style.color = '#64748b';
-        }
-    }
-
-    function saveCurrentMemo(showNotice = true, isAuto = false) {
-        if (!spkData || spkData.length === 0) return;
-        const editor = document.getElementById('memo-editor');
-        if (!editor) return;
-
-        const currentHtml = editor.innerHTML;
-
-        // Diffing: 내용 변화가 없으면 로컬스토리지 쓰기 및 타임스탬프 갱신 건너뛰기
-        if (currentHtml === lastSavedMemoHtml) return;
-
-        spkData[currentIndex].memo = currentHtml;
-        lastSavedMemoHtml = currentHtml;
-        localStorage.setItem('pongcrush_spk_data', JSON.stringify(spkData));
-
-        if (showNotice) {
-            const status = document.getElementById('memo-save-status');
-            if (status) {
-                const timeStr = getKoreanTimeString(new Date());
-                // 친절하고 명확한 풀네임 워딩 적용
-                status.innerText = isAuto ? `자동저장 완료 (${timeStr})` : `수동저장 완료 (${timeStr})`;
-                status.style.color = isAuto ? '#475569' : '#0f172a';
-                setTimeout(() => {
-                    if (status) status.style.color = '#64748b';
-                }, 1800);
-            }
-        }
-    }
-
-    // [수정] 자동 저장 인터벌을 2초에서 5초(5000ms)로 변경
-    function startMemoAutoSave() {
-        stopMemoAutoSave(false);
-        memoAutoSaveTimer = setInterval(() => {
-            saveCurrentMemo(true, true); // 5초 주기 Diffing 후 자동 저장
-        }, 5000);
-    }
-
-    // 편집 이탈(Blur, 전환 등) 시 타이머 정리 및 최종 플러시 (메모리 누수 차단)
-    function stopMemoAutoSave(flush = true) {
-        if (memoAutoSaveTimer) {
-            clearInterval(memoAutoSaveTimer);
-            memoAutoSaveTimer = null;
-        }
-        if (flush) {
-            saveCurrentMemo(false, false);
-        }
-    }
-
-
-    function adjustMemoFontSize(delta) {
-        memoFontSize = Math.min(32, Math.max(12, memoFontSize + delta));
-        localStorage.setItem('pongcrush_memo_font_size', memoFontSize);
-        applyMemoFontSize();
-    }
-
-    function applyMemoFontSize() {
-        const editor = document.getElementById('memo-editor');
-        if (editor) editor.style.fontSize = memoFontSize + 'px';
-    }
-
- 
 
     // [핵심] Tab 들여쓰기 / - 누르고 Space 시 불렛 리스트 변환 / Ctrl+B 볼드체 처리
 
     // [수정] - 누르고 Space 시 윗줄 간섭 없이 현재 줄만 불렛 리스트로 변환
 
     // [수정] 복붙 시 줄바꿈 분리 및 불렛 변환 시 기존 문장 텍스트 100% 보존
-let isMemoShortcutsBound = false;
-    function initMemoShortcuts() {
-        const editor = document.getElementById('memo-editor');
-        if (!editor || isMemoShortcutsBound) return;
-        isMemoShortcutsBound = true;
-
-        // [추가] 편집 진입 시 2초 diffing 타이머 가동, 이탈 시 타이머 해제 및 플러시
-        editor.addEventListener('focus', () => {
-            startMemoAutoSave();
-        });
-        editor.addEventListener('blur', () => {
-            stopMemoAutoSave(true);
-        });
-
-        // 엔터 입력 시 기본 블록을 div로 분리
-        document.execCommand('defaultParagraphSeparator', false, 'div');
-
-        // 1. 복붙은 HTML 서식 우선 보존
-editor.addEventListener('paste', (e) => {
-    const clipboard = e.clipboardData || window.clipboardData;
-    if (!clipboard) return;
-
-    const htmlData = clipboard.getData('text/html');
-    const textData = clipboard.getData('text/plain');
-
-    // 같은 메모장/서식 있는 영역에서 잘라낸 경우
-    // 문단, 불렛, 볼드 등의 HTML 구조를 그대로 유지
-    if (htmlData) {
-        e.preventDefault();
-
-        const doc = new DOMParser().parseFromString(htmlData, 'text/html');
-
-        // 외부 HTML의 위험 요소 제거
-        doc.querySelectorAll(
-            'script, style, iframe, object, embed, link, meta'
-        ).forEach(el => el.remove());
-
-        // inline 이벤트 및 위험한 URL 제거
-        doc.querySelectorAll('*').forEach(el => {
-            [...el.attributes].forEach(attr => {
-                const name = attr.name.toLowerCase();
-                const value = attr.value || '';
-
-                if (name.startsWith('on')) {
-                    el.removeAttribute(attr.name);
-                    return;
-                }
-
-                if (
-                    (name === 'href' ||
-                     name === 'src' ||
-                     name === 'xlink:href') &&
-                    /^(javascript:|data:|vbscript:)/i.test(value.trim())
-                ) {
-                    el.removeAttribute(attr.name);
-                }
-            });
-        });
-
-        const richHtml = doc.body.innerHTML.trim();
-
-        if (richHtml) {
-            document.execCommand('insertHTML', false, richHtml);
-            return;
-        }
-    }
-
-    // HTML이 없는 경우에만 일반 텍스트 처리
-    if (!textData) return;
-
-    e.preventDefault();
-
-    const text = textData
-        .replace(/\r\n/g, '\n')
-        .replace(/\r/g, '\n');
-
-    const lines = text.split('\n');
-
-    // 단일 라인
-    if (lines.length === 1) {
-        document.execCommand('insertText', false, lines[0]);
-        return;
-    }
-
-    // 여러 줄: 문장별 독립 블록 유지
-    const escapeHtml = (str) => str
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-
-    let insertHtml = '';
-    let inUl = false;
-
-    lines.forEach((line) => {
-        const trimmed = line.trim();
-
-        if (trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
-            if (!inUl) {
-                insertHtml += '<ul>';
-                inUl = true;
-            }
-
-            const content = trimmed.replace(/^[-•]\s+/, '');
-            insertHtml += `<li>${escapeHtml(content) || '<br>'}</li>`;
-        } else {
-            if (inUl) {
-                insertHtml += '</ul>';
-                inUl = false;
-            }
-
-            insertHtml += trimmed.length === 0
-                ? '<div><br></div>'
-                : `<div>${escapeHtml(line)}</div>`;
-        }
-    });
-
-    if (inUl) {
-        insertHtml += '</ul>';
-    }
-
-    document.execCommand('insertHTML', false, insertHtml);
-});
-
-        // 2. 키보드 단축키 및 라이브 서식 핸들러
-        editor.addEventListener('keydown', (e) => {
-            // Tab 들여쓰기 / Shift+Tab 내어쓰기
-            if (e.key === 'Tab') {
-                e.preventDefault();
-                if (e.shiftKey) {
-                    document.execCommand('outdent');
-                } else {
-                    document.execCommand('indent');
-                }
-                return;
-            }
-
-            // Ctrl+B / Cmd+B 볼드체 토글
-            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
-                e.preventDefault();
-                document.execCommand('bold');
-                return;
-            }
-
-            // 빈 불렛(li)에서 Backspace 시 불렛 해제 후 일반 줄로 복귀
-            if (e.key === 'Backspace') {
-                const sel = window.getSelection();
-                if (!sel || sel.rangeCount === 0) return;
-                const range = sel.getRangeAt(0);
-                const node = range.startContainer;
-                const li = node.nodeType === Node.ELEMENT_NODE ? node.closest('li') : (node.parentElement ? node.parentElement.closest('li') : null);
-                if (li && range.startOffset === 0 && (!li.textContent.trim() || li.innerHTML === '<br>')) {
-                    e.preventDefault();
-                    document.execCommand('outdent');
-                    return;
-                }
-            }
-
-            // '-' 뒤에서 Space 누를 때 기존 문장을 날리지 않고 그대로 불렛(li)으로 전환
-            if (e.key === ' ' || e.code === 'Space') {
-                const sel = window.getSelection();
-                if (!sel || sel.rangeCount === 0) return;
-
-                const range = sel.getRangeAt(0);
-                const node = range.startContainer;
-
-                // 이미 리스트 내부인 경우 무시
-                if (node.nodeType === Node.ELEMENT_NODE && node.closest('li')) return;
-                if (node.nodeType === Node.TEXT_NODE && node.parentElement && node.parentElement.closest('li')) return;
-
-                if (node.nodeType === Node.TEXT_NODE) {
-                    const textBefore = node.textContent.substring(0, range.startOffset);
-
-                    // 현재 커서 바로 앞이 '-' 인 경우
-                    if (textBefore.trim() === '-') {
-                        e.preventDefault();
-
-                        // '-' 뒷부분에 적혀있던 원래 문장 텍스트 추출 및 앞쪽 공백 제거
-                        const textAfter = node.textContent.substring(range.startOffset).replace(/^\s+/, '');
-                        node.textContent = textAfter;
-
-                        // 현재 줄의 최상위 블록(div 등) 탐색
-                        let targetBlock = node;
-                        while (targetBlock && targetBlock.parentNode !== editor) {
-                            targetBlock = targetBlock.parentNode;
-                        }
-
-                        if (!targetBlock || targetBlock === editor) return;
-
-                        const ul = document.createElement('ul');
-                        const li = document.createElement('li');
-
-                        if (targetBlock.nodeType === Node.TEXT_NODE) {
-                            if (node.textContent.trim().length > 0) {
-                                li.appendChild(document.createTextNode(node.textContent));
-                            } else {
-                                li.appendChild(document.createElement('br'));
-                            }
-                        } else {
-                            // targetBlock(div 등) 내부에 있던 기존 텍스트 및 서식 노드들을 li 내부로 온전히 이전
-                            while (targetBlock.firstChild) {
-                                li.appendChild(targetBlock.firstChild);
-                            }
-                            if (!li.textContent.trim() && li.children.length === 0) {
-                                li.appendChild(document.createElement('br'));
-                            }
-                        }
-
-                        // 바로 윗줄이 이미 <ul>이면 해당 목록에 병합, 아니면 새로 <ul> 치환
-                        const prevElem = targetBlock.previousElementSibling;
-                        if (prevElem && prevElem.tagName === 'UL') {
-                            prevElem.appendChild(li);
-                            editor.removeChild(targetBlock);
-                        } else {
-                            ul.appendChild(li);
-                            editor.replaceChild(ul, targetBlock);
-                        }
-
-                        // 커서를 li 내부의 문장 시작 지점으로 안착
-                        const newRange = document.createRange();
-                        if (li.firstChild && li.firstChild.nodeType === Node.TEXT_NODE) {
-                            newRange.setStart(li.firstChild, 0);
-                        } else {
-                            newRange.setStart(li, 0);
-                        }
-                        newRange.collapse(true);
-                        sel.removeAllRanges();
-                        sel.addRange(newRange);
-                    }
-                }
-            }
-        });
-    }
-
+let isMemoShortcutsBound = false; 
     // [기존 전역 변수 영역에 추가]
     let currentTopicIndex = 0;
     let appliedTopicIndex = 0;  // 적용된 응용분야의 인덱스
@@ -3767,36 +3764,38 @@ function saveEditedData() {
 
     // 단축키 이벤트 리스너 통합 관리
     document.addEventListener('keydown', (e) => {
-        // [추가] Ctrl+S / Cmd+S 누를 때 본문제 메모 즉시 저장
+        // [1] 수동 저장
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
             e.preventDefault();
             saveCurrentMemo(true);
             return;
         }
 
-        if (e.ctrlKey || e.metaKey || e.altKey) return;
+        // ⭐ Editor.js 내부 요소 (블록, 툴바, 팝오버 등) 여부 완벽 판별
+        const isInsideMemo = !!e.target.closest('#memo-editor') || 
+                             !!e.target.closest('.codex-editor') || 
+                             !!e.target.closest('.ce-toolbar') ||
+                             !!e.target.closest('.ce-popover');
 
         const key = e.key;
 
-        // ESC 키 우선순위 처리 (모달 닫기 -> 시험 취소 -> 편집 포커스 해제 -> 응용문제 원본 복귀)
+        // [2] ESC 키 우선순위 처리
         if (key === 'Escape') {
             e.preventDefault();
             
-            // 1순위: 코치마크 실행 중이면 닫기
             if (isMemoTourActive) {
                 closeMemoTour();
                 return;
             }
 
-            // 2순위: ⭐ 메모장(contenteditable)이나 인풋 편집 중이면 즉시 포커스 해제(Blur)!
-            const isEditing = e.target.isContentEditable || ['TEXTAREA', 'INPUT', 'SELECT'].includes(e.target.tagName);
+            // 메모장 입력 중이면 저장 후 포커스 해제
+            const isEditing = isInsideMemo || e.target.isContentEditable || ['TEXTAREA', 'INPUT', 'SELECT'].includes(e.target.tagName);
             if (isEditing) {
-                saveCurrentMemo(false); // 잔여 메모 안전 저장
-                e.target.blur();        // 포커스 해제 -> 이제 방향키/A/S/D 단축키 자유롭게 사용 가능
+                saveCurrentMemo(false);
+                e.target.blur();
                 return;
             }
            
-            // 1순위: 켜져있는 모달 닫기
             const modals = document.querySelectorAll('.modal-overlay');
             let isModalOpen = false;
             modals.forEach(m => {
@@ -3807,13 +3806,10 @@ function saveEditedData() {
             });
             if (isModalOpen) return;
 
-            // 2순위: 시험 모드 켜져있으면 취소
             if (testMode) {
                 cancelTestMode();
                 return;
             }
-
-
         }
 
         const backdrop = document.getElementById('coachmark-backdrop');
@@ -3831,25 +3827,21 @@ function saveEditedData() {
             e.preventDefault(); confirmVoiceSettings(); return;
         }
 
-        // 메모장(contenteditable) 및 입력창(input/textarea) 수정 중일 때
-        const isEditing = e.target.isContentEditable || ['TEXTAREA', 'INPUT', 'SELECT'].includes(e.target.tagName);
+        // [3] ⭐ 메모장 및 일반 인풋 편집 중일 때 모든 전역 단축키 차단
+        const isEditing = isInsideMemo || e.target.isContentEditable || ['TEXTAREA', 'INPUT', 'SELECT'].includes(e.target.tagName);
         if (isEditing) {
-            // 방향키(상/하/좌/우)는 전역 단축키(읽기, 문제 이동 등)를 타지 않고 메모장 조작이 최우선 되도록 즉시 반환
+            // 방향키는 메모장 내부 커서 이동 보장
             if (key.startsWith('Arrow')) {
                 return;
             }
 
-            if (testMode && key === 'Enter') { 
+            // 시험 모드일 때 엔터 제출은 '메모장 바깥'의 답안 인풋에서만 동작하도록 제한 (리스트 줄바꿈 보장)
+            if (testMode && key === 'Enter' && !isInsideMemo) { 
                 if (!e.shiftKey) { e.preventDefault(); submitTest(); }
-            }
-            else if (key === 'Escape') { 
-                if(testMode) e.preventDefault(); cancelTestMode(); 
-                closeModal('persona-modal'); closeModal('list-modal'); 
-                closeModal('add-modal'); closeModal('edit-modal'); closeVoiceModal();
             }
             return; 
         }
-        
+
         const keyLower = key.toLowerCase();
         
         if (testMode) {
@@ -4551,13 +4543,7 @@ function initPanelResizer() {
     });
 }
 
-// 우측 패널 렌더링 함수
-function renderRightPanel() {
-    loadCurrentMemo();
-    applyMemoFontSize();
-    initMemoShortcuts();
-}
-
+ 
 // 초기 로딩 진입점
 window.onload = () => { 
     initVoiceEngine();
